@@ -1,0 +1,144 @@
+{
+  "project_info": {
+    "project_number": "842128210652",
+    "firebase_url": "https://reminderwater-84694-default-rtdb.firebaseio.com",
+    "project_id": "reminderwater-84694",
+    "storage_bucket": "reminderwater-84694.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842128210652:android:60d369d65e85a0ed6c9219",
+        "android_client_info": {
+          "package_name": "com.cam.water_reminder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXWk6glK6hpXQkiunvydjFNtM56yxwN_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842128210652:android:07b396ed84391ad26c9219",
+        "android_client_info": {
+          "package_name": "com.example.test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXWk6glK6hpXQkiunvydjFNtM56yxwN_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842128210652:android:239c05547c13ec3c6c9219",
+        "android_client_info": {
+          "package_name": "com.mycompany.chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXWk6glK6hpXQkiunvydjFNtM56yxwN_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842128210652:android:6c5b3ca6c2c2e29c6c9219",
+        "android_client_info": {
+          "package_name": "com.mycompany.stt1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXWk6glK6hpXQkiunvydjFNtM56yxwN_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842128210652:android:4b200c02adfb7aaf6c9219",
+        "android_client_info": {
+          "package_name": "com.mycompany.tutorialmultilanguageapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXWk6glK6hpXQkiunvydjFNtM56yxwN_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842128210652:android:6506eaf0a1d0b0bc6c9219",
+        "android_client_info": {
+          "package_name": "com.vhn.doan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXWk6glK6hpXQkiunvydjFNtM56yxwN_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842128210652:android:c7a626519d4e701b6c9219",
+        "android_client_info": {
+          "package_name": "com.vhn.tiktok_clon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXWk6glK6hpXQkiunvydjFNtM56yxwN_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

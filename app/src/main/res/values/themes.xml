@@ -1,0 +1,70 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Doan" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/primary_button_start</item>
+        <item name="colorPrimaryVariant">@color/primary_button_end</item>
+        <item name="colorSecondary">@color/secondary_button_start</item>
+        <item name="colorSecondaryVariant">@color/secondary_button_end</item>
+        <item name="colorAccent">@color/primary_button_end</item>
+
+        <item name="android:colorBackground">@color/background_dark</item>
+        <item name="colorSurface">@color/background_dark_alt</item>
+
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+
+        <item name="colorError">@color/error</item>
+
+        <!-- Áp dụng màu trạng thái thanh hệ thống -->
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Màu cho các thành phần khác -->
+        <item name="android:colorControlNormal">@color/text_primary</item>
+        <item name="colorControlActivated">@color/primary_button_start</item>
+        <item name="colorControlHighlight">@color/primary_button_end</item>
+    </style>
+
+    <style name="Theme.Doan" parent="Base.Theme.Doan" />
+
+    <!-- Style cho Button chính -->
+    <style name="PrimaryButton">
+        <item name="android:background">@drawable/bg_primary_button</item>
+        <item name="android:textColor">@color/primary_button_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <!-- Style cho Button phụ -->
+    <style name="SecondaryButton">
+        <item name="android:background">@drawable/bg_secondary_button</item>
+        <item name="android:textColor">@color/secondary_button_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <!-- Style cho TextInputLayout -->
+    <style name="AppTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/divider</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="hintTextColor">@color/primary_button_end</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- Style cho EditText -->
+    <style name="AppEditText">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:background">@color/background_dark_alt</item>
+    </style>
+</resources>

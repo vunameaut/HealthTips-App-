@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Màu cơ bản -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Màu nền -->
+    <color name="background_dark">#1A1A1D</color>
+    <color name="background_dark_alt">#212124</color>
+
+    <!-- Màu text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#F0F0F0</color>
+
+    <!-- Màu cho nút chính -->
+    <color name="primary_button_start">#2E7D32</color> <!-- Xanh lá đậm -->
+    <color name="primary_button_end">#C0CA33</color>   <!-- Vàng chanh -->
+    <color name="primary_button_text">#FFFFFF</color>  <!-- Trắng -->
+
+    <!-- Màu cho nút phụ -->
+    <color name="secondary_button_start">#F57C00</color> <!-- Cam tươi -->
+    <color name="secondary_button_end">#D32F2F</color>   <!-- Đỏ gạch -->
+    <color name="secondary_button_text">#FFFFFF</color>  <!-- Trắng -->
+
+    <!-- Màu đường viền/phân cách -->
+    <color name="divider">#424242</color>
+
+    <!-- Màu icon -->
+    <color name="icon_color">#FFFFFF</color>
+
+    <!-- Màu thông báo -->
+    <color name="error">#F44336</color>
+    <color name="success">#4CAF50</color>
+    <color name="info">#2196F3</color>
+    <color name="warning">#FFC107</color>
+</resources>

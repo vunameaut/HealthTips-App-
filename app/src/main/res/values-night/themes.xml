@@ -1,0 +1,28 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Doan" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <item name="colorPrimary">@color/primary_button_start</item>
+        <item name="colorPrimaryVariant">@color/primary_button_end</item>
+        <item name="colorSecondary">@color/secondary_button_start</item>
+        <item name="colorSecondaryVariant">@color/secondary_button_end</item>
+        <item name="colorAccent">@color/primary_button_end</item>
+
+        <item name="android:colorBackground">@color/background_dark</item>
+        <item name="colorSurface">@color/background_dark_alt</item>
+
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+
+        <item name="colorError">@color/error</item>
+
+        <!-- Áp dụng màu trạng thái thanh hệ thống -->
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Màu cho các thành phần khác -->
+        <item name="android:colorControlNormal">@color/text_primary</item>
+        <item name="colorControlActivated">@color/primary_button_start</item>
+        <item name="colorControlHighlight">@color/primary_button_end</item>
+    </style>
+</resources>
