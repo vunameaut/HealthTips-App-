@@ -1,4 +1,4 @@
-Tuyệt vời! Để tích hợp phong cách màu sắc và giao diện mà bạn mong muốn vào bộ hướng dẫn, tôi sẽ thêm một mục mới là "9. Phong cách và Giao diện người dùng" ngay dưới mục "5. Giao diện người dùng (UI)" hiện có. Điều này sẽ giúp Copilot hiểu rõ hơn về các nguyên tắc thiết kế màu sắc mà bạn muốn áp dụng.
+Bạn hoàn toàn đúng\! Tôi hiểu ý bạn là muốn mô tả rõ ràng hai phiên bản giao diện (chế độ sáng và chế độ tối) dựa trên hai hình ảnh logo đã cung cấp. Tôi đã cập nhật lại mục "9. Phong cách và Giao diện người dùng" để phản ánh điều này một cách chi tiết hơn, đảm bảo Copilot sẽ hiểu và áp dụng đúng cho từng chế độ.
 
 Đây là các instructions đã cập nhật:
 
@@ -40,16 +40,30 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
     * Tuân thủ nghiêm ngặt **Material Design 3** để đảm bảo tính nhất quán và trải nghiệm người dùng hiện đại.
 
 **9. Phong cách và Giao diện người dùng:**
-    * **Gam màu chủ đạo:**
-        * **Nền (Background):** Sử dụng các tông màu đen xám đậm (#1A1A1D hoặc #212124) để tạo cảm giác hiện đại và sang trọng.
-        * **Chữ (Text):** Trắng tinh khiết (#FFFFFF) hoặc trắng xám nhạt (#F0F0F0) để đảm bảo độ tương phản cao và dễ đọc trên nền tối.
-    * **Màu sắc các nút (Buttons):**
-        * **Nút chính (Primary Buttons - ví dụ: "Tập phim"):** Sử dụng gradient chuyển màu từ xanh lá cây đậm (#4CAF50 hoặc #2E7D32) sang vàng chanh (#C0CA33 hoặc xanh lá cây nhạt hơn #8BC34A). Chữ trên nút phải là màu trắng (#FFFFFF).
-        * **Nút phụ/Hành động khác (Secondary Buttons - ví dụ: "Xem phim"):** Sử dụng gradient chuyển màu từ cam tươi (#FF9800 hoặc #F57C00) sang đỏ cam (#FF5722 hoặc đỏ gạch #D32F2F). Chữ trên nút nên là màu trắng (#FFFFFF) hoặc đen (#000000) tùy theo độ tương phản.
-    * **Các thành phần UI khác:**
-        * **Đường viền/phân cách:** Nên là màu xám nhạt (#424242) hoặc xám đậm hơn một chút so với nền để tạo sự phân tách tinh tế.
-        * **Biểu tượng (Icons):** Sử dụng màu trắng (#FFFFFF) hoặc các màu tương đồng với gam màu của các nút để duy trì sự nhất quán.
-    * **Hiệu ứng:** Ưu tiên sử dụng gradient cho các nút để tạo chiều sâu và điểm nhấn.
+    * **Ứng dụng sẽ hỗ trợ hai chế độ giao diện:** Chế độ tối (Dark Mode) và Chế độ sáng (Light Mode).
+    * **Chế độ tối (Dark Mode - Lấy cảm hứng từ `cu_black.png`):**
+        * **Gam màu chủ đạo:**
+            * **Nền (Background):** Các tông màu đen xám đậm (ví dụ: `#1A1A1D` hoặc `#212124`) để tạo cảm giác hiện đại, sang trọng và dịu mắt khi sử dụng trong điều kiện thiếu sáng.
+            * **Chữ (Text):** Trắng tinh khiết (`#FFFFFF`) hoặc trắng xám nhạt (`#F0F0F0`) để đảm bảo độ tương phản cao và dễ đọc trên nền tối.
+        * **Màu sắc các nút (Buttons):**
+            * **Nút chính (Primary Buttons):** Sử dụng gradient chuyển màu từ xanh lá cây đậm (ví dụ: `#4CAF50` hoặc `#2E7D32`) sang vàng chanh (`#C0CA33` hoặc xanh lá cây nhạt hơn `#8BC34A`). Chữ trên nút phải là màu trắng (`#FFFFFF`).
+            * **Nút phụ/Hành động khác (Secondary Buttons):** Sử dụng gradient chuyển màu từ cam tươi (`#FF9800` hoặc `#F57C00`) sang đỏ cam (`#FF5722` hoặc đỏ gạch `#D32F2F`). Chữ trên nút nên là màu trắng (`#FFFFFF`).
+        * **Các thành phần UI khác:**
+            * **Đường viền/phân cách:** Nên là màu xám nhạt (`#424242`) hoặc xám đậm hơn một chút so với nền để tạo sự phân tách tinh tế.
+            * **Biểu tượng (Icons):** Màu trắng (`#FFFFFF`) hoặc các màu tương đồng với gam màu của các nút để duy trì sự nhất quán.
+            * **Điểm nhấn/Highlight:** Có thể sử dụng các màu xanh dương sáng từ logo `cu_black.png` (ví dụ: `#00BFFF` hoặc `#1E90FF`) cho các yếu tố tương tác nhỏ, đường viền hoặc trạng thái được chọn.
+    * **Chế độ sáng (Light Mode - Lấy cảm hứng từ `cu_night.png`):**
+        * **Gam màu chủ đạo:**
+            * **Nền (Background):** Các tông màu xanh dương nhạt hoặc trắng sáng (ví dụ: `#E0F2F7` hoặc `#FFFFFF`), tạo cảm giác tươi mới và dễ chịu.
+            * **Chữ (Text):** Xám đậm (ví dụ: `#212124` hoặc `#424242`) hoặc đen (`#000000`) để đảm bảo độ tương phản trên nền sáng.
+        * **Màu sắc các nút (Buttons):**
+            * **Nút chính (Primary Buttons):** Sử dụng các tông màu xanh dương (ví dụ: `#2196F3` hoặc `#1976D2`) hoặc xanh lá cây (ví dụ: `#4CAF50`) tương tự như logo `cu_night.png`. Chữ trên nút phải là màu trắng (`#FFFFFF`).
+            * **Nút phụ/Hành động khác (Secondary Buttons):** Sử dụng màu sắc tương phản nhưng vẫn hài hòa, ví dụ: màu xám đậm (`#616161`) hoặc cam nhạt (`#FFB74D`). Chữ trên nút nên là màu trắng (`#FFFFFF`) hoặc đen (`#000000`).
+        * **Các thành phần UI khác:**
+            * **Đường viền/phân cách:** Nên là màu xám nhạt (`#BDBDBD`) hoặc xanh nhạt (`#81D4FA`).
+            * **Biểu tượng (Icons):** Màu đen (`#000000`), xanh lam đậm (`#1976D2`), hoặc các màu xanh từ logo `cu_night.png` để phù hợp với nền sáng.
+            * **Điểm nhấn/Highlight:** Các màu cam/vàng từ bóng đèn trên logo `cu_night.png` (ví dụ: `#FFC107` hoặc `#FFEB3B`) có thể được sử dụng để làm nổi bật các yếu tố quan trọng hoặc trạng thái.
+    * **Hiệu ứng chung:** Ưu tiên sử dụng gradient cho các nút để tạo chiều sâu và điểm nhấn trong cả hai chế độ. Đảm bảo tính nhất quán về hình dạng, khoảng cách và kiểu chữ giữa hai chế độ để trải nghiệm người dùng không bị gián đoạn.
 
 6.  **Quy ước đặt tên:**
     * Luôn tuân thủ quy ước đặt tên rõ ràng và nhất quán:

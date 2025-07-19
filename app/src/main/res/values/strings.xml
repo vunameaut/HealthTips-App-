@@ -1,3 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">do)an</string>
+    <!-- Tên ứng dụng -->
+    <string name="app_name">HealthTips</string>
+
+    <!-- Các chuỗi cho màn hình đăng nhập -->
+    <string name="login">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+    <string name="email">Email</string>
+    <string name="password">Mật khẩu</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="dont_have_account">Chưa có tài khoản? Đăng ký</string>
+    <string name="already_have_account">Đã có tài khoản? Đăng nhập</string>
+
+    <!-- Các chuỗi cho màn hình quên mật khẩu -->
+    <string name="reset_password">Đặt lại mật khẩu</string>
+    <string name="reset_password_instructions">Nhập email của bạn để nhận hướng dẫn đặt lại mật khẩu</string>
+    <string name="send_reset_email">Gửi email đặt lại</string>
+    <string name="back_to_login">Quay lại đăng nhập</string>
+
+    <!-- Các chuỗi cho màn hình trang chủ -->
+    <string name="categories">Danh mục</string>
+    <string name="latest_tips">Mẹo mới nhất</string>
+    <string name="most_viewed">Xem nhiều nhất</string>
+    <string name="most_liked">Yêu thích nhất</string>
+    <string name="see_all">Xem tất cả</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="offline_mode">Đang ở chế độ ngoại tuyến</string>
+
+    <!-- Các chuỗi cho bottom navigation -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_categories">Danh mục</string>
+    <string name="nav_favorites">Yêu thích</string>
+    <string name="nav_profile">Cá nhân</string>
+
+    <!-- Các chuỗi cho màn hình chi tiết -->
+    <string name="related_tips">Mẹo liên quan</string>
+    <string name="share">Chia sẻ</string>
+    <string name="save">Lưu</string>
+    <string name="views">lượt xem</string>
+    <string name="likes">lượt thích</string>
+
+    <!-- Thông báo lỗi và thành công -->
+    <string name="error_login">Đăng nhập thất bại</string>
+    <string name="error_register">Đăng ký thất bại</string>
+    <string name="error_reset_password">Không thể đặt lại mật khẩu</string>
+    <string name="success_login">Đăng nhập thành công</string>
+    <string name="success_register">Đăng ký thành công</string>
+    <string name="success_reset_password">Đã gửi email đặt lại mật khẩu</string>
+    <string name="error_network">Lỗi kết nối mạng</string>
+
+    <!-- Các chuỗi cho màn hình cài đặt và hồ sơ -->
+    <string name="settings">Cài đặt</string>
+    <string name="profile">Hồ sơ</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="edit_profile">Chỉnh sửa hồ sơ</string>
+    <string name="dark_mode">Chế độ tối</string>
+    <string name="notifications">Thông báo</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="about">Về ứng dụng</string>
 </resources>

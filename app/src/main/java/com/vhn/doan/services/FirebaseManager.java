@@ -82,7 +82,7 @@ public class FirebaseManager {
      * @return StorageReference tới thư mục ảnh người dùng
      */
     public StorageReference getUserImagesReference(String userId) {
-        return storage.getReference().child(Constants.USERS_COLLECTION).child(userId).child(Constants.PROFILE_IMAGES_PATH);
+        return storage.getReference().child(Constants.USERS_PATH).child(userId).child(Constants.PROFILE_IMAGES_PATH);
     }
 
     /**
@@ -91,7 +91,7 @@ public class FirebaseManager {
      * @param email Email của người dùng
      */
     public void createUserDocument(String userId, String email) {
-        DocumentReference userDocRef = firestore.collection(Constants.USERS_COLLECTION).document(userId);
+        DocumentReference userDocRef = firestore.collection(Constants.USERS_PATH).document(userId);
 
         Map<String, Object> userData = new HashMap<>();
         userData.put("email", email);
@@ -112,7 +112,7 @@ public class FirebaseManager {
      * @param userData Map chứa dữ liệu cần cập nhật
      */
     public void updateUserData(String userId, Map<String, Object> userData) {
-        DocumentReference userDocRef = firestore.collection(Constants.USERS_COLLECTION).document(userId);
+        DocumentReference userDocRef = firestore.collection(Constants.USERS_PATH).document(userId);
 
         userDocRef.update(userData)
                 .addOnSuccessListener(aVoid -> {

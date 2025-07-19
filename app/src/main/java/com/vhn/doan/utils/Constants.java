@@ -1,62 +1,52 @@
 package com.vhn.doan.utils;
 
 /**
- * Constants.java - Lớp chứa các hằng số được sử dụng trong ứng dụng
- *
- * File này chứa các hằng số quan trọng như:
- * - Key Firebase
- * - Tên các collection trong database
- * - Đường dẫn cho Storage
- * - Routes cho điều hướng
- * - Các giá trị dùng chung khác
+ * Class lưu trữ các hằng số dùng chung trong ứng dụng
  */
 public class Constants {
 
-    // Firebase API Keys và Configuration
-    public static final String FIREBASE_WEB_API_KEY = "AIzaSyCxJ5fASsMWruG9D00QGip3JW3Q0HvZp7g";
+    // Các key cho Firebase Authentication
+    public static final String FIREBASE_AUTH_KEY = "AIzaSyA9TsK_lVXViYuZ_LjHj4MvM1LAPJxNJqQ"; // Key mẫu, cần thay bằng key thật
 
-    // Firebase Collection Paths
-    public static final String USERS_COLLECTION = "users";
-    public static final String POSTS_COLLECTION = "posts";
-    public static final String MESSAGES_COLLECTION = "messages";
-    public static final String COMMENTS_COLLECTION = "comments";
+    // Đường dẫn tham chiếu Firebase Realtime Database
+    public static final String USERS_REF = "users";
+    public static final String CATEGORIES_REF = "categories";
+    public static final String HEALTH_TIPS_REF = "health_tips";
+    public static final String USER_FAVORITES_REF = "user_favorites";
+    public static final String USER_HISTORY_REF = "user_history";
 
-    // Firebase Storage Paths
+    // Đường dẫn cho Firebase Firestore và Storage
+    public static final String USERS_PATH = "users";
     public static final String PROFILE_IMAGES_PATH = "profile_images";
-    public static final String POST_IMAGES_PATH = "post_images";
+    public static final String USERS_COLLECTION = "users";
 
-    // Shared Preferences
-    public static final String PREFS_NAME = "app_preferences";
-    public static final String KEY_USER_ID = "user_id";
-    public static final String KEY_USER_EMAIL = "user_email";
-    public static final String KEY_IS_LOGGED_IN = "is_logged_in";
+    // Các key cho SharedPreferences
+    public static final String PREF_NAME = "HealthTipsPrefs";
+    public static final String PREF_USER_ID = "user_id";
+    public static final String PREF_USER_EMAIL = "user_email";
+    public static final String PREF_IS_LOGGED_IN = "is_logged_in";
+    public static final String PREF_THEME_MODE = "theme_mode";
 
-    // Request Codes
-    public static final int RC_SIGN_IN = 100;
-    public static final int RC_IMAGE_PICK = 101;
+    // Các key cho Intent
+    public static final String INTENT_CATEGORY_ID = "category_id";
+    public static final String INTENT_HEALTH_TIP_ID = "health_tip_id";
+    public static final String INTENT_SEARCH_QUERY = "search_query";
 
-    // Intent extras
-    public static final String EXTRA_USER_ID = "extra_user_id";
-    public static final String EXTRA_POST_ID = "extra_post_id";
+    // Số lượng hiển thị mặc định
+    public static final int DEFAULT_LIMIT = 10;
 
-    // Validation constants
-    public static final int MIN_PASSWORD_LENGTH = 6;
-    public static final int MAX_USERNAME_LENGTH = 30;
+    // Các tham số giao diện
+    public static final boolean DARK_MODE_DEFAULT = true;
 
-    // Network timeout values (in milliseconds)
-    public static final long DEFAULT_TIMEOUT = 30000; // 30 seconds
+    // Các thông báo
+    public static final String ERROR_NETWORK = "Không có kết nối internet";
+    public static final String ERROR_LOGIN_FAILED = "Đăng nhập thất bại";
+    public static final String ERROR_REGISTRATION_FAILED = "Đăng ký thất bại";
+    public static final String SUCCESS_LOGIN = "Đăng nhập thành công";
+    public static final String SUCCESS_REGISTRATION = "Đăng ký thành công";
+    public static final String SUCCESS_PASSWORD_RESET = "Đã gửi email đặt lại mật khẩu";
 
-    // Pagination
-    public static final int DEFAULT_PAGE_SIZE = 20;
-
-    // Notification channels
-    public static final String CHANNEL_GENERAL = "general_channel";
-    public static final String CHANNEL_MESSAGES = "messages_channel";
-
-    // Routes for Navigation
-    public static final String ROUTE_HOME = "home";
-    public static final String ROUTE_PROFILE = "profile";
-    public static final String ROUTE_MESSAGES = "messages";
-    public static final String ROUTE_NOTIFICATIONS = "notifications";
-    public static final String ROUTE_SETTINGS = "settings";
+    // Các màu sắc gradient cho nút (được định nghĩa trong XML)
+    public static final String PRIMARY_BUTTON_GRADIENT = "primary_button_gradient";
+    public static final String SECONDARY_BUTTON_GRADIENT = "secondary_button_gradient";
 }

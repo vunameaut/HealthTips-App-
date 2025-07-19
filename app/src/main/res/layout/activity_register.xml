@@ -8,7 +8,7 @@
     android:background="@color/background_dark"
     tools:context=".presentation.auth.RegisterActivity">
 
-    <!-- Nút quay lại với ImageButton thay cho Toolbar -->
+    <!-- Nút quay lại với ImageButton  -->
     <ImageButton
         android:id="@+id/buttonBack"
         android:layout_width="48dp"
@@ -29,7 +29,7 @@
         android:layout_height="120dp"
         android:layout_marginTop="16dp"
         android:contentDescription="@string/app_name"
-        android:src="@mipmap/ic_launcher"
+        android:src="@mipmap/ic_logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonBack" />

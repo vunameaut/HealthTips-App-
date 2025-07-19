@@ -11,8 +11,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.vhn.doan.MainActivity;
 import com.vhn.doan.R;
+import com.vhn.doan.presentation.home.HomeActivity;
 
 /**
  * LoginActivity là màn hình đăng nhập của ứng dụng
@@ -43,7 +43,7 @@ public class LoginActivity extends AppCompatActivity implements AuthView {
         // Kiểm tra người dùng đã đăng nhập chưa
         if (authPresenter.isUserLoggedIn()) {
             // Nếu đã đăng nhập thì chuyển đến màn hình chính
-            navigateToMainActivity();
+            navigateToHomeActivity();
             return;
         }
 
@@ -109,10 +109,10 @@ public class LoginActivity extends AppCompatActivity implements AuthView {
     }
 
     /**
-     * Chuyển đến màn hình chính
+     * Chuyển đến màn hình chính (HomeActivity)
      */
-    private void navigateToMainActivity() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+    private void navigateToHomeActivity() {
+        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
@@ -153,7 +153,7 @@ public class LoginActivity extends AppCompatActivity implements AuthView {
     @Override
     public void onLoginSuccess(String userId) {
         showMessage("Đăng nhập thành công");
-        navigateToMainActivity();
+        navigateToHomeActivity();
     }
 
     @Override

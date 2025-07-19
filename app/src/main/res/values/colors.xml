@@ -22,15 +22,18 @@
     <color name="secondary_button_end">#D32F2F</color>   <!-- Đỏ gạch -->
     <color name="secondary_button_text">#FFFFFF</color>  <!-- Trắng -->
 
-    <!-- Màu đường viền/phân cách -->
-    <color name="divider">#424242</color>
+    <!-- Màu điểm nhấn -->
+    <color name="accent">#00BFFF</color>  <!-- Xanh dương sáng -->
 
-    <!-- Màu icon -->
-    <color name="icon_color">#FFFFFF</color>
+    <!-- Màu đường viền/phân cách -->
+    <color name="divider">#424242</color> <!-- Xám cho đường phân cách -->
 
     <!-- Màu thông báo -->
-    <color name="error">#F44336</color>
-    <color name="success">#4CAF50</color>
+    <color name="error">#FF5252</color>   <!-- Đỏ lỗi -->
+    <color name="success">#4CAF50</color> <!-- Xanh lá cho thành công -->
     <color name="info">#2196F3</color>
     <color name="warning">#FFC107</color>
+
+    <!-- Màu biểu tượng -->
+    <color name="icon_color">#C0CA33</color> <!-- Màu icon - sử dụng màu vàng chanh giống primary_button_end -->
 </resources>
