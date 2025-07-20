@@ -36,6 +36,9 @@
             android:name=".presentation.home.HomeActivity"
             android:exported="false" />
         <activity
+            android:name=".presentation.category.detail.CategoryDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
         </activity>

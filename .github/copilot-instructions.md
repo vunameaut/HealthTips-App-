@@ -1,8 +1,3 @@
-Bạn hoàn toàn đúng\! Tôi hiểu ý bạn là muốn mô tả rõ ràng hai phiên bản giao diện (chế độ sáng và chế độ tối) dựa trên hai hình ảnh logo đã cung cấp. Tôi đã cập nhật lại mục "9. Phong cách và Giao diện người dùng" để phản ánh điều này một cách chi tiết hơn, đảm bảo Copilot sẽ hiểu và áp dụng đúng cho từng chế độ.
-
-Đây là các instructions đã cập nhật:
-
-```markdown
 # Instructions cho GitHub Copilot - Dự án HealthTips App (Android)
 
 Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát triển bằng Java và tuân thủ kiến trúc MVP (Model-View-Presenter).
@@ -39,7 +34,24 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
     * Giao diện được xây dựng bằng **XML**.
     * Tuân thủ nghiêm ngặt **Material Design 3** để đảm bảo tính nhất quán và trải nghiệm người dùng hiện đại.
 
-**9. Phong cách và Giao diện người dùng:**
+6.  **Quy ước đặt tên:**
+    * Luôn tuân thủ quy ước đặt tên rõ ràng và nhất quán:
+        * Adapter: `[Tên]Adapter.java` (ví dụ: `HealthTipAdapter.java`).
+        * Presenter: `[Tên]Presenter.java` (ví dụ: `HomePresenter.java`, `LoginPresenter.java`).
+        * Service: `[Tên]Service.java` (ví dụ: `ReminderService.java`, `NotificationService.java`).
+        * Activity/Fragment: `[Tên]Activity.java`, `[Tên]Fragment.java`.
+        * View Interface: `[Tên]Contract.java` (chứa `View` và `Presenter` interfaces lồng vào nhau) hoặc `[Tên]View.java`.
+        * Model: `[Tên]Model.java` hoặc chỉ `[Tên].java` (ví dụ: `HealthTip.java`).
+        * Repository: `[Tên]Repository.java`.
+
+7.  **Kế thừa Presenter và View:**
+    * Tất cả các Presenter phải kế thừa từ một lớp `BasePresenter` chung.
+    * Tất cả các View interfaces (hoặc các lớp Activity/Fragment implement View interface) phải implement một interface `BaseView` chung.
+
+8.  **Tuân thủ thiết kế:**
+    * Luôn sinh code tuân thủ chặt chẽ **file thiết kế phân tích đã được cung cấp**, bao gồm cả việc chia module và chức năng đã định rõ.
+
+9.  **Phong cách và Giao diện người dùng:**
     * **Ứng dụng sẽ hỗ trợ hai chế độ giao diện:** Chế độ tối (Dark Mode) và Chế độ sáng (Light Mode).
     * **Chế độ tối (Dark Mode - Lấy cảm hứng từ `cu_black.png`):**
         * **Gam màu chủ đạo:**
@@ -65,23 +77,30 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
             * **Điểm nhấn/Highlight:** Các màu cam/vàng từ bóng đèn trên logo `cu_night.png` (ví dụ: `#FFC107` hoặc `#FFEB3B`) có thể được sử dụng để làm nổi bật các yếu tố quan trọng hoặc trạng thái.
     * **Hiệu ứng chung:** Ưu tiên sử dụng gradient cho các nút để tạo chiều sâu và điểm nhấn trong cả hai chế độ. Đảm bảo tính nhất quán về hình dạng, khoảng cách và kiểu chữ giữa hai chế độ để trải nghiệm người dùng không bị gián đoạn.
 
-6.  **Quy ước đặt tên:**
-    * Luôn tuân thủ quy ước đặt tên rõ ràng và nhất quán:
-        * Adapter: `[Tên]Adapter.java` (ví dụ: `HealthTipAdapter.java`).
-        * Presenter: `[Tên]Presenter.java` (ví dụ: `HomePresenter.java`, `LoginPresenter.java`).
-        * Service: `[Tên]Service.java` (ví dụ: `ReminderService.java`, `NotificationService.java`).
-        * Activity/Fragment: `[Tên]Activity.java`, `[Tên]Fragment.java`.
-        * View Interface: `[Tên]Contract.java` (chứa `View` và `Presenter` interfaces lồng vào nhau) hoặc `[Tên]View.java`.
-        * Model: `[Tên]Model.java` hoặc chỉ `[Tên].java` (ví dụ: `HealthTip.java`).
-        * Repository: `[Tên]Repository.java`.
+10. **Tránh trùng lặp File và Chức năng:**
+    * **Trước khi đề xuất hoặc tạo bất kỳ file mới nào (Activity, Fragment, Presenter, Model, Service, v.v.) hoặc triển khai một chức năng mới, Copilot phải kiểm tra kỹ lưỡng toàn bộ cấu trúc dự án hiện có.**
+    * **Nếu phát hiện đã tồn tại một file hoặc một phần code thực hiện chức năng tương tự hoặc cùng tên trong dự án (dựa trên tên file, quy ước đặt tên, hoặc logic đã có), Copilot phải thông báo và KHÔNG tạo ra bản sao.**
+    * **Thay vào đó, Copilot sẽ:**
+        * **Đề xuất tích hợp hoặc mở rộng chức năng hiện có** vào file hoặc module đã tồn tại.
+        * **Chỉ tạo file mới khi không có bất kỳ file hoặc chức năng tương tự nào tồn tại** và nó thực sự cần thiết cho một module hoặc tính năng mới hoàn toàn.
+        * **Khi tiếp tục một chức năng đã được bắt đầu ở bước trước, Copilot phải tiếp tục làm việc trên các file đã được tạo ra cho chức năng đó, không tạo lại chúng ở thư mục khác.**
+    * **Luôn ưu tiên việc tái sử dụng và mở rộng code hiện có.**
 
-7.  **Kế thừa Presenter và View:**
-    * Tất cả các Presenter phải kế thừa từ một lớp `BasePresenter` chung.
-    * Tất cả các View interfaces (hoặc các lớp Activity/Fragment implement View interface) phải implement một interface `BaseView` chung.
+11. **Quản lý tài nguyên:**
+    * **Tập trung tài nguyên vào các file chung:**
+        * **Strings:** Tất cả chuỗi văn bản phải được đặt trong file `strings.xml` chung, không tạo file strings riêng cho từng tính năng.
+        * **Colors:** Tất cả định nghĩa màu sắc phải được đặt trong file `colors.xml` chung, không tạo file colors riêng biệt.
+        * **Styles/Themes:** Tất cả styles và themes phải được đặt trong file `styles.xml` hoặc `themes.xml` chung, không tạo file styles riêng.
+        * **Dimensions:** Tất cả kích thước phải được đặt trong file `dimens.xml` chung.
+    * **Đặt tên tài nguyên:**
+        * Đặt tên theo cấu trúc `[feature]_[type]_[description]` (ví dụ: `category_title`, `home_description`, `auth_button_text`)
+        * Đảm bảo tên mô tả đúng mục đích sử dụng và dễ hiểu
+    * **Tránh trùng lặp tài nguyên:** Kiểm tra kỹ trước khi thêm tài nguyên mới, tái sử dụng tài nguyên hiện có nếu phù hợp.
+    * **Tài nguyên hình ảnh:**
+        * Vector Drawables (XML) được ưu tiên hơn bitmap cho biểu tượng và đồ họa đơn giản
+        * Bitmap (PNG, JPEG) chỉ sử dụng cho hình ảnh phức tạp không thể biểu diễn bằng vector
 
-8.  **Tuân thủ thiết kế:**
-    * Luôn sinh code tuân thủ chặt chẽ **file thiết kế phân tích đã được cung cấp**, bao gồm cả việc chia module và chức năng đã định rõ.
-
+---
 
 ## Những điều cần lưu ý khi sinh code:
 
@@ -91,4 +110,3 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
 * **Phản hồi UI:** Đảm bảo có phản hồi phù hợp cho người dùng khi thực hiện các thao tác (ví dụ: loading states, thông báo lỗi/thành công).
 * **Bảo mật:** Lưu ý các vấn đề bảo mật cơ bản khi làm việc với dữ liệu người dùng và Firebase.
 * **Hiệu suất:** Cân nhắc hiệu suất, đặc biệt là khi làm việc với dữ liệu lớn hoặc các thao tác UI phức tạp.
-```

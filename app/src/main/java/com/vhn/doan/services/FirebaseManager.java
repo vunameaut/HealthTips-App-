@@ -6,6 +6,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.vhn.doan.utils.Constants;
@@ -18,6 +19,9 @@ import java.util.Map;
  * Cung cấp các phương thức truy cập và thao tác với dữ liệu Firebase
  */
 public class FirebaseManager {
+
+    // Singleton instance
+    private static FirebaseManager instance;
 
     // Các instance Firebase
     private final FirebaseAuth firebaseAuth;
@@ -34,6 +38,17 @@ public class FirebaseManager {
         this.firestore = FirebaseFirestore.getInstance();
         this.realtimeDB = FirebaseDatabase.getInstance();
         this.storage = FirebaseStorage.getInstance();
+    }
+
+    /**
+     * Lấy singleton instance của FirebaseManager
+     * @return Instance của FirebaseManager
+     */
+    public static synchronized FirebaseManager getInstance() {
+        if (instance == null) {
+            instance = new FirebaseManager();
+        }
+        return instance;
     }
 
     /**
@@ -58,6 +73,14 @@ public class FirebaseManager {
      */
     public FirebaseDatabase getRealtimeDB() {
         return realtimeDB;
+    }
+
+    /**
+     * Lấy reference đến root của Firebase Realtime Database
+     * @return DatabaseReference đến root của database
+     */
+    public DatabaseReference getDatabaseReference() {
+        return realtimeDB.getReference();
     }
 
     /**

@@ -29,11 +29,19 @@
     <color name="divider">#424242</color> <!-- Xám cho đường phân cách -->
 
     <!-- Màu thông báo -->
-    <color name="error">#FF5252</color>   <!-- Đỏ lỗi -->
-    <color name="success">#4CAF50</color> <!-- Xanh lá cho thành công -->
-    <color name="info">#2196F3</color>
-    <color name="warning">#FFC107</color>
+    <color name="success">#4CAF50</color>  <!-- Xanh lá -->
+    <color name="error">#F44336</color>    <!-- Đỏ -->
+    <color name="error_color">#F44336</color>    <!-- Đỏ - cùng giá trị với error để tương thích -->
+    <color name="warning">#FFC107</color>  <!-- Vàng -->
+    <color name="info">#2196F3</color>     <!-- Xanh dương -->
+
+    <!-- Màu cho trạng thái -->
+    <color name="progress_color">#00BFFF</color> <!-- Xanh dương sáng -->
+    <color name="disabled">#9E9E9E</color>  <!-- Xám -->
+
+    <!-- Màu card -->
+    <color name="card_background">#212124</color> <!-- Xám đen nhạt -->
 
     <!-- Màu biểu tượng -->
-    <color name="icon_color">#C0CA33</color> <!-- Màu icon - sử dụng màu vàng chanh giống primary_button_end -->
+    <color name="icon_color">#FFFFFF</color> <!-- Màu trắng cho các biểu tượng -->
 </resources>

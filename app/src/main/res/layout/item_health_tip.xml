@@ -1,113 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cardViewHealthTip"
-    android:layout_width="280dp"
-    android:layout_height="200dp"
-    android:layout_margin="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:cardBackgroundColor="@color/background_dark">
+    app:cardBackgroundColor="?attr/colorSurface">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:padding="12dp">
 
+        <!-- Thumbnail hình ảnh mẹo sức khỏe -->
         <ImageView
-            android:id="@+id/imageViewThumbnail"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:id="@+id/imageViewHealthTip"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:contentDescription="@string/health_tip_image"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@tools:sample/backgrounds/scenic" />
+            app:layout_constraintStart_toStartOf="parent"
+            tools:src="@drawable/placeholder_image" />
 
+        <!-- Tiêu đề mẹo sức khỏe -->
         <TextView
-            android:id="@+id/textViewTitle"
+            android:id="@+id/textViewHealthTipTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="@color/text_primary"
+            android:layout_marginStart="12dp"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewThumbnail"
-            tools:text="Tiêu đề mẹo sức khỏe" />
-
-        <TextView
-            android:id="@+id/textViewShortDesc"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:ellipsize="end"
+            android:textColor="?android:attr/textColorPrimary"
             android:maxLines="2"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayoutStats"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewTitle"
-            tools:text="Mô tả ngắn về mẹo sức khỏe này..." />
+            android:ellipsize="end"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/imageViewHealthTip"
+            app:layout_constraintEnd_toStartOf="@id/imageViewFavorite"
+            tools:text="Cách uống nước đúng cách để tăng cường sức khỏe" />
 
-        <LinearLayout
-            android:id="@+id/linearLayoutStats"
-            android:layout_width="match_parent"
+        <!-- Nội dung tóm tắt -->
+        <TextView
+            android:id="@+id/textViewHealthTipSummary"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="4dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintTop_toBottomOf="@id/textViewHealthTipTitle"
+            app:layout_constraintStart_toEndOf="@id/imageViewHealthTip"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            tools:text="Nước là thành phần thiết yếu cho cơ thể con người. Uống đủ nước mỗi ngày giúp cơ thể hoạt động hiệu quả và ngăn ngừa mất nước..." />
 
-            <ImageView
-                android:id="@+id/imageViewViewIcon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="center_vertical"
-                android:src="@android:drawable/ic_menu_view"
-                app:tint="@color/text_secondary" />
+        <!-- Ngày đăng -->
+        <TextView
+            android:id="@+id/textViewDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="12dp"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintTop_toBottomOf="@id/textViewHealthTipSummary"
+            app:layout_constraintStart_toEndOf="@id/imageViewHealthTip"
+            tools:text="24/06/2023" />
 
-            <TextView
-                android:id="@+id/textViewViewCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="12dp"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                tools:text="245" />
+        <!-- Lượt xem -->
+        <TextView
+            android:id="@+id/textViewViewCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:drawableStart="@drawable/ic_view"
+            android:drawablePadding="4dp"
+            app:layout_constraintTop_toBottomOf="@id/textViewHealthTipSummary"
+            app:layout_constraintStart_toEndOf="@id/textViewDate"
+            tools:text="128" />
 
-            <ImageView
-                android:id="@+id/imageViewLikeIcon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="center_vertical"
-                android:src="@android:drawable/star_on"
-                app:tint="@color/primary_button_end" />
+        <!-- Lượt thích -->
+        <TextView
+            android:id="@+id/textViewLikeCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:drawableStart="@drawable/ic_like"
+            android:drawablePadding="4dp"
+            app:layout_constraintTop_toBottomOf="@id/textViewHealthTipSummary"
+            app:layout_constraintStart_toEndOf="@id/textViewViewCount"
+            tools:text="32" />
 
-            <TextView
-                android:id="@+id/textViewLikeCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="4dp"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                tools:text="42" />
+        <!-- Icon yêu thích -->
+        <ImageView
+            android:id="@+id/imageViewFavorite"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/favorite"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:src="@drawable/ic_favorite_border" />
 
-        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

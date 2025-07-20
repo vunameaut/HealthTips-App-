@@ -31,6 +31,7 @@ public class Constants {
     public static final String INTENT_CATEGORY_ID = "category_id";
     public static final String INTENT_HEALTH_TIP_ID = "health_tip_id";
     public static final String INTENT_SEARCH_QUERY = "search_query";
+    public static final String CATEGORY_ID_KEY = "category_id"; // Key cho Bundle trong Fragment
 
     // Số lượng hiển thị mặc định
     public static final int DEFAULT_LIMIT = 10;

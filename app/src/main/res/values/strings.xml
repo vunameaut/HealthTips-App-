@@ -50,13 +50,25 @@
     <string name="success_reset_password">Đã gửi email đặt lại mật khẩu</string>
     <string name="error_network">Lỗi kết nối mạng</string>
 
-    <!-- Các chuỗi cho màn hình cài đặt và hồ sơ -->
-    <string name="settings">Cài đặt</string>
-    <string name="profile">Hồ sơ</string>
+    <!-- Các chuỗi cho màn hình danh mục -->
+    <string name="categories_title">Tất cả chủ đề sức khỏe</string>
+    <string name="categories_subtitle">Khám phá các chủ đề sức khỏe phong phú</string>
+    <string name="empty_categories_title">Không tìm thấy danh mục</string>
+    <string name="empty_categories_message">Hiện không có danh mục nào để hiển thị</string>
+    <string name="empty_categories_description">Các danh mục sẽ xuất hiện ở đây</string>
+    <string name="health_tip_image">Hình ảnh mẹo sức khỏe</string>
+
+    <!-- Các chuỗi chung -->
+    <string name="loading">Đang tải...</string>
+    <string name="retry">Thử lại</string>
+    <string name="error_general">Đã xảy ra lỗi</string>
+    <string name="no_data">Không có dữ liệu</string>
     <string name="logout">Đăng xuất</string>
-    <string name="edit_profile">Chỉnh sửa hồ sơ</string>
-    <string name="dark_mode">Chế độ tối</string>
-    <string name="notifications">Thông báo</string>
-    <string name="language">Ngôn ngữ</string>
-    <string name="about">Về ứng dụng</string>
+    <string name="back">Quay lại</string>
+    <string name="favorite">Yêu thích</string>
+
+    <!-- Các chuỗi cho màn hình chi tiết danh mục -->
+    <string name="empty_tips_description">Chưa có mẹo nào trong danh mục này</string>
+    <string name="empty_tips_title">Danh sách trống</string>
+    <string name="empty_tips_message">Danh mục này hiện không có mẹo sức khỏe nào</string>
 </resources>

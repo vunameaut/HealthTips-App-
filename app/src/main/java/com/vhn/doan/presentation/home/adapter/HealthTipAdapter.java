@@ -87,12 +87,12 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
 
         public HealthTipViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageViewThumbnail = itemView.findViewById(R.id.imageViewThumbnail);
-            textViewTitle = itemView.findViewById(R.id.textViewTitle);
-            textViewShortDesc = itemView.findViewById(R.id.textViewShortDesc);
+            imageViewThumbnail = itemView.findViewById(R.id.imageViewHealthTip);
+            textViewTitle = itemView.findViewById(R.id.textViewHealthTipTitle);
+            textViewShortDesc = itemView.findViewById(R.id.textViewHealthTipSummary);
             textViewViewCount = itemView.findViewById(R.id.textViewViewCount);
             textViewLikeCount = itemView.findViewById(R.id.textViewLikeCount);
-            cardViewHealthTip = itemView.findViewById(R.id.cardViewHealthTip);
+            cardViewHealthTip = (CardView) itemView; // MaterialCardView là lớp con của CardView
         }
 
         public void bind(final HealthTip healthTip, final HealthTipClickListener listener) {
