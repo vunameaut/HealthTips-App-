@@ -21,6 +21,7 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
     private final FirebaseDatabase database;
     private final DatabaseReference healthTipsRef;
+    private Map<Object, ValueEventListener> activeListeners = new HashMap<>();
 
     /**
      * Constructor mặc định
@@ -78,18 +79,21 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
-    public void getHealthTipById(String healthTipId, final HealthTipCallback callback) {
+    public void getHealthTipById(String healthTipId, final SingleHealthTipCallback callback) {
+        if (healthTipId == null || healthTipId.isEmpty()) {
+            callback.onError("ID bài viết không hợp lệ");
+            return;
+        }
+
         healthTipsRef.child(healthTipId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HealthTip healthTip = dataSnapshot.getValue(HealthTip.class);
                 if (healthTip != null) {
                     healthTip.setId(dataSnapshot.getKey());
-                    List<HealthTip> healthTips = new ArrayList<>();
-                    healthTips.add(healthTip);
-                    callback.onSuccess(healthTips);
+                    callback.onSuccess(healthTip);
                 } else {
-                    callback.onError("Không tìm thấy mẹo sức khỏe");
+                    callback.onError("Không tìm thấy bài viết");
                 }
             }
 
@@ -221,7 +225,7 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
-    public void addHealthTip(final HealthTip healthTip, final HealthTipOperationCallback callback) {
+    public void addHealthTip(HealthTip healthTip, final HealthTipOperationCallback callback) {
         String key = healthTipsRef.push().getKey();
         if (key != null) {
             healthTip.setId(key);
@@ -234,43 +238,36 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
-    public void updateHealthTip(final HealthTip healthTip, final HealthTipOperationCallback callback) {
-        if (healthTip.getId() == null) {
-            callback.onError("ID của mẹo sức khỏe không hợp lệ");
+    public void updateFavoriteStatus(String healthTipId, boolean isFavorite, final HealthTipOperationCallback callback) {
+        if (healthTipId == null || healthTipId.isEmpty()) {
+            callback.onError("ID bài viết không hợp lệ");
             return;
         }
 
-        Map<String, Object> healthTipValues = new HashMap<>();
-        healthTipValues.put("title", healthTip.getTitle());
-        healthTipValues.put("content", healthTip.getContent());
-        healthTipValues.put("categoryId", healthTip.getCategoryId());
-        healthTipValues.put("viewCount", healthTip.getViewCount());
-        healthTipValues.put("likeCount", healthTip.getLikeCount());
-        healthTipValues.put("imageUrl", healthTip.getImageUrl());
-        healthTipValues.put("createdAt", healthTip.getCreatedAt());
-        healthTipValues.put("isFavorite", healthTip.isFavorite());
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("isFavorite", isFavorite);
 
-        healthTipsRef.child(healthTip.getId()).updateChildren(healthTipValues)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(healthTip.getId()))
-                .addOnFailureListener(e -> callback.onError(e.getMessage()));
-    }
-
-    @Override
-    public void deleteHealthTip(final String healthTipId, final HealthTipOperationCallback callback) {
-        healthTipsRef.child(healthTipId).removeValue()
+        healthTipsRef.child(healthTipId).updateChildren(updates)
                 .addOnSuccessListener(aVoid -> callback.onSuccess(healthTipId))
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
 
     @Override
     public void incrementViewCount(String healthTipId, final HealthTipOperationCallback callback) {
-        DatabaseReference viewCountRef = healthTipsRef.child(healthTipId).child("viewCount");
-        viewCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        if (healthTipId == null || healthTipId.isEmpty()) {
+            callback.onError("ID bài viết không hợp lệ");
+            return;
+        }
+
+        DatabaseReference healthTipRef = healthTipsRef.child(healthTipId).child("viewCount");
+
+        healthTipRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Integer currentCount = dataSnapshot.getValue(Integer.class);
-                int newCount = (currentCount == null) ? 1 : currentCount + 1;
-                viewCountRef.setValue(newCount)
+                Integer currentViews = dataSnapshot.getValue(Integer.class);
+                int newViewCount = (currentViews != null) ? currentViews + 1 : 1;
+
+                healthTipRef.setValue(newViewCount)
                         .addOnSuccessListener(aVoid -> callback.onSuccess(healthTipId))
                         .addOnFailureListener(e -> callback.onError(e.getMessage()));
             }
@@ -283,21 +280,28 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
-    public void toggleLike(String healthTipId, final boolean like, final HealthTipOperationCallback callback) {
-        DatabaseReference likeCountRef = healthTipsRef.child(healthTipId).child("likeCount");
-        likeCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+    public void updateLikeStatus(String healthTipId, boolean isLiked, final HealthTipOperationCallback callback) {
+        if (healthTipId == null || healthTipId.isEmpty()) {
+            callback.onError("ID bài viết không hợp lệ");
+            return;
+        }
+
+        DatabaseReference healthTipRef = healthTipsRef.child(healthTipId).child("likeCount");
+
+        healthTipRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Integer currentCount = dataSnapshot.getValue(Integer.class);
-                int newCount;
+                Integer currentLikes = dataSnapshot.getValue(Integer.class);
+                int likesCount = (currentLikes != null) ? currentLikes : 0;
 
-                if (currentCount == null) {
-                    newCount = like ? 1 : 0;
+                int newLikeCount;
+                if (isLiked) {
+                    newLikeCount = likesCount + 1;
                 } else {
-                    newCount = like ? currentCount + 1 : Math.max(0, currentCount - 1);
+                    newLikeCount = Math.max(0, likesCount - 1);
                 }
 
-                likeCountRef.setValue(newCount)
+                healthTipRef.setValue(newLikeCount)
                         .addOnSuccessListener(aVoid -> callback.onSuccess(healthTipId))
                         .addOnFailureListener(e -> callback.onError(e.getMessage()));
             }
@@ -309,8 +313,14 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         });
     }
 
+    /**
+     * Đăng ký lắng nghe các thay đổi từ Firebase cho dữ liệu mẹo sức khỏe mới nhất
+     * @param limit Số lượng mẹo muốn lấy
+     * @param callback Callback để nhận kết quả
+     * @return Object định danh của listener để có thể hủy đăng ký sau này
+     */
     @Override
-    public Object listenToLatestHealthTips(int limit, HealthTipCallback callback) {
+    public Object listenToLatestHealthTips(int limit, final HealthTipCallback callback) {
         Query query = healthTipsRef.orderByChild("createdAt").limitToLast(limit);
         ValueEventListener listener = new ValueEventListener() {
             @Override
@@ -323,7 +333,6 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                         healthTips.add(healthTip);
                     }
                 }
-
                 // Đảo ngược danh sách để các mục mới nhất hiển thị trước
                 List<HealthTip> reversedList = new ArrayList<>();
                 for (int i = healthTips.size() - 1; i >= 0; i--) {
@@ -339,13 +348,21 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         };
 
         query.addValueEventListener(listener);
-        return listener;
+        Object listenerId = new Object();
+        activeListeners.put(listenerId, listener);
+        return listenerId;
     }
 
+    /**
+     * Hủy đăng ký lắng nghe thay đổi từ Firebase
+     * @param listener Đối tượng listener cần hủy, nhận được từ phương thức đăng ký tương ứng
+     */
     @Override
     public void removeListener(Object listener) {
-        if (listener instanceof ValueEventListener) {
-            healthTipsRef.removeEventListener((ValueEventListener) listener);
+        ValueEventListener valueEventListener = activeListeners.get(listener);
+        if (valueEventListener != null) {
+            healthTipsRef.removeEventListener(valueEventListener);
+            activeListeners.remove(listener);
         }
     }
 }

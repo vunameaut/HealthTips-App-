@@ -309,28 +309,18 @@ public class HomeFragment extends Fragment implements HomeView {
 
     @Override
     public void navigateToHealthTipDetail(HealthTip healthTip) {
-        // Hiển thị thông báo tạm thời
-        showMessage("Đã chọn mẹo: " + healthTip.getTitle());
-
-        // Sau này sẽ chuyển đến màn hình chi tiết mẹo sức khỏe thay vì danh mục
-        // Phần code dưới đây đã bị comment lại để sửa lỗi
-        /*
-        if (healthTip != null && healthTip.getCategoryId() != null) {
-            // Tạo Intent để chuyển đến CategoryDetailListActivity
-            android.content.Intent intent = new android.content.Intent(requireContext(), com.vhn.doan.presentation.category.detail.CategoryDetailListActivity.class);
-
-            // Truyền ID của danh mục
-            intent.putExtra(Constants.CATEGORY_ID_KEY, healthTip.getCategoryId());
-
-            // Thêm ID của mẹo sức khỏe để có thể cuộn đến đúng mẹo đó
-            intent.putExtra(Constants.INTENT_HEALTH_TIP_ID, healthTip.getId());
+        if (healthTip != null && healthTip.getId() != null) {
+            // Tạo Intent để chuyển đến HealthTipDetailActivity
+            android.content.Intent intent = com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity.createIntent(
+                    requireContext(),
+                    healthTip.getId()
+            );
 
             // Khởi chạy Activity mới
             startActivity(intent);
         } else {
-            showError("Không thể mở chi tiết mẹo sức khỏe do thiếu thông tin danh mục");
+            showError("Không thể mở chi tiết mẹo sức khỏe do thiếu thông tin");
         }
-        */
     }
 
     @Override

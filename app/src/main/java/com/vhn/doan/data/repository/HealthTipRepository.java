@@ -28,6 +28,23 @@ public interface HealthTipRepository {
     }
 
     /**
+     * Interface callback cho việc lấy một mẹo sức khỏe đơn lẻ
+     */
+    interface SingleHealthTipCallback {
+        /**
+         * Được gọi khi thao tác thành công
+         * @param healthTip mẹo sức khỏe
+         */
+        void onSuccess(HealthTip healthTip);
+
+        /**
+         * Được gọi khi thao tác thất bại
+         * @param errorMessage thông báo lỗi
+         */
+        void onError(String errorMessage);
+    }
+
+    /**
      * Interface callback cho các thao tác không trả về dữ liệu
      */
     interface HealthTipOperationCallback {
@@ -62,7 +79,7 @@ public interface HealthTipRepository {
      * @param healthTipId ID của mẹo sức khỏe cần lấy
      * @param callback callback để nhận kết quả
      */
-    void getHealthTipById(String healthTipId, HealthTipCallback callback);
+    void getHealthTipById(String healthTipId, SingleHealthTipCallback callback);
 
     /**
      * Lấy các mẹo sức khỏe mới nhất
@@ -100,18 +117,12 @@ public interface HealthTipRepository {
     void addHealthTip(HealthTip healthTip, HealthTipOperationCallback callback);
 
     /**
-     * Cập nhật thông tin mẹo sức khỏe
-     * @param healthTip mẹo sức khỏe cần cập nhật
+     * Cập nhật trạng thái yêu thích của một mẹo sức khỏe
+     * @param healthTipId ID của mẹo sức khỏe
+     * @param isFavorite trạng thái yêu thích mới
      * @param callback callback để nhận kết quả
      */
-    void updateHealthTip(HealthTip healthTip, HealthTipOperationCallback callback);
-
-    /**
-     * Xóa một mẹo sức khỏe
-     * @param healthTipId ID của mẹo sức khỏe cần xóa
-     * @param callback callback để nhận kết quả
-     */
-    void deleteHealthTip(String healthTipId, HealthTipOperationCallback callback);
+    void updateFavoriteStatus(String healthTipId, boolean isFavorite, HealthTipOperationCallback callback);
 
     /**
      * Tăng số lượt xem của một mẹo sức khỏe
@@ -121,24 +132,24 @@ public interface HealthTipRepository {
     void incrementViewCount(String healthTipId, HealthTipOperationCallback callback);
 
     /**
-     * Thay đổi trạng thái thích của một mẹo sức khỏe
+     * Cập nhật trạng thái thích của một mẹo sức khỏe
      * @param healthTipId ID của mẹo sức khỏe
-     * @param like true để tăng lượt thích, false để giảm
+     * @param isLiked trạng thái thích mới
      * @param callback callback để nhận kết quả
      */
-    void toggleLike(String healthTipId, boolean like, HealthTipOperationCallback callback);
+    void updateLikeStatus(String healthTipId, boolean isLiked, HealthTipOperationCallback callback);
 
     /**
-     * Lắng nghe sự thay đổi của các mẹo sức khỏe mới nhất
-     * @param limit số lượng mẹo cần lấy
-     * @param callback callback để nhận kết quả khi có thay đổi
-     * @return một object để dừng lắng nghe sau này
+     * Đăng ký lắng nghe các thay đổi từ Firebase cho dữ liệu mẹo sức khỏe mới nhất
+     * @param limit Số lượng mẹo muốn lấy
+     * @param callback Callback để nhận kết quả
+     * @return Object định danh của listener để có thể hủy đăng ký sau này
      */
     Object listenToLatestHealthTips(int limit, HealthTipCallback callback);
 
     /**
-     * Dừng lắng nghe sự thay đổi
-     * @param listener listener đã đăng ký trước đó
+     * Hủy đăng ký lắng nghe thay đổi từ Firebase
+     * @param listener Đối tượng listener cần hủy, nhận được từ phương thức đăng ký tương ứng
      */
     void removeListener(Object listener);
 }

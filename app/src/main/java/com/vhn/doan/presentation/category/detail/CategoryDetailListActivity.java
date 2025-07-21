@@ -162,16 +162,12 @@ public class CategoryDetailListActivity extends AppCompatActivity implements Cat
      * @param healthTipId ID của mẹo sức khỏe
      */
     public void navigateToHealthTipDetail(String healthTipId) {
-        // Khi tạo HealthTipDetailActivity, sẽ điều hướng đến đó
-        // TODO: Thay thế bằng Intent đến HealthTipDetailActivity khi tạo xong
-        Toast.makeText(this, "Đã chọn mẹo sức khỏe: " + healthTipId, Toast.LENGTH_SHORT).show();
-
-        // Mẫu code cho điều hướng đến HealthTipDetailActivity trong tương lai
-        /*
-        Intent intent = new Intent(this, HealthTipDetailActivity.class);
-        intent.putExtra(Constants.INTENT_HEALTH_TIP_ID, healthTipId);
+        // Sử dụng phương thức tĩnh của HealthTipDetailActivity để tạo Intent
+        Intent intent = com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity.createIntent(
+                this,
+                healthTipId
+        );
         startActivity(intent);
-        */
     }
 
     @Override

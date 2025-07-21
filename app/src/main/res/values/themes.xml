@@ -31,4 +31,11 @@
     </style>
 
     <style name="Theme.Doan" parent="Base.Theme.Doan" />
+
+    <!-- Theme không có ActionBar cho các màn hình sử dụng CollapsingToolbar -->
+    <style name="Theme.Doan.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
 </resources>
