@@ -8,11 +8,13 @@ public class HealthTip {
     private String title;
     private String content;
     private String categoryId;
+    private String categoryName; // Thêm field cho tên category
     private int viewCount;
     private int likeCount;
     private String imageUrl;
     private long createdAt;
     private boolean isFavorite;
+    private boolean isLiked; // Thêm field cho trạng thái like
 
     /**
      * Constructor rỗng cho Firebase
@@ -39,6 +41,7 @@ public class HealthTip {
         this.likeCount = likeCount;
         this.createdAt = System.currentTimeMillis();
         this.isFavorite = false;
+        this.isLiked = false;
     }
 
     /**
@@ -55,6 +58,7 @@ public class HealthTip {
         this.imageUrl = imageUrl;
         this.createdAt = createdAt;
         this.isFavorite = isFavorite;
+        this.isLiked = false;
     }
 
     // Getters and Setters
@@ -88,6 +92,15 @@ public class HealthTip {
 
     public void setCategoryId(String categoryId) {
         this.categoryId = categoryId;
+    }
+
+    // Thêm getter/setter cho categoryName
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public int getViewCount() {
@@ -130,6 +143,14 @@ public class HealthTip {
         isFavorite = favorite;
     }
 
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean liked) {
+        isLiked = liked;
+    }
+
     @Override
     public String toString() {
         return "HealthTip{" +
@@ -137,11 +158,13 @@ public class HealthTip {
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
                 ", categoryId='" + categoryId + '\'' +
+                ", categoryName='" + categoryName + '\'' +
                 ", viewCount=" + viewCount +
                 ", likeCount=" + likeCount +
                 ", imageUrl='" + imageUrl + '\'' +
                 ", createdAt=" + createdAt +
                 ", isFavorite=" + isFavorite +
+                ", isLiked=" + isLiked +
                 '}';
     }
 }

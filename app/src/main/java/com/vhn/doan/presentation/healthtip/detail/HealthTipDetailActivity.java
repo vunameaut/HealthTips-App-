@@ -83,13 +83,14 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
         // Khởi tạo presenter
         HealthTipRepository repository = new HealthTipRepositoryImpl();
-        presenter = new HealthTipDetailPresenterImpl(this, repository);
+        presenter = new HealthTipDetailPresenterImpl(repository);
+        presenter.attachView(this);
 
         // Thiết lập listeners
         setupListeners();
 
         // Tải dữ liệu
-        presenter.loadHealthTipDetails(healthTipId);
+        presenter.loadHealthTipDetail(healthTipId);
     }
 
     /**
@@ -123,18 +124,16 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
      */
     private void setupListeners() {
         fabFavorite.setOnClickListener(v -> {
-            isFavorite = !isFavorite;
-            presenter.toggleFavoriteStatus(healthTipId, isFavorite);
-            updateFavoriteFabIcon();
+            presenter.onFavoriteClick(healthTipId);
         });
 
         buttonLike.setOnClickListener(v -> {
-            isLiked = !isLiked;
-            presenter.toggleLike(healthTipId, isLiked);
-            updateLikeButtonText();
+            presenter.onLikeClick(healthTipId);
         });
 
-        buttonShare.setOnClickListener(v -> shareHealthTip());
+        buttonShare.setOnClickListener(v -> {
+            presenter.onShareClick(healthTipId);
+        });
     }
 
     /**
@@ -201,28 +200,55 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         textViewViewCount.setText(String.valueOf(healthTip.getViewCount()));
         textViewLikeCount.setText(String.valueOf(healthTip.getLikeCount()));
 
-        // Hiển thị hình ảnh
+        // Set category text - đây là phần bị thiếu
+        if (healthTip.getCategoryName() != null && !healthTip.getCategoryName().isEmpty()) {
+            textViewCategory.setText(healthTip.getCategoryName());
+            textViewCategory.setVisibility(View.VISIBLE);
+        } else {
+            textViewCategory.setText("Chưa phân loại");
+            textViewCategory.setVisibility(View.VISIBLE);
+        }
+
+        // Set title cho toolbar
+        collapsingToolbarLayout.setTitle(healthTip.getTitle());
+
+        // Tải hình ảnh
         if (healthTip.getImageUrl() != null && !healthTip.getImageUrl().isEmpty()) {
             Glide.with(this)
                     .load(healthTip.getImageUrl())
-                    .centerCrop()
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.error_image)
                     .into(imageViewDetail);
+        } else {
+            imageViewDetail.setImageResource(R.drawable.placeholder_image);
         }
 
-        // Cập nhật trạng thái yêu thích và thích
+        // Cập nhật trạng thái favorite và like
         isFavorite = healthTip.isFavorite();
-        updateFavoriteStatus(isFavorite);
-
-        // Đặt tiêu đề cho CollapsingToolbarLayout
-        collapsingToolbarLayout.setTitle(healthTip.getTitle());
+        isLiked = healthTip.isLiked();
+        updateFavoriteFabIcon();
+        updateLikeButtonText();
     }
 
     @Override
     public void updateFavoriteStatus(boolean isFavorite) {
-        this.isFavorite = isFavorite;
-        updateFavoriteFabIcon();
+        if (isFavorite) {
+            fabFavorite.setImageResource(R.drawable.ic_favorite);
+        } else {
+            fabFavorite.setImageResource(R.drawable.ic_favorite_border);
+        }
+    }
+
+    @Override
+    public void updateLikeStatus(boolean isLiked) {
+        // Thay đổi text của button thay vì image vì buttonLike là Button không phải ImageButton
+        if (isLiked) {
+            buttonLike.setText("❤️ Đã thích");
+            buttonLike.setTextColor(getResources().getColor(R.color.primary_button_start));
+        } else {
+            buttonLike.setText("🤍 Thích");
+            buttonLike.setTextColor(getResources().getColor(R.color.text_secondary));
+        }
     }
 
     @Override
@@ -233,5 +259,21 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     @Override
     public void updateViewCount(int viewCount) {
         textViewViewCount.setText(String.valueOf(viewCount));
+    }
+
+    @Override
+    public void shareContent(String content) {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, content);
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_tip)));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (presenter != null) {
+            presenter.detachView();
+        }
     }
 }

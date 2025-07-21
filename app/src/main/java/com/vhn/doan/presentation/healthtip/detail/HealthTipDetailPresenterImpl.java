@@ -2,52 +2,72 @@ package com.vhn.doan.presentation.healthtip.detail;
 
 import com.vhn.doan.data.HealthTip;
 import com.vhn.doan.data.repository.HealthTipRepository;
-import com.vhn.doan.presentation.base.BasePresenter;
+import com.vhn.doan.presentation.base.BaseView;
 
 /**
  * Lớp HealthTipDetailPresenterImpl triển khai HealthTipDetailPresenter
  * xử lý logic cho màn hình chi tiết bài viết sức khỏe
  * Tuân theo kiến trúc MVP (Model-View-Presenter)
  */
-public class HealthTipDetailPresenterImpl extends BasePresenter<HealthTipDetailView> implements HealthTipDetailPresenter {
+public class HealthTipDetailPresenterImpl implements HealthTipDetailPresenter {
 
     private final HealthTipRepository healthTipRepository;
+    private HealthTipDetailView view;
     private HealthTip currentHealthTip;
 
     /**
      * Constructor
-     * @param view View để hiển thị dữ liệu
      * @param healthTipRepository Repository để truy cập dữ liệu
      */
-    public HealthTipDetailPresenterImpl(HealthTipDetailView view, HealthTipRepository healthTipRepository) {
+    public HealthTipDetailPresenterImpl(HealthTipRepository healthTipRepository) {
         this.healthTipRepository = healthTipRepository;
-        attachView(view);
+    }
+
+    @Override
+    public void attachView(BaseView view) {
+        if (view instanceof HealthTipDetailView) {
+            this.view = (HealthTipDetailView) view;
+        }
+    }
+
+    @Override
+    public void detachView() {
+        this.view = null;
     }
 
     @Override
     public void start() {
-        // Không có hành động khởi tạo cần thiết ở đây
-        // Việc tải dữ liệu sẽ được thực hiện trong loadHealthTipDetails()
+        // Khởi tạo presenter
     }
 
     @Override
-    public void loadHealthTipDetails(String healthTipId) {
-        if (healthTipId == null || healthTipId.isEmpty()) {
-            view.showError("ID bài viết không hợp lệ");
+    public void stop() {
+        // Dọn dẹp tài nguyên
+        detachView();
+    }
+
+    @Override
+    public void loadHealthTipDetail(String tipId) {
+        if (tipId == null || tipId.isEmpty()) {
+            if (view != null) {
+                view.showError("ID bài viết không hợp lệ");
+            }
             return;
         }
 
-        view.showLoading(true);
+        if (view != null) {
+            view.showLoading(true);
+        }
 
-        healthTipRepository.getHealthTipById(healthTipId, new HealthTipRepository.SingleHealthTipCallback() {
+        healthTipRepository.getHealthTipDetail(tipId, new HealthTipRepository.SingleHealthTipCallback() {
             @Override
             public void onSuccess(HealthTip healthTip) {
-                if (isViewAttached()) {
+                if (view != null) {
                     view.showLoading(false);
                     if (healthTip != null) {
                         currentHealthTip = healthTip;
                         view.displayHealthTipDetails(healthTip);
-                        incrementViewCount(healthTipId);
+                        updateViewCount(tipId);
                     } else {
                         view.showError("Không tìm thấy bài viết");
                     }
@@ -56,90 +76,117 @@ public class HealthTipDetailPresenterImpl extends BasePresenter<HealthTipDetailV
 
             @Override
             public void onError(String errorMessage) {
-                if (isViewAttached()) {
+                if (view != null) {
                     view.showLoading(false);
-                    view.showError(errorMessage);
+                    view.showError("Lỗi khi tải chi tiết bài viết: " + errorMessage);
                 }
             }
         });
     }
 
     @Override
-    public void toggleFavoriteStatus(String healthTipId, boolean isFavorite) {
-        if (healthTipId == null || healthTipId.isEmpty()) {
-            view.showError("ID bài viết không hợp lệ");
+    public void onFavoriteClick(String tipId) {
+        if (currentHealthTip == null || tipId == null) {
+            if (view != null) {
+                view.showError("Không thể thực hiện thao tác yêu thích");
+            }
             return;
         }
 
-        healthTipRepository.updateFavoriteStatus(healthTipId, isFavorite, new HealthTipRepository.HealthTipOperationCallback() {
+        boolean newFavoriteStatus = !currentHealthTip.isFavorite();
+
+        healthTipRepository.updateFavoriteStatus(tipId, newFavoriteStatus, new HealthTipRepository.HealthTipOperationCallback() {
             @Override
-            public void onSuccess(String healthTipId) {
-                view.updateFavoriteStatus(isFavorite);
-                if (isFavorite) {
-                    view.showMessage("Đã thêm vào danh sách yêu thích");
-                } else {
-                    view.showMessage("Đã xóa khỏi danh sách yêu thích");
+            public void onSuccess() {
+                if (view != null && currentHealthTip != null) {
+                    currentHealthTip.setFavorite(newFavoriteStatus);
+                    view.updateFavoriteStatus(newFavoriteStatus);
+                    view.showMessage(newFavoriteStatus ? "Đã thêm vào yêu thích" : "Đã bỏ khỏi yêu thích");
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
-                view.showError(errorMessage);
+                if (view != null) {
+                    view.showError("Lỗi khi cập nhật trạng thái yêu thích: " + errorMessage);
+                }
             }
         });
     }
 
     @Override
-    public void incrementViewCount(String healthTipId) {
-        if (healthTipId == null || healthTipId.isEmpty()) {
-            return; // Lỗi tĩnh, không cần thông báo
+    public void onLikeClick(String tipId) {
+        if (currentHealthTip == null || tipId == null) {
+            if (view != null) {
+                view.showError("Không thể thực hiện thao tác thích");
+            }
+            return;
         }
 
-        healthTipRepository.incrementViewCount(healthTipId, new HealthTipRepository.HealthTipOperationCallback() {
+        boolean newLikeStatus = !currentHealthTip.isLiked();
+
+        healthTipRepository.updateLikeStatus(tipId, newLikeStatus, new HealthTipRepository.HealthTipOperationCallback() {
             @Override
-            public void onSuccess(String healthTipId) {
+            public void onSuccess() {
+                if (view != null && currentHealthTip != null) {
+                    currentHealthTip.setLiked(newLikeStatus);
+                    view.updateLikeStatus(newLikeStatus);
+                    view.showMessage(newLikeStatus ? "Đã thích bài viết" : "Đã bỏ thích bài viết");
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (view != null) {
+                    view.showError("Lỗi khi cập nhật trạng thái thích: " + errorMessage);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onShareClick(String tipId) {
+        if (currentHealthTip == null) {
+            if (view != null) {
+                view.showError("Không có nội dung để chia sẻ");
+            }
+            return;
+        }
+
+        String shareText = "Chia sẻ mẹo sức khỏe: " + currentHealthTip.getTitle() + "\n\n" +
+                          currentHealthTip.getContent() + "\n\nTải app để xem thêm nhiều mẹo sức khỏe hữu ích!";
+
+        if (view != null) {
+            view.shareContent(shareText);
+        }
+    }
+
+    @Override
+    public void updateViewCount(String tipId) {
+        if (tipId == null || tipId.isEmpty()) {
+            return;
+        }
+
+        healthTipRepository.updateViewCount(tipId, new HealthTipRepository.HealthTipOperationCallback() {
+            @Override
+            public void onSuccess() {
+                // Cập nhật thành công, không cần thông báo
                 if (currentHealthTip != null) {
                     currentHealthTip.setViewCount(currentHealthTip.getViewCount() + 1);
-                    view.updateViewCount(currentHealthTip.getViewCount());
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
-                // Không hiển thị lỗi cho người dùng khi cập nhật số lượt xem thất bại
-                // Đây là thao tác ngầm
+                // Lỗi cập nhật view count không cần thông báo cho user
             }
         });
     }
 
-    @Override
-    public void toggleLike(String healthTipId, boolean isLiked) {
-        if (healthTipId == null || healthTipId.isEmpty()) {
-            view.showError("ID bài viết không hợp lệ");
-            return;
-        }
-
-        healthTipRepository.updateLikeStatus(healthTipId, isLiked, new HealthTipRepository.HealthTipOperationCallback() {
-            @Override
-            public void onSuccess(String healthTipId) {
-                if (currentHealthTip != null) {
-                    int newLikeCount = isLiked ?
-                            currentHealthTip.getLikeCount() + 1 :
-                            Math.max(0, currentHealthTip.getLikeCount() - 1);
-
-                    currentHealthTip.setLikeCount(newLikeCount);
-                    view.updateLikeCount(newLikeCount);
-
-                    if (isLiked) {
-                        view.showMessage("Bạn đã thích bài viết này");
-                    }
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                view.showError(errorMessage);
-            }
-        });
+    /**
+     * Kiểm tra xem view có đang được gắn không
+     */
+    private boolean isViewAttached() {
+        return view != null;
     }
 }

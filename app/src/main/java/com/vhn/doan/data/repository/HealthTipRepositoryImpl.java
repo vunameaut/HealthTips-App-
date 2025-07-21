@@ -7,6 +7,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.vhn.doan.data.HealthTip;
+import com.vhn.doan.data.Category;
 import com.vhn.doan.utils.Constants;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
     private final FirebaseDatabase database;
     private final DatabaseReference healthTipsRef;
+    private final DatabaseReference categoriesRef;
     private Map<Object, ValueEventListener> activeListeners = new HashMap<>();
 
     /**
@@ -29,6 +31,74 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     public HealthTipRepositoryImpl() {
         database = FirebaseDatabase.getInstance();
         healthTipsRef = database.getReference(Constants.HEALTH_TIPS_REF);
+        categoriesRef = database.getReference(Constants.CATEGORIES_REF);
+    }
+
+    /**
+     * Helper method để lấy category name từ category ID
+     */
+    private void loadCategoryNameForHealthTip(HealthTip healthTip, final Runnable onComplete) {
+        if (healthTip.getCategoryId() == null || healthTip.getCategoryId().isEmpty()) {
+            healthTip.setCategoryName("Chưa phân loại");
+            if (onComplete != null) onComplete.run();
+            return;
+        }
+
+        categoriesRef.child(healthTip.getCategoryId()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Category category = dataSnapshot.getValue(Category.class);
+                if (category != null && category.getName() != null && !category.getName().isEmpty()) {
+                    healthTip.setCategoryName(category.getName());
+                } else {
+                    healthTip.setCategoryName("Chưa phân loại");
+                }
+                if (onComplete != null) onComplete.run();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                healthTip.setCategoryName("Chưa phân loại");
+                if (onComplete != null) onComplete.run();
+            }
+        });
+    }
+
+    /**
+     * Helper method để load category names cho danh sách health tips
+     */
+    private void loadCategoryNamesForHealthTips(List<HealthTip> healthTips, final HealthTipCallback callback) {
+        if (healthTips == null || healthTips.isEmpty()) {
+            callback.onSuccess(healthTips);
+            return;
+        }
+
+        final int[] completedCount = {0};
+        final int totalCount = healthTips.size();
+
+        for (HealthTip healthTip : healthTips) {
+            loadCategoryNameForHealthTip(healthTip, new Runnable() {
+                @Override
+                public void run() {
+                    completedCount[0]++;
+                    if (completedCount[0] >= totalCount) {
+                        callback.onSuccess(healthTips);
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Helper method để load category name cho single health tip
+     */
+    private void loadCategoryNameForSingleHealthTip(HealthTip healthTip, final SingleHealthTipCallback callback) {
+        loadCategoryNameForHealthTip(healthTip, new Runnable() {
+            @Override
+            public void run() {
+                callback.onSuccess(healthTip);
+            }
+        });
     }
 
     @Override
@@ -44,7 +114,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                         healthTips.add(healthTip);
                     }
                 }
-                callback.onSuccess(healthTips);
+                // Load category names trước khi trả về callback
+                loadCategoryNamesForHealthTips(healthTips, callback);
             }
 
             @Override
@@ -68,7 +139,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                         healthTips.add(healthTip);
                     }
                 }
-                callback.onSuccess(healthTips);
+                // Load category names trước khi trả về callback
+                loadCategoryNamesForHealthTips(healthTips, callback);
             }
 
             @Override
@@ -78,7 +150,6 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         });
     }
 
-    @Override
     public void getHealthTipById(String healthTipId, final SingleHealthTipCallback callback) {
         if (healthTipId == null || healthTipId.isEmpty()) {
             callback.onError("ID bài viết không hợp lệ");
@@ -91,7 +162,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 HealthTip healthTip = dataSnapshot.getValue(HealthTip.class);
                 if (healthTip != null) {
                     healthTip.setId(dataSnapshot.getKey());
-                    callback.onSuccess(healthTip);
+                    // Load category name trước khi trả về callback
+                    loadCategoryNameForSingleHealthTip(healthTip, callback);
                 } else {
                     callback.onError("Không tìm thấy bài viết");
                 }
@@ -123,7 +195,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 for (int i = healthTips.size() - 1; i >= 0; i--) {
                     reversedList.add(healthTips.get(i));
                 }
-                callback.onSuccess(reversedList);
+                // Load category names trước khi trả về callback
+                loadCategoryNamesForHealthTips(reversedList, callback);
             }
 
             @Override
@@ -152,7 +225,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 for (int i = healthTips.size() - 1; i >= 0; i--) {
                     reversedList.add(healthTips.get(i));
                 }
-                callback.onSuccess(reversedList);
+                // Load category names trước khi trả về callback
+                loadCategoryNamesForHealthTips(reversedList, callback);
             }
 
             @Override
@@ -181,7 +255,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 for (int i = healthTips.size() - 1; i >= 0; i--) {
                     reversedList.add(healthTips.get(i));
                 }
-                callback.onSuccess(reversedList);
+                // Load category names trước khi trả về callback
+                loadCategoryNamesForHealthTips(reversedList, callback);
             }
 
             @Override
@@ -192,34 +267,41 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
-    public void searchHealthTips(String query, final HealthTipCallback callback) {
-        // Firebase Realtime Database không hỗ trợ tìm kiếm text đầy đủ
-        // Chúng ta sẽ lấy tất cả và lọc theo tên
+    public void searchHealthTips(String query, HealthTipCallback callback) {
+        if (query == null || query.trim().isEmpty()) {
+            callback.onError("Từ khóa tìm kiếm không hợp lệ");
+            return;
+        }
+
         healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<HealthTip> searchResults = new ArrayList<>();
-                String lowerQuery = query.toLowerCase();
+                String searchQuery = query.toLowerCase().trim();
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     HealthTip healthTip = snapshot.getValue(HealthTip.class);
                     if (healthTip != null) {
                         healthTip.setId(snapshot.getKey());
 
-                        // Kiểm tra nếu tiêu đề hoặc nội dung chứa từ khóa tìm kiếm
-                        if ((healthTip.getTitle() != null && healthTip.getTitle().toLowerCase().contains(lowerQuery)) ||
-                            (healthTip.getContent() != null && healthTip.getContent().toLowerCase().contains(lowerQuery))) {
+                        // Tìm kiếm trong tiêu đề và nội dung
+                        boolean titleMatch = healthTip.getTitle() != null &&
+                                           healthTip.getTitle().toLowerCase().contains(searchQuery);
+                        boolean contentMatch = healthTip.getContent() != null &&
+                                             healthTip.getContent().toLowerCase().contains(searchQuery);
+
+                        if (titleMatch || contentMatch) {
                             searchResults.add(healthTip);
                         }
                     }
                 }
-
-                callback.onSuccess(searchResults);
+                // Load category names cho search results
+                loadCategoryNamesForHealthTips(searchResults, callback);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+                callback.onError("Lỗi khi tìm kiếm: " + databaseError.getMessage());
             }
         });
     }
@@ -230,7 +312,7 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         if (key != null) {
             healthTip.setId(key);
             healthTipsRef.child(key).setValue(healthTip)
-                    .addOnSuccessListener(aVoid -> callback.onSuccess(key))
+                    .addOnSuccessListener(aVoid -> callback.onSuccess())
                     .addOnFailureListener(e -> callback.onError(e.getMessage()));
         } else {
             callback.onError("Không thể tạo ID cho mẹo sức khỏe mới");
@@ -238,90 +320,25 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
-    public void updateFavoriteStatus(String healthTipId, boolean isFavorite, final HealthTipOperationCallback callback) {
-        if (healthTipId == null || healthTipId.isEmpty()) {
+    public void updateLikeStatus(String tipId, boolean isLiked, HealthTipOperationCallback callback) {
+        if (tipId == null || tipId.isEmpty()) {
             callback.onError("ID bài viết không hợp lệ");
             return;
         }
 
+        DatabaseReference tipRef = healthTipsRef.child(tipId);
         Map<String, Object> updates = new HashMap<>();
-        updates.put("isFavorite", isFavorite);
+        updates.put("liked", isLiked);
 
-        healthTipsRef.child(healthTipId).updateChildren(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(healthTipId))
-                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+        tipRef.updateChildren(updates)
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError("Lỗi khi cập nhật trạng thái thích: " + e.getMessage()));
     }
 
     @Override
-    public void incrementViewCount(String healthTipId, final HealthTipOperationCallback callback) {
-        if (healthTipId == null || healthTipId.isEmpty()) {
-            callback.onError("ID bài viết không hợp lệ");
-            return;
-        }
+    public Object listenToLatestHealthTips(int limit, HealthTipCallback callback) {
+        Query query = healthTipsRef.orderByChild("timestamp").limitToLast(limit);
 
-        DatabaseReference healthTipRef = healthTipsRef.child(healthTipId).child("viewCount");
-
-        healthTipRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Integer currentViews = dataSnapshot.getValue(Integer.class);
-                int newViewCount = (currentViews != null) ? currentViews + 1 : 1;
-
-                healthTipRef.setValue(newViewCount)
-                        .addOnSuccessListener(aVoid -> callback.onSuccess(healthTipId))
-                        .addOnFailureListener(e -> callback.onError(e.getMessage()));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
-            }
-        });
-    }
-
-    @Override
-    public void updateLikeStatus(String healthTipId, boolean isLiked, final HealthTipOperationCallback callback) {
-        if (healthTipId == null || healthTipId.isEmpty()) {
-            callback.onError("ID bài viết không hợp lệ");
-            return;
-        }
-
-        DatabaseReference healthTipRef = healthTipsRef.child(healthTipId).child("likeCount");
-
-        healthTipRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Integer currentLikes = dataSnapshot.getValue(Integer.class);
-                int likesCount = (currentLikes != null) ? currentLikes : 0;
-
-                int newLikeCount;
-                if (isLiked) {
-                    newLikeCount = likesCount + 1;
-                } else {
-                    newLikeCount = Math.max(0, likesCount - 1);
-                }
-
-                healthTipRef.setValue(newLikeCount)
-                        .addOnSuccessListener(aVoid -> callback.onSuccess(healthTipId))
-                        .addOnFailureListener(e -> callback.onError(e.getMessage()));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
-            }
-        });
-    }
-
-    /**
-     * Đăng ký lắng nghe các thay đổi từ Firebase cho dữ liệu mẹo sức khỏe mới nhất
-     * @param limit Số lượng mẹo muốn lấy
-     * @param callback Callback để nhận kết quả
-     * @return Object định danh của listener để có thể hủy đăng ký sau này
-     */
-    @Override
-    public Object listenToLatestHealthTips(int limit, final HealthTipCallback callback) {
-        Query query = healthTipsRef.orderByChild("createdAt").limitToLast(limit);
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -333,36 +350,108 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                         healthTips.add(healthTip);
                     }
                 }
-                // Đảo ngược danh sách để các mục mới nhất hiển thị trước
-                List<HealthTip> reversedList = new ArrayList<>();
-                for (int i = healthTips.size() - 1; i >= 0; i--) {
-                    reversedList.add(healthTips.get(i));
-                }
-                callback.onSuccess(reversedList);
+                // Load category names cho listen results
+                loadCategoryNamesForHealthTips(healthTips, callback);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+                callback.onError("Lỗi khi lắng nghe dữ liệu: " + databaseError.getMessage());
             }
         };
 
         query.addValueEventListener(listener);
-        Object listenerId = new Object();
-        activeListeners.put(listenerId, listener);
-        return listenerId;
+        activeListeners.put(listener, listener);
+        return listener;
     }
 
-    /**
-     * Hủy đăng ký lắng nghe thay đổi từ Firebase
-     * @param listener Đối tượng listener cần hủy, nhận được từ phương thức đăng ký tương ứng
-     */
     @Override
     public void removeListener(Object listener) {
-        ValueEventListener valueEventListener = activeListeners.get(listener);
-        if (valueEventListener != null) {
-            healthTipsRef.removeEventListener(valueEventListener);
-            activeListeners.remove(listener);
+        if (listener instanceof ValueEventListener) {
+            ValueEventListener valueEventListener = (ValueEventListener) listener;
+            if (activeListeners.containsKey(listener)) {
+                healthTipsRef.removeEventListener(valueEventListener);
+                activeListeners.remove(listener);
+            }
         }
+    }
+
+    @Override
+    public void updateFavoriteStatus(String tipId, boolean isFavorite, HealthTipOperationCallback callback) {
+        if (tipId == null || tipId.isEmpty()) {
+            callback.onError("ID bài viết không hợp lệ");
+            return;
+        }
+
+        DatabaseReference tipRef = healthTipsRef.child(tipId);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("favorite", isFavorite);
+
+        tipRef.updateChildren(updates)
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError("Lỗi khi cập nhật trạng thái yêu thích: " + e.getMessage()));
+    }
+
+    @Override
+    public void updateViewCount(String tipId, HealthTipOperationCallback callback) {
+        if (tipId == null || tipId.isEmpty()) {
+            callback.onError("ID bài viết không hợp lệ");
+            return;
+        }
+
+        DatabaseReference tipRef = healthTipsRef.child(tipId).child("viewCount");
+        tipRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int currentCount = 0;
+                if (dataSnapshot.exists()) {
+                    currentCount = dataSnapshot.getValue(Integer.class);
+                }
+                tipRef.setValue(currentCount + 1)
+                        .addOnSuccessListener(aVoid -> callback.onSuccess())
+                        .addOnFailureListener(e -> callback.onError("Lỗi khi cập nhật số lượt xem: " + e.getMessage()));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError("Lỗi khi đọc số lượt xem: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void getFavoriteHealthTips(String userId, HealthTipCallback callback) {
+        if (userId == null || userId.isEmpty()) {
+            callback.onError("ID người dùng không hợp lệ");
+            return;
+        }
+
+        // Lấy danh sách yêu thích từ user preferences hoặc từ health tips có favorite = true
+        healthTipsRef.orderByChild("favorite").equalTo(true)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        List<HealthTip> favoriteHealthTips = new ArrayList<>();
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                            if (healthTip != null) {
+                                healthTip.setId(snapshot.getKey());
+                                favoriteHealthTips.add(healthTip);
+                            }
+                        }
+                        // Load category names cho favorite tips
+                        loadCategoryNamesForHealthTips(favoriteHealthTips, callback);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        callback.onError("Lỗi khi lấy danh sách yêu thích: " + databaseError.getMessage());
+                    }
+                });
+    }
+
+    @Override
+    public void getHealthTipDetail(String tipId, SingleHealthTipCallback callback) {
+        getHealthTipById(tipId, callback);
     }
 }

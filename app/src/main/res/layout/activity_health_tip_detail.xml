@@ -75,7 +75,7 @@
                 android:paddingEnd="8dp"
                 android:paddingBottom="4dp"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textViewTitle"
                 tools:text="Danh mục" />

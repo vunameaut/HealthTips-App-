@@ -1,37 +1,41 @@
 package com.vhn.doan.presentation.healthtip.detail;
 
-import com.vhn.doan.presentation.base.BasePresenter;
+import com.vhn.doan.presentation.base.BasePresenterInterface;
 
 /**
  * Interface HealthTipDetailPresenter định nghĩa các phương thức cho presenter
  * xử lý logic cho màn hình chi tiết bài viết sức khỏe
  * Tuân theo kiến trúc MVP (Model-View-Presenter)
  */
-public interface HealthTipDetailPresenter {
+public interface HealthTipDetailPresenter extends BasePresenterInterface {
 
     /**
      * Lấy thông tin chi tiết của một bài viết sức khỏe
-     * @param healthTipId ID của bài viết cần hiển thị
+     * @param tipId ID của bài viết
      */
-    void loadHealthTipDetails(String healthTipId);
+    void loadHealthTipDetail(String tipId);
 
     /**
-     * Thay đổi trạng thái yêu thích của bài viết
-     * @param healthTipId ID của bài viết
-     * @param isFavorite trạng thái yêu thích mới
+     * Xử lý khi người dùng nhấn nút yêu thích
+     * @param tipId ID của bài viết
      */
-    void toggleFavoriteStatus(String healthTipId, boolean isFavorite);
+    void onFavoriteClick(String tipId);
 
     /**
-     * Tăng số lượt xem của bài viết
-     * @param healthTipId ID của bài viết
+     * Xử lý khi người dùng nhấn nút thích
+     * @param tipId ID của bài viết
      */
-    void incrementViewCount(String healthTipId);
+    void onLikeClick(String tipId);
 
     /**
-     * Thực hiện thao tác like/unlike bài viết
-     * @param healthTipId ID của bài viết
-     * @param isLiked true nếu người dùng like, false nếu unlike
+     * Xử lý khi người dùng nhấn nút chia sẻ
+     * @param tipId ID của bài viết
      */
-    void toggleLike(String healthTipId, boolean isLiked);
+    void onShareClick(String tipId);
+
+    /**
+     * Cập nhật số lượt xem
+     * @param tipId ID của bài viết
+     */
+    void updateViewCount(String tipId);
 }

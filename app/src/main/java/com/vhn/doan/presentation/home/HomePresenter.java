@@ -238,9 +238,9 @@ public class HomePresenter {
     public void onHealthTipSelected(HealthTip healthTip) {
         if (view != null) {
             // Tăng lượt xem và chuyển đến trang chi tiết
-            healthTipRepository.incrementViewCount(healthTip.getId(), new HealthTipRepository.HealthTipOperationCallback() {
+            healthTipRepository.updateViewCount(healthTip.getId(), new HealthTipRepository.HealthTipOperationCallback() {
                 @Override
-                public void onSuccess(String healthTipId) {
+                public void onSuccess() {
                     if (view != null) {
                         view.navigateToHealthTipDetail(healthTip);
                     }
@@ -249,8 +249,7 @@ public class HomePresenter {
                 @Override
                 public void onError(String errorMessage) {
                     if (view != null) {
-                        view.showError("Không thể cập nhật lượt xem: " + errorMessage);
-                        // Vẫn chuyển đến trang chi tiết ngay cả khi không thể cập nhật lượt xem
+                        // Vẫn chuyển đến trang chi tiết ngay cả khi không cập nhật được view count
                         view.navigateToHealthTipDetail(healthTip);
                     }
                 }

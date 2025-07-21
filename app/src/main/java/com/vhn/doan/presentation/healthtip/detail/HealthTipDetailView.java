@@ -23,6 +23,12 @@ public interface HealthTipDetailView extends BaseView {
     void updateFavoriteStatus(boolean isFavorite);
 
     /**
+     * Cập nhật trạng thái thích của bài viết
+     * @param isLiked true nếu bài viết được thích, false nếu ngược lại
+     */
+    void updateLikeStatus(boolean isLiked);
+
+    /**
      * Cập nhật số lượt thích của bài viết
      * @param likeCount số lượt thích mới
      */
@@ -33,4 +39,10 @@ public interface HealthTipDetailView extends BaseView {
      * @param viewCount số lượt xem mới
      */
     void updateViewCount(int viewCount);
+
+    /**
+     * Chia sẻ nội dung bài viết
+     * @param content nội dung cần chia sẻ
+     */
+    void shareContent(String content);
 }
