@@ -36,7 +36,7 @@
             android:name=".presentation.home.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".presentation.category.detail.CategoryDetailActivity"
+            android:name=".presentation.category.detail.CategoryDetailListActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

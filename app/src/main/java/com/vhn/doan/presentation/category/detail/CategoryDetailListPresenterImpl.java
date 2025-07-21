@@ -12,23 +12,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementation của CategoryDetailPresenter
+ * Implementation của CategoryDetailListPresenter
  */
-public class CategoryDetailPresenterImpl implements CategoryDetailPresenter {
+public class CategoryDetailListPresenterImpl implements CategoryDetailListPresenter {
 
-    private CategoryDetailView view;
+    private CategoryDetailListView view;
     private FirebaseManager firebaseManager;
 
     /**
      * Constructor nhận FirebaseManager từ DI
      * @param firebaseManager Manager quản lý giao tiếp với Firebase
      */
-    public CategoryDetailPresenterImpl(FirebaseManager firebaseManager) {
+    public CategoryDetailListPresenterImpl(FirebaseManager firebaseManager) {
         this.firebaseManager = firebaseManager;
     }
 
     @Override
-    public void attachView(CategoryDetailView view) {
+    public void attachView(CategoryDetailListView view) {
         this.view = view;
     }
 

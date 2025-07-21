@@ -4,9 +4,9 @@ import com.vhn.doan.data.HealthTip;
 import java.util.List;
 
 /**
- * Interface định nghĩa các phương thức cho màn hình chi tiết danh mục
+ * Interface định nghĩa các phương thức cho màn hình danh sách chi tiết danh mục
  */
-public interface CategoryDetailView {
+public interface CategoryDetailListView {
 
     /**
      * Hiển thị danh sách các mẹo sức khỏe

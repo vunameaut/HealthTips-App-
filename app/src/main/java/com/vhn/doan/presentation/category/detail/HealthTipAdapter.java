@@ -55,6 +55,10 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
         notifyDataSetChanged();
     }
 
+    public List<HealthTip> getHealthTips() {
+        return healthTips;
+    }
+
     @NonNull
     @Override
     public HealthTipViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

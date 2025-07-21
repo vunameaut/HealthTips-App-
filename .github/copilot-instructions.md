@@ -21,10 +21,10 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
 3.  **Tích hợp Firebase:**
     * Firebase đã được tích hợp đầy đủ và sẽ được sử dụng cho các chức năng sau:
         * **Firebase Authentication:** Quản lý đăng nhập/đăng ký người dùng.
-        * **Cloud Firestore:** Lưu trữ dữ liệu cấu trúc (ví dụ: thông tin mẹo sức khỏe, hồ sơ người dùng).
+        * **Firebase Realtime Database:** **Đây là cơ sở dữ liệu chính được sử dụng để lưu trữ dữ liệu cấu trúc (ví dụ: thông tin mẹo sức khỏe, danh mục, hồ sơ người dùng) và quản lý dữ liệu thời gian thực.**
         * **Firebase Storage:** Lưu trữ các file (ví dụ: hình ảnh cho mẹo sức khỏe).
-        * **Firebase Realtime Database:** Có thể được sử dụng cho các tính năng thời gian thực đơn giản hơn nếu cần, nhưng ưu tiên Firestore.
         * **Firebase Cloud Messaging (FCM):** Gửi thông báo đẩy cho người dùng.
+        * **Cloud Firestore:** **Không phải là cơ sở dữ liệu chính cho dữ liệu cấu trúc hiện tại.** Có thể được sử dụng tùy chọn cho các tính năng đặc thù trong tương lai nếu cần.
 
 4.  **Dependency Injection:**
     * Sử dụng **Dagger 2** cho toàn bộ hệ thống Dependency Injection.
@@ -68,7 +68,7 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
         * **Gam màu chủ đạo:**
             * **Nền (Background):** Các tông màu xanh dương nhạt hoặc trắng sáng (ví dụ: `#E0F2F7` hoặc `#FFFFFF`), tạo cảm giác tươi mới và dễ chịu.
             * **Chữ (Text):** Xám đậm (ví dụ: `#212124` hoặc `#424242`) hoặc đen (`#000000`) để đảm bảo độ tương phản trên nền sáng.
-        * **Màu sắc các nút (Buttons):**
+        * **Màu sắc các nút (Buttons):
             * **Nút chính (Primary Buttons):** Sử dụng các tông màu xanh dương (ví dụ: `#2196F3` hoặc `#1976D2`) hoặc xanh lá cây (ví dụ: `#4CAF50`) tương tự như logo `cu_night.png`. Chữ trên nút phải là màu trắng (`#FFFFFF`).
             * **Nút phụ/Hành động khác (Secondary Buttons):** Sử dụng màu sắc tương phản nhưng vẫn hài hòa, ví dụ: màu xám đậm (`#616161`) hoặc cam nhạt (`#FFB74D`). Chữ trên nút nên là màu trắng (`#FFFFFF`) hoặc đen (`#000000`).
         * **Các thành phần UI khác:**
@@ -86,19 +86,41 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
         * **Khi tiếp tục một chức năng đã được bắt đầu ở bước trước, Copilot phải tiếp tục làm việc trên các file đã được tạo ra cho chức năng đó, không tạo lại chúng ở thư mục khác.**
     * **Luôn ưu tiên việc tái sử dụng và mở rộng code hiện có.**
 
-11. **Quản lý tài nguyên:**
-    * **Tập trung tài nguyên vào các file chung:**
-        * **Strings:** Tất cả chuỗi văn bản phải được đặt trong file `strings.xml` chung, không tạo file strings riêng cho từng tính năng.
-        * **Colors:** Tất cả định nghĩa màu sắc phải được đặt trong file `colors.xml` chung, không tạo file colors riêng biệt.
-        * **Styles/Themes:** Tất cả styles và themes phải được đặt trong file `styles.xml` hoặc `themes.xml` chung, không tạo file styles riêng.
-        * **Dimensions:** Tất cả kích thước phải được đặt trong file `dimens.xml` chung.
-    * **Đặt tên tài nguyên:**
-        * Đặt tên theo cấu trúc `[feature]_[type]_[description]` (ví dụ: `category_title`, `home_description`, `auth_button_text`)
-        * Đảm bảo tên mô tả đúng mục đích sử dụng và dễ hiểu
-    * **Tránh trùng lặp tài nguyên:** Kiểm tra kỹ trước khi thêm tài nguyên mới, tái sử dụng tài nguyên hiện có nếu phù hợp.
-    * **Tài nguyên hình ảnh:**
-        * Vector Drawables (XML) được ưu tiên hơn bitmap cho biểu tượng và đồ họa đơn giản
-        * Bitmap (PNG, JPEG) chỉ sử dụng cho hình ảnh phức tạp không thể biểu diễn bằng vector
+11. **Chi tiết Phân tích Dự án:**
+    * **Để có cái nhìn toàn diện và chi tiết về cấu trúc dự án, các thành phần công nghệ, mô hình dữ liệu, quy tắc bảo mật, và lộ trình phát triển, Copilot HÃY THAM KHẢO file `Project_Analysis_Details.md` được cung cấp trong cùng thư mục dự án.**
+    * **File này chứa thông tin chi tiết về:**
+        * Tổng quan dự án (SDK, Architecture, Database, Authentication, v.v.).
+        * Cấu trúc thư mục chi tiết.
+        * Định nghĩa các Data Models (User, HealthTip, Category, Reminder, ChatMessage, Enums).
+        * Cấu hình Firebase (FirebaseManager, Firestore Collections Structure).
+        * Chi tiết triển khai kiến trúc MVP (Base Classes, Repository Pattern).
+        * Triển khai đa ngôn ngữ (LocaleHelper, cấu trúc resource, ví dụ strings.xml).
+        * Các Activity và Fragment chính.
+        * Hệ thống thông báo (FCMService, ReminderService).
+        * Hệ thống Chat Bot.
+        * Permissions và cấu hình AndroidManifest.xml.
+        * Cấu hình Build (build.gradle).
+        * Class Application.
+        * Cấu hình Dependency Injection với Dagger 2.
+        * Chiến lược kiểm thử (Unit Tests, Presenter Tests).
+        * Ưu tiên triển khai tính năng theo từng Phase.
+        * Các quy tắc bảo mật Firebase và ProGuard.
+        * Monitoring & Analytics (Firebase Analytics Events).
+
+12. **Hướng dẫn theo ngữ cảnh Chức năng:**
+    * **Copilot PHẢI chủ động đọc và phân tích file `Project_Analysis_Details.md` dựa trên chức năng hoặc nhiệm vụ mà người dùng đang thực hiện.**
+    * **Khi người dùng yêu cầu thực hiện một tác vụ hoặc đang làm việc trong một file cụ thể, Copilot cần:**
+        * **Xác định chức năng liên quan:** Ví dụ, nếu người dùng đang chỉnh sửa `HomeFragment.java` hoặc yêu cầu "tải dữ liệu trang chủ", Copilot phải hiểu rằng đây là một phần của "Home Fragment với MVP" và "Phase 1 (MVP)".
+        * **Truy xuất thông tin liên quan:** Tìm kiếm các phần trong `Project_Analysis_Details.md` mô tả chi tiết về chức năng đó, bao gồm:
+            * **Mô hình dữ liệu (Models):** Các Model liên quan (ví dụ: `HealthTip`, `Category`).
+            * **Giao diện (Views):** Giao diện View tương ứng (ví dụ: `HomeView`).
+            * **Presenter:** Presenter liên quan (ví dụ: `HomePresenter`).
+            * **Repository:** Các Repository được sử dụng (ví dụ: `HealthTipRepository`, `CategoryRepository`).
+            * **Cấu trúc Firebase:** Các Collection hoặc cấu trúc dữ liệu Firebase liên quan.
+            * **Quy ước đặt tên:** Tên file và thư mục chính xác theo quy ước.
+            * **Ưu tiên triển khai (Implementation Priority):** Xác định giai đoạn hiện tại của chức năng để gợi ý các bước tiếp theo phù hợp với lộ trình dự án.
+        * **Đề xuất và Hỗ trợ thông minh:** Dựa trên thông tin đã truy xuất, Copilot sẽ đưa ra các gợi ý code, giải thích, hoặc các bước tiếp theo một cách chính xác và phù hợp với thiết kế tổng thể của dự án.
+        * **Nếu không rõ ngữ cảnh:** Nếu Copilot không thể xác định rõ chức năng hiện tại hoặc các thông tin liên quan trong `Project_Analysis_Details.md`, nó sẽ hỏi người dùng để làm rõ.
 
 ---
 
@@ -110,3 +132,25 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
 * **Phản hồi UI:** Đảm bảo có phản hồi phù hợp cho người dùng khi thực hiện các thao tác (ví dụ: loading states, thông báo lỗi/thành công).
 * **Bảo mật:** Lưu ý các vấn đề bảo mật cơ bản khi làm việc với dữ liệu người dùng và Firebase.
 * **Hiệu suất:** Cân nhắc hiệu suất, đặc biệt là khi làm việc với dữ liệu lớn hoặc các thao tác UI phức tạp.
+
+---
+
+**Lưu ý quan trọng cho việc phát triển (Từ Project_Analysis_Details.md):**
+
+* Luôn sử dụng Java best practices và tuân thủ coding conventions.
+* Implement proper error handling cho tất cả Firebase operations.
+* Test trên nhiều thiết bị và API levels khác nhau.
+* Optimize cho performance - đặc biệt là loading times và memory usage.
+* Follow Material Design guidelines cho UI/UX consistency.
+* Implement proper lifecycle management cho Activities và Fragments.
+* Use proper logging với different levels (DEBUG, INFO, WARNING, ERROR).
+* Secure sensitive data và không hardcode API keys trong source code.
+* Implement offline capabilities cho user experience tốt hơn.
+* Regular backup Firebase data và có disaster recovery plan.
+
+**Đối với đa ngôn ngữ (Từ Project_Analysis_Details.md):**
+
+* Luôn sử dụng string resources thay vì hardcode text.
+* Test UI layout với các ngôn ngữ có text dài (German) và ngắn (Chinese).
+* Implement proper RTL support cho các ngôn ngữ như Arabic (nếu cần).
+* Use appropriate fonts cho các ngôn ngữ khác nhau.

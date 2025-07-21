@@ -27,6 +27,7 @@ import com.vhn.doan.data.repository.HealthTipRepository;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
 import com.vhn.doan.presentation.home.adapter.CategoryAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipAdapter;
+import com.vhn.doan.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -292,16 +293,44 @@ public class HomeFragment extends Fragment implements HomeView {
 
     @Override
     public void navigateToCategoryDetail(Category category) {
-        // Triển khai chức năng chuyển đến trang chi tiết danh mục
-        showMessage("Đã chọn danh mục: " + category.getName());
-        // Sẽ triển khai sau khi có CategoryDetailActivity/Fragment
+        if (category != null && category.getId() != null) {
+            // Tạo Intent để chuyển đến CategoryDetailListActivity
+            android.content.Intent intent = new android.content.Intent(requireContext(), com.vhn.doan.presentation.category.detail.CategoryDetailListActivity.class);
+
+            // Truyền ID của danh mục
+            intent.putExtra(Constants.CATEGORY_ID_KEY, category.getId());
+
+            // Khởi chạy Activity mới
+            startActivity(intent);
+        } else {
+            showError("Không thể mở chi tiết danh mục do thiếu thông tin");
+        }
     }
 
     @Override
     public void navigateToHealthTipDetail(HealthTip healthTip) {
-        // Triển khai chức năng chuyển đến trang chi tiết mẹo sức khỏe
+        // Hiển thị thông báo tạm thời
         showMessage("Đã chọn mẹo: " + healthTip.getTitle());
-        // Sẽ triển khai sau khi có HealthTipDetailActivity/Fragment
+
+        // Sau này sẽ chuyển đến màn hình chi tiết mẹo sức khỏe thay vì danh mục
+        // Phần code dưới đây đã bị comment lại để sửa lỗi
+        /*
+        if (healthTip != null && healthTip.getCategoryId() != null) {
+            // Tạo Intent để chuyển đến CategoryDetailListActivity
+            android.content.Intent intent = new android.content.Intent(requireContext(), com.vhn.doan.presentation.category.detail.CategoryDetailListActivity.class);
+
+            // Truyền ID của danh mục
+            intent.putExtra(Constants.CATEGORY_ID_KEY, healthTip.getCategoryId());
+
+            // Thêm ID của mẹo sức khỏe để có thể cuộn đến đúng mẹo đó
+            intent.putExtra(Constants.INTENT_HEALTH_TIP_ID, healthTip.getId());
+
+            // Khởi chạy Activity mới
+            startActivity(intent);
+        } else {
+            showError("Không thể mở chi tiết mẹo sức khỏe do thiếu thông tin danh mục");
+        }
+        */
     }
 
     @Override

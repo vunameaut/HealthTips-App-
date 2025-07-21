@@ -24,9 +24,9 @@ import java.util.List;
 /**
  * Activity hiển thị danh sách các mẹo sức khỏe theo danh mục
  */
-public class CategoryDetailActivity extends AppCompatActivity implements CategoryDetailView, HealthTipAdapter.OnHealthTipClickListener {
+public class CategoryDetailListActivity extends AppCompatActivity implements CategoryDetailListView, HealthTipAdapter.OnHealthTipClickListener {
 
-    private CategoryDetailPresenter presenter;
+    private CategoryDetailListPresenter presenter;
     private HealthTipAdapter adapter;
 
     private RecyclerView recyclerViewHealthTips;
@@ -36,26 +36,34 @@ public class CategoryDetailActivity extends AppCompatActivity implements Categor
     private TextView textViewCategoryTitle;
 
     private String categoryId;
+    private String selectedHealthTipId; // Thêm biến để lưu ID của mẹo sức khỏe cần cuộn đến
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_category_detail);
+        setContentView(R.layout.activity_category_detail_list);
 
         // Lấy categoryId từ intent
         categoryId = getIntent().getStringExtra(Constants.INTENT_CATEGORY_ID);
+        if (categoryId == null) {
+            categoryId = getIntent().getStringExtra(Constants.CATEGORY_ID_KEY); // Kiểm tra key thay thế
+        }
+
         if (categoryId == null) {
             Toast.makeText(this, "Không tìm thấy thông tin danh mục", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        // Lấy ID của mẹo sức khỏe cụ thể nếu có
+        selectedHealthTipId = getIntent().getStringExtra(Constants.INTENT_HEALTH_TIP_ID);
+
         // Khởi tạo views
         initViews();
 
         // Khởi tạo presenter
         FirebaseManager firebaseManager = FirebaseManager.getInstance();
-        presenter = new CategoryDetailPresenterImpl(firebaseManager);
+        presenter = new CategoryDetailListPresenterImpl(firebaseManager);
         presenter.attachView(this);
 
         // Load dữ liệu
@@ -90,6 +98,27 @@ public class CategoryDetailActivity extends AppCompatActivity implements Categor
         textViewError.setVisibility(View.GONE);
 
         adapter.setHealthTips(healthTips);
+
+        // Cuộn đến mẹo sức khỏe cụ thể nếu có
+        if (selectedHealthTipId != null) {
+            scrollToHealthTip(selectedHealthTipId);
+        }
+    }
+
+    private void scrollToHealthTip(String healthTipId) {
+        // Tìm vị trí của mẹo sức khỏe trong danh sách
+        List<HealthTip> healthTips = adapter.getHealthTips();
+        for (int i = 0; i < healthTips.size(); i++) {
+            if (healthTips.get(i).getId().equals(healthTipId)) {
+                // Cuộn đến vị trí đó
+                recyclerViewHealthTips.smoothScrollToPosition(i);
+                // Dừng cuộn sau 1 giây (1000ms)
+                recyclerViewHealthTips.postDelayed(() -> {
+                    // Thực hiện hành động gì đó sau khi cuộn xong nếu cần thiết
+                }, 1000);
+                break;
+            }
+        }
     }
 
     @Override

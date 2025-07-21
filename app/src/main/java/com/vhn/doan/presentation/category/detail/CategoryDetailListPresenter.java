@@ -1,9 +1,9 @@
 package com.vhn.doan.presentation.category.detail;
 
 /**
- * Interface định nghĩa các phương thức của presenter cho màn hình chi tiết danh mục
+ * Interface định nghĩa các phương thức của presenter cho màn hình danh sách chi tiết danh mục
  */
-public interface CategoryDetailPresenter {
+public interface CategoryDetailListPresenter {
 
     /**
      * Load các mẹo sức khỏe theo categoryId
@@ -32,5 +32,5 @@ public interface CategoryDetailPresenter {
      * Gắn view vào presenter
      * @param view View cần gắn
      */
-    void attachView(CategoryDetailView view);
+    void attachView(CategoryDetailListView view);
 }
