@@ -1,7 +1,5 @@
 package com.vhn.doan.presentation.auth;
 
-import android.content.Context;
-
 import com.vhn.doan.services.AuthManager;
 
 /**
@@ -12,16 +10,14 @@ public class AuthPresenter {
 
     private final AuthView view;
     private final AuthManager authManager;
-    private final Context context;
 
     /**
      * Khởi tạo AuthPresenter
      * @param view Giao diện AuthView để cập nhật UI
      * @param context Context của ứng dụng
      */
-    public AuthPresenter(AuthView view, Context context) {
+    public AuthPresenter(AuthView view, android.content.Context context) {
         this.view = view;
-        this.context = context;
         this.authManager = new AuthManager(context);
     }
 
@@ -61,13 +57,19 @@ public class AuthPresenter {
 
         view.showLoading(true);
 
-        authManager.registerWithEmailPassword(email, password, (isSuccess, userId, errorMessage) -> {
-            view.showLoading(false);
+        // Tạo displayName từ email (phần trước @)
+        String displayName = email.substring(0, email.indexOf("@"));
 
-            if (isSuccess) {
-                view.onRegistrationSuccess(userId);
-            } else {
-                view.showError(errorMessage);
+        authManager.registerWithEmailPassword(email, password, displayName, new AuthManager.AuthCallback() {
+            @Override
+            public void onResult(boolean isSuccess, String userId, String errorMessage) {
+                view.showLoading(false);
+
+                if (isSuccess) {
+                    view.onRegistrationSuccess(userId);
+                } else {
+                    view.showError(errorMessage);
+                }
             }
         });
     }

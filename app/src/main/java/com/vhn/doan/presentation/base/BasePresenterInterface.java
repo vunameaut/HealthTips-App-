@@ -1,7 +1,7 @@
 package com.vhn.doan.presentation.base;
 
 /**
- * BasePresenter interface định nghĩa các phương thức cơ bản cho tất cả Presenter
+ * BasePresenterInterface định nghĩa các phương thức cơ bản mà tất cả các Presenter interface nên kế thừa
  * Tuân theo kiến trúc MVP (Model-View-Presenter)
  */
 public interface BasePresenterInterface {

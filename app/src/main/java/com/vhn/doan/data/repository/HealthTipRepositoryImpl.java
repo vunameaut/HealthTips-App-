@@ -420,38 +420,60 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
-    public void getFavoriteHealthTips(String userId, HealthTipCallback callback) {
+    public void getHealthTipDetail(String tipId, final SingleHealthTipCallback callback) {
+        if (tipId == null || tipId.isEmpty()) {
+            callback.onError("ID bài viết không hợp lệ");
+            return;
+        }
+
+        healthTipsRef.child(tipId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HealthTip healthTip = dataSnapshot.getValue(HealthTip.class);
+                if (healthTip != null) {
+                    healthTip.setId(dataSnapshot.getKey());
+                    // Load category name trước khi trả về callback
+                    loadCategoryNameForSingleHealthTip(healthTip, callback);
+                } else {
+                    callback.onError("Không tìm thấy bài viết");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError("Lỗi khi tải chi tiết bài viết: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void getFavoriteHealthTips(String userId, final HealthTipCallback callback) {
         if (userId == null || userId.isEmpty()) {
             callback.onError("ID người dùng không hợp lệ");
             return;
         }
 
-        // Lấy danh sách yêu thích từ user preferences hoặc từ health tips có favorite = true
-        healthTipsRef.orderByChild("favorite").equalTo(true)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        List<HealthTip> favoriteHealthTips = new ArrayList<>();
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            HealthTip healthTip = snapshot.getValue(HealthTip.class);
-                            if (healthTip != null) {
-                                healthTip.setId(snapshot.getKey());
-                                favoriteHealthTips.add(healthTip);
-                            }
-                        }
-                        // Load category names cho favorite tips
-                        loadCategoryNamesForHealthTips(favoriteHealthTips, callback);
+        // Tìm các bài viết mà người dùng đã đánh dấu yêu thích
+        Query query = healthTipsRef.orderByChild("favoriteUsers/" + userId).equalTo(true);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<HealthTip> favoriteHealthTips = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                    if (healthTip != null) {
+                        healthTip.setId(snapshot.getKey());
+                        favoriteHealthTips.add(healthTip);
                     }
+                }
+                // Load category names trước khi trả về callback
+                loadCategoryNamesForHealthTips(favoriteHealthTips, callback);
+            }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        callback.onError("Lỗi khi lấy danh sách yêu thích: " + databaseError.getMessage());
-                    }
-                });
-    }
-
-    @Override
-    public void getHealthTipDetail(String tipId, SingleHealthTipCallback callback) {
-        getHealthTipById(tipId, callback);
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError("Lỗi khi tải danh sách yêu thích: " + databaseError.getMessage());
+            }
+        });
     }
 }

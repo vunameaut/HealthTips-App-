@@ -4,10 +4,14 @@ import android.content.Context;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.vhn.doan.data.User;
+import com.vhn.doan.data.repository.UserRepository;
+import com.vhn.doan.data.repository.UserRepositoryImpl;
 
 /**
  * AuthManager là lớp quản lý xác thực người dùng sử dụng FirebaseAuth
  * Cung cấp các phương thức để đăng nhập, đăng ký, đăng xuất và kiểm tra trạng thái đăng nhập
+ * Đã được cập nhật để lưu thông tin người dùng vào Firebase Realtime Database
  */
 public class AuthManager {
 
@@ -18,7 +22,7 @@ public class AuthManager {
 
     private final Context context;
     private final FirebaseAuth firebaseAuth;
-    private final FirebaseManager firebaseManager;
+    private final UserRepository userRepository;
 
     /**
      * Constructor của AuthManager
@@ -27,7 +31,7 @@ public class AuthManager {
     public AuthManager(Context context) {
         this.context = context;
         this.firebaseAuth = FirebaseAuth.getInstance();
-        this.firebaseManager = new FirebaseManager();
+        this.userRepository = new UserRepositoryImpl();
     }
 
     /**
@@ -40,9 +44,21 @@ public class AuthManager {
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = firebaseAuth.getCurrentUser();
-                        if (user != null) {
-                            callback.onResult(true, user.getUid(), null);
+                        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            // Cập nhật thời gian đăng nhập cuối
+                            userRepository.updateLastLogin(firebaseUser.getUid(), new UserRepository.UserOperationCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    callback.onResult(true, firebaseUser.getUid(), null);
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    // Vẫn cho đăng nhập thành công dù không cập nhật được thời gian
+                                    callback.onResult(true, firebaseUser.getUid(), null);
+                                }
+                            });
                         } else {
                             callback.onResult(false, null, "Đăng nhập thành công nhưng không tìm thấy thông tin người dùng");
                         }
@@ -57,17 +73,31 @@ public class AuthManager {
      * Đăng ký tài khoản mới bằng email và mật khẩu
      * @param email Email người dùng
      * @param password Mật khẩu người dùng
+     * @param displayName Tên hiển thị của người dùng
      * @param callback Callback xử lý kết quả
      */
-    public void registerWithEmailPassword(String email, String password, AuthCallback callback) {
+    public void registerWithEmailPassword(String email, String password, String displayName, AuthCallback callback) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = firebaseAuth.getCurrentUser();
-                        if (user != null) {
-                            // Tạo document cho người dùng mới trong Firestore
-                            createUserDocument(user.getUid(), email);
-                            callback.onResult(true, user.getUid(), null);
+                        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            // Tạo đối tượng User để lưu vào Firebase Realtime Database
+                            User user = new User(firebaseUser.getUid(), email, displayName);
+
+                            // Lưu thông tin người dùng vào Firebase Realtime Database
+                            userRepository.saveUser(user, new UserRepository.UserOperationCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    callback.onResult(true, firebaseUser.getUid(), null);
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    // Đăng ký Firebase Auth thành công nhưng lưu thông tin thất bại
+                                    callback.onResult(false, null, "Đăng ký thành công nhưng không thể lưu thông tin người dùng: " + errorMessage);
+                                }
+                            });
                         } else {
                             callback.onResult(false, null, "Đăng ký thành công nhưng không tìm thấy thông tin người dùng");
                         }
@@ -76,16 +106,6 @@ public class AuthManager {
                         callback.onResult(false, null, errorMessage);
                     }
                 });
-    }
-
-    /**
-     * Tạo document cho người dùng mới trong Firestore
-     * @param userId ID người dùng
-     * @param email Email người dùng
-     */
-    private void createUserDocument(String userId, String email) {
-        // Sử dụng FirebaseManager để tạo document người dùng trong Firestore
-        firebaseManager.createUserDocument(userId, email);
     }
 
     /**
