@@ -1,5 +1,7 @@
 package com.vhn.doan.data.repository;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -110,11 +112,31 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     HealthTip healthTip = snapshot.getValue(HealthTip.class);
                     if (healthTip != null) {
-                        healthTip.setId(snapshot.getKey());
+                        // Đảm bảo ID được set từ key của Firebase
+                        String healthTipId = snapshot.getKey();
+                        healthTip.setId(healthTipId);
+
+                        // Validate và set default values nếu cần
+                        if (healthTip.getTitle() == null || healthTip.getTitle().trim().isEmpty()) {
+                            healthTip.setTitle("Mẹo sức khỏe không tên");
+                        }
+                        if (healthTip.getContent() == null || healthTip.getContent().trim().isEmpty()) {
+                            healthTip.setContent("Nội dung đang được cập nhật");
+                        }
+                        if (healthTip.getCreatedAt() <= 0) {
+                            healthTip.setCreatedAt(System.currentTimeMillis());
+                        }
+                        if (healthTip.getViewCount() < 0) {
+                            healthTip.setViewCount(0);
+                        }
+                        if (healthTip.getLikeCount() < 0) {
+                            healthTip.setLikeCount(0);
+                        }
+
                         healthTips.add(healthTip);
                     }
                 }
-                // Load category names trước khi trả về callback
+                // Load category names cho tất cả health tips
                 loadCategoryNamesForHealthTips(healthTips, callback);
             }
 
@@ -126,7 +148,55 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
+    public void getHealthTipDetail(String tipId, final SingleHealthTipCallback callback) {
+        if (tipId == null || tipId.trim().isEmpty()) {
+            callback.onError("ID mẹo sức khỏe không hợp lệ");
+            return;
+        }
+
+        healthTipsRef.child(tipId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HealthTip healthTip = dataSnapshot.getValue(HealthTip.class);
+                if (healthTip != null) {
+                    // Đảm bảo ID được set chính xác
+                    healthTip.setId(dataSnapshot.getKey());
+
+                    // Validate dữ liệu
+                    if (healthTip.getTitle() == null || healthTip.getTitle().trim().isEmpty()) {
+                        healthTip.setTitle("Mẹo sức khỏe không tên");
+                    }
+                    if (healthTip.getContent() == null || healthTip.getContent().trim().isEmpty()) {
+                        healthTip.setContent("Nội dung đang được cập nhật");
+                    }
+                    if (healthTip.getViewCount() < 0) {
+                        healthTip.setViewCount(0);
+                    }
+                    if (healthTip.getLikeCount() < 0) {
+                        healthTip.setLikeCount(0);
+                    }
+
+                    // Load category name
+                    loadCategoryNameForSingleHealthTip(healthTip, callback);
+                } else {
+                    callback.onError("Không tìm thấy mẹo sức khỏe với ID: " + tipId);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError(databaseError.getMessage());
+            }
+        });
+    }
+
+    @Override
     public void getHealthTipsByCategory(String categoryId, final HealthTipCallback callback) {
+        if (categoryId == null || categoryId.trim().isEmpty()) {
+            callback.onError("ID danh mục không hợp lệ");
+            return;
+        }
+
         Query query = healthTipsRef.orderByChild("categoryId").equalTo(categoryId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -135,11 +205,21 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     HealthTip healthTip = snapshot.getValue(HealthTip.class);
                     if (healthTip != null) {
+                        // Đảm bảo ID được set từ key
                         healthTip.setId(snapshot.getKey());
+
+                        // Validate dữ liệu
+                        if (healthTip.getViewCount() < 0) {
+                            healthTip.setViewCount(0);
+                        }
+                        if (healthTip.getLikeCount() < 0) {
+                            healthTip.setLikeCount(0);
+                        }
+
                         healthTips.add(healthTip);
                     }
                 }
-                // Load category names trước khi trả về callback
+                // Load category names
                 loadCategoryNamesForHealthTips(healthTips, callback);
             }
 
@@ -150,31 +230,6 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         });
     }
 
-    public void getHealthTipById(String healthTipId, final SingleHealthTipCallback callback) {
-        if (healthTipId == null || healthTipId.isEmpty()) {
-            callback.onError("ID bài viết không hợp lệ");
-            return;
-        }
-
-        healthTipsRef.child(healthTipId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                HealthTip healthTip = dataSnapshot.getValue(HealthTip.class);
-                if (healthTip != null) {
-                    healthTip.setId(dataSnapshot.getKey());
-                    // Load category name trước khi trả về callback
-                    loadCategoryNameForSingleHealthTip(healthTip, callback);
-                } else {
-                    callback.onError("Không tìm thấy bài viết");
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
-            }
-        });
-    }
 
     @Override
     public void getLatestHealthTips(int limit, final HealthTipCallback callback) {
@@ -419,32 +474,6 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         });
     }
 
-    @Override
-    public void getHealthTipDetail(String tipId, final SingleHealthTipCallback callback) {
-        if (tipId == null || tipId.isEmpty()) {
-            callback.onError("ID bài viết không hợp lệ");
-            return;
-        }
-
-        healthTipsRef.child(tipId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                HealthTip healthTip = dataSnapshot.getValue(HealthTip.class);
-                if (healthTip != null) {
-                    healthTip.setId(dataSnapshot.getKey());
-                    // Load category name trước khi trả về callback
-                    loadCategoryNameForSingleHealthTip(healthTip, callback);
-                } else {
-                    callback.onError("Không tìm thấy bài viết");
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError("Lỗi khi tải chi tiết bài viết: " + databaseError.getMessage());
-            }
-        });
-    }
 
     @Override
     public void getFavoriteHealthTips(String userId, final HealthTipCallback callback) {

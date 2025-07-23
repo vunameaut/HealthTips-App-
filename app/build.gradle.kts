@@ -60,6 +60,15 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.firebase.database)
 
+    // Thêm SwipeRefreshLayout cho FavoriteFragment
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    // Thêm RecyclerView nếu chưa có
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+
+    // Thêm CardView cho layout items
+    implementation("androidx.cardview:cardview:1.0.0")
+
     // Thêm thư viện Desugaring để hỗ trợ tính năng Java 8+ trên các thiết bị cũ
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 

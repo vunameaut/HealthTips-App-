@@ -151,6 +151,30 @@ public class HealthTip {
         isLiked = liked;
     }
 
+    /**
+     * Lấy nội dung tóm tắt của mẹo sức khỏe (100 ký tự đầu)
+     * @return nội dung tóm tắt
+     */
+    public String getSummary() {
+        if (content == null || content.trim().isEmpty()) {
+            return "Nội dung đang được cập nhật...";
+        }
+        if (content.length() <= 100) {
+            return content;
+        }
+        return content.substring(0, 100) + "...";
+    }
+
+    /**
+     * Kiểm tra xem HealthTip có hợp lệ không
+     * @return true nếu có đủ thông tin cơ bản
+     */
+    public boolean isValid() {
+        return id != null && !id.isEmpty() &&
+               title != null && !title.isEmpty() &&
+               content != null && !content.isEmpty();
+    }
+
     @Override
     public String toString() {
         return "HealthTip{" +

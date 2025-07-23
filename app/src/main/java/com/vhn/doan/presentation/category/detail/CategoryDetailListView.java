@@ -1,18 +1,28 @@
 package com.vhn.doan.presentation.category.detail;
 
+import com.vhn.doan.data.Category;
 import com.vhn.doan.data.HealthTip;
+import com.vhn.doan.presentation.base.BaseView;
+
 import java.util.List;
 
 /**
- * Interface định nghĩa các phương thức cho màn hình danh sách chi tiết danh mục
+ * View interface cho màn hình danh sách mẹo sức khỏe theo danh mục
+ * Tuân theo kiến trúc MVP
  */
-public interface CategoryDetailListView {
+public interface CategoryDetailListView extends BaseView {
 
     /**
      * Hiển thị danh sách các mẹo sức khỏe
      * @param healthTips Danh sách mẹo sức khỏe cần hiển thị
      */
     void displayHealthTips(List<HealthTip> healthTips);
+
+    /**
+     * Hiển thị thông tin chi tiết danh mục
+     * @param category Thông tin danh mục
+     */
+    void displayCategoryDetails(Category category);
 
     /**
      * Hiển thị trạng thái loading
@@ -24,6 +34,11 @@ public interface CategoryDetailListView {
      * Hiển thị giao diện khi không có dữ liệu
      */
     void showEmptyView();
+
+    /**
+     * Hiển thị trạng thái rỗng khi không có dữ liệu
+     */
+    void showEmptyState();
 
     /**
      * Hiển thị thông báo lỗi

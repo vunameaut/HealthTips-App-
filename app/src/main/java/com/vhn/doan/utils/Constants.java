@@ -12,6 +12,7 @@ public class Constants {
     public static final String USERS_REF = "users";
     public static final String CATEGORIES_REF = "categories";
     public static final String HEALTH_TIPS_REF = "health_tips";
+    public static final String FAVORITES_REF = "favorites"; // Thêm path cho favorites theo cấu trúc test data
     public static final String USER_FAVORITES_REF = "user_favorites";
     public static final String USER_HISTORY_REF = "user_history";
 

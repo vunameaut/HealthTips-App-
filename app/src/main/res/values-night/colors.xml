@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Màu bị thiếu từ lỗi build - Night Mode -->
+    <color name="disabled">#9E9E9E</color>               <!-- Màu xám sáng hơn cho night mode -->
+    <color name="error_color">#FF5252</color>            <!-- Màu đỏ sáng hơn cho night mode -->
+    <color name="progress_color">#66BB6A</color>         <!-- Màu xanh sáng hơn cho night mode -->
+
+    <!-- Màu icon cho night mode -->
+    <color name="icon_color">#E0E0E0</color>             <!-- Màu icon sáng hơn cho night mode -->
+</resources>
+

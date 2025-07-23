@@ -39,7 +39,21 @@ public class CategoryRepositoryImpl implements CategoryRepository {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Category category = snapshot.getValue(Category.class);
                     if (category != null) {
-                        category.setId(snapshot.getKey());
+                        // Đảm bảo ID được set từ key của Firebase
+                        String categoryId = snapshot.getKey();
+                        category.setId(categoryId);
+
+                        // Kiểm tra và đảm bảo dữ liệu hợp lệ
+                        if (category.getName() == null || category.getName().trim().isEmpty()) {
+                            category.setName("Danh mục không tên");
+                        }
+                        if (category.getDescription() == null) {
+                            category.setDescription("");
+                        }
+                        if (category.getCreatedAt() <= 0) {
+                            category.setCreatedAt(System.currentTimeMillis());
+                        }
+
                         categories.add(category);
                     }
                 }
@@ -55,15 +69,30 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     @Override
     public void getCategoryById(String categoryId, final CategoryCallback callback) {
+        if (categoryId == null || categoryId.trim().isEmpty()) {
+            callback.onError("ID danh mục không hợp lệ");
+            return;
+        }
+
         categoryRef.child(categoryId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Category category = dataSnapshot.getValue(Category.class);
                 if (category != null) {
+                    // Đảm bảo ID được set chính xác
                     category.setId(dataSnapshot.getKey());
+
+                    // Validate dữ liệu
+                    if (category.getName() == null || category.getName().trim().isEmpty()) {
+                        category.setName("Danh mục không tên");
+                    }
+                    if (category.getDescription() == null) {
+                        category.setDescription("");
+                    }
+
                     callback.onSingleCategoryLoaded(category);
                 } else {
-                    callback.onError("Không tìm thấy danh mục");
+                    callback.onError("Không tìm thấy danh mục với ID: " + categoryId);
                 }
             }
 

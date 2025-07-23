@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.category.detail;
 
+import androidx.annotation.NonNull;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -33,6 +34,11 @@ public class CategoryDetailListPresenterImpl implements CategoryDetailListPresen
     }
 
     @Override
+    public void detachView() {
+        this.view = null;
+    }
+
+    @Override
     public void loadHealthTipsByCategory(String categoryId) {
         if (view == null) return;
 
@@ -44,34 +50,43 @@ public class CategoryDetailListPresenterImpl implements CategoryDetailListPresen
                 .equalTo(categoryId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        view.showLoading(false);
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        // Null check quan trọng trong callback - sử dụng local reference để tránh race condition
+                        CategoryDetailListView currentView = view;
+                        if (currentView == null) return;
+
+                        currentView.showLoading(false);
 
                         if (dataSnapshot.exists()) {
                             List<HealthTip> healthTips = new ArrayList<>();
-
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                HealthTip tip = snapshot.getValue(HealthTip.class);
-                                if (tip != null) {
-                                    tip.setId(snapshot.getKey());
-                                    healthTips.add(tip);
+                                HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                                if (healthTip != null) {
+                                    healthTip.setId(snapshot.getKey());
+                                    healthTips.add(healthTip);
                                 }
                             }
 
-                            if (healthTips.isEmpty()) {
-                                view.showEmptyView();
-                            } else {
+                            // Double check view vẫn còn tồn tại trước khi cập nhật UI
+                            if (view != null) {
                                 view.displayHealthTips(healthTips);
                             }
                         } else {
-                            view.showEmptyView();
+                            // Double check view vẫn còn tồn tại trước khi hiển thị empty state
+                            if (view != null) {
+                                view.showEmptyState();
+                            }
                         }
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {
-                        view.showLoading(false);
-                        view.showError("Không thể tải danh sách mẹo: " + error.getMessage());
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Null check quan trọng trong callback onCancelled
+                        CategoryDetailListView currentView = view;
+                        if (currentView == null) return;
+
+                        currentView.showLoading(false);
+                        currentView.showError("Lỗi khi tải dữ liệu: " + databaseError.getMessage());
                     }
                 });
     }
@@ -85,18 +100,24 @@ public class CategoryDetailListPresenterImpl implements CategoryDetailListPresen
                 .child(categoryId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        // Null check quan trọng trong callback
+                        if (view == null) return;
+
                         if (dataSnapshot.exists()) {
                             Category category = dataSnapshot.getValue(Category.class);
                             if (category != null) {
                                 category.setId(dataSnapshot.getKey());
-                                view.setCategoryTitle(category.getName());
+                                view.displayCategoryDetails(category);
                             }
                         }
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error) {
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Null check quan trọng trong callback
+                        if (view == null) return;
+
                         view.showError("Không thể tải thông tin danh mục: " + error.getMessage());
                     }
                 });
@@ -108,10 +129,5 @@ public class CategoryDetailListPresenterImpl implements CategoryDetailListPresen
 
         // Chuyển đến màn hình chi tiết mẹo sức khỏe
         view.navigateToHealthTipDetails(healthTipId);
-    }
-
-    @Override
-    public void detachView() {
-        this.view = null;
     }
 }

@@ -6,34 +6,47 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.vhn.doan.R;
 import com.vhn.doan.data.HealthTip;
+import com.vhn.doan.data.repository.FavoriteRepository;
+import com.vhn.doan.data.repository.FavoriteRepositoryImpl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Adapter hiển thị danh sách mẹo sức khỏe trong RecyclerView
+ * Đã được cập nhật để hỗ trợ chức năng yêu thích
  */
 public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.HealthTipViewHolder> {
 
     private List<HealthTip> healthTips = new ArrayList<>();
     private final Context context;
-    private final OnHealthTipClickListener listener;
+    private final HealthTipClickListener listener;
+    private final FavoriteRepository favoriteRepository;
+    private final FirebaseAuth firebaseAuth;
+    private final Set<String> favoriteHealthTipIds; // Cache để theo dõi trạng thái yêu thích
 
     /**
      * Interface để xử lý sự kiện khi nhấp vào mẹo sức khỏe
+     * Đã thống nhất với home adapter
      */
-    public interface OnHealthTipClickListener {
-        void onHealthTipClick(String healthTipId);
+    public interface HealthTipClickListener {
+        void onHealthTipClick(HealthTip healthTip);
+        void onFavoriteClick(HealthTip healthTip, boolean isFavorite);
     }
 
     /**
@@ -41,35 +54,160 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
      * @param context Context của activity hoặc fragment
      * @param listener Listener xử lý sự kiện click
      */
-    public HealthTipAdapter(Context context, OnHealthTipClickListener listener) {
+    public HealthTipAdapter(Context context, HealthTipClickListener listener) {
         this.context = context;
         this.listener = listener;
+        this.favoriteRepository = new FavoriteRepositoryImpl();
+        this.firebaseAuth = FirebaseAuth.getInstance();
+        this.favoriteHealthTipIds = new HashSet<>();
+
+        // Load danh sách yêu thích khi khởi tạo adapter
+        loadUserFavorites();
+    }
+
+    /**
+     * Constructor với FavoriteRepository tùy chỉnh (cho testing)
+     */
+    public HealthTipAdapter(Context context, HealthTipClickListener listener, FavoriteRepository favoriteRepository) {
+        this.context = context;
+        this.listener = listener;
+        this.favoriteRepository = favoriteRepository;
+        this.firebaseAuth = FirebaseAuth.getInstance();
+        this.favoriteHealthTipIds = new HashSet<>();
+
+        loadUserFavorites();
     }
 
     /**
      * Cập nhật dữ liệu mới cho adapter
      * @param healthTips Danh sách mẹo sức khỏe mới
      */
-    public void setHealthTips(List<HealthTip> healthTips) {
-        this.healthTips = healthTips;
+    public void updateHealthTips(List<HealthTip> healthTips) {
+        this.healthTips.clear();
+        if (healthTips != null) {
+            this.healthTips.addAll(healthTips);
+        }
         notifyDataSetChanged();
+        // Reload favorites sau khi cập nhật danh sách
+        loadUserFavorites();
     }
 
-    public List<HealthTip> getHealthTips() {
-        return healthTips;
+    /**
+     * Lấy danh sách health tips hiện tại
+     * @return Danh sách health tips
+     */
+    public List<HealthTip> getHealthTipsList() {
+        return new ArrayList<>(healthTips);
+    }
+
+    /**
+     * Load danh sách yêu thích của người dùng hiện tại
+     */
+    private void loadUserFavorites() {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        favoriteRepository.getFavoriteHealthTipIds(currentUser.getUid(), new FavoriteRepository.FavoriteListCallback() {
+            @Override
+            public void onSuccess(List<HealthTip> favoriteHealthTips) {
+                favoriteHealthTipIds.clear();
+                for (HealthTip healthTip : favoriteHealthTips) {
+                    favoriteHealthTipIds.add(healthTip.getId());
+                }
+                notifyDataSetChanged(); // Cập nhật UI
+            }
+
+            @Override
+            public void onError(String error) {
+                // Log error nhưng không hiển thị Toast để tránh spam
+                android.util.Log.e("HealthTipAdapter", "Lỗi khi tải danh sách yêu thích: " + error);
+            }
+        });
+    }
+
+    /**
+     * Toggle trạng thái yêu thích cho một mẹo sức khỏe
+     */
+    public void toggleFavorite(HealthTip healthTip, ImageView favoriteIcon) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(context, "Vui lòng đăng nhập để sử dụng chức năng yêu thích", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = currentUser.getUid();
+        String healthTipId = healthTip.getId();
+        boolean isCurrentlyFavorite = favoriteHealthTipIds.contains(healthTipId);
+
+        // Cập nhật UI ngay lập tức cho UX tốt hơn
+        updateFavoriteIcon(favoriteIcon, !isCurrentlyFavorite);
+
+        if (isCurrentlyFavorite) {
+            // Xóa khỏi yêu thích
+            favoriteRepository.removeFromFavorites(userId, healthTipId, new FavoriteRepository.FavoriteActionCallback() {
+                @Override
+                public void onSuccess() {
+                    favoriteHealthTipIds.remove(healthTipId);
+                    if (listener != null) {
+                        listener.onFavoriteClick(healthTip, false);
+                    }
+                }
+
+                @Override
+                public void onError(String error) {
+                    // Revert UI changes on error
+                    updateFavoriteIcon(favoriteIcon, isCurrentlyFavorite);
+                    Toast.makeText(context, "Lỗi khi xóa khỏi yêu thích: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            // Thêm vào yêu thích
+            favoriteRepository.addToFavorites(userId, healthTipId, new FavoriteRepository.FavoriteActionCallback() {
+                @Override
+                public void onSuccess() {
+                    favoriteHealthTipIds.add(healthTipId);
+                    if (listener != null) {
+                        listener.onFavoriteClick(healthTip, true);
+                    }
+                }
+
+                @Override
+                public void onError(String error) {
+                    // Revert UI changes on error
+                    updateFavoriteIcon(favoriteIcon, isCurrentlyFavorite);
+                    Toast.makeText(context, "Lỗi khi thêm vào yêu thích: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    /**
+     * Cập nhật icon yêu thích
+     */
+    private void updateFavoriteIcon(ImageView favoriteIcon, boolean isFavorite) {
+        if (isFavorite) {
+            favoriteIcon.setImageResource(R.drawable.ic_favorite_filled);
+            favoriteIcon.setColorFilter(context.getResources().getColor(R.color.favorite_color, null));
+        } else {
+            favoriteIcon.setImageResource(R.drawable.ic_favorite_outline);
+            favoriteIcon.setColorFilter(context.getResources().getColor(R.color.icon_color, null));
+        }
     }
 
     @NonNull
     @Override
     public HealthTipViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_health_tip, parent, false);
-        return new HealthTipViewHolder(view);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.item_health_tip, parent, false);
+        return new HealthTipViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull HealthTipViewHolder holder, int position) {
         HealthTip healthTip = healthTips.get(position);
-        holder.bind(healthTip);
+        boolean isFavorite = favoriteHealthTipIds.contains(healthTip.getId());
+        holder.bind(healthTip, listener, isFavorite, this);
     }
 
     @Override
@@ -78,74 +216,74 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
     }
 
     /**
-     * ViewHolder cho mỗi item trong danh sách
+     * ViewHolder cho từng item trong RecyclerView
      */
-    class HealthTipViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textViewTitle;
-        private final TextView textViewContent;
-        private final TextView textViewViews;
-        private final TextView textViewLikes;
-        private final TextView textViewDate;
-        private final ImageView imageViewThumbnail;
-        private final ImageView imageViewFavorite;
+    public static class HealthTipViewHolder extends RecyclerView.ViewHolder {
+        private final ImageView imageView;
+        private final TextView titleTextView;
+        private final TextView summaryTextView;
+        private final TextView dateTextView;
+        private final TextView viewCountTextView;
+        private final TextView likeCountTextView;
+        private final ImageView favoriteIcon;
+        private final SimpleDateFormat dateFormat;
 
         public HealthTipViewHolder(@NonNull View itemView) {
             super(itemView);
-            textViewTitle = itemView.findViewById(R.id.textViewHealthTipTitle);
-            textViewContent = itemView.findViewById(R.id.textViewHealthTipSummary);
-            textViewViews = itemView.findViewById(R.id.textViewViewCount);
-            textViewLikes = itemView.findViewById(R.id.textViewLikeCount);
-            textViewDate = itemView.findViewById(R.id.textViewDate);
-            imageViewThumbnail = itemView.findViewById(R.id.imageViewHealthTip);
-            imageViewFavorite = itemView.findViewById(R.id.imageViewFavorite);
-
-            itemView.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && listener != null) {
-                    listener.onHealthTipClick(healthTips.get(position).getId());
-                }
-            });
+            imageView = itemView.findViewById(R.id.imageViewHealthTip);
+            titleTextView = itemView.findViewById(R.id.textViewHealthTipTitle);
+            summaryTextView = itemView.findViewById(R.id.textViewHealthTipSummary);
+            dateTextView = itemView.findViewById(R.id.textViewDate);
+            viewCountTextView = itemView.findViewById(R.id.textViewViewCount);
+            likeCountTextView = itemView.findViewById(R.id.textViewLikeCount);
+            favoriteIcon = itemView.findViewById(R.id.imageViewFavorite);
+            dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         }
 
-        /**
-         * Hiển thị thông tin từ HealthTip lên giao diện
-         * @param healthTip Đối tượng HealthTip cần hiển thị
-         */
-        public void bind(HealthTip healthTip) {
-            textViewTitle.setText(healthTip.getTitle());
+        public void bind(HealthTip healthTip, HealthTipClickListener listener, boolean isFavorite, HealthTipAdapter adapter) {
+            // Thiết lập tiêu đề - kiểm tra null
+            String title = healthTip.getTitle();
+            titleTextView.setText(title != null ? title : "Không có tiêu đề");
 
-            // Hiển thị tóm tắt nội dung (100 ký tự đầu tiên)
-            String summary = healthTip.getContent();
-            if (summary.length() > 100) {
-                summary = summary.substring(0, 97) + "...";
-            }
-            textViewContent.setText(summary);
+            // Thiết lập tóm tắt - sử dụng getContent() thay vì getSummary() và kiểm tra null
+            String content = healthTip.getContent();
+            summaryTextView.setText(content != null ? content : "Không có nội dung");
 
-            textViewViews.setText(String.valueOf(healthTip.getViewCount()));
-            textViewLikes.setText(String.valueOf(healthTip.getLikeCount()));
-
-            // Định dạng ngày tạo
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            String formattedDate = sdf.format(new Date(healthTip.getCreatedAt()));
-            textViewDate.setText(formattedDate);
-
-            // Hiển thị icon yêu thích
-            imageViewFavorite.setImageResource(
-                    healthTip.isFavorite() ?
-                    R.drawable.ic_favorite_filled :
-                    R.drawable.ic_favorite_border);
-
-            // Tải ảnh thumbnail nếu có
-            if (healthTip.getImageUrl() != null && !healthTip.getImageUrl().isEmpty()) {
-                Glide.with(context)
-                    .load(healthTip.getImageUrl())
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.error_image)
-                    .into(imageViewThumbnail);
-                imageViewThumbnail.setVisibility(View.VISIBLE);
+            // Thiết lập ngày - kiểm tra createdAt > 0 thay vì != null vì là primitive long
+            if (healthTip.getCreatedAt() > 0) {
+                dateTextView.setText(dateFormat.format(new Date(healthTip.getCreatedAt())));
             } else {
-                imageViewThumbnail.setVisibility(View.GONE);
+                dateTextView.setText(dateFormat.format(new Date()));
             }
+
+            // Thiết lập số lượt xem và thích
+            viewCountTextView.setText(String.valueOf(healthTip.getViewCount()));
+            likeCountTextView.setText(String.valueOf(healthTip.getLikeCount()));
+
+            // Tải hình ảnh với Glide - đã có kiểm tra null
+            if (healthTip.getImageUrl() != null && !healthTip.getImageUrl().isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(healthTip.getImageUrl())
+                        .centerCrop()
+                        .placeholder(R.drawable.placeholder_image)
+                        .error(R.drawable.error_image)
+                        .into(imageView);
+            } else {
+                imageView.setImageResource(R.drawable.placeholder_image);
+            }
+
+            // Cập nhật icon yêu thích
+            adapter.updateFavoriteIcon(favoriteIcon, isFavorite);
+
+            // Thiết lập sự kiện click cho item
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onHealthTipClick(healthTip);
+                }
+            });
+
+            // Thiết lập sự kiện click cho nút yêu thích
+            favoriteIcon.setOnClickListener(v -> adapter.toggleFavorite(healthTip, favoriteIcon));
         }
     }
 }

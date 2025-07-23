@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:background="@color/background_dark_alt"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Hình ảnh mẹo sức khỏe -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/imageViewHealthTip"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Hình ảnh mẹo sức khỏe"
+                tools:src="@drawable/placeholder_image" />
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Nút xóa khỏi yêu thích -->
+        <ImageView
+            android:id="@+id/imageViewRemoveFavorite"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_favorite_filled"
+            android:padding="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Xóa khỏi yêu thích"
+            app:tint="@color/favorite_color"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Tiêu đề -->
+        <TextView
+            android:id="@+id/textViewTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toTopOf="@id/cardViewImage"
+            app:layout_constraintStart_toEndOf="@id/cardViewImage"
+            app:layout_constraintEnd_toStartOf="@id/imageViewRemoveFavorite"
+            tools:text="Mẹo giữ sức khỏe tim mạch hiệu quả" />
+
+        <!-- Nội dung tóm tắt -->
+        <TextView
+            android:id="@+id/textViewContent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toBottomOf="@id/textViewTitle"
+            app:layout_constraintStart_toEndOf="@id/cardViewImage"
+            app:layout_constraintEnd_toStartOf="@id/imageViewRemoveFavorite"
+            tools:text="Tập thể dục đều đặn, ăn uống lành mạnh và kiểm tra sức khỏe định kỳ..." />
+
+        <!-- Thông tin thống kê -->
+        <LinearLayout
+            android:id="@+id/layoutStats"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/cardViewImage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Ngày tạo -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_back"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@color/icon_color" />
+
+                <TextView
+                    android:id="@+id/textViewDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="15/07/2024" />
+
+            </LinearLayout>
+
+            <!-- Lượt xem -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_view"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@color/icon_color" />
+
+                <TextView
+                    android:id="@+id/textViewViewCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="1.2K" />
+
+            </LinearLayout>
+
+            <!-- Lượt thích -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_like"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@color/icon_color" />
+
+                <TextView
+                    android:id="@+id/textViewLikeCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="248" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

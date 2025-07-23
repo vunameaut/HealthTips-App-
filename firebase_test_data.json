@@ -1,6 +1,7 @@
 {
   "categories": {
     "cat001": {
+      "id": "cat001",
       "name": "Dinh dưỡng",
       "description": "Các mẹo về dinh dưỡng và chế độ ăn uống lành mạnh",
       "imageUrl": "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=hzPJSe0MPsoQ7kNvwFtGSiB&_nc_oc=AdmpVILB_YiV6KFN3nhu0rLHd1XjAFH6Lya-W9tKQD0AbLih2lUYTot0NWIF07ubg4mfbqSawrXgGAAnPfn45c3O&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=1pQTfJyxYVK2a4dEHeBAGQ&oh=00_AfTztbFeNN5F86LdHQlzYqWFMil3Ama_E9rFhGWTfaBX1A&oe=688123FD",
@@ -8,6 +9,7 @@
       "createdAt": 1721195400000
     },
     "cat002": {
+      "id": "cat002",
       "name": "Tập luyện",
       "description": "Các bài tập và hoạt động thể chất để duy trì sức khỏe",
       "imageUrl": "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=hzPJSe0MPsoQ7kNvwFtGSiB&_nc_oc=AdmpVILB_YiV6KFN3nhu0rLHd1XjAFH6Lya-W9tKQD0AbLih2lUYTot0NWIF07ubg4mfbqSawrXgGAAnPfn45c3O&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=1pQTfJyxYVK2a4dEHeBAGQ&oh=00_AfTztbFeNN5F86LdHQlzYqWFMil3Ama_E9rFhGWTfaBX1A&oe=688123FD",
@@ -15,6 +17,7 @@
       "createdAt": 1721195500000
     },
     "cat003": {
+      "id": "cat003",
       "name": "Giấc ngủ",
       "description": "Các mẹo để có giấc ngủ ngon và đủ giấc",
       "imageUrl": "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=hzPJSe0MPsoQ7kNvwFtGSiB&_nc_oc=AdmpVILB_YiV6KFN3nhu0rLHd1XjAFH6Lya-W9tKQD0AbLih2lUYTot0NWIF07ubg4mfbqSawrXgGAAnPfn45c3O&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=1pQTfJyxYVK2a4dEHeBAGQ&oh=00_AfTztbFeNN5F86LdHQlzYqWFMil3Ama_E9rFhGWTfaBX1A&oe=688123FD",
@@ -22,6 +25,7 @@
       "createdAt": 1721195600000
     },
     "cat004": {
+      "id": "cat004",
       "name": "Sức khỏe tinh thần",
       "description": "Các mẹo cải thiện và duy trì sức khỏe tinh thần",
       "imageUrl": "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=hzPJSe0MPsoQ7kNvwFtGSiB&_nc_oc=AdmpVILB_YiV6KFN3nhu0rLHd1XjAFH6Lya-W9tKQD0AbLih2lUYTot0NWIF07ubg4mfbqSawrXgGAAnPfn45c3O&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=1pQTfJyxYVK2a4dEHeBAGQ&oh=00_AfTztbFeNN5F86LdHQlzYqWFMil3Ama_E9rFhGWTfaBX1A&oe=688123FD",
@@ -29,6 +33,7 @@
       "createdAt": 1721195700000
     },
     "cat005": {
+      "id": "cat005",
       "name": "Vitamin & Khoáng chất",
       "description": "Thông tin về các loại vitamin và khoáng chất cần thiết",
       "imageUrl": "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=hzPJSe0MPsoQ7kNvwFtGSiB&_nc_oc=AdmpVILB_YiV6KFN3nhu0rLHd1XjAFH6Lya-W9tKQD0AbLih2lUYTot0NWIF07ubg4mfbqSawrXgGAAnPfn45c3O&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=1pQTfJyxYVK2a4dEHeBAGQ&oh=00_AfTztbFeNN5F86LdHQlzYqWFMil3Ama_E9rFhGWTfaBX1A&oe=688123FD",
@@ -38,95 +43,217 @@
   },
   "health_tips": {
     "tip001": {
-      "categoryId": "cat002",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 1.",
+      "id": "tip001",
+      "title": "Bổ sung protein từ thực phẩm tự nhiên",
+      "content": "Protein là một trong những dưỡng chất quan trọng nhất cho cơ thể. Để bổ sung protein hiệu quả, bạn nên ăn các loại thực phẩm như: thịt nạc, cá, trứng, đậu phụ, đậu xanh, hạt óc chó. Một người trưởng thành cần khoảng 0.8-1.2g protein/kg cân nặng mỗi ngày. Hãy chia nhỏ lượng protein ra các bữa ăn trong ngày để cơ thể hấp thụ tốt nhất.",
+      "categoryId": "cat001",
+      "categoryName": "Dinh dưỡng",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 1"
+      "viewCount": 125,
+      "likeCount": 23,
+      "createdAt": 1721195450000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip002": {
-      "categoryId": "cat003",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 2.",
+      "id": "tip002",
+      "title": "5 bài tập cardio đơn giản tại nhà",
+      "content": "Cardio là loại hình tập luyện tuyệt vời để cải thiện sức khỏe tim mạch và đốt cháy calo. Dưới đây là 5 bài tập cardio bạn có thể thực hiện tại nhà: 1. Jumping Jacks (30 giây), 2. High Knees (30 giây), 3. Burpees (20 giây), 4. Mountain Climbers (30 giây), 5. Jump Squats (20 giây). Thực hiện 3-4 vòng với thời gian nghỉ 1 phút giữa các vòng.",
+      "categoryId": "cat002",
+      "categoryName": "Tập luyện",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 2"
+      "viewCount": 89,
+      "likeCount": 34,
+      "createdAt": 1721195550000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip003": {
-      "categoryId": "cat001",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 3.",
+      "id": "tip003",
+      "title": "Thói quen ngủ tốt cho sức khỏe",
+      "content": "Giấc ngủ chất lượng là nền tảng của sức khỏe tốt. Để có giấc ngủ ngon, hãy: 1. Đi ngủ và thức dậy đúng giờ mỗi ngày, 2. Tránh sử dụng điện thoại 1 giờ trước khi ngủ, 3. Giữ phòng ngủ mát mẻ (18-20°C), 4. Tránh caffeine sau 2 giờ chiều, 5. Tạo môi trường yên tĩnh và tối. Người trưởng thành cần ngủ 7-9 giờ mỗi đêm.",
+      "categoryId": "cat003",
+      "categoryName": "Giấc ngủ",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 3"
+      "viewCount": 156,
+      "likeCount": 67,
+      "createdAt": 1721195650000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip004": {
-      "categoryId": "cat002",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 4.",
+      "id": "tip004",
+      "title": "Quản lý stress hiệu quả",
+      "content": "Stress kéo dài có thể gây hại cho sức khỏe. Để quản lý stress hiệu quả: 1. Thực hành thiền hoặc yoga 10-15 phút mỗi ngày, 2. Tập thở sâu khi cảm thấy căng thẳng, 3. Dành thời gian cho sở thích cá nhân, 4. Kết nối với bạn bè và gia đình, 5. Tập thể dục đều đặn. Nếu stress nghiêm trọng, hãy tìm kiếm sự hỗ trợ từ chuyên gia.",
+      "categoryId": "cat004",
+      "categoryName": "Sức khỏe tinh thần",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 4"
+      "viewCount": 203,
+      "likeCount": 91,
+      "createdAt": 1721195750000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip005": {
-      "categoryId": "cat003",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 5.",
+      "id": "tip005",
+      "title": "Tầm quan trọng của Vitamin D",
+      "content": "Vitamin D đóng vai trò quan trọng trong việc hấp thụ canxi và duy trì sức khỏe xương. Nguồn vitamin D tự nhiên: 1. Ánh nắng mặt trời (10-15 phút/ngày), 2. Cá béo như cá hồi, cá thu, 3. Trứng (lòng đỏ), 4. Nấm maitake và portobello. Thiếu vitamin D có thể dẫn đến loãng xương, yếu cơ và giảm miễn dịch. Nên kiểm tra mức vitamin D định kỳ.",
+      "categoryId": "cat005",
+      "categoryName": "Vitamin & Khoáng chất",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 5"
+      "viewCount": 78,
+      "likeCount": 45,
+      "createdAt": 1721195850000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip006": {
+      "id": "tip006",
+      "title": "Hydration - Uống nước đúng cách",
+      "content": "Nước chiếm 60% trọng lượng cơ thể và rất quan trọng cho mọi chức năng. Cách uống nước đúng: 1. Uống 8-10 ly nước/ngày (2-2.5L), 2. Uống nước ngay khi thức dậy, 3. Uống trước bữa ăn 30 phút, 4. Tăng lượng nước khi tập thể dục, 5. Quan sát màu nước tiểu để đánh giá mức độ hydration. Nước tiểu màu vàng nhạt là dấu hiệu hydration tốt.",
       "categoryId": "cat001",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 6.",
+      "categoryName": "Dinh dưỡng",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 6"
+      "viewCount": 142,
+      "likeCount": 56,
+      "createdAt": 1721195950000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip007": {
+      "id": "tip007",
+      "title": "Bài tập kéo dãn cơ bắp",
+      "content": "Kéo dãn giúp tăng tính linh hoạt và giảm căng cơ. Các bài tập kéo dãn cơ bản: 1. Kéo dãn cổ (giữ 15-30 giây), 2. Xoay vai (10 vòng mỗi hướng), 3. Kéo dãn lưng (cat-cow pose), 4. Kéo dãn đùi trước và sau, 5. Kéo dãn bắp chân. Thực hiện sau khi khởi động hoặc kết thúc buổi tập. Không kéo dãn quá mạnh, chỉ cần cảm thấy căng nhẹ.",
       "categoryId": "cat002",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 7.",
+      "categoryName": "Tập luyện",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 7"
+      "viewCount": 95,
+      "likeCount": 42,
+      "createdAt": 1721196050000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip008": {
+      "id": "tip008",
+      "title": "Môi trường ngủ lý tưởng",
+      "content": "Môi trường ngủ ảnh hưởng lớn đến chất lượng giấc ngủ. Tạo môi trường ngủ lý tưởng: 1. Nhiệt độ phòng 18-20°C, 2. Rèm cửa dày để chặn ánh sáng, 3. Giảm tiếng ồn hoặc dùng máy tạo tiếng ồn trắng, 4. Nệm và gối thoải mái, 5. Loại bỏ thiết bị điện tử khỏi phòng ngủ. Đầu tư vào môi trường ngủ tốt sẽ cải thiện đáng kể chất lượng giấc ngủ.",
       "categoryId": "cat003",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 8.",
+      "categoryName": "Giấc ngủ",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 8"
+      "viewCount": 167,
+      "likeCount": 73,
+      "createdAt": 1721196150000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip009": {
-      "categoryId": "cat001",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 9.",
+      "id": "tip009",
+      "title": "Tập trung và tăng năng suất",
+      "content": "Tập trung tốt giúp tăng hiệu quả công việc và giảm stress. Các kỹ thuật cải thiện tập trung: 1. Kỹ thuật Pomodoro (25 phút tập trung + 5 phút nghỉ), 2. Loại bỏ các yếu tố gây xao nhãng, 3. Tập thiền mindfulness 10 phút/ngày, 4. Chia nhỏ công việc lớn thành các nhiệm vụ nhỏ, 5. Nghỉ ngơi đầy đủ và tập thể dục. Não bộ cũng cần được tập luyện như cơ bắp.",
+      "categoryId": "cat004",
+      "categoryName": "Sức khỏe tinh thần",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 9"
+      "viewCount": 234,
+      "likeCount": 108,
+      "createdAt": 1721196250000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip010": {
-      "categoryId": "cat002",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 10.",
+      "id": "tip010",
+      "title": "Lợi ích của Omega-3",
+      "content": "Omega-3 là axit béo thiết yếu mà cơ thể không tự sản xuất được. Lợi ích của Omega-3: 1. Cải thiện sức khỏe tim mạch, 2. Hỗ trợ chức năng não bộ, 3. Giảm viêm trong cơ thể, 4. Cải thiện sức khỏe mắt, 5. Hỗ trợ phát triển não bộ ở trẻ em. Nguồn Omega-3 tự nhiên: cá hồi, cá thu, hạt chia, hạt lanh, óc chó. Nên bổ sung 2-3 bữa cá/tuần.",
+      "categoryId": "cat005",
+      "categoryName": "Vitamin & Khoáng chất",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 10"
+      "viewCount": 186,
+      "likeCount": 79,
+      "createdAt": 1721196350000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip011": {
-      "categoryId": "cat003",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 11.",
+      "id": "tip011",
+      "title": "Chế độ ăn Mediteranean",
+      "content": "Chế độ ăn Địa Trung Hải được coi là một trong những chế độ ăn lành mạnh nhất. Đặc điểm: 1. Nhiều rau xanh, trái cây, ngũ cốc nguyên hạt, 2. Dầu olive là nguồn chất béo chính, 3. Cá và hải sản thay vì thịt đỏ, 4. Hạt và đậu, 5. Hạn chế thực phẩm chế biến. Chế độ ăn này giúp giảm nguy cơ bệnh tim, đột quỵ và một số loại ung thư.",
+      "categoryId": "cat001",
+      "categoryName": "Dinh dưỡng",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 11"
+      "viewCount": 145,
+      "likeCount": 62,
+      "createdAt": 1721196450000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip012": {
-      "categoryId": "cat001",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 12.",
+      "id": "tip012",
+      "title": "Workout cho người bận rộn",
+      "content": "Không có thời gian không còn là lý do để không tập thể dục. Bài tập 15 phút cho người bận rộn: 1. Warm-up (2 phút): Đi bộ tại chỗ, xoay khớp, 2. Circuit training (10 phút): Push-ups, Squats, Planks, Lunges (mỗi bài 45 giây, nghỉ 15 giây), 3. Cool-down (3 phút): Kéo dãn toàn thân. Thực hiện 3-4 lần/tuần sẽ mang lại hiệu quả rõ rệt.",
+      "categoryId": "cat002",
+      "categoryName": "Tập luyện",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 12"
+      "viewCount": 298,
+      "likeCount": 134,
+      "createdAt": 1721196550000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip013": {
-      "categoryId": "cat002",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 13.",
+      "id": "tip013",
+      "title": "Power Nap - Ngủ trưa hiệu quả",
+      "content": "Ngủ trưa ngắn có thể tăng cường năng lượng và cải thiện hiệu suất. Cách ngủ trưa hiệu quả: 1. Thời gian lý tưởng: 10-20 phút, 2. Tối đa không quá 30 phút, 3. Thời điểm tốt nhất: 1-3 giờ chiều, 4. Tìm nơi yên tĩnh, tối, 5. Đặt báo thức để tránh ngủ quá lâu. Ngủ trưa quá lâu có thể gây khó ngủ vào ban đêm và cảm giác mệt mỏi.",
+      "categoryId": "cat003",
+      "categoryName": "Giấc ngủ",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 13"
+      "viewCount": 174,
+      "likeCount": 85,
+      "createdAt": 1721196650000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip014": {
-      "categoryId": "cat003",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 14.",
+      "id": "tip014",
+      "title": "Xây dựng thói quen tích cực",
+      "content": "Thói quen tốt là nền tảng của cuộc sống khỏe mạnh. Cách xây dựng thói quen mới: 1. Bắt đầu với mục tiêu nhỏ và cụ thể, 2. Gắn thói quen mới với thói quen cũ, 3. Theo dõi tiến độ hàng ngày, 4. Khen thưởng bản thân khi đạt mục tiêu, 5. Kiên trì ít nhất 21 ngày. Nghiên cứu cho thấy cần 66 ngày để một hành vi trở thành thói quen tự động.",
+      "categoryId": "cat004",
+      "categoryName": "Sức khỏe tinh thần",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 14"
+      "viewCount": 219,
+      "likeCount": 97,
+      "createdAt": 1721196750000,
+      "isFavorite": false,
+      "isLiked": false
     },
     "tip015": {
-      "categoryId": "cat001",
-      "content": "Nội dung chi tiết cho mẹo sức khỏe số 15.",
+      "id": "tip015",
+      "title": "Canxi và sức khỏe xương",
+      "content": "Canxi là khoáng chất quan trọng nhất cho xương và răng. Nhu cầu canxi: Người trưởng thành cần 1000-1200mg/ngày. Nguồn canxi tự nhiên: 1. Sữa và sản phẩm từ sữa, 2. Rau xanh đậm màu (cải bó xôi, cải xoăn), 3. Cá có xương (cá cơm, cá mòi), 4. Hạnh nhân, mè, 5. Đậu phụ. Vitamin D giúp hấp thụ canxi tốt hơn, nên kết hợp với ánh nắng mặt trời.",
+      "categoryId": "cat005",
+      "categoryName": "Vitamin & Khoáng chất",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
-      "title": "Mẹo sức khỏe 15",
-      "viewCount": 8
+      "viewCount": 163,
+      "likeCount": 71,
+      "createdAt": 1721196850000,
+      "isFavorite": false,
+      "isLiked": false
+    }
+  },
+ "users": {
+    "JsqrVnadK9QV08CeWWf5zqfsIDX2": {
+      "active": true,
+      "createdAt": 1753162800504,
+      "displayName": "usernam26103",
+      "email": "usernam26103@gmail.com",
+      "favorites": {
+        "tip006": {
+          "createdAt": 1753248292874,
+          "healthTipId": "tip006",
+          "updatedAt": 1753248292874,
+          "userId": "JsqrVnadK9QV08CeWWf5zqfsIDX2"
+        }
+      },
+      "lastLoginAt": 1753162800504,
+      "uid": "JsqrVnadK9QV08CeWWf5zqfsIDX2"
     }
   }
 }

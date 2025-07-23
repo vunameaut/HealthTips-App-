@@ -159,6 +159,12 @@ public class HomeFragment extends Fragment implements HomeView {
                     public void onHealthTipClick(HealthTip healthTip) {
                         presenter.onHealthTipSelected(healthTip);
                     }
+
+                    @Override
+                    public void onFavoriteClick(HealthTip healthTip, boolean isFavorite) {
+                        // Xử lý khi người dùng click favorite cho latest tips
+                        handleFavoriteClick(healthTip, isFavorite);
+                    }
                 });
         recyclerViewLatestTips.setAdapter(latestTipsAdapter);
 
@@ -174,6 +180,12 @@ public class HomeFragment extends Fragment implements HomeView {
                     public void onHealthTipClick(HealthTip healthTip) {
                         presenter.onHealthTipSelected(healthTip);
                     }
+
+                    @Override
+                    public void onFavoriteClick(HealthTip healthTip, boolean isFavorite) {
+                        // Xử lý khi người dùng click favorite cho most viewed tips
+                        handleFavoriteClick(healthTip, isFavorite);
+                    }
                 });
         recyclerViewMostViewedTips.setAdapter(mostViewedTipsAdapter);
 
@@ -188,6 +200,12 @@ public class HomeFragment extends Fragment implements HomeView {
                     @Override
                     public void onHealthTipClick(HealthTip healthTip) {
                         presenter.onHealthTipSelected(healthTip);
+                    }
+
+                    @Override
+                    public void onFavoriteClick(HealthTip healthTip, boolean isFavorite) {
+                        // Xử lý khi người dùng click favorite cho most liked tips
+                        handleFavoriteClick(healthTip, isFavorite);
                     }
                 });
         recyclerViewMostLikedTips.setAdapter(mostLikedTipsAdapter);
@@ -346,6 +364,36 @@ public class HomeFragment extends Fragment implements HomeView {
     public void showError(String errorMessage) {
         if (isAdded() && getView() != null) {
             Snackbar.make(getView(), errorMessage, Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Xử lý khi người dùng click vào nút yêu thích
+     */
+    private void handleFavoriteClick(HealthTip healthTip, boolean isFavorite) {
+        if (isFavorite) {
+            showMessage("Đã thêm '" + healthTip.getTitle() + "' vào danh sách yêu thích");
+            // Có thể thêm animation hoặc effect nhỏ ở đây
+        } else {
+            showMessage("Đã xóa '" + healthTip.getTitle() + "' khỏi danh sách yêu thích");
+        }
+    }
+
+    /**
+     * Navigation đến màn hình yêu thích
+     * Được gọi khi người dùng muốn xem toàn bộ danh sách yêu thích
+     */
+    public void navigateToFavorites() {
+        // Chuyển tab bottom navigation đến favorites
+        if (getActivity() instanceof HomeActivity) {
+            HomeActivity homeActivity = (HomeActivity) getActivity();
+            // Trigger bottom navigation để chuyển đến FavoriteFragment
+            homeActivity.findViewById(R.id.bottom_navigation);
+            com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
+                    homeActivity.findViewById(R.id.bottom_navigation);
+            if (bottomNav != null) {
+                bottomNav.setSelectedItemId(R.id.nav_favorites);
+            }
         }
     }
 }
