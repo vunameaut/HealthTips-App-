@@ -11,8 +11,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.vhn.doan.MainActivity;
 import com.vhn.doan.R;
+import com.vhn.doan.presentation.home.HomeFragment;
 
 /**
  * RegisterActivity là màn hình đăng ký của ứng dụng
@@ -100,6 +100,7 @@ public class RegisterActivity extends AppCompatActivity implements AuthView {
     @Override
     public void onBackPressed() {
         // Khi nhấn nút back (từ phần cứng hoặc nút back tự tạo), quay về màn hình trước đó
+        super.onBackPressed();
         finish();
     }
 
@@ -107,7 +108,7 @@ public class RegisterActivity extends AppCompatActivity implements AuthView {
      * Chuyển đến màn hình chính
      */
     private void navigateToMainActivity() {
-        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+        Intent intent = new Intent(RegisterActivity.this, HomeFragment.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
