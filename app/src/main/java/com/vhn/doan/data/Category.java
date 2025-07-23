@@ -8,6 +8,7 @@ public class Category {
     private String name;
     private String description;
     private String iconUrl;
+    private String imageUrl; // Thêm trường imageUrl để tương thích với dữ liệu test
     private boolean active;
     private long createdAt; // Thêm field createdAt
     private int tipCount; // Thêm field tipCount để phù hợp với data test
@@ -35,6 +36,7 @@ public class Category {
         this.name = name;
         this.description = description;
         this.iconUrl = iconUrl;
+        this.imageUrl = iconUrl; // Đồng bộ cả hai trường
         this.active = active;
         this.createdAt = System.currentTimeMillis();
         this.tipCount = 0;
@@ -48,6 +50,7 @@ public class Category {
         this.name = name;
         this.description = description;
         this.iconUrl = iconUrl;
+        this.imageUrl = iconUrl; // Đồng bộ cả hai trường
         this.active = active;
         this.createdAt = createdAt;
         this.tipCount = tipCount;
@@ -79,11 +82,31 @@ public class Category {
     }
 
     public String getIconUrl() {
+        // Ưu tiên imageUrl nếu có, sau đó mới đến iconUrl
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            return imageUrl;
+        }
         return iconUrl;
     }
 
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
+        // Đồng bộ với imageUrl nếu imageUrl chưa được set
+        if (this.imageUrl == null || this.imageUrl.isEmpty()) {
+            this.imageUrl = iconUrl;
+        }
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+        // Đồng bộ với iconUrl nếu iconUrl chưa được set
+        if (this.iconUrl == null || this.iconUrl.isEmpty()) {
+            this.iconUrl = imageUrl;
+        }
     }
 
     public boolean isActive() {
@@ -117,6 +140,7 @@ public class Category {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", iconUrl='" + iconUrl + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", active=" + active +
                 ", createdAt=" + createdAt +
                 ", tipCount=" + tipCount +

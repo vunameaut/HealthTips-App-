@@ -2,6 +2,7 @@ package com.vhn.doan.presentation.category.detail;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -27,6 +28,8 @@ import java.util.List;
  * Activity hiển thị danh sách các mẹo sức khỏe theo danh mục
  */
 public class CategoryDetailListActivity extends AppCompatActivity implements CategoryDetailListView, HealthTipAdapter.HealthTipClickListener {
+
+    private static final String TAG = "CategoryDetailList";
 
     private CategoryDetailListPresenter presenter;
     private HealthTipAdapter adapter;
@@ -74,19 +77,36 @@ public class CategoryDetailListActivity extends AppCompatActivity implements Cat
     }
 
     private void setupToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbarCategoryDetail);
-        setSupportActionBar(toolbar);
+        try {
+            Toolbar toolbar = findViewById(R.id.toolbarCategoryDetail);
+            Log.d(TAG, "Toolbar found: " + (toolbar != null));
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false); // Tắt navigation icon mặc định
-            getSupportActionBar().setDisplayShowHomeEnabled(false);
-            getSupportActionBar().setTitle(""); // Xóa title mặc định vì đã có TextView riêng
-        }
+            if (toolbar != null) {
+                setSupportActionBar(toolbar);
 
-        // Thiết lập sự kiện click cho nút back có sẵn trong layout
-        ImageButton buttonBack = findViewById(R.id.buttonBack);
-        if (buttonBack != null) {
-            buttonBack.setOnClickListener(v -> onBackPressed());
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    getSupportActionBar().setDisplayShowHomeEnabled(false);
+                    getSupportActionBar().setTitle("");
+                }
+            } else {
+                Log.e(TAG, "Toolbar is null - check layout file");
+            }
+
+            // Thiết lập sự kiện click cho nút back
+            ImageButton buttonBack = findViewById(R.id.buttonBack);
+            Log.d(TAG, "ButtonBack found: " + (buttonBack != null));
+
+            if (buttonBack != null) {
+                buttonBack.setOnClickListener(v -> {
+                    Log.d(TAG, "Back button clicked");
+                    onBackPressed();
+                });
+            } else {
+                Log.e(TAG, "ButtonBack is null - check layout file");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up toolbar: " + e.getMessage(), e);
         }
     }
 
@@ -130,11 +150,17 @@ public class CategoryDetailListActivity extends AppCompatActivity implements Cat
     @Override
     public void displayCategoryDetails(Category category) {
         if (category != null && textViewCategoryTitle != null) {
+            Log.d(TAG, "Displaying category: " + category.getName());
+            Log.d(TAG, "Category icon URL: " + category.getIconUrl());
+            Log.d(TAG, "Category image URL: " + category.getImageUrl());
+
             textViewCategoryTitle.setText(category.getName());
 
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle(category.getName());
             }
+        } else {
+            Log.w(TAG, "Category is null or textViewCategoryTitle is null");
         }
     }
 

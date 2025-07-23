@@ -1,6 +1,7 @@
 package com.vhn.doan.presentation.home.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,6 +24,8 @@ import java.util.List;
  * Adapter cho RecyclerView hiển thị danh sách các danh mục
  */
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
+
+    private static final String TAG = "CategoryAdapter";
 
     private final Context context;
     private List<Category> categories;
@@ -58,25 +62,49 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
         Category category = categories.get(position);
 
+        // Log thông tin danh mục cơ bản
+        Log.d(TAG, "Binding Category: " + category.getName());
+
         // Thiết lập tên danh mục
         holder.textViewCategoryName.setText(category.getName());
 
+        // Ưu tiên sử dụng iconUrl, fallback sang imageUrl
+        String imageUrl = category.getIconUrl();
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            imageUrl = category.getImageUrl();
+        }
+
         // Tải hình ảnh danh mục sử dụng Glide
-        if (category.getIconUrl() != null && !category.getIconUrl().isEmpty()) {
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             Glide.with(context)
-                    .load(category.getIconUrl())
+                    .load(imageUrl)
                     .apply(new RequestOptions()
-                            .placeholder(R.drawable.ic_launcher_foreground) // Placeholder mặc định
-                            .error(R.drawable.ic_launcher_foreground)) // Ảnh hiển thị khi lỗi
+                            .placeholder(R.drawable.ic_category_default)
+                            .error(R.drawable.ic_category_default)
+                            .centerCrop()) // Hiển thị hình vuông
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                            Log.e(TAG, "Failed to load image for category: " + category.getName());
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            Log.d(TAG, "Successfully loaded image for category: " + category.getName());
+                            return false;
+                        }
+                    })
                     .into(holder.imageViewCategoryIcon);
         } else {
-            // Hiển thị icon mặc định nếu không có url
-            holder.imageViewCategoryIcon.setImageResource(R.drawable.ic_launcher_foreground);
+            Log.w(TAG, "No image URL found for category: " + category.getName() + " - using default icon");
+            holder.imageViewCategoryIcon.setImageResource(R.drawable.ic_category_default);
         }
 
         // Xử lý sự kiện click vào card
         holder.cardViewCategory.setOnClickListener(v -> {
             if (clickListener != null) {
+                Log.d(TAG, "Category clicked: " + category.getName());
                 clickListener.onCategoryClick(category);
             }
         });
