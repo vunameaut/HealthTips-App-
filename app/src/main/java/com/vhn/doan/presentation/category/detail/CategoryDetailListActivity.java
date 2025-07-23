@@ -74,15 +74,20 @@ public class CategoryDetailListActivity extends AppCompatActivity implements Cat
     }
 
     private void setupToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbarCategoryDetail);
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false); // Tắt navigation icon mặc định
+            getSupportActionBar().setDisplayShowHomeEnabled(false);
+            getSupportActionBar().setTitle(""); // Xóa title mặc định vì đã có TextView riêng
         }
 
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        // Thiết lập sự kiện click cho nút back có sẵn trong layout
+        ImageButton buttonBack = findViewById(R.id.buttonBack);
+        if (buttonBack != null) {
+            buttonBack.setOnClickListener(v -> onBackPressed());
+        }
     }
 
     private void setupRecyclerView() {
