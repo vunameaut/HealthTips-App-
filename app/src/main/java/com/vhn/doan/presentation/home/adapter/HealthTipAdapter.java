@@ -206,6 +206,33 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
     }
 
     /**
+     * Cập nhật trạng thái yêu thích cho một health tip cụ thể
+     * Method này được gọi từ HomeFragment để đồng bộ trạng thái giữa các adapter
+     * @param healthTipId ID của health tip cần cập nhật
+     * @param isFavorite Trạng thái yêu thích mới
+     */
+    public void updateFavoriteStatus(String healthTipId, boolean isFavorite) {
+        if (healthTipId == null) return;
+
+        // Cập nhật cache trạng thái yêu thích
+        if (isFavorite) {
+            favoriteHealthTipIds.add(healthTipId);
+        } else {
+            favoriteHealthTipIds.remove(healthTipId);
+        }
+
+        // Tìm và cập nhật UI cho item có ID tương ứng
+        for (int i = 0; i < healthTips.size(); i++) {
+            HealthTip healthTip = healthTips.get(i);
+            if (healthTip != null && healthTipId.equals(healthTip.getId())) {
+                // Chỉ cập nhật item cụ thể thay vì toàn bộ danh sách
+                notifyItemChanged(i);
+                break;
+            }
+        }
+    }
+
+    /**
      * ViewHolder cho item mẹo sức khỏe
      */
     public static class HealthTipViewHolder extends RecyclerView.ViewHolder {

@@ -369,13 +369,44 @@ public class HomeFragment extends Fragment implements HomeView {
 
     /**
      * Xử lý khi người dùng click vào nút yêu thích
+     * Đồng bộ trạng thái yêu thích giữa tất cả các adapter
      */
     private void handleFavoriteClick(HealthTip healthTip, boolean isFavorite) {
+        if (healthTip == null || healthTip.getId() == null) {
+            showError("Không thể cập nhật trạng thái yêu thích");
+            return;
+        }
+
+        // Hiển thị thông báo cho người dùng
         if (isFavorite) {
             showMessage("Đã thêm '" + healthTip.getTitle() + "' vào danh sách yêu thích");
-            // Có thể thêm animation hoặc effect nhỏ ở đây
         } else {
             showMessage("Đã xóa '" + healthTip.getTitle() + "' khỏi danh sách yêu thích");
+        }
+
+        // Đồng bộ trạng thái yêu thích giữa tất cả các adapter
+        syncFavoriteStatusAcrossAdapters(healthTip.getId(), isFavorite);
+    }
+
+    /**
+     * Đồng bộ trạng thái yêu thích của một health tip trên tất cả các adapter
+     * @param healthTipId ID của health tip cần đồng bộ
+     * @param isFavorite Trạng thái yêu thích mới
+     */
+    private void syncFavoriteStatusAcrossAdapters(String healthTipId, boolean isFavorite) {
+        // Đồng bộ cho adapter Latest Tips
+        if (latestTipsAdapter != null) {
+            latestTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
+        }
+
+        // Đồng bộ cho adapter Most Viewed Tips
+        if (mostViewedTipsAdapter != null) {
+            mostViewedTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
+        }
+
+        // Đồng bộ cho adapter Most Liked Tips
+        if (mostLikedTipsAdapter != null) {
+            mostLikedTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
         }
     }
 
