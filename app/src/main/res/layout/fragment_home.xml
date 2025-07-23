@@ -11,12 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Thanh tiêu đề -->
+        <!-- Thanh tiêu đề - Đã hạ thấp xuống -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -27,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -35,11 +37,12 @@
 
             <ImageButton
                 android:id="@+id/buttonSearch"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/search"
                 android:src="@android:drawable/ic_menu_search"
+                android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
