@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme cho HealthTipDetailActivity để tránh hiện tượng nháy -->
+    <style name="Theme.HealthTipDetail" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Làm cho activity trong suốt ban đầu -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+
+        <!-- Tắt animation mặc định của hệ thống -->
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+    </style>
+</resources>
+

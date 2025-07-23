@@ -41,11 +41,8 @@
         <activity
             android:name=".presentation.healthtip.detail.HealthTipDetailActivity"
             android:exported="false"
-            android:theme="@style/Theme.Doan.NoActionBar" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-        </activity>
+            android:theme="@style/Theme.HealthTipDetail" />
+
     </application>
 
 </manifest>

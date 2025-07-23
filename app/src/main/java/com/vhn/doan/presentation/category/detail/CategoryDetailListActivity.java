@@ -225,6 +225,7 @@ public class CategoryDetailListActivity extends AppCompatActivity implements Cat
         Intent intent = new Intent(this, HealthTipDetailActivity.class);
         intent.putExtra(Constants.INTENT_HEALTH_TIP_ID, healthTipId);
         startActivity(intent);
+        // Loại bỏ overridePendingTransition vì animation giờ được xử lý trong HealthTipDetailActivity
     }
 
     // Implementation của HealthTipAdapter.HealthTipClickListener

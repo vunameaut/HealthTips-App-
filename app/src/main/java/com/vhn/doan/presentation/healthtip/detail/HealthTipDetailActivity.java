@@ -26,12 +26,15 @@ import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
 /**
  * Activity hiển thị chi tiết một bài viết mẹo sức khỏe
  * Tuân theo kiến trúc MVP (Model-View-Presenter)
+ * Hỗ trợ animation trượt từ dưới lên và swipe-to-dismiss
  */
 public class HealthTipDetailActivity extends AppCompatActivity implements HealthTipDetailView {
 
     private static final String EXTRA_HEALTH_TIP_ID = "health_tip_id";
 
     // UI components
+    private SwipeToDismissLayout swipeToDismissLayout;
+    private View backgroundOverlay;
     private ImageView imageViewDetail;
     private TextView textViewTitle;
     private TextView textViewCategory;
@@ -43,6 +46,7 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     private Button buttonShare;
     private ProgressBar progressBar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    private View dragHandle;
 
     // Presenter
     private HealthTipDetailPresenter presenter;
@@ -53,10 +57,7 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     private boolean isFavorite = false;
 
     /**
-     * Tạo Intent để mở Activity này
-     * @param context Context nguồn
-     * @param healthTipId ID của mẹo sức khỏe cần xem chi tiết
-     * @return Intent để mở HealthTipDetailActivity
+     * Tạo Intent để mở Activity này với animation trượt từ dưới lên
      */
     public static Intent createIntent(Context context, String healthTipId) {
         Intent intent = new Intent(context, HealthTipDetailActivity.class);
@@ -67,10 +68,15 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Đặt activity ở vị trí dưới màn hình ngay từ đầu để tránh nháy
+        setupInitialPosition();
+
         setContentView(R.layout.activity_health_tip_detail);
 
         // Khởi tạo UI components
         initViews();
+        setupSwipeToDismiss();
 
         // Lấy healthTipId từ Intent
         healthTipId = getIntent().getStringExtra(EXTRA_HEALTH_TIP_ID);
@@ -89,14 +95,58 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         // Thiết lập listeners
         setupListeners();
 
+        // Bắt đầu animation trượt lên từ dưới
+        startSlideUpAnimation();
+
         // Tải dữ liệu
         presenter.loadHealthTipDetail(healthTipId);
+    }
+
+    /**
+     * Đặt vị trí ban đầu của activity ở dưới màn hình
+     */
+    private void setupInitialPosition() {
+        // Lấy kích thước màn hình
+        android.view.WindowManager windowManager = getWindowManager();
+        android.util.DisplayMetrics displayMetrics = new android.util.DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        int screenHeight = displayMetrics.heightPixels;
+
+        // Đặt activity ở vị trí dưới màn hình
+        View decorView = getWindow().getDecorView();
+        decorView.setTranslationY(screenHeight);
+        decorView.setAlpha(1.0f);
+    }
+
+    /**
+     * Bắt đầu animation trượt lên từ dưới
+     */
+    private void startSlideUpAnimation() {
+        View decorView = getWindow().getDecorView();
+
+        // Animation trượt lên từ dưới với hiệu ứng mượt mà
+        decorView.animate()
+                .translationY(0)
+                .setDuration(300)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .setListener(new android.animation.AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(android.animation.Animator animation) {
+                        // Đảm bảo activity hiển thị trong suốt quá trình animation
+                        decorView.setAlpha(1.0f);
+                    }
+                })
+                .start();
     }
 
     /**
      * Khởi tạo các view
      */
     private void initViews() {
+        // Khởi tạo SwipeToDismissLayout
+        swipeToDismissLayout = findViewById(R.id.swipeToDismissLayout);
+        dragHandle = findViewById(R.id.dragHandle);
+
         // Khởi tạo toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -105,7 +155,7 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Khởi tạo các view
+        // Khởi tạo các view khác
         collapsingToolbarLayout = findViewById(R.id.collapsingToolbarLayout);
         imageViewDetail = findViewById(R.id.imageViewDetail);
         textViewTitle = findViewById(R.id.textViewTitle);
@@ -117,55 +167,130 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         buttonLike = findViewById(R.id.buttonLike);
         buttonShare = findViewById(R.id.buttonShare);
         progressBar = findViewById(R.id.progressBar);
+
+        // Khởi tạo background overlay
+        backgroundOverlay = findViewById(R.id.backgroundOverlay);
+
+        // Ẩn tất cả nội dung cho đến khi dữ liệu được tải
+        hideContentViews();
     }
 
     /**
-     * Thiết lập các sự kiện
+     * Ẩn tất cả các view nội dung để tránh hiện tượng nháy
      */
-    private void setupListeners() {
-        fabFavorite.setOnClickListener(v -> {
-            presenter.onFavoriteClick(healthTipId);
-        });
+    private void hideContentViews() {
+        // Ẩn các thành phần chính
+        if (textViewTitle != null) textViewTitle.setVisibility(View.GONE);
+        if (textViewCategory != null) textViewCategory.setVisibility(View.GONE);
+        if (textViewContent != null) textViewContent.setVisibility(View.GONE);
+        if (textViewViewCount != null) textViewViewCount.setVisibility(View.GONE);
+        if (textViewLikeCount != null) textViewLikeCount.setVisibility(View.GONE);
+        if (fabFavorite != null) fabFavorite.setVisibility(View.GONE);
+        if (buttonLike != null) buttonLike.setVisibility(View.GONE);
+        if (buttonShare != null) buttonShare.setVisibility(View.GONE);
+        if (imageViewDetail != null) imageViewDetail.setVisibility(View.GONE);
 
-        buttonLike.setOnClickListener(v -> {
-            presenter.onLikeClick(healthTipId);
-        });
-
-        buttonShare.setOnClickListener(v -> {
-            presenter.onShareClick(healthTipId);
-        });
+        // Hiển thị loading
+        showLoading(true);
     }
 
     /**
-     * Cập nhật icon của FAB yêu thích
+     * Hiển thị các view nội dung với animation mượt mà
      */
-    private void updateFavoriteFabIcon() {
-        if (isFavorite) {
-            fabFavorite.setImageResource(R.drawable.ic_favorite);
-            fabFavorite.setContentDescription(getString(R.string.remove_from_favorite));
-        } else {
-            fabFavorite.setImageResource(R.drawable.ic_favorite_border);
-            fabFavorite.setContentDescription(getString(R.string.add_to_favorite));
+    private void showContentViewsWithAnimation() {
+        // Ẩn loading trước
+        showLoading(false);
+
+        // Tạo danh sách các view cần animate
+        View[] viewsToAnimate = {
+            imageViewDetail,
+            textViewTitle,
+            textViewCategory,
+            textViewViewCount,
+            textViewLikeCount,
+            textViewContent,
+            buttonLike,
+            buttonShare,
+            fabFavorite
+        };
+
+        // Animate từng view với delay nhỏ để tạo hiệu ứng cascade
+        for (int i = 0; i < viewsToAnimate.length; i++) {
+            final View view = viewsToAnimate[i];
+            if (view != null) {
+                // Đặt vị trí ban đầu (ẩn và offset)
+                view.setAlpha(0f);
+                view.setTranslationY(50f);
+                view.setVisibility(View.VISIBLE);
+
+                // Animate với delay
+                view.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(300)
+                    .setStartDelay(i * 50) // Delay 50ms cho mỗi view
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .start();
+            }
         }
     }
 
     /**
-     * Cập nhật text của nút thích
+     * Thiết lập chức năng swipe-to-dismiss
      */
-    private void updateLikeButtonText() {
-        buttonLike.setText(isLiked ? R.string.unlike : R.string.like);
+    private void setupSwipeToDismiss() {
+        if (swipeToDismissLayout != null) {
+            swipeToDismissLayout.setOnDismissListener(new SwipeToDismissLayout.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    // Đóng activity với animation
+                    finishWithAnimation();
+                }
+
+                @Override
+                public void onDragProgress(float progress) {
+                    // Cập nhật hiệu ứng khi đang kéo
+                    // Progress từ 0.0 (không kéo) đến 1.0 (kéo hoàn toàn)
+                    updateDragProgress(progress);
+                }
+            });
+        }
     }
 
     /**
-     * Chia sẻ thông tin mẹo sức khỏe
+     * Cập nhật hiệu ứng khi đang kéo - làm cho activity phía sau hiển thị rõ hơn
      */
-    private void shareHealthTip() {
-        String shareText = textViewTitle.getText() + "\n\n" + textViewContent.getText();
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, textViewTitle.getText());
-        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
-        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_tip)));
+    private void updateDragProgress(float progress) {
+        // Thay đổi độ mờ của drag handle
+        if (dragHandle != null) {
+            dragHandle.setAlpha(1.0f - progress * 0.5f);
+        }
+
+        // Thông báo cho activity phía trước để cập nhật hiệu ứng
+        // Activity phía trước sẽ được làm sáng dần khi kéo xuống
+        updateBackgroundActivityVisibility(progress);
+    }
+
+    /**
+     * Cập nhật hiển thị activity phía sau khi đang kéo
+     */
+    private void updateBackgroundActivityVisibility(float progress) {
+        // Tính toán độ mờ của overlay để làm cho activity phía sau hiển thị rõ hơn
+        // Khi progress = 0 (không kéo): overlay hoàn toàn mờ
+        // Khi progress = 1 (kéo hoàn toàn): overlay trong suốt, activity phía sau hiển thị rõ
+
+        // Tạo overlay effect để activity phía sau hiển thị dần
+        View rootView = findViewById(android.R.id.content);
+        if (rootView != null) {
+            // Thay đổi background alpha của window để thấy activity phía sau
+            float overlayAlpha = 0.3f * (1.0f - progress); // Bắt đầu từ 30% opacity, giảm dần về 0
+            getWindow().setStatusBarColor(
+                    android.graphics.Color.argb(
+                            (int) (overlayAlpha * 255),
+                            0, 0, 0
+                    )
+            );
+        }
     }
 
     @Override
@@ -228,6 +353,62 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         isLiked = healthTip.isLiked();
         updateFavoriteFabIcon();
         updateLikeButtonText();
+
+        // Hiển thị nội dung với animation
+        showContentViewsWithAnimation();
+    }
+
+    /**
+     * Thiết lập các sự kiện
+     */
+    private void setupListeners() {
+        if (fabFavorite != null) {
+            fabFavorite.setOnClickListener(v -> {
+                if (presenter != null) {
+                    presenter.onFavoriteClick(healthTipId);
+                }
+            });
+        }
+
+        if (buttonLike != null) {
+            buttonLike.setOnClickListener(v -> {
+                if (presenter != null) {
+                    presenter.onLikeClick(healthTipId);
+                }
+            });
+        }
+
+        if (buttonShare != null) {
+            buttonShare.setOnClickListener(v -> {
+                if (presenter != null) {
+                    presenter.onShareClick(healthTipId);
+                }
+            });
+        }
+    }
+
+    /**
+     * Cập nhật icon của FAB yêu thích
+     */
+    private void updateFavoriteFabIcon() {
+        if (fabFavorite != null) {
+            if (isFavorite) {
+                fabFavorite.setImageResource(R.drawable.ic_favorite);
+                fabFavorite.setContentDescription(getString(R.string.remove_from_favorite));
+            } else {
+                fabFavorite.setImageResource(R.drawable.ic_favorite_border);
+                fabFavorite.setContentDescription(getString(R.string.add_to_favorite));
+            }
+        }
+    }
+
+    /**
+     * Cập nhật text của nút thích
+     */
+    private void updateLikeButtonText() {
+        if (buttonLike != null) {
+            buttonLike.setText(isLiked ? R.string.unlike : R.string.like);
+        }
     }
 
     @Override
@@ -275,5 +456,24 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         if (presenter != null) {
             presenter.detachView();
         }
+    }
+
+    @Override
+    public void finish() {
+        finishWithAnimation();
+    }
+
+    @Override
+    public void onBackPressed() {
+        finishWithAnimation();
+    }
+
+    /**
+     * Đóng activity với animation trượt xuống dưới
+     */
+    private void finishWithAnimation() {
+        super.finish();
+        // Áp dụng animation trượt xuống dưới khi đóng activity
+        overridePendingTransition(R.anim.restore_and_scale_up, R.anim.slide_down_to_bottom);
     }
 }

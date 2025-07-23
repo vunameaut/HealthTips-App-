@@ -27,6 +27,8 @@ import com.vhn.doan.data.repository.HealthTipRepository;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
 import com.vhn.doan.presentation.home.adapter.CategoryAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipAdapter;
+import com.vhn.doan.presentation.home.adapter.CategorySkeletonAdapter;
+import com.vhn.doan.presentation.home.adapter.HealthTipSkeletonAdapter;
 import com.vhn.doan.utils.Constants;
 
 import java.util.ArrayList;
@@ -51,14 +53,26 @@ public class HomeFragment extends Fragment implements HomeView {
     private TextView textViewSeeAllMostViewed;
     private TextView textViewSeeAllMostLiked;
 
-    // Adapters
+    // Adapters - Real data
     private CategoryAdapter categoryAdapter;
     private HealthTipAdapter latestTipsAdapter;
     private HealthTipAdapter mostViewedTipsAdapter;
     private HealthTipAdapter mostLikedTipsAdapter;
 
+    // Skeleton Adapters
+    private CategorySkeletonAdapter categorySkeletonAdapter;
+    private HealthTipSkeletonAdapter latestTipsSkeletonAdapter;
+    private HealthTipSkeletonAdapter mostViewedTipsSkeletonAdapter;
+    private HealthTipSkeletonAdapter mostLikedTipsSkeletonAdapter;
+
     // Presenter
     private HomePresenter presenter;
+
+    // Loading state flags
+    private boolean isCategoriesLoaded = false;
+    private boolean isLatestTipsLoaded = false;
+    private boolean isMostViewedTipsLoaded = false;
+    private boolean isMostLikedTipsLoaded = false;
 
     public HomeFragment() {
         // Constructor mặc định
@@ -96,14 +110,87 @@ public class HomeFragment extends Fragment implements HomeView {
         // Ánh xạ các thành phần UI
         initViews(view);
 
-        // Thiết lập RecyclerViews
-        setupRecyclerViews();
+        // Thiết lập Layout Managers cho RecyclerViews TRƯỚC
+        setupLayoutManagers();
+
+        // Hiển thị skeleton loading ngay sau khi có Layout Managers
+        setupSkeletonLoading();
+
+        // Khởi tạo real adapters (nhưng chưa set vào RecyclerViews)
+        initializeRealAdapters();
 
         // Thiết lập các sự kiện click
         setupClickListeners();
 
         // Gắn presenter với view và bắt đầu tải dữ liệu
         presenter.attachView(this);
+    }
+
+    /**
+     * Thiết lập skeleton loading cho tất cả RecyclerViews
+     */
+    private void setupSkeletonLoading() {
+        // Hiển thị tất cả các tiêu đề và "Xem tất cả" ngay lập tức
+        showAllTitlesAndSeeAll();
+
+        // Thiết lập skeleton adapters
+        setupSkeletonAdapters();
+    }
+
+    /**
+     * Hiển thị tất cả tiêu đề và nút "Xem tất cả"
+     */
+    private void showAllTitlesAndSeeAll() {
+        if (textViewCategoriesTitle != null) textViewCategoriesTitle.setVisibility(View.VISIBLE);
+        if (textViewLatestTipsTitle != null) textViewLatestTipsTitle.setVisibility(View.VISIBLE);
+        if (textViewMostViewedTitle != null) textViewMostViewedTitle.setVisibility(View.VISIBLE);
+        if (textViewMostLikedTitle != null) textViewMostLikedTitle.setVisibility(View.VISIBLE);
+
+        if (textViewSeeAllCategories != null) textViewSeeAllCategories.setVisibility(View.VISIBLE);
+        if (textViewSeeAllLatestTips != null) textViewSeeAllLatestTips.setVisibility(View.VISIBLE);
+        if (textViewSeeAllMostViewed != null) textViewSeeAllMostViewed.setVisibility(View.VISIBLE);
+        if (textViewSeeAllMostLiked != null) textViewSeeAllMostLiked.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Thiết lập skeleton adapters cho tất cả RecyclerViews
+     */
+    private void setupSkeletonAdapters() {
+        // Skeleton cho Categories (4 items)
+        categorySkeletonAdapter = new CategorySkeletonAdapter(requireContext(), 4);
+        recyclerViewCategories.setAdapter(categorySkeletonAdapter);
+
+        // Skeleton cho Latest Tips (3 items)
+        latestTipsSkeletonAdapter = new HealthTipSkeletonAdapter(requireContext(), 3);
+        recyclerViewLatestTips.setAdapter(latestTipsSkeletonAdapter);
+
+        // Skeleton cho Most Viewed Tips (3 items)
+        mostViewedTipsSkeletonAdapter = new HealthTipSkeletonAdapter(requireContext(), 3);
+        recyclerViewMostViewedTips.setAdapter(mostViewedTipsSkeletonAdapter);
+
+        // Skeleton cho Most Liked Tips (3 items)
+        mostLikedTipsSkeletonAdapter = new HealthTipSkeletonAdapter(requireContext(), 3);
+        recyclerViewMostLikedTips.setAdapter(mostLikedTipsSkeletonAdapter);
+    }
+
+    /**
+     * DEPRECATED: Không còn sử dụng phương thức này
+     * Thay thế bằng setupSkeletonLoading()
+     */
+    @Deprecated
+    private void hideContentViews() {
+        // Phương thức này không còn được sử dụng
+        // Skeleton loading sẽ hiển thị ngay từ đầu
+    }
+
+    /**
+     * DEPRECATED: Không còn sử dụng animation cascade
+     * Data sẽ được thay thế trực tiếp từ skeleton sang real data
+     */
+    @Deprecated
+    private void showContentViewsWithAnimation() {
+        // Phương thức này không còn được sử dụng
+        // Data được cập nhật trực tiếp qua các phương thức show*Data()
     }
 
     /**
@@ -126,16 +213,69 @@ public class HomeFragment extends Fragment implements HomeView {
         textViewSeeAllLatestTips = view.findViewById(R.id.textViewSeeAllLatestTips);
         textViewSeeAllMostViewed = view.findViewById(R.id.textViewSeeAllMostViewed);
         textViewSeeAllMostLiked = view.findViewById(R.id.textViewSeeAllMostLiked);
+
+        // Thêm các tiêu đề sections
+        initSectionTitles(view);
+    }
+
+    // UI components cho tiêu đề sections
+    private TextView textViewCategoriesTitle;
+    private TextView textViewLatestTipsTitle;
+    private TextView textViewMostViewedTitle;
+    private TextView textViewMostLikedTitle;
+
+    /**
+     * Khởi tạo các tiêu đề sections
+     */
+    private void initSectionTitles(View view) {
+        // Tìm các TextView tiêu đề trong layout
+        textViewCategoriesTitle = view.findViewById(R.id.textViewCategoriesTitle);
+        textViewLatestTipsTitle = view.findViewById(R.id.textViewLatestTipsTitle);
+        textViewMostViewedTitle = view.findViewById(R.id.textViewMostViewedTitle);
+        textViewMostLikedTitle = view.findViewById(R.id.textViewMostLikedTitle);
     }
 
     /**
      * Thiết lập RecyclerViews với adapters và LayoutManagers
      */
     private void setupRecyclerViews() {
-        // Setup cho RecyclerView danh mục
+        // Setup Layout Managers TRƯỚC KHI thiết lập skeleton
+        setupLayoutManagers();
+
+        // Khởi tạo real adapters (nhưng chưa set vào RecyclerViews)
+        initializeRealAdapters();
+    }
+
+    /**
+     * Thiết lập Layout Managers cho tất cả RecyclerViews
+     */
+    private void setupLayoutManagers() {
+        // Setup Layout Manager cho Categories
         LinearLayoutManager categoriesLayoutManager = new LinearLayoutManager(
                 requireContext(), RecyclerView.HORIZONTAL, false);
         recyclerViewCategories.setLayoutManager(categoriesLayoutManager);
+
+        // Setup Layout Manager cho Latest Tips
+        LinearLayoutManager latestTipsLayoutManager = new LinearLayoutManager(
+                requireContext(), RecyclerView.HORIZONTAL, false);
+        recyclerViewLatestTips.setLayoutManager(latestTipsLayoutManager);
+
+        // Setup Layout Manager cho Most Viewed Tips
+        LinearLayoutManager mostViewedLayoutManager = new LinearLayoutManager(
+                requireContext(), RecyclerView.HORIZONTAL, false);
+        recyclerViewMostViewedTips.setLayoutManager(mostViewedLayoutManager);
+
+        // Setup Layout Manager cho Most Liked Tips
+        LinearLayoutManager mostLikedLayoutManager = new LinearLayoutManager(
+                requireContext(), RecyclerView.HORIZONTAL, false);
+        recyclerViewMostLikedTips.setLayoutManager(mostLikedLayoutManager);
+    }
+
+    /**
+     * Khởi tạo các real adapters (nhưng chưa set vào RecyclerViews)
+     */
+    private void initializeRealAdapters() {
+        // Khởi tạo Category Adapter
         categoryAdapter = new CategoryAdapter(
                 requireContext(),
                 new ArrayList<>(),
@@ -145,12 +285,8 @@ public class HomeFragment extends Fragment implements HomeView {
                         presenter.onCategorySelected(category);
                     }
                 });
-        recyclerViewCategories.setAdapter(categoryAdapter);
 
-        // Setup cho RecyclerView mẹo sức khỏe mới nhất
-        LinearLayoutManager latestTipsLayoutManager = new LinearLayoutManager(
-                requireContext(), RecyclerView.HORIZONTAL, false);
-        recyclerViewLatestTips.setLayoutManager(latestTipsLayoutManager);
+        // Khởi tạo Latest Tips Adapter
         latestTipsAdapter = new HealthTipAdapter(
                 requireContext(),
                 new ArrayList<>(),
@@ -162,16 +298,11 @@ public class HomeFragment extends Fragment implements HomeView {
 
                     @Override
                     public void onFavoriteClick(HealthTip healthTip, boolean isFavorite) {
-                        // Xử lý khi người dùng click favorite cho latest tips
                         handleFavoriteClick(healthTip, isFavorite);
                     }
                 });
-        recyclerViewLatestTips.setAdapter(latestTipsAdapter);
 
-        // Setup cho RecyclerView mẹo sức khỏe xem nhiều nhất
-        LinearLayoutManager mostViewedLayoutManager = new LinearLayoutManager(
-                requireContext(), RecyclerView.HORIZONTAL, false);
-        recyclerViewMostViewedTips.setLayoutManager(mostViewedLayoutManager);
+        // Khởi tạo Most Viewed Tips Adapter
         mostViewedTipsAdapter = new HealthTipAdapter(
                 requireContext(),
                 new ArrayList<>(),
@@ -183,16 +314,11 @@ public class HomeFragment extends Fragment implements HomeView {
 
                     @Override
                     public void onFavoriteClick(HealthTip healthTip, boolean isFavorite) {
-                        // Xử lý khi người dùng click favorite cho most viewed tips
                         handleFavoriteClick(healthTip, isFavorite);
                     }
                 });
-        recyclerViewMostViewedTips.setAdapter(mostViewedTipsAdapter);
 
-        // Setup cho RecyclerView mẹo sức khỏe được yêu thích nhất
-        LinearLayoutManager mostLikedLayoutManager = new LinearLayoutManager(
-                requireContext(), RecyclerView.HORIZONTAL, false);
-        recyclerViewMostLikedTips.setLayoutManager(mostLikedLayoutManager);
+        // Khởi tạo Most Liked Tips Adapter
         mostLikedTipsAdapter = new HealthTipAdapter(
                 requireContext(),
                 new ArrayList<>(),
@@ -204,11 +330,9 @@ public class HomeFragment extends Fragment implements HomeView {
 
                     @Override
                     public void onFavoriteClick(HealthTip healthTip, boolean isFavorite) {
-                        // Xử lý khi người dùng click favorite cho most liked tips
                         handleFavoriteClick(healthTip, isFavorite);
                     }
                 });
-        recyclerViewMostLikedTips.setAdapter(mostLikedTipsAdapter);
     }
 
     /**
@@ -282,27 +406,67 @@ public class HomeFragment extends Fragment implements HomeView {
         presenter.detachView(); // Tách View khỏi Presenter
     }
 
-    // Triển khai các phương thức của HomeView
-
+    // Triển khai các phương thức của HomeView với skeleton loading
     @Override
     public void showCategories(List<Category> categories) {
+        // Thay thế skeleton adapter bằng real adapter với data
+        if (!isCategoriesLoaded) {
+            recyclerViewCategories.setAdapter(categoryAdapter);
+            isCategoriesLoaded = true;
+        }
         categoryAdapter.updateCategories(categories);
     }
 
     @Override
     public void showLatestHealthTips(List<HealthTip> healthTips) {
+        // Thay thế skeleton adapter bằng real adapter với data
+        if (!isLatestTipsLoaded) {
+            recyclerViewLatestTips.setAdapter(latestTipsAdapter);
+            isLatestTipsLoaded = true;
+        }
         latestTipsAdapter.updateHealthTips(healthTips);
     }
 
     @Override
     public void showMostViewedHealthTips(List<HealthTip> healthTips) {
+        // Thay thế skeleton adapter bằng real adapter với data
+        if (!isMostViewedTipsLoaded) {
+            recyclerViewMostViewedTips.setAdapter(mostViewedTipsAdapter);
+            isMostViewedTipsLoaded = true;
+        }
         mostViewedTipsAdapter.updateHealthTips(healthTips);
     }
 
     @Override
     public void showMostLikedHealthTips(List<HealthTip> healthTips) {
+        // Thay thế skeleton adapter bằng real adapter với data
+        if (!isMostLikedTipsLoaded) {
+            recyclerViewMostLikedTips.setAdapter(mostLikedTipsAdapter);
+            isMostLikedTipsLoaded = true;
+        }
         mostLikedTipsAdapter.updateHealthTips(healthTips);
     }
+
+    /**
+     * DEPRECATED: Không còn sử dụng animation cascade
+     * Data được thay thế trực tiếp từ skeleton sang real data
+     */
+    @Deprecated
+    private void checkAndShowContentAnimation() {
+        // Không còn cần thiết với skeleton loading
+    }
+
+    /**
+     * DEPRECATED: Các phương thức kiểm tra data không còn cần thiết
+     */
+    @Deprecated
+    private boolean hasCategories() { return false; }
+    @Deprecated
+    private boolean hasLatestTips() { return false; }
+    @Deprecated
+    private boolean hasMostViewedTips() { return false; }
+    @Deprecated
+    private boolean hasMostLikedTips() { return false; }
 
     @Override
     public void showOfflineMode() {
@@ -350,7 +514,11 @@ public class HomeFragment extends Fragment implements HomeView {
 
     @Override
     public void showLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        // Với skeleton loading, không cần hiển thị progress bar chính
+        // Skeleton đã thay thế loading indicator
+        if (progressBar != null) {
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -416,12 +584,10 @@ public class HomeFragment extends Fragment implements HomeView {
      */
     public void navigateToFavorites() {
         // Chuyển tab bottom navigation đến favorites
-        if (getActivity() instanceof HomeActivity) {
-            HomeActivity homeActivity = (HomeActivity) getActivity();
+        if (getActivity() != null) {
             // Trigger bottom navigation để chuyển đến FavoriteFragment
-            homeActivity.findViewById(R.id.bottom_navigation);
             com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
-                    homeActivity.findViewById(R.id.bottom_navigation);
+                    getActivity().findViewById(R.id.bottom_navigation);
             if (bottomNav != null) {
                 bottomNav.setSelectedItemId(R.id.nav_favorites);
             }

@@ -1,183 +1,223 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.vhn.doan.presentation.healthtip.detail.SwipeToDismissLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipeToDismissLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.healthtip.detail.HealthTipDetailActivity">
+    android:background="#80000000">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
-
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/collapsingToolbarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleGravity="bottom|start"
-            app:expandedTitleMarginBottom="16dp"
-            app:expandedTitleMarginStart="16dp"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-            <ImageView
-                android:id="@+id/imageViewDetail"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/health_tip_image"
-                android:scaleType="centerCrop"
-                app:layout_collapseMode="parallax" />
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" />
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
+    <!-- Background dimming overlay - sẽ trở nên trong suốt khi kéo xuống -->
+    <View
+        android:id="@+id/backgroundOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:background="#40000000" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:attr/colorBackground"
+        tools:context=".presentation.healthtip.detail.HealthTipDetailActivity">
+
+        <!-- Drag handle indicator -->
+        <View
+            android:id="@+id/dragHandle"
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/drag_handle_background"
+            android:elevation="8dp" />
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:layout_marginTop="16dp"
+            android:fitsSystemWindows="true">
 
-            <TextView
-                android:id="@+id/textViewTitle"
-                android:layout_width="0dp"
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/collapsingToolbarLayout"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleGravity="bottom|start"
+                app:expandedTitleMarginBottom="16dp"
+                app:expandedTitleMarginStart="16dp"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+                <ImageView
+                    android:id="@+id/imageViewDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/health_tip_image"
+                    android:scaleType="centerCrop"
+                    app:layout_collapseMode="parallax" />
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    app:layout_collapseMode="pin"
+                    app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Tiêu đề bài viết sức khỏe" />
+                android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textViewCategory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_category_label"
-                android:paddingStart="8dp"
-                android:paddingTop="4dp"
-                android:paddingEnd="8dp"
-                android:paddingBottom="4dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                android:textColor="@color/black"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textViewTitle"
-                tools:text="Danh mục" />
+                <TextView
+                    android:id="@+id/textViewTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Tiêu đề bài viết sức khỏe" />
 
-            <TextView
-                android:id="@+id/textViewViewCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:drawablePadding="4dp"
-                android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                app:drawableStartCompat="@drawable/ic_visibility"
-                app:layout_constraintEnd_toStartOf="@id/textViewLikeCount"
-                app:layout_constraintTop_toBottomOf="@id/textViewTitle"
-                tools:text="125" />
+                <TextView
+                    android:id="@+id/textViewCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_category_label"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/textViewTitle"
+                    tools:text="Danh mục" />
 
-            <TextView
-                android:id="@+id/textViewLikeCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawablePadding="4dp"
-                android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                app:drawableStartCompat="@drawable/ic_favorite"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/textViewViewCount"
-                tools:text="48" />
+                <TextView
+                    android:id="@+id/textViewViewCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:drawablePadding="4dp"
+                    android:gravity="center_vertical"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    app:drawableStartCompat="@drawable/ic_visibility"
+                    app:layout_constraintEnd_toStartOf="@id/textViewLikeCount"
+                    app:layout_constraintTop_toBottomOf="@id/textViewTitle"
+                    tools:text="125" />
 
-            <View
-                android:id="@+id/divider"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="?android:attr/listDivider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textViewCategory" />
+                <TextView
+                    android:id="@+id/textViewLikeCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="4dp"
+                    android:gravity="center_vertical"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    app:drawableStartCompat="@drawable/ic_favorite"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/textViewViewCount"
+                    tools:text="48" />
 
-            <TextView
-                android:id="@+id/textViewContent"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:lineSpacingMultiplier="1.2"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/divider"
-                tools:text="Nội dung chi tiết bài viết sức khỏe. Phần này sẽ chứa toàn bộ nội dung của mẹo sức khỏe được định dạng phù hợp." />
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:background="?android:attr/listDivider"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/textViewCategory" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
+                <TextView
+                    android:id="@+id/textViewContent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:lineSpacingMultiplier="1.2"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divider"
+                    tools:text="Nội dung chi tiết bài viết sức khỏe. Phần này sẽ chứa toàn bộ nội dung của mẹo sức khỏe được định dạng phù hợp." />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabFavorite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:contentDescription="@string/add_to_favorite"
-        app:layout_anchor="@id/appBarLayout"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@drawable/ic_favorite_border" />
+                <!-- Action buttons section -->
+                <LinearLayout
+                    android:id="@+id/layoutActionButtons"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/textViewContent">
 
-    <LinearLayout
-        android:id="@+id/layoutActionButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="?android:attr/colorBackground"
-        android:elevation="8dp"
-        android:orientation="horizontal"
-        android:padding="8dp">
+                    <Button
+                        android:id="@+id/buttonLike"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/like"
+                        android:drawableStart="@drawable/ic_favorite_border"
+                        android:drawablePadding="8dp"
+                        android:textColor="?attr/colorOnSurface"
+                        app:strokeColor="?attr/colorOnSurface" />
 
-        <Button
-            android:id="@+id/buttonLike"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-            android:layout_width="0dp"
+                    <Button
+                        android:id="@+id/buttonShare"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/share"
+                        android:drawableStart="@drawable/ic_share"
+                        android:drawablePadding="8dp"
+                        android:textColor="?attr/colorOnSurface"
+                        app:strokeColor="?attr/colorOnSurface" />
+
+                </LinearLayout>
+
+                <!-- Bottom spacing -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="24dp"
+                    app:layout_constraintTop_toBottomOf="@id/layoutActionButtons" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabFavorite"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:text="@string/like"
-            app:icon="@drawable/ic_thumb_up" />
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_favorite_border"
+            app:layout_anchor="@id/appBarLayout"
+            app:layout_anchorGravity="bottom|end" />
 
-        <Button
-            android:id="@+id/buttonShare"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-            android:layout_width="0dp"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/share"
-            app:icon="@drawable/ic_share" />
-    </LinearLayout>
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        tools:visibility="visible" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</com.vhn.doan.presentation.healthtip.detail.SwipeToDismissLayout>
