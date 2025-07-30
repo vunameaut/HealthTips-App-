@@ -62,11 +62,16 @@ public class HomeActivity extends AppCompatActivity {
 
                 if (itemId == R.id.nav_home) {
                     fragment = HomeFragment.newInstance();
-                } else if (itemId == R.id.nav_categories) {
+                } else if (itemId == R.id.nav_reminders) {
                     // Tạm thời vẫn dùng HomeFragment cho các tab khác
                     // Sẽ thay thế bằng Fragment tương ứng khi đã phát triển
                     fragment = HomeFragment.newInstance();
-                    // fragment = CategoriesFragment.newInstance();
+                    // fragment = RemindersFragment.newInstance();
+                } else if (itemId == R.id.nav_videos) {
+                    // Tạm thời vẫn dùng HomeFragment
+                    // Sẽ thay thế bằng ShortVideoFragment khi phát triển
+                    fragment = HomeFragment.newInstance();
+                    // fragment = ShortVideoFragment.newInstance();
                 } else if (itemId == R.id.nav_favorites) {
                     // Kích hoạt FavoriteFragment
                     fragment = FavoriteFragment.newInstance();

@@ -30,9 +30,10 @@
 
     <!-- Các chuỗi cho bottom navigation -->
     <string name="nav_home">Trang chủ</string>
-    <string name="nav_categories">Danh mục</string>
+    <string name="nav_reminders">Nhắc nhở</string>
+    <string name="nav_videos">Video ngắn</string>
     <string name="nav_favorites">Yêu thích</string>
-    <string name="nav_profile">Cá nhân</string>
+    <string name="nav_profile">Hồ sơ</string>
 
     <!-- Các chuỗi cho màn hình chi tiết -->
     <string name="related_tips">Mẹo liên quan</string>
