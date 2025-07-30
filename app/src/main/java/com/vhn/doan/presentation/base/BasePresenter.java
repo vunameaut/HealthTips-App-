@@ -1,50 +1,43 @@
 package com.vhn.doan.presentation.base;
 
 /**
- * BasePresenter định nghĩa các phương thức cơ bản mà tất cả các Presenter trong ứng dụng nên thừa kế
- * Tuân theo kiến trúc MVP (Model-View-Presenter)
- *
- * @param <V> Loại View mà Presenter này liên kết với
+ * Base class cho tất cả Presenter trong kiến trúc MVP
+ * Hỗ trợ generic type cho View
  */
 public abstract class BasePresenter<V extends BaseView> {
+
     protected V view;
 
     /**
-     * Gắn View với Presenter
-     * @param view View cần gắn
+     * Gắn view vào presenter
      */
     public void attachView(V view) {
         this.view = view;
     }
 
     /**
-     * Tách View khỏi Presenter để tránh memory leak
+     * Gỡ bỏ view khỏi presenter
      */
     public void detachView() {
         this.view = null;
     }
 
     /**
-     * Kiểm tra xem View có đang được gắn không
-     * @return true nếu View đang được gắn, false nếu không
+     * Kiểm tra xem view có được gắn vào hay không
      */
     public boolean isViewAttached() {
         return view != null;
     }
 
     /**
-     * Phương thức được gọi khi Presenter bắt đầu hoạt động
-     * Nên ghi đè phương thức này để thực hiện các tác vụ khởi tạo
+     * Lấy view hiện tại
      */
-    public void start() {
-        // Có thể ghi đè trong các lớp con
+    public V getView() {
+        return view;
     }
 
     /**
-     * Phương thức được gọi khi Presenter kết thúc hoạt động
-     * Nên ghi đè phương thức này để dọn dẹp tài nguyên
+     * Phương thức khởi tạo - override trong các presenter con
      */
-    public void stop() {
-        // Có thể ghi đè trong các lớp con
-    }
+    public abstract void start();
 }

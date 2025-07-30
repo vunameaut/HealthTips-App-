@@ -34,7 +34,7 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
     /**
      * Lấy view hiện tại
      */
-    protected FavoriteView getView() {
+    public FavoriteView getView() {
         return view;
     }
 

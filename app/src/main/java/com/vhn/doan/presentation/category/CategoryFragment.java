@@ -137,23 +137,19 @@ public class CategoryFragment extends Fragment implements CategoryView, Category
 
     /**
      * Phương thức cập nhật trạng thái loading từ BaseView
-     * @param loading true để hiển thị loading, false để ẩn
      */
     @Override
-    public void showLoading(boolean loading) {
+    public void showLoading() {
         if (isAdded()) {
-            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
-    public void showLoading() {
-        showLoading(true);
-    }
-
-    @Override
     public void hideLoading() {
-        showLoading(false);
+        if (isAdded()) {
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -167,28 +163,17 @@ public class CategoryFragment extends Fragment implements CategoryView, Category
     }
 
     @Override
-    public void showMessage(String message) {
-        if (isAdded()) {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
     public void navigateToCategoryDetail(Category category) {
         if (isAdded()) {
             // Tạo bundle với thông tin danh mục
             Bundle args = new Bundle();
-            args.putString(Constants.INTENT_CATEGORY_ID, category.getId());
+            args.putString("CATEGORY_ID", category.getId());
 
             // TODO: Thực hiện điều hướng đến màn hình chi tiết danh mục
             // Navigation Component hoặc Fragment Transaction có thể được sử dụng ở đây
 
-            // Ví dụ sử dụng Navigation Component:
-            // Navigation.findNavController(requireView())
-            //         .navigate(R.id.action_categoryFragment_to_categoryDetailFragment, args);
-
             // Tạm thời hiển thị thông báo
-            showMessage("Đã chọn danh mục: " + category.getName());
+            Toast.makeText(requireContext(), "Đã chọn danh mục: " + category.getName(), Toast.LENGTH_SHORT).show();
         }
     }
 

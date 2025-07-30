@@ -2,16 +2,16 @@ package com.vhn.doan.presentation.base;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 /**
- * BaseFragment chứa các phương thức chung cho tất cả Fragment trong ứng dụng
- * Implement BaseView để tuân thủ kiến trúc MVP
+ * Base Fragment cho tất cả Fragment trong ứng dụng
+ * Cung cấp các phương thức chung và lifecycle management
  */
-public abstract class BaseFragment extends Fragment implements BaseView {
+public abstract class BaseFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -21,7 +21,7 @@ public abstract class BaseFragment extends Fragment implements BaseView {
     }
 
     /**
-     * Khởi tạo các view components
+     * Khởi tạo các View components
      * @param view Root view của fragment
      */
     protected abstract void initViews(View view);
@@ -31,38 +31,24 @@ public abstract class BaseFragment extends Fragment implements BaseView {
      */
     protected abstract void setupListeners();
 
-    // Implementation của BaseView interface
-    @Override
-    public void showMessage(String message) {
-        if (getContext() != null) {
-            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void showLoading(boolean loading) {
-        // TODO: Implement loading indicator
-        // Có thể override trong các Fragment con để implement loading UI cụ thể
-    }
-
-    @Override
-    public void showError(String errorMessage) {
-        if (getContext() != null) {
-            Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
-        }
-    }
-
     /**
-     * Convenience method để hiển thị loading
+     * Hiển thị loading state
      */
     public void showLoading() {
-        showLoading(true);
+        // Override trong các fragment con nếu cần
     }
 
     /**
-     * Convenience method để ẩn loading
+     * Ẩn loading state
      */
     public void hideLoading() {
-        showLoading(false);
+        // Override trong các fragment con nếu cần
+    }
+
+    /**
+     * Hiển thị thông báo lỗi
+     */
+    public void showError(String message) {
+        // Override trong các fragment con nếu cần
     }
 }

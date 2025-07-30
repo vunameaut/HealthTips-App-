@@ -114,7 +114,6 @@ public class SimpleProfileFragment extends BaseFragment {
         }
     }
 
-    @Override
     public void showLoading(boolean loading) {
         // Implement loading indicator với UI feedback
         if (btnLogout != null) {

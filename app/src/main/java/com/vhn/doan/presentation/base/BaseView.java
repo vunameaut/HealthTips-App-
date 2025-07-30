@@ -1,25 +1,47 @@
 package com.vhn.doan.presentation.base;
 
 /**
- * BaseView định nghĩa các phương thức cơ bản mà tất cả các View trong ứng dụng nên implement
- * Tuân theo kiến trúc MVP (Model-View-Presenter)
+ * Base interface cho tất cả View trong kiến trúc MVP
+ * Tương thích với cách sử dụng hiện có trong dự án
  */
 public interface BaseView {
-    /**
-     * Hiển thị thông báo cho người dùng
-     * @param message Nội dung thông báo
-     */
-    void showMessage(String message);
 
     /**
-     * Hiển thị hoặc ẩn trạng thái đang tải
-     * @param loading true để hiển thị loading, false để ẩn
+     * Hiển thị loading
      */
-    void showLoading(boolean loading);
+    default void showLoading() {
+        // Default implementation - có thể override trong các view con
+    }
+
+    /**
+     * Ẩn loading
+     */
+    default void hideLoading() {
+        // Default implementation - có thể override trong các view con
+    }
 
     /**
      * Hiển thị thông báo lỗi
-     * @param errorMessage Thông báo lỗi
      */
-    void showError(String errorMessage);
+    default void showError(String message) {
+        // Default implementation - có thể override trong các view con
+    }
+
+    /**
+     * Hiển thị thông báo (compatibility method)
+     */
+    default void showMessage(String message) {
+        // Default implementation - có thể override trong các view con
+    }
+
+    /**
+     * Hiển thị loading với tham số boolean (compatibility method)
+     */
+    default void showLoading(boolean loading) {
+        if (loading) {
+            showLoading();
+        } else {
+            hideLoading();
+        }
+    }
 }

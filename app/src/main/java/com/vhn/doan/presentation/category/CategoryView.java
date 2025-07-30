@@ -22,22 +22,6 @@ public interface CategoryView extends BaseView {
     void showEmptyView();
 
     /**
-     * Hiển thị loading trong quá trình tải dữ liệu
-     */
-    void showLoading();
-
-    /**
-     * Ẩn loading khi tải dữ liệu xong
-     */
-    void hideLoading();
-
-    /**
-     * Hiển thị lỗi khi tải dữ liệu thất bại
-     * @param message Thông báo lỗi
-     */
-    void showError(String message);
-
-    /**
      * Chuyển đến màn hình chi tiết của danh mục
      * @param category Danh mục được chọn
      */

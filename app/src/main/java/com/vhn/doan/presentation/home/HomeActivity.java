@@ -14,6 +14,7 @@ import com.vhn.doan.R;
 import com.vhn.doan.presentation.auth.LoginActivity;
 import com.vhn.doan.presentation.favorite.FavoriteFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
+import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.services.AuthManager;
 
 /**
@@ -63,10 +64,8 @@ public class HomeActivity extends AppCompatActivity {
                 if (itemId == R.id.nav_home) {
                     fragment = HomeFragment.newInstance();
                 } else if (itemId == R.id.nav_reminders) {
-                    // Tạm thời vẫn dùng HomeFragment cho các tab khác
-                    // Sẽ thay thế bằng Fragment tương ứng khi đã phát triển
-                    fragment = HomeFragment.newInstance();
-                    // fragment = RemindersFragment.newInstance();
+                    // Kích hoạt ReminderFragment
+                    fragment = ReminderFragment.newInstance();
                 } else if (itemId == R.id.nav_videos) {
                     // Tạm thời vẫn dùng HomeFragment
                     // Sẽ thay thế bằng ShortVideoFragment khi phát triển

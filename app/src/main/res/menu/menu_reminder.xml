@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Search -->
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search"
+        android:title="Tìm kiếm"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+
+    <!-- Filter Active Only -->
+    <item
+        android:id="@+id/action_filter_active"
+        android:icon="@drawable/ic_filter_list"
+        android:title="Chỉ hiển thị đang hoạt động"
+        app:showAsAction="ifRoom" />
+
+    <!-- Refresh -->
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_refresh"
+        android:title="Làm mới"
+        app:showAsAction="never" />
+
+</menu>

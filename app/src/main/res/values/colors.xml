@@ -7,15 +7,16 @@
     <!-- Màu nền -->
     <color name="background_dark">#1A1A1D</color>
     <color name="background_dark_alt">#212124</color>
+    <color name="background_color">#1A1A1D</color>       <!-- Alias cho background_dark -->
 
     <!-- Màu text -->
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#F0F0F0</color>
+    <color name="text_primary">#FFFFFF</color>           <!-- Màu chữ chính - trắng cho dark theme -->
+    <color name="text_secondary">#B0BEC5</color>         <!-- Màu chữ phụ - xám nhạt -->
 
     <!-- Màu cho nút chính -->
-    <color name="primary_button_start">#2E7D32</color> <!-- Xanh lá đậm -->
-    <color name="primary_button_end">#C0CA33</color>   <!-- Vàng chanh -->
-    <color name="primary_button_text">#FFFFFF</color>  <!-- Trắng -->
+    <color name="primary_button_start">#2E7D32</color>   <!-- Xanh lá đậm -->
+    <color name="primary_button_end">#C0CA33</color>     <!-- Vàng chanh -->
+    <color name="primary_button_text">#FFFFFF</color>    <!-- Trắng -->
 
     <!-- Màu cho nút phụ -->
     <color name="secondary_button_start">#F57C00</color> <!-- Cam tươi -->
@@ -23,10 +24,12 @@
     <color name="secondary_button_text">#FFFFFF</color>  <!-- Trắng -->
 
     <!-- Màu điểm nhấn -->
-    <color name="accent">#00BFFF</color>  <!-- Xanh dương sáng -->
+    <color name="accent">#00BFFF</color>                 <!-- Xanh dương sáng -->
+    <color name="accent_color">#FF9800</color>           <!-- Màu nhấn cam -->
 
     <!-- Màu đường viền/phân cách -->
-    <color name="divider">#424242</color> <!-- Xám cho đường phân cách -->
+    <color name="divider">#424242</color>                <!-- Xám cho đường phân cách -->
+    <color name="divider_color">#424242</color>          <!-- Alias cho divider -->
 
     <!-- Màu thông báo -->
     <color name="success">#4CAF50</color>
@@ -39,24 +42,25 @@
     <color name="favorite_outline">#757575</color>       <!-- Màu xám cho trái tim chưa yêu thích -->
     <color name="icon_color">#757575</color>             <!-- Màu icon mặc định -->
 
-    <!-- Màu bị thiếu từ lỗi build -->
+    <!-- Màu bổ sung -->
     <color name="disabled">#757575</color>               <!-- Màu xám cho trạng thái disabled -->
-    <color name="error_color">#F44336</color>            <!-- Màu đỏ cho lỗi -->
+    <color name="error_color">#F44336</color>            <!-- Alias cho error -->
     <color name="progress_color">#4CAF50</color>         <!-- Màu xanh cho progress bar -->
+
+    <!-- Màu chính của ứng dụng -->
+    <color name="primary_color">#4CAF50</color>          <!-- Màu chính - xanh lá -->
+    <color name="primary_dark">#2E7D32</color>           <!-- Màu chính đậm -->
+    <color name="primary_light">#C8E6C9</color>          <!-- Màu chính nhạt -->
 
     <!-- Màu cho Material Design 3 - Dark Theme -->
     <color name="md_theme_dark_primary">#4CAF50</color>
     <color name="md_theme_dark_onPrimary">#FFFFFF</color>
     <color name="md_theme_dark_surface">#1A1A1D</color>
     <color name="md_theme_dark_onSurface">#FFFFFF</color>
-    <color name="md_theme_dark_background">#1A1A1D</color>
-    <color name="md_theme_dark_onBackground">#FFFFFF</color>
 
-    <!-- Màu cho Material Design 3 - Light Theme -->
-    <color name="md_theme_light_primary">#2196F3</color>
-    <color name="md_theme_light_onPrimary">#FFFFFF</color>
-    <color name="md_theme_light_surface">#FFFFFF</color>
-    <color name="md_theme_light_onSurface">#212124</color>
-    <color name="md_theme_light_background">#E0F2F7</color>
-    <color name="md_theme_light_onBackground">#212124</color>
+    <!-- Màu cho Reminder Status -->
+    <color name="status_active">#4CAF50</color>          <!-- Xanh lá - nhắc nhở đang hoạt động -->
+    <color name="status_due">#FF5722</color>             <!-- Đỏ cam - nhắc nhở đã đến giờ -->
+    <color name="status_inactive">#757575</color>        <!-- Xám - nhắc nhở đã tắt -->
+
 </resources>

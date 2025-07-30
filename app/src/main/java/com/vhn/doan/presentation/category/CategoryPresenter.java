@@ -105,6 +105,15 @@ public class CategoryPresenter extends BasePresenter<CategoryView> {
     /**
      * Dọn dẹp tài nguyên khi presenter không còn được sử dụng
      */
+    @Override
+    public void start() {
+        // Khởi tạo presenter - tự động tải dữ liệu
+        loadCategories();
+    }
+
+    /**
+     * Dọn dẹp tài nguyên khi presenter không còn được sử dụng
+     */
     public void onDestroy() {
         if (categoryListener != null) {
             categoryRepository.removeListener(categoryListener);
