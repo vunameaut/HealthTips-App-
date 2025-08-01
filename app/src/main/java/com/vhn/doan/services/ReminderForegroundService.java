@@ -30,6 +30,7 @@ public class ReminderForegroundService extends Service {
 
     private PowerManager.WakeLock wakeLock;
     private NotificationManager notificationManager;
+    private boolean isServiceRunning = false;
 
     @Override
     public void onCreate() {
@@ -48,11 +49,12 @@ public class ReminderForegroundService extends Service {
         wakeLock.acquire();
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        isServiceRunning = true;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "ReminderForegroundService started");
+        Log.d(TAG, "ReminderForegroundService started with flags: " + flags + ", startId: " + startId);
 
         try {
             // Bắt đầu chạy foreground với delay nhỏ để tránh lỗi
@@ -65,6 +67,9 @@ public class ReminderForegroundService extends Service {
                     handleShowReminder(intent);
                 }
             }
+
+            // ✅ THÊM: Tự động restart service nếu bị kill
+            Log.d(TAG, "Service đang chạy với START_STICKY để tự động restart");
 
         } catch (Exception e) {
             Log.e(TAG, "Error starting foreground service", e);
@@ -83,8 +88,36 @@ public class ReminderForegroundService extends Service {
         super.onDestroy();
         Log.d(TAG, "ReminderForegroundService destroyed");
 
+        isServiceRunning = false;
+
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
+        }
+
+        // ✅ THÊM: Tự động restart service nếu bị destroy không mong muốn
+        if (isServiceRunning) {
+            Log.d(TAG, "Service bị destroy - tự động restart...");
+            Intent restartIntent = new Intent(this, ReminderForegroundService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(restartIntent);
+            } else {
+                startService(restartIntent);
+            }
+        }
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        Log.d(TAG, "App task removed - service vẫn chạy trong background");
+        
+        // Đảm bảo service tiếp tục chạy khi app bị remove khỏi recent apps
+        Intent restartServiceIntent = new Intent(getApplicationContext(), ReminderForegroundService.class);
+        restartServiceIntent.setPackage(getPackageName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(restartServiceIntent);
+        } else {
+            startService(restartServiceIntent);
         }
     }
 
@@ -106,6 +139,7 @@ public class ReminderForegroundService extends Service {
             );
             channel.setDescription("Dịch vụ chạy ngầm để đảm bảo nhắc nhở hoạt động");
             channel.setShowBadge(false);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
 
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(channel);
@@ -134,6 +168,7 @@ public class ReminderForegroundService extends Service {
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .build();
     }
 
@@ -150,6 +185,9 @@ public class ReminderForegroundService extends Service {
         if (title != null && message != null) {
             // Hiển thị thông báo nhắc nhở
             NotificationService.showReminderNotification(this, title, message, reminderId);
+            
+            // ✅ THÊM: Log để debug
+            Log.d(TAG, "✅ Đã hiển thị notification cho reminder: " + title);
         }
     }
 
@@ -157,16 +195,25 @@ public class ReminderForegroundService extends Service {
      * Static method để start service và hiển thị reminder
      */
     public static void showReminder(Context context, String reminderId, String title, String message) {
+        Log.d(TAG, "🔄 Yêu cầu hiển thị reminder: " + title);
+        
         Intent serviceIntent = new Intent(context, ReminderForegroundService.class);
         serviceIntent.setAction("SHOW_REMINDER");
         serviceIntent.putExtra("reminder_id", reminderId);
         serviceIntent.putExtra("title", title);
         serviceIntent.putExtra("message", message);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent);
-        } else {
-            context.startService(serviceIntent);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent);
+            } else {
+                context.startService(serviceIntent);
+            }
+            Log.d(TAG, "✅ Đã gửi intent hiển thị reminder");
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi gửi intent hiển thị reminder", e);
+            // Fallback: hiển thị notification trực tiếp
+            NotificationService.showReminderNotification(context, title, message, reminderId);
         }
     }
 
@@ -174,12 +221,19 @@ public class ReminderForegroundService extends Service {
      * Static method để start service
      */
     public static void startService(Context context) {
+        Log.d(TAG, "🔄 Khởi động ReminderForegroundService...");
+        
         Intent serviceIntent = new Intent(context, ReminderForegroundService.class);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent);
-        } else {
-            context.startService(serviceIntent);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent);
+            } else {
+                context.startService(serviceIntent);
+            }
+            Log.d(TAG, "✅ Đã khởi động ReminderForegroundService thành công");
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi khởi động ReminderForegroundService", e);
         }
     }
 
@@ -187,8 +241,12 @@ public class ReminderForegroundService extends Service {
      * Static method để stop service
      */
     public static void stopService(Context context) {
+        Log.d(TAG, "🔄 Dừng ReminderForegroundService...");
+        
         Intent serviceIntent = new Intent(context, ReminderForegroundService.class);
         context.stopService(serviceIntent);
+        
+        Log.d(TAG, "✅ Đã dừng ReminderForegroundService");
     }
 
     /**

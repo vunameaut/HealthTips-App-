@@ -3,6 +3,7 @@ package com.vhn.doan.presentation.home;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,8 @@ import com.vhn.doan.presentation.favorite.FavoriteFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.services.AuthManager;
+import com.vhn.doan.services.ReminderForegroundService;
+import com.vhn.doan.receivers.BootReceiver;
 
 /**
  * HomeActivity là màn hình chính của ứng dụng sau khi đăng nhập
@@ -23,6 +26,7 @@ import com.vhn.doan.services.AuthManager;
  */
 public class HomeActivity extends AppCompatActivity {
 
+    private static final String TAG = "HomeActivity";
     private BottomNavigationView bottomNavigationView;
     private AuthManager authManager;
 
@@ -44,12 +48,35 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
 
+        // ✅ KHỞI ĐỘNG REMINDER SERVICE KHI APP ĐƯỢC MỞ
+        startReminderServices();
+
         // Khởi tạo và thiết lập BottomNavigationView
         setupBottomNavigation();
 
         // Mặc định hiển thị HomeFragment khi khởi động
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
+        }
+    }
+
+    /**
+     * Khởi động các service cần thiết cho reminder system
+     */
+    private void startReminderServices() {
+        try {
+            Log.d(TAG, "🔄 Khởi động reminder services...");
+
+            // 1. Khởi động Foreground Service để duy trì hoạt động
+            ReminderForegroundService.startService(this);
+            Log.d(TAG, "✅ Đã khởi động ReminderForegroundService");
+
+            // 2. Khôi phục lại tất cả reminder active
+            BootReceiver.rescheduleAllReminders(this);
+            Log.d(TAG, "✅ Đã yêu cầu khôi phục reminders");
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi khởi động reminder services", e);
         }
     }
 
@@ -63,6 +90,30 @@ public class HomeActivity extends AppCompatActivity {
         if (currentFragment instanceof ReminderFragment) {
             ReminderFragment reminderFragment = (ReminderFragment) currentFragment;
             reminderFragment.onCreateReminderClick();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        // ✅ ĐẢM BẢO SERVICE LUÔN CHẠY KHI APP ĐƯỢC RESUME
+        ensureReminderServiceRunning();
+    }
+
+    /**
+     * Đảm bảo reminder service luôn chạy
+     */
+    private void ensureReminderServiceRunning() {
+        try {
+            Log.d(TAG, "🔄 Kiểm tra và đảm bảo reminder service đang chạy...");
+            
+            // Khởi động service nếu chưa chạy
+            ReminderForegroundService.startService(this);
+            
+            Log.d(TAG, "✅ Đã đảm bảo reminder service đang chạy");
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi đảm bảo reminder service chạy", e);
         }
     }
 

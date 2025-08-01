@@ -7,6 +7,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -25,6 +27,7 @@ public class NotificationService {
     private static final String REMINDER_CHANNEL_NAME = "Nhắc nhở sức khỏe";
     private static final String REMINDER_CHANNEL_DESCRIPTION = "Thông báo nhắc nhở về sức khỏe";
     private static final int REMINDER_NOTIFICATION_ID = 1001;
+    private static final int MAX_RETRY_ATTEMPTS = 3;
 
     private Context context;
     private NotificationManager notificationManager;
@@ -52,64 +55,97 @@ public class NotificationService {
             channel.setLightColor(android.graphics.Color.BLUE);
             channel.setShowBadge(true);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            channel.setAllowBubbles(true);
 
             notificationManager.createNotificationChannel(channel);
         }
     }
 
     /**
-     * Hiển thị thông báo nhắc nhở
+     * Hiển thị thông báo nhắc nhở với retry logic
      */
     public void showReminderNotification(Reminder reminder) {
         if (reminder == null) return;
 
-        // Tạo intent để mở app khi click notification
-        Intent intent = new Intent(context, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra("open_reminders", true);
+        showReminderNotificationWithRetry(reminder, 0);
+    }
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        // Tạo notification với âm thanh và rung
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification_reminder)
-            .setContentTitle("🔔 Nhắc nhở: " + reminder.getTitle())
-            .setContentText(reminder.getDescription())
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setAutoCancel(true)
-            .setOngoing(false)
-            .setContentIntent(pendingIntent)
-            .setStyle(new NotificationCompat.BigTextStyle()
-                .bigText(reminder.getDescription())
-                .setBigContentTitle("🔔 Nhắc nhở: " + reminder.getTitle()))
-            .addAction(
-                R.drawable.ic_check,
-                "✓ Hoàn thành",
-                createMarkCompleteIntent(reminder)
-            )
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER);
-
-        // Hiển thị notification
+    /**
+     * Hiển thị thông báo nhắc nhở với retry logic
+     */
+    private void showReminderNotificationWithRetry(Reminder reminder, int retryCount) {
         try {
+            // Tạo intent để mở app khi click notification
+            Intent intent = new Intent(context, HomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.putExtra("open_reminders", true);
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            // Tạo notification với âm thanh và rung
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification_reminder)
+                .setContentTitle("🔔 Nhắc nhở: " + reminder.getTitle())
+                .setContentText(reminder.getDescription())
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setAutoCancel(true)
+                .setOngoing(false)
+                .setContentIntent(pendingIntent)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText(reminder.getDescription())
+                    .setBigContentTitle("🔔 Nhắc nhở: " + reminder.getTitle()))
+                .addAction(
+                    R.drawable.ic_check,
+                    "✓ Hoàn thành",
+                    createMarkCompleteIntent(reminder)
+                )
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setTimeoutAfter(300000) // 5 phút timeout
+                .setOnlyAlertOnce(false);
+
+            // Hiển thị notification
             NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
             if (notificationManagerCompat.areNotificationsEnabled()) {
                 int notificationId = REMINDER_NOTIFICATION_ID + reminder.getId().hashCode();
                 notificationManagerCompat.notify(notificationId, builder.build());
 
-                android.util.Log.d("NotificationService", "Đã hiển thị thông báo cho reminder: " +
+                android.util.Log.d("NotificationService", "✅ Đã hiển thị thông báo cho reminder: " +
                     reminder.getTitle() + " với ID: " + notificationId);
             } else {
-                android.util.Log.w("NotificationService", "Thông báo bị tắt bởi người dùng");
+                android.util.Log.w("NotificationService", "❌ Thông báo bị tắt bởi người dùng");
+                
+                // Retry sau 1 giây nếu notification bị tắt
+                if (retryCount < MAX_RETRY_ATTEMPTS) {
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        showReminderNotificationWithRetry(reminder, retryCount + 1);
+                    }, 1000);
+                }
             }
         } catch (SecurityException e) {
-            android.util.Log.e("NotificationService", "Không có quyền hiển thị thông báo", e);
+            android.util.Log.e("NotificationService", "❌ Không có quyền hiển thị thông báo", e);
+            
+            // Retry sau 2 giây nếu có lỗi permission
+            if (retryCount < MAX_RETRY_ATTEMPTS) {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    showReminderNotificationWithRetry(reminder, retryCount + 1);
+                }, 2000);
+            }
+        } catch (Exception e) {
+            android.util.Log.e("NotificationService", "❌ Lỗi khi hiển thị thông báo", e);
+            
+            // Retry sau 3 giây nếu có lỗi khác
+            if (retryCount < MAX_RETRY_ATTEMPTS) {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    showReminderNotificationWithRetry(reminder, retryCount + 1);
+                }, 3000);
+            }
         }
     }
 
@@ -157,6 +193,8 @@ public class NotificationService {
      * Hiển thị thông báo nhắc nhở với các tham số riêng lẻ (static method)
      */
     public static void showReminderNotification(Context context, String title, String message, String reminderId) {
+        android.util.Log.d("NotificationService", "🔄 Yêu cầu hiển thị notification: " + title);
+        
         NotificationService service = new NotificationService(context);
 
         // Tạo một Reminder object tạm thời để sử dụng method hiện tại
