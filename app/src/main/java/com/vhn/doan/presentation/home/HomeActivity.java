@@ -2,6 +2,7 @@ package com.vhn.doan.presentation.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,8 @@ import com.vhn.doan.presentation.favorite.FavoriteFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.services.AuthManager;
+import com.vhn.doan.services.ReminderManager;
+import com.vhn.doan.utils.UserSessionManager;
 
 /**
  * HomeActivity là màn hình chính của ứng dụng sau khi đăng nhập
@@ -23,8 +26,10 @@ import com.vhn.doan.services.AuthManager;
  */
 public class HomeActivity extends AppCompatActivity {
 
+    private static final String TAG = "HomeActivity";
     private BottomNavigationView bottomNavigationView;
     private AuthManager authManager;
+    private ReminderManager reminderManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +49,38 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
 
+        // Khởi tạo ReminderManager
+        reminderManager = new ReminderManager(new UserSessionManager(this));
+
+        // Khởi động ReminderForegroundService
+        reminderManager.startReminderService(this);
+        Log.d(TAG, "ReminderForegroundService đã được khởi động từ HomeActivity");
+
         // Khởi tạo và thiết lập BottomNavigationView
         setupBottomNavigation();
 
         // Mặc định hiển thị HomeFragment khi khởi động
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Khởi động lại ReminderForegroundService khi activity được resume
+        if (reminderManager != null) {
+            // Khởi động lại service để đảm bảo nó đang chạy
+            reminderManager.startReminderService(this);
+
+            // Khởi động lại tất cả reminders đang active
+            reminderManager.restartAllReminders(this);
+
+            // Kiểm tra và hiển thị reminders đã bị miss
+            reminderManager.checkAndShowMissedReminders(this);
+
+            Log.d(TAG, "Đã khởi động lại và kiểm tra reminders trong onResume");
         }
     }
 

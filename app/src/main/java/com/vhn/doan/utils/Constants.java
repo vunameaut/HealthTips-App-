@@ -15,6 +15,7 @@ public class Constants {
     public static final String FAVORITES_REF = "favorites"; // Thêm path cho favorites theo cấu trúc test data
     public static final String USER_FAVORITES_REF = "user_favorites";
     public static final String USER_HISTORY_REF = "user_history";
+    public static final String REMINDERS_NODE = "reminders"; // Node lưu trữ các reminder
 
     // Đường dẫn cho Firebase Firestore và Storage
     public static final String USERS_PATH = "users";
@@ -51,4 +52,16 @@ public class Constants {
     // Các màu sắc gradient cho nút (được định nghĩa trong XML)
     public static final String PRIMARY_BUTTON_GRADIENT = "primary_button_gradient";
     public static final String SECONDARY_BUTTON_GRADIENT = "secondary_button_gradient";
+
+    // Các action cho ReminderService
+    public static final String ACTION_SET_REMINDER = "com.vhn.doan.action.SET_REMINDER";
+    public static final String ACTION_SHOW_MISSED_REMINDER = "com.vhn.doan.action.SHOW_MISSED_REMINDER";
+    public static final String ACTION_CANCEL_REMINDER = "com.vhn.doan.action.CANCEL_REMINDER";
+    public static final String ACTION_REMINDER_TRIGGER = "com.vhn.doan.action.REMINDER_TRIGGER";
+
+    // Các key cho Intent extras
+    public static final String EXTRA_REMINDER = "com.vhn.doan.extra.REMINDER";
+    public static final String EXTRA_REMINDER_ID = "com.vhn.doan.extra.REMINDER_ID";
+    public static final String EXTRA_REMINDER_TITLE = "com.vhn.doan.extra.REMINDER_TITLE";
+    public static final String EXTRA_REMINDER_MESSAGE = "com.vhn.doan.extra.REMINDER_MESSAGE";
 }

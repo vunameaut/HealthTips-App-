@@ -3,6 +3,7 @@ package com.vhn.doan.data;
 import com.google.firebase.database.PropertyName;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Exclude;
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.Map;
  * Model class đại diện cho một nhắc nhở sức khỏe
  * Được tối ưu hóa để tương thích với Firebase Realtime Database
  */
-public class Reminder {
+public class Reminder implements Serializable {
     private String id;
     private String userId;
     private String title;
