@@ -78,11 +78,15 @@ public class ReminderDialog {
     public ReminderDialog(Context context, Reminder reminder, OnReminderDialogListener listener) {
         this(context, listener);
         this.reminder = reminder;
-        this.isEditMode = reminder != null; // Chỉ set edit mode khi reminder không null
+        this.isEditMode = reminder != null;
 
         // Kiểm tra reminder không null trước khi truy cập properties
         if (reminder != null && reminder.getReminderTime() != null) {
             selectedDateTime.setTime(reminder.getReminderTime());
+        } else {
+            // Đặt thời gian mặc định là 1 giờ sau thời điểm hiện tại nếu reminder null
+            selectedDateTime = Calendar.getInstance();
+            selectedDateTime.add(Calendar.HOUR_OF_DAY, 1);
         }
     }
 

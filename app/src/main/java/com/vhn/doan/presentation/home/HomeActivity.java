@@ -49,7 +49,20 @@ public class HomeActivity extends AppCompatActivity {
 
         // Mặc định hiển thị HomeFragment khi khởi động
         if (savedInstanceState == null) {
-            loadFragment(HomeFragment.newInstance());
+            loadFragment(new HomeFragment());
+        }
+    }
+
+    /**
+     * Method để xử lý onClick từ XML layout cho nút tạo reminder
+     * Sửa lỗi: IllegalStateException: Could not find method onCreateReminderClick
+     */
+    public void onCreateReminderClick(android.view.View view) {
+        // Tìm ReminderFragment hiện tại và gọi method tạo reminder
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (currentFragment instanceof ReminderFragment) {
+            ReminderFragment reminderFragment = (ReminderFragment) currentFragment;
+            reminderFragment.onCreateReminderClick();
         }
     }
 

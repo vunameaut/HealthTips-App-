@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Tên ứng dụng -->
     <string name="app_name">HealthTips</string>
@@ -51,7 +50,30 @@
     <string name="success_reset_password">Đã gửi email đặt lại mật khẩu</string>
     <string name="error_network">Lỗi kết nối mạng</string>
 
-    <!-- Chuỗi bổ sung cho màn hình chi tiết bài viết -->
+    <!-- Chuỗi cho màn hình nhắc nhở -->
+    <string name="reminder_title">Tiêu đề nhắc nhở</string>
+    <string name="reminder_description">Mô tả nhắc nhở</string>
+    <string name="reminder_time">Thời gian nhắc nhở</string>
+    <string name="reminder_repeat">Lặp lại</string>
+    <string name="reminder_active">Kích hoạt</string>
+    <string name="create_reminder">Tạo nhắc nhở</string>
+    <string name="edit_reminder">Chỉnh sửa nhắc nhở</string>
+    <string name="delete_reminder">Xóa nhắc nhở</string>
+    <string name="no_reminders">Chưa có nhắc nhở nào</string>
+
+    <!-- Chuỗi cho loại lặp lại -->
+    <string name="repeat_none">Không lặp</string>
+    <string name="repeat_daily">Hàng ngày</string>
+    <string name="repeat_weekly">Hàng tuần</string>
+    <string name="repeat_monthly">Hàng tháng</string>
+
+    <!-- Chuỗi cho notification -->
+    <string name="notification_channel_name">Nhắc nhở sức khỏe</string>
+    <string name="notification_channel_description">Thông báo nhắc nhở về sức khỏe</string>
+    <string name="notification_reminder_title">Nhắc nhở: %1$s</string>
+    <string name="notification_mark_complete">Đánh dấu hoàn thành</string>
+
+    <!-- Các chuỗi bổ sung cho màn hình chi tiết bài viết -->
     <string name="like">Thích</string>
     <string name="unlike">Bỏ thích</string>
     <string name="add_to_favorite">Thêm vào yêu thích</string>
@@ -69,9 +91,16 @@
     <string name="empty_categories_description">Các danh mục sẽ xuất hiện ở đây</string>
 
     <!-- Các chuỗi chung -->
+    <string name="ok">OK</string>
+    <string name="cancel">Hủy</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
     <string name="loading">Đang tải...</string>
-    <string name="retry">Thử lại</string>
-    <string name="error_general">Đã xảy ra lỗi</string>
+    <string name="error">Lỗi</string>
+    <string name="success">Thành công</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="warning">Cảnh báo</string>
+
     <string name="no_data">Không có dữ liệu</string>
     <string name="logout">Đăng xuất</string>
     <string name="back">Quay lại</string>

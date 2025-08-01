@@ -1,21 +1,25 @@
 package com.vhn.doan.data;
 
+import com.google.firebase.database.PropertyName;
+import com.google.firebase.database.ServerValue;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Model class đại diện cho một nhắc nhở sức khỏe
+ * Được tối ưu hóa để tương thích với Firebase Realtime Database
  */
 public class Reminder {
     private String id;
     private String userId;
     private String title;
     private String description;
-    private Date reminderTime;
+    private Long reminderTime; // Sử dụng Long thay vì Date để tương thích Firebase
     private int repeatType; // 0: Không lặp, 1: Hàng ngày, 2: Hàng tuần, 3: Hàng tháng
     private boolean isActive;
-    private Date createdAt;
-    private Date updatedAt;
+    private Long createdAt; // Sử dụng Long thay vì Date
+    private Long updatedAt; // Sử dụng Long thay vì Date
     private String healthTipId; // ID của mẹo sức khỏe liên quan (nếu có)
 
     // Enum cho loại lặp lại
@@ -28,8 +32,9 @@ public class Reminder {
 
     // Constructor mặc định (cần thiết cho Firebase)
     public Reminder() {
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
+        long currentTime = System.currentTimeMillis();
+        this.createdAt = currentTime;
+        this.updatedAt = currentTime;
         this.isActive = true;
         this.repeatType = RepeatType.NO_REPEAT;
     }
@@ -41,15 +46,16 @@ public class Reminder {
         this.userId = userId;
         this.title = title;
         this.description = description;
-        this.reminderTime = reminderTime;
+        this.reminderTime = reminderTime != null ? reminderTime.getTime() : null;
         this.repeatType = repeatType;
         this.isActive = isActive;
         this.healthTipId = healthTipId;
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
+        long currentTime = System.currentTimeMillis();
+        this.createdAt = currentTime;
+        this.updatedAt = currentTime;
     }
 
-    // Getters
+    // Getters với Firebase annotations
     public String getId() {
         return id;
     }
@@ -66,8 +72,15 @@ public class Reminder {
         return description;
     }
 
-    public Date getReminderTime() {
+    // Getter cho Firebase - trả về Long
+    @PropertyName("reminderTime")
+    public Long getReminderTimestamp() {
         return reminderTime;
+    }
+
+    // Getter cho UI - trả về Date
+    public Date getReminderTime() {
+        return reminderTime != null ? new Date(reminderTime) : null;
     }
 
     public int getRepeatType() {
@@ -78,12 +91,26 @@ public class Reminder {
         return isActive;
     }
 
-    public Date getCreatedAt() {
+    // Getter cho Firebase - trả về Long
+    @PropertyName("createdAt")
+    public Long getCreatedAtTimestamp() {
         return createdAt;
     }
 
-    public Date getUpdatedAt() {
+    // Getter cho UI - trả về Date
+    public Date getCreatedAt() {
+        return createdAt != null ? new Date(createdAt) : null;
+    }
+
+    // Getter cho Firebase - trả về Long
+    @PropertyName("updatedAt")
+    public Long getUpdatedAtTimestamp() {
         return updatedAt;
+    }
+
+    // Getter cho UI - trả về Date
+    public Date getUpdatedAt() {
+        return updatedAt != null ? new Date(updatedAt) : null;
     }
 
     public String getHealthTipId() {
@@ -101,40 +128,62 @@ public class Reminder {
 
     public void setTitle(String title) {
         this.title = title;
-        this.updatedAt = new Date();
+        this.updatedAt = System.currentTimeMillis();
     }
 
     public void setDescription(String description) {
         this.description = description;
-        this.updatedAt = new Date();
+        this.updatedAt = System.currentTimeMillis();
     }
 
-    public void setReminderTime(Date reminderTime) {
+    // Setter cho Firebase - nhận Long
+    @PropertyName("reminderTime")
+    public void setReminderTimestamp(Long reminderTime) {
         this.reminderTime = reminderTime;
-        this.updatedAt = new Date();
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    // Setter cho UI - nhận Date
+    public void setReminderTime(Date reminderTime) {
+        this.reminderTime = reminderTime != null ? reminderTime.getTime() : null;
+        this.updatedAt = System.currentTimeMillis();
     }
 
     public void setRepeatType(int repeatType) {
         this.repeatType = repeatType;
-        this.updatedAt = new Date();
+        this.updatedAt = System.currentTimeMillis();
     }
 
     public void setActive(boolean active) {
         isActive = active;
-        this.updatedAt = new Date();
+        this.updatedAt = System.currentTimeMillis();
     }
 
-    public void setCreatedAt(Date createdAt) {
+    // Setter cho Firebase - nhận Long
+    @PropertyName("createdAt")
+    public void setCreatedAtTimestamp(Long createdAt) {
         this.createdAt = createdAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    // Setter cho UI - nhận Date
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt != null ? createdAt.getTime() : null;
+    }
+
+    // Setter cho Firebase - nhận Long
+    @PropertyName("updatedAt")
+    public void setUpdatedAtTimestamp(Long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    // Setter cho UI - nhận Date
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt != null ? updatedAt.getTime() : null;
     }
 
     public void setHealthTipId(String healthTipId) {
         this.healthTipId = healthTipId;
-        this.updatedAt = new Date();
+        this.updatedAt = System.currentTimeMillis();
     }
 
     /**
@@ -142,11 +191,11 @@ public class Reminder {
      */
     public Date getNextReminderTime() {
         if (reminderTime == null || repeatType == RepeatType.NO_REPEAT) {
-            return reminderTime;
+            return getReminderTime();
         }
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(reminderTime);
+        calendar.setTime(getReminderTime());
 
         switch (repeatType) {
             case RepeatType.DAILY:
@@ -158,71 +207,48 @@ public class Reminder {
             case RepeatType.MONTHLY:
                 calendar.add(Calendar.MONTH, 1);
                 break;
+            default:
+                return getReminderTime();
         }
 
         return calendar.getTime();
     }
 
     /**
-     * Lấy tên hiển thị cho loại lặp lại
-     */
-    public String getRepeatTypeDisplayName() {
-        switch (repeatType) {
-            case RepeatType.DAILY:
-                return "Hàng ngày";
-            case RepeatType.WEEKLY:
-                return "Hàng tuần";
-            case RepeatType.MONTHLY:
-                return "Hàng tháng";
-            case RepeatType.NO_REPEAT:
-            default:
-                return "Không lặp";
-        }
-    }
-
-    /**
-     * Kiểm tra xem nhắc nhở có đã đến thời gian hay chưa
+     * Kiểm tra xem nhắc nhở có đã đến giờ hay chưa
      */
     public boolean isDue() {
         if (reminderTime == null || !isActive) {
             return false;
         }
+        return System.currentTimeMillis() >= reminderTime;
+    }
 
-        Date now = new Date();
-        return now.getTime() >= reminderTime.getTime();
+    /**
+     * Lấy Map để ghi vào Firebase với ServerValue.TIMESTAMP
+     */
+    public Map<String, Object> toFirebaseMap() {
+        Map<String, Object> map = new java.util.HashMap<>();
+        map.put("id", id);
+        map.put("userId", userId);
+        map.put("title", title);
+        map.put("description", description);
+        map.put("reminderTime", reminderTime);
+        map.put("repeatType", repeatType);
+        map.put("isActive", isActive);
+        map.put("healthTipId", healthTipId);
+        map.put("createdAt", createdAt != null ? createdAt : ServerValue.TIMESTAMP);
+        map.put("updatedAt", ServerValue.TIMESTAMP);
+        return map;
     }
 
     @Override
     public String toString() {
         return "Reminder{" +
                 "id='" + id + '\'' +
-                ", userId='" + userId + '\'' +
                 ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", reminderTime=" + reminderTime +
-                ", repeatType=" + repeatType +
+                ", reminderTime=" + getReminderTime() +
                 ", isActive=" + isActive +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", healthTipId='" + healthTipId + '\'' +
                 '}';
-    }
-
-    /**
-     * Chuyển đổi object thành Map để lưu vào Firebase
-     */
-    public java.util.Map<String, Object> toMap() {
-        java.util.Map<String, Object> result = new java.util.HashMap<>();
-        result.put("id", id);
-        result.put("userId", userId);
-        result.put("title", title);
-        result.put("description", description);
-        result.put("reminderTime", reminderTime != null ? reminderTime.getTime() : null);
-        result.put("repeatType", repeatType);
-        result.put("active", isActive);
-        result.put("createdAt", createdAt != null ? createdAt.getTime() : null);
-        result.put("updatedAt", updatedAt != null ? updatedAt.getTime() : null);
-        result.put("healthTipId", healthTipId);
-        return result;
     }
 }

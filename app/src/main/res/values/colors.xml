@@ -63,4 +63,8 @@
     <color name="status_due">#FF5722</color>             <!-- Đỏ cam - nhắc nhở đã đến giờ -->
     <color name="status_inactive">#757575</color>        <!-- Xám - nhắc nhở đã tắt -->
 
+    <!-- Màu cho Reminder Background -->
+    <color name="bg_reminder_due">#FFEBEE</color>
+    <color name="bg_reminder_normal">#F1F8E9</color>
+
 </resources>

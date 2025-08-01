@@ -2,9 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Thêm quyền truy cập Internet -->
+    <!-- Quyền truy cập Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Quyền cho thông báo và alarm -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -17,31 +24,61 @@
         android:theme="@style/Theme.Doan"
         android:name="androidx.multidex.MultiDexApplication"
         tools:targetApi="31">
+
+        <!-- Activities -->
         <activity
             android:name=".presentation.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".presentation.auth.ForgotPasswordActivity"
             android:exported="false" />
+
         <activity
             android:name=".presentation.auth.RegisterActivity"
             android:exported="false" />
+
         <activity
             android:name=".presentation.home.HomeActivity"
             android:exported="false" />
+
         <activity
             android:name=".presentation.category.detail.CategoryDetailListActivity"
             android:exported="false" />
+
         <activity
             android:name=".presentation.healthtip.detail.HealthTipDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
+
+        <!-- Broadcast Receivers cho Reminder -->
+        <receiver
+            android:name=".receivers.ReminderBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".receivers.ReminderActionReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Receiver để khởi động lại reminder sau khi boot -->
+        <receiver
+            android:name=".receivers.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

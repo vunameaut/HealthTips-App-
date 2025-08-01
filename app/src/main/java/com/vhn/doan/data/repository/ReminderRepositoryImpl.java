@@ -46,7 +46,7 @@ public class ReminderRepositoryImpl implements ReminderRepository {
 
             reminder.setUpdatedAt(new Date());
 
-            Map<String, Object> reminderValues = reminder.toMap();
+            Map<String, Object> reminderValues = reminder.toFirebaseMap();
             Map<String, Object> childUpdates = new HashMap<>();
 
             // Lưu vào node reminders
@@ -73,7 +73,7 @@ public class ReminderRepositoryImpl implements ReminderRepository {
             }
 
             reminder.setUpdatedAt(new Date());
-            Map<String, Object> reminderValues = reminder.toMap();
+            Map<String, Object> reminderValues = reminder.toFirebaseMap();
 
             remindersRef.child(reminder.getId())
                     .updateChildren(reminderValues)

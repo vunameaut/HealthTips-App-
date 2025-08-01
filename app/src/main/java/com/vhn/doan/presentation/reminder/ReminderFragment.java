@@ -332,4 +332,14 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
             recyclerView.setVisibility(View.VISIBLE);
         }
     }
+
+    /**
+     * Method public để Activity có thể gọi khi click button từ XML
+     * Sửa lỗi: IllegalStateException khi click nút tạo reminder
+     */
+    public void onCreateReminderClick() {
+        if (presenter != null) {
+            presenter.createReminder();
+        }
+    }
 }
