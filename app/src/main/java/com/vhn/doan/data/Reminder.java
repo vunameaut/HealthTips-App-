@@ -23,6 +23,14 @@ public class Reminder {
     private Long updatedAt; // Sử dụng Long thay vì Date
     private String healthTipId; // ID của mẹo sức khỏe liên quan (nếu có)
 
+    /**
+     * Các method bổ sung cho Reminder
+     */
+
+    // Field bổ sung cho lastNotified và completed
+    private Long lastNotified;
+    private boolean completed = false;
+
     // Enum cho loại lặp lại
     public static class RepeatType {
         public static final int NO_REPEAT = 0;
@@ -119,6 +127,15 @@ public class Reminder {
         return healthTipId;
     }
 
+    // Field bổ sung cho lastNotified và completed
+    public Long getLastNotified() {
+        return lastNotified;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
     // Setters
     public void setId(String id) {
         this.id = id;
@@ -186,6 +203,16 @@ public class Reminder {
 
     public void setHealthTipId(String healthTipId) {
         this.healthTipId = healthTipId;
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public void setLastNotified(Long lastNotified) {
+        this.lastNotified = lastNotified;
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
         this.updatedAt = System.currentTimeMillis();
     }
 
@@ -275,5 +302,13 @@ public class Reminder {
                 ", reminderTime=" + getReminderTimeAsDate() +
                 ", isActive=" + isActive +
                 '}';
+    }
+
+    /**
+     * Kiểm tra xem reminder có lặp lại hay không
+     */
+    @Exclude
+    public boolean isRepeating() {
+        return repeatType != RepeatType.NO_REPEAT;
     }
 }

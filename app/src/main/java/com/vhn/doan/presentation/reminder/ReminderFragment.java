@@ -1,6 +1,10 @@
 package com.vhn.doan.presentation.reminder;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,7 +29,10 @@ import com.vhn.doan.data.Reminder;
 import com.vhn.doan.data.repository.ReminderRepository;
 import com.vhn.doan.data.repository.ReminderRepositoryImpl;
 import com.vhn.doan.utils.UserSessionManager;
+import com.vhn.doan.utils.PermissionHelper;
 import com.vhn.doan.presentation.base.BaseFragment;
+import com.vhn.doan.services.NotificationService;
+import com.vhn.doan.services.ReminderService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +59,12 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
     // Search
     private SearchView searchView;
     private boolean showActiveOnly = false;
+
+    // Permission handling
+    private boolean isPermissionChecked = false;
+
+    // Broadcast receiver cho reminder status changes
+    private BroadcastReceiver reminderStatusReceiver;
 
     public static ReminderFragment newInstance() {
         return new ReminderFragment();
@@ -88,19 +101,174 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
 
         initViews(view);
         setupRecyclerView();
-        setupListeners();
+        setupSwipeRefresh();
+        setupFloatingActionButton();
 
+        // Attach presenter và start
         presenter.attachView(this);
         presenter.start();
+
+        // Kiểm tra và yêu cầu quyền cần thiết cho reminder
+        checkReminderPermissions();
+
+        // Đăng ký receiver để lắng nghe thay đổi trạng thái reminder
+        registerReminderStatusReceiver();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        // Hủy đăng ký broadcast receiver
+        unregisterReminderStatusReceiver();
+
         if (presenter != null) {
             presenter.detachView();
         }
     }
+
+    /**
+     * Đăng ký BroadcastReceiver để lắng nghe thay đổi trạng thái reminder
+     */
+    private void registerReminderStatusReceiver() {
+        if (getContext() == null) return;
+
+        reminderStatusReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if ("REMINDER_STATUS_CHANGED".equals(intent.getAction())) {
+                    handleReminderStatusChanged(intent);
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter("REMINDER_STATUS_CHANGED");
+
+        // Sửa lỗi SecurityException cho Android 13+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ yêu cầu chỉ định RECEIVER_EXPORTED hoặc RECEIVER_NOT_EXPORTED
+            // Sử dụng RECEIVER_NOT_EXPORTED vì đây là broadcast nội bộ app
+            getContext().registerReceiver(reminderStatusReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            // Android cũ hơn sử dụng cách đăng ký truyền thống
+            getContext().registerReceiver(reminderStatusReceiver, filter);
+        }
+
+        android.util.Log.d("ReminderFragment", "📡 Đã đăng ký lắng nghe broadcast reminder status");
+    }
+
+    /**
+     * Hủy đăng ký BroadcastReceiver
+     */
+    private void unregisterReminderStatusReceiver() {
+        if (getContext() != null && reminderStatusReceiver != null) {
+            try {
+                getContext().unregisterReceiver(reminderStatusReceiver);
+                android.util.Log.d("ReminderFragment", "📡 Đã hủy đăng ký broadcast receiver");
+            } catch (IllegalArgumentException e) {
+                // Receiver đã được hủy đăng ký trước đó
+                android.util.Log.w("ReminderFragment", "Receiver đã được hủy đăng ký: " + e.getMessage());
+            }
+        }
+        reminderStatusReceiver = null;
+    }
+
+    /**
+     * Xử lý khi nhận được broadcast thay đổi trạng thái reminder
+     */
+    private void handleReminderStatusChanged(Intent intent) {
+        try {
+            String reminderId = intent.getStringExtra("reminder_id");
+            String reminderTitle = intent.getStringExtra("reminder_title");
+            boolean isActive = intent.getBooleanExtra("is_active", true);
+            String reason = intent.getStringExtra("reason");
+
+            android.util.Log.d("ReminderFragment", "🔄 Nhận broadcast: " + reminderId + " - Active: " + isActive + " - Reason: " + reason);
+
+            if ("auto_disabled_after_notification".equals(reason)) {
+                // Hiển thị thông báo cho người dùng biết reminder đã tự động tắt
+                showSuccess("Nhắc nhở \"" + reminderTitle + "\" đã hoàn thành và tự động tắt");
+            }
+
+            // Refresh danh sách để cập nhật UI
+            if (presenter != null) {
+                presenter.refreshReminders();
+            }
+
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Lỗi khi xử lý broadcast: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Kiểm tra quyền và bắt đầu load dữ liệu
+     */
+    private void checkPermissionsAndStart() {
+        if (isPermissionChecked) {
+            // Đã kiểm tra quyền rồi, chỉ start presenter
+            presenter.start();
+            return;
+        }
+
+        if (PermissionHelper.hasReminderPermissions(requireContext())) {
+            // Đã có đủ quyền
+            isPermissionChecked = true;
+            presenter.start();
+        } else {
+            // Chưa có đủ quyền, hiển thị dialog yêu cầu
+            showPermissionDialog();
+        }
+    }
+
+    /**
+     * Hiển thị dialog yêu cầu cấp quyền
+     */
+    private void showPermissionDialog() {
+        PermissionHelper.showPermissionExplanationDialog(this, new PermissionHelper.PermissionCallback() {
+            @Override
+            public void onPermissionsGranted() {
+                isPermissionChecked = true;
+                showSuccess("Đã cấp quyền thành công!");
+                presenter.start();
+            }
+
+            @Override
+            public void onPermissionsDenied(List<String> deniedPermissions) {
+                isPermissionChecked = true;
+                showWarningAboutMissingPermissions(deniedPermissions);
+                // Vẫn cho phép sử dụng app nhưng cảnh báo tính năng sẽ bị hạn chế
+                presenter.start();
+            }
+        });
+    }
+
+    /**
+     * Hiển thị cảnh báo về quyền bị thiếu
+     */
+    private void showWarningAboutMissingPermissions(List<String> deniedPermissions) {
+        if (getContext() == null) return;
+
+        String message = "Quyền thông báo chưa được cấp. Tính năng nhắc nhở có thể không hoạt động đúng:\n\n" +
+                "• Không thể hiển thị thông báo nhắc nhở\n\n" +
+                "Bạn có thể cấp quyền sau bằng cách vào Cài đặt > Ứng dụng > HealthTips > Quyền";
+
+        new AlertDialog.Builder(getContext())
+                .setTitle("Cảnh báo quyền")
+                .setMessage(message)
+                .setPositiveButton("Đã hiểu", null)
+                .setNeutralButton("Thử lại", (dialog, which) -> {
+                    isPermissionChecked = false;
+                    checkPermissionsAndStart();
+                })
+                .show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        PermissionHelper.handlePermissionResult(this, requestCode, permissions, grantResults);
+    }
+
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -176,16 +344,6 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         recyclerView.setAdapter(adapter);
     }
 
-    @Override
-    protected void setupListeners() {
-        // Setup các listeners cụ thể
-        setupSwipeRefresh();
-        setupFab();
-        if (searchView != null) {
-            setupSearchView();
-        }
-    }
-
     private void setupSwipeRefresh() {
         swipeRefresh.setOnRefreshListener(() -> presenter.refreshReminders());
         swipeRefresh.setColorSchemeResources(
@@ -195,7 +353,7 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         );
     }
 
-    private void setupFab() {
+    private void setupFloatingActionButton() {
         fabAdd.setOnClickListener(v -> presenter.createReminder());
     }
 
@@ -361,5 +519,71 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         if (presenter != null) {
             presenter.createReminder();
         }
+    }
+
+    /**
+     * ✅ THÊM: Khôi phục lại tất cả nhắc nhở khi mở app
+     */
+    private void restoreRemindersIfNeeded() {
+        try {
+            android.util.Log.d("ReminderFragment", "🔄 Khôi phục nhắc nhở khi mở fragment...");
+
+            // Sử dụng BootReceiver để khôi phục lại tất cả nhắc nhở
+            if (getContext() != null) {
+                com.vhn.doan.receivers.BootReceiver.rescheduleAllReminders(getContext());
+                android.util.Log.d("ReminderFragment", "✅ Đã yêu cầu khôi phục nhắc nhở");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Lỗi khi khôi phục nhắc nhở", e);
+        }
+    }
+
+    /**
+     * Kiểm tra và yêu cầu tất cả quyền cần thiết cho reminder
+     */
+    private void checkReminderPermissions() {
+        com.vhn.doan.utils.ReminderPermissionHelper.checkAndRequestAllPermissions(this,
+            new com.vhn.doan.utils.ReminderPermissionHelper.ReminderPermissionCallback() {
+                @Override
+                public void onAllPermissionsGranted() {
+                    android.util.Log.d("ReminderFragment", "✅ Tất cả quyền đã được cấp");
+                    // Khởi động foreground service để duy trì hoạt động
+                    com.vhn.doan.utils.ReminderPermissionHelper.startReminderService(requireContext());
+                    showSuccess("Hệ thống nhắc nhở đã sẵn sàng!");
+                }
+
+                @Override
+                public void onNotificationPermissionResult(boolean granted) {
+                    if (granted) {
+                        android.util.Log.d("ReminderFragment", "✅ Quyền thông báo đã được cấp");
+                        // Tiếp tục kiểm tra quyền khác
+                        checkReminderPermissions();
+                    } else {
+                        android.util.Log.w("ReminderFragment", "❌ Quyền thông báo bị từ chối");
+                        showError("Cần cấp quyền thông báo để nhắc nhở hoạt động");
+                    }
+                }
+
+                @Override
+                public void onBatteryOptimizationDenied() {
+                    android.util.Log.w("ReminderFragment", "⚠️ Battery optimization không được tắt");
+                    showError("Nhắc nhở có thể không hoạt động khi app bị tắt hoàn toàn");
+                    // Vẫn khởi động service
+                    com.vhn.doan.utils.ReminderPermissionHelper.startReminderService(requireContext());
+                }
+
+                @Override
+                public void onError(String error) {
+                    android.util.Log.e("ReminderFragment", "❌ Lỗi khi kiểm tra quyền: " + error);
+                    showError("Lỗi khi thiết lập quyền: " + error);
+                }
+            });
+    }
+
+    @Override
+    protected void setupListeners() {
+        // Setup listeners cho các UI components
+        setupSwipeRefresh();
+        setupFloatingActionButton();
     }
 }

@@ -8,18 +8,27 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
 import com.vhn.doan.data.Reminder;
 import com.vhn.doan.receivers.ReminderBroadcastReceiver;
+import com.vhn.doan.workers.ReminderWorker;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Service để quản lý và lên lịch thông báo nhắc nhở
+ * Sử dụng cả AlarmManager và WorkManager để đảm bảo hoạt động trong mọi tình huống
  */
 public class ReminderService {
 
     private static final String TAG = "ReminderService";
+    public static final String ACTION_REMINDER_TRIGGER = "com.vhn.doan.REMINDER_TRIGGER";
+
     private Context context;
     private AlarmManager alarmManager;
     private PowerManager.WakeLock wakeLock;
@@ -34,7 +43,7 @@ public class ReminderService {
     }
 
     /**
-     * Lên lịch thông báo nhắc nhở với logging chi tiết
+     * Lên lịch thông báo nhắc nhở với cả AlarmManager và WorkManager
      */
     public void scheduleReminder(Reminder reminder) {
         Log.d(TAG, "=== BẮT ĐẦU SCHEDULE REMINDER ===");
@@ -49,237 +58,195 @@ public class ReminderService {
             return;
         }
 
-        long reminderTime = reminder.getReminderTime();
+        long reminderTimeMillis = reminder.getReminderTime(); // getReminderTime() đã trả về Long
         long currentTime = System.currentTimeMillis();
 
-        Log.d(TAG, "Reminder Time: " + new Date(reminderTime));
-        Log.d(TAG, "Current Time: " + new Date(currentTime));
-        Log.d(TAG, "Time difference: " + (reminderTime - currentTime) + "ms");
+        Log.d(TAG, "Current time: " + new Date(currentTime));
+        Log.d(TAG, "Reminder time: " + new Date(reminderTimeMillis));
 
-        // Kiểm tra quyền exact alarm trước khi schedule
-        if (!canScheduleExactAlarms()) {
-            Log.e(TAG, "Không có quyền SCHEDULE_EXACT_ALARM!");
+        if (reminderTimeMillis <= currentTime) {
+            Log.w(TAG, "Thời gian nhắc nhở đã qua - bỏ qua scheduling");
             return;
         }
 
-        // Nếu là reminder lặp lại và thời gian đã qua, tính thời gian tiếp theo
-        if (reminderTime <= currentTime && reminder.getRepeatType() != Reminder.RepeatType.NO_REPEAT) {
-            Log.d(TAG, "Reminder đã qua và có lặp lại - tính thời gian tiếp theo");
-            Date nextTime = calculateNextReminderTime(reminder, currentTime);
-            if (nextTime != null) {
-                reminderTime = nextTime.getTime();
-                reminder.setReminderTime(reminderTime);
-                Log.d(TAG, "Thời gian tiếp theo: " + nextTime);
-            } else {
-                Log.w(TAG, "Không thể tính thời gian tiếp theo");
-                return;
-            }
-        } else if (reminderTime <= currentTime) {
-            Log.d(TAG, "Reminder không lặp lại và đã qua - tự động tắt");
-            disableExpiredReminder(reminder);
-            return;
-        }
+        // Schedule với cả hai phương pháp để đảm bảo độ tin cậy
+        scheduleWithAlarmManager(reminder, reminderTimeMillis);
+        scheduleWithWorkManager(reminder, reminderTimeMillis - currentTime);
 
-        // Tạo intent với tất cả thông tin cần thiết
-        Intent intent = new Intent(context, ReminderBroadcastReceiver.class);
-        intent.putExtra("reminder_id", reminder.getId());
-        intent.putExtra("reminder_title", reminder.getTitle());
-        intent.putExtra("reminder_description", reminder.getDescription());
-        intent.putExtra("reminder_repeat_type", reminder.getRepeatType());
-        intent.setAction("REMINDER_NOTIFICATION");
+        Log.d(TAG, "=== KẾT THÚC SCHEDULE REMINDER ===");
+    }
 
-        // Tạo unique request code để tránh conflict
-        int requestCode = reminder.getId().hashCode();
-        Log.d(TAG, "Request Code: " + requestCode);
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
+    /**
+     * Schedule với AlarmManager (cho instant delivery)
+     */
+    private void scheduleWithAlarmManager(Reminder reminder, long reminderTimeMillis) {
         try {
-            // Acquire wake lock trước khi schedule
-            if (!wakeLock.isHeld()) {
-                wakeLock.acquire(10000); // 10 seconds timeout
-            }
+            Intent intent = new Intent(context, ReminderBroadcastReceiver.class);
+            intent.setAction(ACTION_REMINDER_TRIGGER);
+            intent.putExtra("reminder_id", reminder.getId());
+            intent.putExtra("title", reminder.getTitle());
+            intent.putExtra("message", reminder.getDescription());
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Log.d(TAG, "Sử dụng setExactAndAllowWhileIdle cho Android 6.0+");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context,
+                reminder.getId().hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            // Sử dụng setAlarmClock để có độ ưu tiên cao nhất (bỏ qua Doze mode hoàn toàn)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                // Tạo intent để mở app khi click notification từ alarm clock
+                Intent showIntent = new Intent(context, com.vhn.doan.presentation.home.HomeActivity.class);
+                showIntent.putExtra("open_reminders", true);
+                PendingIntent showPendingIntent = PendingIntent.getActivity(
+                    context,
+                    reminder.getId().hashCode() + 1000,
+                    showIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
+
+                AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(
+                    reminderTimeMillis,
+                    showPendingIntent
+                );
+
+                alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
+                Log.d(TAG, "AlarmManager: Đã schedule với setAlarmClock (cao nhất priority)");
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
-                    reminderTime,
+                    reminderTimeMillis,
+                    pendingIntent
+                );
+                Log.d(TAG, "AlarmManager: Đã schedule với setExactAndAllowWhileIdle");
+            } else {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    reminderTimeMillis,
+                    pendingIntent
+                );
+                Log.d(TAG, "AlarmManager: Đã schedule với setExact");
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi schedule AlarmManager", e);
+        }
+    }
+
+    /**
+     * Schedule với WorkManager (backup cho reliability)
+     */
+    private void scheduleWithWorkManager(Reminder reminder, long delayMillis) {
+        try {
+            Data inputData = new Data.Builder()
+                .putString(ReminderWorker.KEY_REMINDER_ID, reminder.getId())
+                .putString(ReminderWorker.KEY_TITLE, reminder.getTitle())
+                .putString(ReminderWorker.KEY_MESSAGE, reminder.getDescription())
+                .build();
+
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ReminderWorker.class)
+                .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
+                .setInputData(inputData)
+                .addTag("reminder_" + reminder.getId())
+                .build();
+
+            WorkManager.getInstance(context).enqueue(workRequest);
+            Log.d(TAG, "WorkManager: Đã schedule work request với delay " + delayMillis + "ms");
+
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi schedule WorkManager", e);
+        }
+    }
+
+    /**
+     * Hủy thông báo nhắc nhở
+     */
+    public static void cancelReminder(Context context, String reminderId) {
+        Log.d(TAG, "Hủy reminder: " + reminderId);
+
+        try {
+            // Hủy AlarmManager
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(context, ReminderBroadcastReceiver.class);
+            intent.setAction(ACTION_REMINDER_TRIGGER);
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context,
+                reminderId.hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            alarmManager.cancel(pendingIntent);
+            Log.d(TAG, "Đã hủy AlarmManager cho reminder: " + reminderId);
+
+            // Hủy WorkManager
+            WorkManager.getInstance(context).cancelAllWorkByTag("reminder_" + reminderId);
+            Log.d(TAG, "Đã hủy WorkManager cho reminder: " + reminderId);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi hủy reminder", e);
+        }
+    }
+
+    /**
+     * Test thông báo ngay lập tức
+     */
+    public void testNotification(Reminder reminder) {
+        Log.d(TAG, "Test thông báo cho reminder: " + reminder.getTitle());
+
+        // Hiển thị thông báo ngay
+        NotificationService.showReminderNotification(
+            context,
+            reminder.getTitle(),
+            reminder.getDescription(),
+            reminder.getId()
+        );
+
+        // Schedule một thông báo test sau 5 giây
+        scheduleTestNotification(reminder, 5000);
+    }
+
+    /**
+     * Schedule test notification sau một khoảng thời gian ngắn
+     */
+    private void scheduleTestNotification(Reminder reminder, long delayMillis) {
+        try {
+            long triggerTime = System.currentTimeMillis() + delayMillis;
+
+            // Test với AlarmManager
+            Intent intent = new Intent(context, ReminderBroadcastReceiver.class);
+            intent.setAction(ACTION_REMINDER_TRIGGER);
+            intent.putExtra("reminder_id", reminder.getId());
+            intent.putExtra("title", "[TEST] " + reminder.getTitle());
+            intent.putExtra("message", "[TEST] " + reminder.getDescription());
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context,
+                ("test_" + reminder.getId()).hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
                     pendingIntent
                 );
             } else {
-                Log.d(TAG, "Sử dụng setExact cho Android cũ");
                 alarmManager.setExact(
                     AlarmManager.RTC_WAKEUP,
-                    reminderTime,
+                    triggerTime,
                     pendingIntent
                 );
             }
 
-            Log.d(TAG, "✅ ĐÃ LÊN LỊCH THÀNH CÔNG!");
-            Log.d(TAG, "Reminder: " + reminder.getTitle());
-            Log.d(TAG, "Thời gian: " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date(reminderTime)));
-            Log.d(TAG, "=== KẾT THÚC SCHEDULE REMINDER ===");
+            Log.d(TAG, "Đã schedule test notification sau " + delayMillis + "ms");
 
-        } catch (SecurityException e) {
-            Log.e(TAG, "❌ LỖI QUYỀN: Không thể lên lịch exact alarm", e);
-
-            // Thử fallback với setWindow nếu không có quyền exact
-            try {
-                Log.d(TAG, "Thử fallback với setWindow...");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    alarmManager.setWindow(
-                        AlarmManager.RTC_WAKEUP,
-                        reminderTime,
-                        60000, // 1 minute window
-                        pendingIntent
-                    );
-                    Log.d(TAG, "Đã schedule với setWindow thành công");
-                }
-            } catch (Exception fallbackError) {
-                Log.e(TAG, "Fallback cũng thất bại", fallbackError);
-            }
         } catch (Exception e) {
-            Log.e(TAG, "❌ LỖI KHÔNG XÁC ĐỊNH khi schedule reminder", e);
-        } finally {
-            // Release wake lock
-            if (wakeLock.isHeld()) {
-                wakeLock.release();
-            }
-        }
-    }
-
-    /**
-     * Tính toán thời gian nhắc nhở tiếp theo cho reminder lặp lại
-     */
-    private Date calculateNextReminderTime(Reminder reminder, long currentTime) {
-        Date reminderDate = new Date(reminder.getReminderTime());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(reminderDate);
-
-        // Tìm thời gian tiếp theo sau current time
-        while (calendar.getTimeInMillis() <= currentTime) {
-            switch (reminder.getRepeatType()) {
-                case Reminder.RepeatType.DAILY:
-                    calendar.add(Calendar.DAY_OF_MONTH, 1);
-                    break;
-                case Reminder.RepeatType.WEEKLY:
-                    calendar.add(Calendar.WEEK_OF_YEAR, 1);
-                    break;
-                case Reminder.RepeatType.MONTHLY:
-                    calendar.add(Calendar.MONTH, 1);
-                    break;
-                default:
-                    return null;
-            }
-        }
-
-        return calendar.getTime();
-    }
-
-    /**
-     * Tự động tắt reminder đã hết hạn (không lặp lại)
-     */
-    private void disableExpiredReminder(Reminder reminder) {
-        // TODO: Cập nhật trong database để tắt reminder
-        android.util.Log.d("ReminderService", "Reminder đã hết hạn và bị tắt: " + reminder.getTitle());
-    }
-
-    /**
-     * Hủy lịch thông báo nhắc nhở
-     */
-    public void cancelReminder(String reminderId) {
-        if (reminderId == null) return;
-
-        Intent intent = new Intent(context, ReminderBroadcastReceiver.class);
-        intent.setAction("REMINDER_NOTIFICATION");
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-            context,
-            reminderId.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        alarmManager.cancel(pendingIntent);
-        pendingIntent.cancel();
-    }
-
-    /**
-     * Cập nhật lịch nhắc nhở
-     */
-    public void updateReminder(Reminder reminder) {
-        // Hủy lịch cũ
-        cancelReminder(reminder.getId());
-
-        // Lên lịch mới nếu reminder vẫn còn hoạt động
-        if (reminder.isActive()) {
-            scheduleReminder(reminder);
-        }
-    }
-
-    /**
-     * Lên lịch cho lần lặp lại tiếp theo
-     */
-    private void scheduleNextRepeat(Reminder reminder) {
-        if (reminder.getRepeatType() == Reminder.RepeatType.NO_REPEAT) {
-            return;
-        }
-
-        Date nextTime = reminder.getNextReminderTime();
-        if (nextTime != null && nextTime.getTime() > System.currentTimeMillis()) {
-            // Tạo reminder mới cho lần tiếp theo
-            Reminder nextReminder = new Reminder();
-            nextReminder.setId(reminder.getId() + "_next");
-            nextReminder.setUserId(reminder.getUserId());
-            nextReminder.setTitle(reminder.getTitle());
-            nextReminder.setDescription(reminder.getDescription());
-            nextReminder.setReminderTime(nextTime.getTime());
-            nextReminder.setRepeatType(reminder.getRepeatType());
-            nextReminder.setActive(reminder.isActive());
-            nextReminder.setHealthTipId(reminder.getHealthTipId());
-
-            scheduleReminder(nextReminder);
-        }
-    }
-
-    /**
-     * Lên lịch lại tất cả nhắc nhở hoạt động (thường dùng sau khi restart app)
-     */
-    public void rescheduleAllActiveReminders(java.util.List<Reminder> reminders) {
-        if (reminders == null) return;
-
-        for (Reminder reminder : reminders) {
-            if (reminder.isActive() && reminder.getReminderTime() != null) {
-                scheduleReminder(reminder);
-            }
-        }
-    }
-
-    /**
-     * Kiểm tra xem có quyền lên lịch exact alarm hay không với logging
-     */
-    public boolean canScheduleExactAlarms() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            boolean canSchedule = alarmManager.canScheduleExactAlarms();
-            Log.d(TAG, "Can schedule exact alarms: " + canSchedule);
-            return canSchedule;
-        }
-        Log.d(TAG, "Android version < 31, exact alarms allowed by default");
-        return true;
-    }
-
-    /**
-     * Release wake lock khi service bị destroy
-     */
-    public void release() {
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
+            Log.e(TAG, "Lỗi khi schedule test notification", e);
         }
     }
 }

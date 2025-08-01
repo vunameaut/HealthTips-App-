@@ -3,6 +3,7 @@ package com.vhn.doan.presentation.reminder;
 import com.vhn.doan.data.Reminder;
 import com.vhn.doan.data.repository.ReminderRepository;
 import com.vhn.doan.presentation.base.BasePresenter;
+import com.vhn.doan.services.ReminderService;
 import com.vhn.doan.utils.UserSessionManager;
 
 import java.util.ArrayList;
@@ -138,6 +139,9 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
                         view.showSuccess("Tạo nhắc nhở thành công");
                         reminder.setId(reminderId);
                         addReminderToList(reminder);
+
+                        // ✅ THÊM: Lên lịch thông báo cho nhắc nhở mới
+                        scheduleReminderNotification(reminder);
                     }
                 }
 
@@ -158,6 +162,9 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
                         view.hideLoading();
                         view.showSuccess("Cập nhật nhắc nhở thành công");
                         updateReminderInList(reminder);
+
+                        // ✅ THÊM: Cập nhật lịch thông báo cho nhắc nhở đã chỉnh sửa
+                        scheduleReminderNotification(reminder);
                     }
                 }
 
@@ -189,6 +196,9 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
 
                     String message = newStatus ? "Đã bật nhắc nhở" : "Đã tắt nhắc nhở";
                     view.showSuccess(message);
+
+                    // ✅ THÊM: Cập nhật lịch thông báo khi bật/tắt
+                    scheduleReminderNotification(reminder);
                 }
             }
 
@@ -199,6 +209,62 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
                 }
             }
         });
+    }
+
+    /**
+     * ✅ THÊM: Method để lên lịch thông báo cho nhắc nhở
+     */
+    private void scheduleReminderNotification(Reminder reminder) {
+        if (!isViewAttached() || reminder == null) {
+            return;
+        }
+
+        // Lấy context từ view để tạo ReminderService
+        android.content.Context context = getContextFromView();
+        if (context == null) {
+            android.util.Log.w("ReminderPresenter", "Không thể lấy context để schedule reminder");
+            return;
+        }
+
+        try {
+            ReminderService reminderService = new ReminderService(context);
+
+            if (reminder.isActive()) {
+                // Lên lịch thông báo nếu reminder đang bật
+                reminderService.scheduleReminder(reminder);
+                android.util.Log.d("ReminderPresenter", "✅ Đã lên lịch thông báo cho reminder: " + reminder.getTitle());
+            } else {
+                // Hủy thông báo nếu reminder bị tắt - cần thêm context
+                ReminderService.cancelReminder(getContextFromView(), reminder.getId());
+                android.util.Log.d("ReminderPresenter", "❌ Đã hủy thông báo cho reminder: " + reminder.getTitle());
+            }
+        } catch (Exception e) {
+            android.util.Log.e("ReminderPresenter", "Lỗi khi schedule reminder: " + e.getMessage());
+            if (isViewAttached()) {
+                view.showError("Lỗi khi thiết lập thông báo: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * ✅ THÊM: Lấy context từ view (giả sử view là Fragment hoặc Activity)
+     */
+    private android.content.Context getContextFromView() {
+        if (!isViewAttached()) {
+            return null;
+        }
+
+        // Thử cast view thành các loại có thể có context
+        if (view instanceof androidx.fragment.app.Fragment) {
+            return ((androidx.fragment.app.Fragment) view).getContext();
+        } else if (view instanceof android.app.Activity) {
+            return (android.app.Activity) view;
+        } else if (view instanceof ReminderFragment) {
+            return ((ReminderFragment) view).getContext();
+        }
+
+        // Nếu không thể lấy context trực tiếp, thử cách khác
+        return null;
     }
 
     @Override

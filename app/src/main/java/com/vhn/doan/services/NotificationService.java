@@ -152,4 +152,19 @@ public class NotificationService {
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
         return notificationManagerCompat.areNotificationsEnabled();
     }
+
+    /**
+     * Hiển thị thông báo nhắc nhở với các tham số riêng lẻ (static method)
+     */
+    public static void showReminderNotification(Context context, String title, String message, String reminderId) {
+        NotificationService service = new NotificationService(context);
+
+        // Tạo một Reminder object tạm thời để sử dụng method hiện tại
+        Reminder tempReminder = new Reminder();
+        tempReminder.setId(reminderId);
+        tempReminder.setTitle(title);
+        tempReminder.setDescription(message);
+
+        service.showReminderNotification(tempReminder);
+    }
 }

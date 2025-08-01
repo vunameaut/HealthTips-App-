@@ -13,8 +13,15 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Quyền tắt tối ưu hóa pin để hoạt động trong Doze mode -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- Quyền foreground service cho WorkManager -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Quyền foreground service đặc biệt cho Android 14+ (API 34+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
     <application
-        android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_logo"
@@ -85,6 +92,18 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
+        <!-- Services -->
+        <service
+            android:name=".services.ReminderForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <!-- Thêm property cho specialUse theo yêu cầu Android 14+ -->
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="explanation_needed" />
+        </service>
 
     </application>
 

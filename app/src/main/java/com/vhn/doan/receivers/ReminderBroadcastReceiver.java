@@ -7,7 +7,8 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.vhn.doan.data.Reminder;
-import com.vhn.doan.services.NotificationService;
+import com.vhn.doan.data.repository.ReminderRepository;
+import com.vhn.doan.data.repository.ReminderRepositoryImpl;
 import com.vhn.doan.services.ReminderService;
 
 /**
@@ -27,131 +28,103 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
         );
 
         try {
-            wakeLock.acquire(30000); // 30 seconds timeout
+            // Acquire wake lock với timeout 10 giây
+            wakeLock.acquire(10 * 1000);
+
+            Log.d(TAG, "ReminderBroadcastReceiver triggered");
 
             String action = intent.getAction();
-            Log.d(TAG, "=== NHẬN ĐƯỢC BROADCAST ===");
-            Log.d(TAG, "Action: " + action);
-            Log.d(TAG, "Time: " + new java.util.Date());
-
-            if ("REMINDER_NOTIFICATION".equals(action)) {
-                handleReminderNotification(context, intent);
-            } else {
-                Log.w(TAG, "Action không được nhận diện: " + action);
+            if (action == null) {
+                Log.w(TAG, "Action is null");
+                return;
             }
 
+            switch (action) {
+                case ReminderService.ACTION_REMINDER_TRIGGER:
+                    handleReminderTrigger(context, intent);
+                    break;
+                case "REMINDER_STATUS_CHANGED":
+                    handleReminderStatusChanged(context, intent);
+                    break;
+                default:
+                    Log.w(TAG, "Unknown action: " + action);
+                    break;
+            }
         } catch (Exception e) {
-            Log.e(TAG, "Lỗi trong onReceive", e);
+            Log.e(TAG, "Error in onReceive", e);
         } finally {
+            // Luôn release wake lock
             if (wakeLock.isHeld()) {
                 wakeLock.release();
             }
         }
     }
 
-    /**
-     * Xử lý hiển thị thông báo nhắc nhở với logging chi tiết
-     */
-    private void handleReminderNotification(Context context, Intent intent) {
+    private void handleReminderTrigger(Context context, Intent intent) {
         String reminderId = intent.getStringExtra("reminder_id");
-        String title = intent.getStringExtra("reminder_title");
-        String description = intent.getStringExtra("reminder_description");
-        int repeatType = intent.getIntExtra("reminder_repeat_type", Reminder.RepeatType.NO_REPEAT);
+        String title = intent.getStringExtra("title");
+        String message = intent.getStringExtra("message");
 
-        Log.d(TAG, "=== XỬ LÝ REMINDER NOTIFICATION ===");
-        Log.d(TAG, "Reminder ID: " + reminderId);
-        Log.d(TAG, "Title: " + title);
-        Log.d(TAG, "Description: " + description);
-        Log.d(TAG, "Repeat Type: " + repeatType);
+        Log.d(TAG, "Handling reminder trigger - ID: " + reminderId + ", Title: " + title);
 
-        if (reminderId == null || title == null) {
-            Log.e(TAG, "❌ Thiếu thông tin reminder - bỏ qua");
+        if (reminderId == null || title == null || message == null) {
+            Log.w(TAG, "Missing reminder data");
             return;
         }
 
-        try {
-            // Tạo reminder object từ dữ liệu trong intent
-            Reminder reminder = new Reminder();
-            reminder.setId(reminderId);
-            reminder.setTitle(title);
-            reminder.setDescription(description != null ? description : "");
-            reminder.setRepeatType(repeatType);
-            reminder.setReminderTime(System.currentTimeMillis());
-            reminder.setActive(true);
+        // Sử dụng Foreground Service để đảm bảo thông báo hiển thị
+        com.vhn.doan.services.ReminderForegroundService.showReminder(context, reminderId, title, message);
 
-            Log.d(TAG, "Đang hiển thị thông báo...");
+        // Cập nhật trạng thái reminder
+        ReminderRepository reminderRepository = new ReminderRepositoryImpl();
+        reminderRepository.getReminderById(reminderId, new ReminderRepository.RepositoryCallback<Reminder>() {
+            @Override
+            public void onSuccess(Reminder reminder) {
+                if (reminder != null) {
+                    Log.d(TAG, "Successfully retrieved reminder: " + reminder.getTitle());
 
-            // Hiển thị thông báo
-            NotificationService notificationService = new NotificationService(context);
-            notificationService.showReminderNotification(reminder);
+                    // Cập nhật lần thông báo cuối
+                    reminder.setLastNotified(System.currentTimeMillis());
 
-            Log.d(TAG, "✅ Đã hiển thị thông báo thành công!");
+                    // Nếu không phải reminder lặp lại, đánh dấu là đã hoàn thành
+                    if (!reminder.isRepeating()) {
+                        reminder.setCompleted(true);
+                        reminder.setActive(false);
+                    }
 
-            // Nếu là reminder lặp lại, lên lịch cho lần tiếp theo
-            if (repeatType != Reminder.RepeatType.NO_REPEAT) {
-                Log.d(TAG, "Reminder có lặp lại - lên lịch lần tiếp theo...");
-                scheduleNextRepeatReminder(context, reminder);
-            } else {
-                Log.d(TAG, "Reminder không lặp lại - hoàn thành");
+                    reminderRepository.updateReminder(reminder, new ReminderRepository.RepositoryCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            Log.d(TAG, "Reminder updated successfully");
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e(TAG, "Failed to update reminder: " + error);
+                        }
+                    });
+                }
             }
 
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Lỗi khi xử lý reminder notification", e);
-        }
-
-        Log.d(TAG, "=== KẾT THÚC XỬ LÝ REMINDER ===");
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Failed to get reminder: " + error);
+                // Vẫn hiển thị thông báo ngay cả khi không lấy được reminder từ database
+                com.vhn.doan.services.ReminderForegroundService.showReminder(context, reminderId, title, message);
+            }
+        });
     }
 
-    /**
-     * Lên lịch cho lần lặp lại tiếp theo với logging chi tiết
-     */
-    private void scheduleNextRepeatReminder(Context context, Reminder currentReminder) {
-        try {
-            Log.d(TAG, "=== LÊN LỊCH LẦN TIẾP THEO ===");
+    private void handleReminderStatusChanged(Context context, Intent intent) {
+        String reminderId = intent.getStringExtra("reminder_id");
+        boolean isActive = intent.getBooleanExtra("is_active", false);
 
-            // Tính thời gian tiếp theo
-            java.util.Calendar calendar = java.util.Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
+        Log.d(TAG, "Reminder status changed - ID: " + reminderId + ", Active: " + isActive);
 
-            switch (currentReminder.getRepeatType()) {
-                case Reminder.RepeatType.DAILY:
-                    calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
-                    Log.d(TAG, "Thêm 1 ngày");
-                    break;
-                case Reminder.RepeatType.WEEKLY:
-                    calendar.add(java.util.Calendar.WEEK_OF_YEAR, 1);
-                    Log.d(TAG, "Thêm 1 tuần");
-                    break;
-                case Reminder.RepeatType.MONTHLY:
-                    calendar.add(java.util.Calendar.MONTH, 1);
-                    Log.d(TAG, "Thêm 1 tháng");
-                    break;
-                default:
-                    Log.d(TAG, "Không lặp lại - bỏ qua");
-                    return;
-            }
-
-            // Tạo reminder cho lần tiếp theo
-            Reminder nextReminder = new Reminder();
-            nextReminder.setId(currentReminder.getId());
-            nextReminder.setTitle(currentReminder.getTitle());
-            nextReminder.setDescription(currentReminder.getDescription());
-            nextReminder.setRepeatType(currentReminder.getRepeatType());
-            nextReminder.setReminderTime(calendar.getTimeInMillis());
-            nextReminder.setActive(true);
-
-            Log.d(TAG, "Thời gian lần tiếp theo: " + calendar.getTime());
-
-            // Lên lịch cho lần tiếp theo
-            ReminderService reminderService = new ReminderService(context);
-            reminderService.scheduleReminder(nextReminder);
-
-            Log.d(TAG, "✅ Đã lên lịch lần tiếp theo thành công!");
-            Log.d(TAG, "Reminder: " + nextReminder.getTitle());
-            Log.d(TAG, "Vào: " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(calendar.getTime()));
-
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Lỗi khi lên lịch lần tiếp theo", e);
+        // Xử lý thay đổi trạng thái reminder nếu cần
+        if (!isActive) {
+            // Hủy alarm nếu reminder bị tắt
+            ReminderService.cancelReminder(context, reminderId);
         }
     }
 }
