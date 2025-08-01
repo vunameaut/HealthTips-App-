@@ -10,6 +10,7 @@ import com.vhn.doan.data.Reminder;
 import com.vhn.doan.data.repository.ReminderRepository;
 import com.vhn.doan.data.repository.ReminderRepositoryImpl;
 import com.vhn.doan.services.ReminderService;
+import com.vhn.doan.services.NotificationService;
 
 /**
  * BroadcastReceiver để xử lý khi thời gian nhắc nhở đã đến
@@ -71,6 +72,10 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
             Log.w(TAG, "Missing reminder data");
             return;
         }
+
+        // Hiển thị thông báo ngay lập tức để đảm bảo user thấy được
+        NotificationService.showReminderNotification(context, title, message, reminderId);
+        Log.d(TAG, "Đã hiển thị thông báo trực tiếp");
 
         // Sử dụng Foreground Service để đảm bảo thông báo hiển thị
         com.vhn.doan.services.ReminderForegroundService.showReminder(context, reminderId, title, message);

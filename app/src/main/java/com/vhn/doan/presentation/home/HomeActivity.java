@@ -3,6 +3,7 @@ package com.vhn.doan.presentation.home;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,10 @@ import com.vhn.doan.presentation.favorite.FavoriteFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.services.AuthManager;
+import com.vhn.doan.services.ReminderForegroundService;
+import com.vhn.doan.utils.ReminderPermissionHelper;
+import com.vhn.doan.utils.ReminderManager;
+import com.vhn.doan.utils.NotificationDebugHelper;
 
 /**
  * HomeActivity là màn hình chính của ứng dụng sau khi đăng nhập
@@ -44,12 +49,45 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
 
+        // Khởi động ReminderForegroundService để đảm bảo thông báo hoạt động
+        startReminderService();
+        
+        // Khởi động lại tất cả reminders đang active
+        ReminderManager.restartAllActiveReminders(this);
+        
+        // Kiểm tra và hiển thị reminders đã bị miss
+        ReminderManager.checkAndRestartMissedReminders(this);
+        
+        // Debug: Kiểm tra trạng thái thông báo
+        NotificationDebugHelper.checkNotificationStatus(this);
+
         // Khởi tạo và thiết lập BottomNavigationView
         setupBottomNavigation();
 
         // Mặc định hiển thị HomeFragment khi khởi động
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
+        }
+    }
+
+    /**
+     * Khởi động ReminderForegroundService để đảm bảo thông báo nhắc nhở hoạt động
+     */
+    private void startReminderService() {
+        try {
+            Log.d("HomeActivity", "Khởi động ReminderForegroundService");
+            
+            // Kiểm tra quyền trước khi khởi động service
+            if (ReminderPermissionHelper.hasExactAlarmPermission(this)) {
+                ReminderForegroundService.startService(this);
+                Log.d("HomeActivity", "Đã khởi động ReminderForegroundService thành công");
+            } else {
+                Log.w("HomeActivity", "Không có quyền exact alarm - service có thể không hoạt động tối ưu");
+                // Vẫn khởi động service để có thể hoạt động với quyền hạn chế
+                ReminderForegroundService.startService(this);
+            }
+        } catch (Exception e) {
+            Log.e("HomeActivity", "Lỗi khi khởi động ReminderForegroundService", e);
         }
     }
 
@@ -106,5 +144,23 @@ public class HomeActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        // Đảm bảo service vẫn hoạt động khi app được resume
+        if (authManager.isUserLoggedIn()) {
+            startReminderService();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        
+        // Không stop service khi destroy activity để service vẫn chạy trong background
+        // Service sẽ tự động stop khi app bị kill hoàn toàn
     }
 }

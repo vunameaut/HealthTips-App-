@@ -66,6 +66,11 @@ public class ReminderForegroundService extends Service {
                 }
             }
 
+            // Đảm bảo service không bị kill bằng cách giữ wake lock
+            if (wakeLock != null && !wakeLock.isHeld()) {
+                wakeLock.acquire();
+            }
+
         } catch (Exception e) {
             Log.e(TAG, "Error starting foreground service", e);
             // Nếu không thể start foreground, fallback về normal notification

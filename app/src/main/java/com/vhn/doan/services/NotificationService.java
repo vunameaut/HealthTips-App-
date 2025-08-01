@@ -157,14 +157,20 @@ public class NotificationService {
      * Hiển thị thông báo nhắc nhở với các tham số riêng lẻ (static method)
      */
     public static void showReminderNotification(Context context, String title, String message, String reminderId) {
-        NotificationService service = new NotificationService(context);
+        try {
+            NotificationService service = new NotificationService(context);
 
-        // Tạo một Reminder object tạm thời để sử dụng method hiện tại
-        Reminder tempReminder = new Reminder();
-        tempReminder.setId(reminderId);
-        tempReminder.setTitle(title);
-        tempReminder.setDescription(message);
+            // Tạo một Reminder object tạm thời để sử dụng method hiện tại
+            Reminder tempReminder = new Reminder();
+            tempReminder.setId(reminderId);
+            tempReminder.setTitle(title);
+            tempReminder.setDescription(message);
 
-        service.showReminderNotification(tempReminder);
+            service.showReminderNotification(tempReminder);
+            
+            android.util.Log.d("NotificationService", "Đã hiển thị thông báo: " + title);
+        } catch (Exception e) {
+            android.util.Log.e("NotificationService", "Lỗi khi hiển thị thông báo", e);
+        }
     }
 }
