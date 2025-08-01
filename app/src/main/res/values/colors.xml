@@ -49,8 +49,10 @@
 
     <!-- Màu chính của ứng dụng -->
     <color name="primary_color">#4CAF50</color>          <!-- Màu chính - xanh lá -->
+    <color name="primary_light">#81C784</color>          <!-- Màu chính nhạt -->
     <color name="primary_dark">#2E7D32</color>           <!-- Màu chính đậm -->
-    <color name="primary_light">#C8E6C9</color>          <!-- Màu chính nhạt -->
+    <color name="secondary_color">#FF9800</color>        <!-- Màu phụ - cam -->
+    <color name="warning_color">#FF9800</color>          <!-- Màu cảnh báo - cam -->
 
     <!-- Màu cho Material Design 3 - Dark Theme -->
     <color name="md_theme_dark_primary">#4CAF50</color>

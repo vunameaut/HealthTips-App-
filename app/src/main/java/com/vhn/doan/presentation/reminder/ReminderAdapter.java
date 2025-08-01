@@ -148,10 +148,10 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
             }
 
             // Hiển thị thời gian
-            if (reminder.getReminderTime() != null) {
-                tvDateTime.setText(dateTimeFormat.format(reminder.getReminderTime()));
+            if (reminder.getReminderTimeAsDate() != null) {
+                tvDateTime.setText(dateTimeFormat.format(reminder.getReminderTimeAsDate()));
             } else {
-                tvDateTime.setText("Chưa đặt thời gian");
+                tvDateTime.setText(itemView.getContext().getString(R.string.no_time_set));
             }
 
             // Hiển thị loại lặp lại

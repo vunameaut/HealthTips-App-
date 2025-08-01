@@ -24,4 +24,11 @@
         android:title="Làm mới"
         app:showAsAction="never" />
 
+    <!-- Debug - chỉ hiển thị trong debug mode -->
+    <item
+        android:id="@+id/action_debug_notifications"
+        android:icon="@drawable/ic_refresh"
+        android:title="🔧 Debug Thông Báo"
+        app:showAsAction="never" />
+
 </menu>

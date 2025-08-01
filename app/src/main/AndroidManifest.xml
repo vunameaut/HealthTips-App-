@@ -56,6 +56,12 @@
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
 
+        <!-- Debug Activity -->
+        <activity
+            android:name=".presentation.debug.ReminderTestActivity"
+            android:exported="true"
+            android:label="Debug Thông Báo" />
+
         <!-- Broadcast Receivers cho Reminder -->
         <receiver
             android:name=".receivers.ReminderBroadcastReceiver"

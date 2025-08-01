@@ -9,7 +9,6 @@ import com.google.firebase.database.Query;
 import com.vhn.doan.data.Reminder;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ public class ReminderRepositoryImpl implements ReminderRepository {
                 reminder.setId(remindersRef.push().getKey());
             }
 
-            reminder.setUpdatedAt(new Date());
+            reminder.setUpdatedAt(System.currentTimeMillis());
 
             Map<String, Object> reminderValues = reminder.toFirebaseMap();
             Map<String, Object> childUpdates = new HashMap<>();
@@ -72,7 +71,7 @@ public class ReminderRepositoryImpl implements ReminderRepository {
                 return;
             }
 
-            reminder.setUpdatedAt(new Date());
+            reminder.setUpdatedAt(System.currentTimeMillis());
             Map<String, Object> reminderValues = reminder.toFirebaseMap();
 
             remindersRef.child(reminder.getId())
@@ -227,7 +226,7 @@ public class ReminderRepositoryImpl implements ReminderRepository {
 
             Map<String, Object> updates = new HashMap<>();
             updates.put("active", isActive);
-            updates.put("updatedAt", new Date().getTime());
+            updates.put("updatedAt", System.currentTimeMillis());
 
             remindersRef.child(reminderId)
                     .updateChildren(updates)

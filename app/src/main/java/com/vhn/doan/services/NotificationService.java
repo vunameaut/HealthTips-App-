@@ -48,7 +48,10 @@ public class NotificationService {
             channel.setDescription(REMINDER_CHANNEL_DESCRIPTION);
             channel.enableLights(true);
             channel.enableVibration(true);
-            channel.setLightColor(context.getResources().getColor(R.color.primary_color, null));
+            channel.setVibrationPattern(new long[]{1000, 1000, 1000, 1000, 1000});
+            channel.setLightColor(android.graphics.Color.BLUE);
+            channel.setShowBadge(true);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
             notificationManager.createNotificationChannel(channel);
         }
@@ -72,35 +75,41 @@ public class NotificationService {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Tạo notification
+        // Tạo notification với âm thanh và rung
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_reminder)
-            .setContentTitle("Nhắc nhở: " + reminder.getTitle())
+            .setContentTitle("🔔 Nhắc nhở: " + reminder.getTitle())
             .setContentText(reminder.getDescription())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(true)
+            .setOngoing(false)
             .setContentIntent(pendingIntent)
             .setStyle(new NotificationCompat.BigTextStyle()
-                .bigText(reminder.getDescription()))
+                .bigText(reminder.getDescription())
+                .setBigContentTitle("🔔 Nhắc nhở: " + reminder.getTitle()))
             .addAction(
                 R.drawable.ic_check,
-                "Đánh dấu hoàn thành",
+                "✓ Hoàn thành",
                 createMarkCompleteIntent(reminder)
-            );
+            )
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER);
 
         // Hiển thị notification
         try {
             NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
             if (notificationManagerCompat.areNotificationsEnabled()) {
-                notificationManagerCompat.notify(
-                    REMINDER_NOTIFICATION_ID + reminder.getId().hashCode(),
-                    builder.build()
-                );
+                int notificationId = REMINDER_NOTIFICATION_ID + reminder.getId().hashCode();
+                notificationManagerCompat.notify(notificationId, builder.build());
+
+                android.util.Log.d("NotificationService", "Đã hiển thị thông báo cho reminder: " +
+                    reminder.getTitle() + " với ID: " + notificationId);
+            } else {
+                android.util.Log.w("NotificationService", "Thông báo bị tắt bởi người dùng");
             }
         } catch (SecurityException e) {
-            // Xử lý trường hợp không có quyền notification
-            e.printStackTrace();
+            android.util.Log.e("NotificationService", "Không có quyền hiển thị thông báo", e);
         }
     }
 

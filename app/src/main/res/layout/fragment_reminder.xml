@@ -6,11 +6,29 @@
     android:layout_height="match_parent"
     android:background="@color/background_color">
 
+    <!-- Nút Debug ở góc trên bên phải -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_debug_notifications"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/warning_color"
+        android:text="🔧 Debug"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        app:icon="@drawable/ic_refresh"
+        app:iconTint="@android:color/white"
+        app:cornerRadius="20dp"
+        android:elevation="4dp" />
+
     <!-- SwipeRefreshLayout chứa RecyclerView -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_reminders"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="60dp">
 
         <!-- RecyclerView hiển thị danh sách nhắc nhở -->
         <androidx.recyclerview.widget.RecyclerView

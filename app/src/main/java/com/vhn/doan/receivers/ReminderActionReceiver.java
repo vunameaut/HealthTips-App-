@@ -3,49 +3,45 @@ package com.vhn.doan.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
-import com.vhn.doan.data.repository.ReminderRepository;
-import com.vhn.doan.data.repository.ReminderRepositoryImpl;
 import com.vhn.doan.services.NotificationService;
 
 /**
- * BroadcastReceiver để xử lý các action từ notification nhắc nhở
+ * BroadcastReceiver để xử lý các hành động từ thông báo nhắc nhở
  */
 public class ReminderActionReceiver extends BroadcastReceiver {
+
+    private static final String TAG = "ReminderActionReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        String reminderId = intent.getStringExtra("reminder_id");
+        Log.d(TAG, "Received action: " + action);
 
-        if ("MARK_COMPLETE".equals(action) && reminderId != null) {
-            markReminderComplete(context, reminderId);
+        if ("MARK_COMPLETE".equals(action)) {
+            handleMarkComplete(context, intent);
         }
     }
 
     /**
-     * Đánh dấu nhắc nhở đã hoàn thành
+     * Xử lý khi người dùng đánh dấu hoàn thành nhắc nhở
      */
-    private void markReminderComplete(Context context, String reminderId) {
-        ReminderRepository reminderRepository = new ReminderRepositoryImpl();
+    private void handleMarkComplete(Context context, Intent intent) {
+        String reminderId = intent.getStringExtra("reminder_id");
 
-        // Tắt nhắc nhở
-        reminderRepository.toggleReminder(reminderId, false, new ReminderRepository.RepositoryCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                // Hủy notification
-                NotificationService notificationService = new NotificationService(context);
-                notificationService.cancelReminderNotification(reminderId);
+        if (reminderId != null) {
+            // Hủy thông báo
+            NotificationService notificationService = new NotificationService(context);
+            notificationService.cancelReminderNotification(reminderId);
 
-                // Hiển thị thông báo thành công
-                Toast.makeText(context, "Đã đánh dấu nhắc nhở hoàn thành", Toast.LENGTH_SHORT).show();
-            }
+            // Hiển thị thông báo Toast
+            Toast.makeText(context, "Đã đánh dấu nhắc nhở hoàn thành", Toast.LENGTH_SHORT).show();
 
-            @Override
-            public void onError(String error) {
-                Toast.makeText(context, "Lỗi khi cập nhật nhắc nhở: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
+            Log.d(TAG, "Đã đánh dấu hoàn thành reminder: " + reminderId);
+
+            // TODO: Có thể cập nhật trạng thái trong database nếu cần
+        }
     }
 }

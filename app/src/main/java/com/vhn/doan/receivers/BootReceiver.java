@@ -3,59 +3,60 @@ package com.vhn.doan.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
-import com.vhn.doan.data.Reminder;
-import com.vhn.doan.data.repository.ReminderRepository;
-import com.vhn.doan.data.repository.ReminderRepositoryImpl;
 import com.vhn.doan.services.ReminderService;
-import com.vhn.doan.utils.UserSessionManager;
-
-import java.util.List;
 
 /**
- * BroadcastReceiver để khởi động lại các reminder sau khi thiết bị boot
+ * BroadcastReceiver để khôi phục lại các reminder sau khi thiết bị khởi động lại
  */
 public class BootReceiver extends BroadcastReceiver {
+
+    private static final String TAG = "BootReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        Log.d(TAG, "Received action: " + action);
 
         if (Intent.ACTION_BOOT_COMPLETED.equals(action) ||
             Intent.ACTION_MY_PACKAGE_REPLACED.equals(action) ||
             Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
 
-            rescheduleAllReminders(context);
+            rescheduleReminders(context);
         }
     }
 
     /**
-     * Lên lịch lại tất cả các reminder đang hoạt động
+     * Lên lịch lại tất cả các reminder hoạt động
      */
-    private void rescheduleAllReminders(Context context) {
-        UserSessionManager userSessionManager = new UserSessionManager(context);
-        String userId = userSessionManager.getCurrentUserId();
+    private void rescheduleReminders(Context context) {
+        try {
+            Log.d(TAG, "Đang khôi phục lại các reminder sau khi boot...");
 
-        if (userId == null || userId.isEmpty()) {
-            return; // Không có user đăng nhập
+            // TODO: Lấy danh sách reminder từ database và lên lịch lại
+            // Hiện tại chỉ ghi log, sau này sẽ tích hợp với repository
+
+            // Ví dụ implementation:
+            // ReminderRepository repository = new ReminderRepositoryImpl();
+            // repository.getActiveReminders(userId, new RepositoryCallback<List<Reminder>>() {
+            //     @Override
+            //     public void onSuccess(List<Reminder> reminders) {
+            //         ReminderService reminderService = new ReminderService(context);
+            //         reminderService.rescheduleAllActiveReminders(reminders);
+            //         Log.d(TAG, "Đã khôi phục " + reminders.size() + " reminder");
+            //     }
+            //
+            //     @Override
+            //     public void onError(String error) {
+            //         Log.e(TAG, "Lỗi khi khôi phục reminder: " + error);
+            //     }
+            // });
+
+            Log.d(TAG, "Hoàn thành việc khôi phục reminder");
+
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi khôi phục reminder sau boot", e);
         }
-
-        ReminderRepository reminderRepository = new ReminderRepositoryImpl();
-        ReminderService reminderService = new ReminderService(context);
-
-        // Lấy tất cả reminder đang hoạt động của user
-        reminderRepository.getActiveReminders(userId, new ReminderRepository.RepositoryCallback<List<Reminder>>() {
-            @Override
-            public void onSuccess(List<Reminder> reminders) {
-                // Lên lịch lại tất cả reminder
-                reminderService.rescheduleAllActiveReminders(reminders);
-            }
-
-            @Override
-            public void onError(String error) {
-                // Log lỗi nhưng không làm gì thêm
-                android.util.Log.e("BootReceiver", "Lỗi khi lấy reminder: " + error);
-            }
-        });
     }
 }

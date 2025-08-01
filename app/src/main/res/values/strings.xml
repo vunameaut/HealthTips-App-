@@ -50,7 +50,8 @@
     <string name="success_reset_password">Đã gửi email đặt lại mật khẩu</string>
     <string name="error_network">Lỗi kết nối mạng</string>
 
-    <!-- Chuỗi cho màn hình nhắc nhở -->
+    <!-- Các chuỗi cho màn hình nhắc nhở -->
+    <string name="no_time_set">Chưa đặt thời gian</string>
     <string name="reminder_title">Tiêu đề nhắc nhở</string>
     <string name="reminder_description">Mô tả nhắc nhở</string>
     <string name="reminder_time">Thời gian nhắc nhở</string>

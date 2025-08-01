@@ -81,8 +81,8 @@ public class ReminderDialog {
         this.isEditMode = reminder != null;
 
         // Kiểm tra reminder không null trước khi truy cập properties
-        if (reminder != null && reminder.getReminderTime() != null) {
-            selectedDateTime.setTime(reminder.getReminderTime());
+        if (reminder != null && reminder.getReminderTimeAsDate() != null) {
+            selectedDateTime.setTime(reminder.getReminderTimeAsDate());
         } else {
             // Đặt thời gian mặc định là 1 giờ sau thời điểm hiện tại nếu reminder null
             selectedDateTime = Calendar.getInstance();
@@ -216,7 +216,7 @@ public class ReminderDialog {
 
         reminder.setTitle(title);
         reminder.setDescription(description);
-        reminder.setReminderTime(selectedDateTime.getTime());
+        reminder.setReminderTime(selectedDateTime.getTimeInMillis());
         reminder.setRepeatType(spRepeatType.getSelectedItemPosition());
         reminder.setActive(swActive.isChecked());
 

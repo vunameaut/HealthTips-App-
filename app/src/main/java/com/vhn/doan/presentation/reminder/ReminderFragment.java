@@ -125,6 +125,9 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         } else if (itemId == R.id.action_refresh) {
             presenter.refreshReminders();
             return true;
+        } else if (itemId == R.id.action_debug_notifications) {
+            openDebugActivity();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -142,6 +145,12 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         Button btnCreateFirstReminder = view.findViewById(R.id.btn_create_first_reminder);
         if (btnCreateFirstReminder != null) {
             btnCreateFirstReminder.setOnClickListener(v -> presenter.createReminder());
+        }
+
+        // Setup Debug Button
+        com.google.android.material.button.MaterialButton btnDebug = view.findViewById(R.id.btn_debug_notifications);
+        if (btnDebug != null) {
+            btnDebug.setOnClickListener(v -> openDebugActivity());
         }
     }
 
@@ -216,6 +225,17 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         } else {
             item.setTitle("Chỉ hiển thị đang hoạt động");
             item.setIcon(R.drawable.ic_filter_list_off);
+        }
+    }
+
+    /**
+     * Mở ReminderTestActivity để debug hệ thống thông báo
+     */
+    private void openDebugActivity() {
+        if (getContext() != null) {
+            android.content.Intent intent = new android.content.Intent(getContext(),
+                com.vhn.doan.presentation.debug.ReminderTestActivity.class);
+            startActivity(intent);
         }
     }
 

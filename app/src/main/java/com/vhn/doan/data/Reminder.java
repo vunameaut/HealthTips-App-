@@ -2,6 +2,7 @@ package com.vhn.doan.data;
 
 import com.google.firebase.database.PropertyName;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.Exclude;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -72,14 +73,14 @@ public class Reminder {
         return description;
     }
 
-    // Getter cho Firebase - trả về Long
-    @PropertyName("reminderTime")
-    public Long getReminderTimestamp() {
+    // Firebase getter - trả về Long
+    public Long getReminderTime() {
         return reminderTime;
     }
 
-    // Getter cho UI - trả về Date
-    public Date getReminderTime() {
+    // UI helper method - trả về Date
+    @Exclude
+    public Date getReminderTimeAsDate() {
         return reminderTime != null ? new Date(reminderTime) : null;
     }
 
@@ -87,29 +88,30 @@ public class Reminder {
         return repeatType;
     }
 
+    @PropertyName("isActive")
     public boolean isActive() {
         return isActive;
     }
 
-    // Getter cho Firebase - trả về Long
-    @PropertyName("createdAt")
-    public Long getCreatedAtTimestamp() {
+    // Firebase getter - trả về Long
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    // Getter cho UI - trả về Date
-    public Date getCreatedAt() {
+    // UI helper method - trả về Date
+    @Exclude
+    public Date getCreatedAtAsDate() {
         return createdAt != null ? new Date(createdAt) : null;
     }
 
-    // Getter cho Firebase - trả về Long
-    @PropertyName("updatedAt")
-    public Long getUpdatedAtTimestamp() {
+    // Firebase getter - trả về Long
+    public Long getUpdatedAt() {
         return updatedAt;
     }
 
-    // Getter cho UI - trả về Date
-    public Date getUpdatedAt() {
+    // UI helper method - trả về Date
+    @Exclude
+    public Date getUpdatedAtAsDate() {
         return updatedAt != null ? new Date(updatedAt) : null;
     }
 
@@ -136,15 +138,15 @@ public class Reminder {
         this.updatedAt = System.currentTimeMillis();
     }
 
-    // Setter cho Firebase - nhận Long
-    @PropertyName("reminderTime")
-    public void setReminderTimestamp(Long reminderTime) {
+    // Firebase setter - nhận Long
+    public void setReminderTime(Long reminderTime) {
         this.reminderTime = reminderTime;
         this.updatedAt = System.currentTimeMillis();
     }
 
-    // Setter cho UI - nhận Date
-    public void setReminderTime(Date reminderTime) {
+    // UI helper method - nhận Date
+    @Exclude
+    public void setReminderTimeFromDate(Date reminderTime) {
         this.reminderTime = reminderTime != null ? reminderTime.getTime() : null;
         this.updatedAt = System.currentTimeMillis();
     }
@@ -154,30 +156,31 @@ public class Reminder {
         this.updatedAt = System.currentTimeMillis();
     }
 
+    @PropertyName("isActive")
     public void setActive(boolean active) {
         isActive = active;
         this.updatedAt = System.currentTimeMillis();
     }
 
-    // Setter cho Firebase - nhận Long
-    @PropertyName("createdAt")
-    public void setCreatedAtTimestamp(Long createdAt) {
+    // Firebase setter - nhận Long
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 
-    // Setter cho UI - nhận Date
-    public void setCreatedAt(Date createdAt) {
+    // UI helper method - nhận Date
+    @Exclude
+    public void setCreatedAtFromDate(Date createdAt) {
         this.createdAt = createdAt != null ? createdAt.getTime() : null;
     }
 
-    // Setter cho Firebase - nhận Long
-    @PropertyName("updatedAt")
-    public void setUpdatedAtTimestamp(Long updatedAt) {
+    // Firebase setter - nhận Long
+    public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
     }
 
-    // Setter cho UI - nhận Date
-    public void setUpdatedAt(Date updatedAt) {
+    // UI helper method - nhận Date
+    @Exclude
+    public void setUpdatedAtFromDate(Date updatedAt) {
         this.updatedAt = updatedAt != null ? updatedAt.getTime() : null;
     }
 
@@ -189,13 +192,14 @@ public class Reminder {
     /**
      * Tính toán thời gian nhắc nhở tiếp theo dựa trên loại lặp lại
      */
+    @Exclude
     public Date getNextReminderTime() {
         if (reminderTime == null || repeatType == RepeatType.NO_REPEAT) {
-            return getReminderTime();
+            return getReminderTimeAsDate();
         }
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(getReminderTime());
+        calendar.setTime(getReminderTimeAsDate());
 
         switch (repeatType) {
             case RepeatType.DAILY:
@@ -208,7 +212,7 @@ public class Reminder {
                 calendar.add(Calendar.MONTH, 1);
                 break;
             default:
-                return getReminderTime();
+                return getReminderTimeAsDate();
         }
 
         return calendar.getTime();
@@ -217,6 +221,7 @@ public class Reminder {
     /**
      * Kiểm tra xem nhắc nhở có đã đến giờ hay chưa
      */
+    @Exclude
     public boolean isDue() {
         if (reminderTime == null || !isActive) {
             return false;
@@ -225,8 +230,28 @@ public class Reminder {
     }
 
     /**
+     * Lấy tên hiển thị cho loại lặp lại
+     */
+    @Exclude
+    public String getRepeatTypeDisplayName() {
+        switch (repeatType) {
+            case RepeatType.NO_REPEAT:
+                return "Không lặp lại";
+            case RepeatType.DAILY:
+                return "Hàng ngày";
+            case RepeatType.WEEKLY:
+                return "Hàng tuần";
+            case RepeatType.MONTHLY:
+                return "Hàng tháng";
+            default:
+                return "Không xác định";
+        }
+    }
+
+    /**
      * Lấy Map để ghi vào Firebase với ServerValue.TIMESTAMP
      */
+    @Exclude
     public Map<String, Object> toFirebaseMap() {
         Map<String, Object> map = new java.util.HashMap<>();
         map.put("id", id);
@@ -247,7 +272,7 @@ public class Reminder {
         return "Reminder{" +
                 "id='" + id + '\'' +
                 ", title='" + title + '\'' +
-                ", reminderTime=" + getReminderTime() +
+                ", reminderTime=" + getReminderTimeAsDate() +
                 ", isActive=" + isActive +
                 '}';
     }
