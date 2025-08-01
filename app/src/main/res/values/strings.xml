@@ -99,13 +99,9 @@
     <string name="loading">Đang tải...</string>
     <string name="error">Lỗi</string>
     <string name="success">Thành công</string>
-    <string name="confirm">Xác nhận</string>
-    <string name="warning">Cảnh báo</string>
-
-    <string name="no_data">Không có dữ liệu</string>
-    <string name="logout">Đăng xuất</string>
-    <string name="back">Quay lại</string>
     <string name="favorite">Yêu thích</string>
+    <string name="no_favorites">Bạn chưa có mục yêu thích nào</string>
+    <string name="back">Quay lại</string>
 
     <!-- Các chuỗi cho màn hình chi tiết danh mục -->
     <string name="empty_tips_description">Chưa có mẹo nào trong danh mục này</string>

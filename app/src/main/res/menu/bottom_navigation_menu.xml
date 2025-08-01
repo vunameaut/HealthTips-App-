@@ -13,10 +13,6 @@
         android:icon="@drawable/icon_video_short"
         android:title="@string/nav_videos" />
     <item
-        android:id="@+id/nav_favorites"
-        android:icon="@android:drawable/btn_star_big_on"
-        android:title="@string/nav_favorites" />
-    <item
         android:id="@+id/nav_profile"
         android:icon="@android:drawable/ic_menu_myplaces"
         android:title="@string/nav_profile" />

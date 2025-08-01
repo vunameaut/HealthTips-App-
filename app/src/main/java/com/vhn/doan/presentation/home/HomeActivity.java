@@ -13,7 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.auth.LoginActivity;
-import com.vhn.doan.presentation.favorite.FavoriteFragment;
+import com.vhn.doan.presentation.profile.FavoritePostsFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.services.AuthManager;
@@ -116,8 +116,8 @@ public class HomeActivity extends AppCompatActivity {
                     fragment = HomeFragment.newInstance();
                     // fragment = ShortVideoFragment.newInstance();
                 } else if (itemId == R.id.nav_favorites) {
-                    // Kích hoạt FavoriteFragment
-                    fragment = FavoriteFragment.newInstance();
+                    // Sử dụng FavoritePostsFragment thay vì FavoriteFragment
+                    fragment = FavoritePostsFragment.newInstance();
                 } else if (itemId == R.id.nav_profile) {
                     // Sử dụng ProfileFragment thay vì HomeFragment
                     fragment = ProfileFragment.newInstance();
