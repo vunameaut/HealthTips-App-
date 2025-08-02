@@ -579,17 +579,17 @@ public class HomeFragment extends Fragment implements HomeView {
     }
 
     /**
-     * Navigation đến màn hình yêu thích
+     * Navigation đến màn hình profile (nơi chứa chức năng yêu thích)
      * Được gọi khi người dùng muốn xem toàn bộ danh sách yêu thích
      */
     public void navigateToFavorites() {
-        // Chuyển tab bottom navigation đến favorites
+        // Chuyển tab bottom navigation đến profile (nơi chứa chức năng yêu thích)
         if (getActivity() != null) {
-            // Trigger bottom navigation để chuyển đến FavoriteFragment
+            // Trigger bottom navigation để chuyển đến ProfileFragment
             com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
                     getActivity().findViewById(R.id.bottom_navigation);
             if (bottomNav != null) {
-                bottomNav.setSelectedItemId(R.id.nav_favorites);
+                bottomNav.setSelectedItemId(R.id.nav_profile);
             }
         }
     }

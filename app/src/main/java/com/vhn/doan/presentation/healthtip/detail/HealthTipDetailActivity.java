@@ -26,15 +26,12 @@ import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
 /**
  * Activity hiển thị chi tiết một bài viết mẹo sức khỏe
  * Tuân theo kiến trúc MVP (Model-View-Presenter)
- * Hỗ trợ animation trượt từ dưới lên và swipe-to-dismiss
  */
 public class HealthTipDetailActivity extends AppCompatActivity implements HealthTipDetailView {
 
     private static final String EXTRA_HEALTH_TIP_ID = "health_tip_id";
 
     // UI components
-    private SwipeToDismissLayout swipeToDismissLayout;
-    private View backgroundOverlay;
     private ImageView imageViewDetail;
     private TextView textViewTitle;
     private TextView textViewCategory;
@@ -46,7 +43,6 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     private Button buttonShare;
     private ProgressBar progressBar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
-    private View dragHandle;
 
     // Presenter
     private HealthTipDetailPresenter presenter;
@@ -57,7 +53,7 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     private boolean isFavorite = false;
 
     /**
-     * Tạo Intent để mở Activity này với animation trượt từ dưới lên
+     * Tạo Intent để mở Activity này
      */
     public static Intent createIntent(Context context, String healthTipId) {
         Intent intent = new Intent(context, HealthTipDetailActivity.class);
@@ -68,15 +64,10 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Đặt activity ở vị trí dưới màn hình ngay từ đầu để tránh nháy
-        setupInitialPosition();
-
         setContentView(R.layout.activity_health_tip_detail);
 
         // Khởi tạo UI components
         initViews();
-        setupSwipeToDismiss();
 
         // Lấy healthTipId từ Intent
         healthTipId = getIntent().getStringExtra(EXTRA_HEALTH_TIP_ID);
@@ -95,58 +86,14 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         // Thiết lập listeners
         setupListeners();
 
-        // Bắt đầu animation trượt lên từ dưới
-        startSlideUpAnimation();
-
         // Tải dữ liệu
         presenter.loadHealthTipDetail(healthTipId);
-    }
-
-    /**
-     * Đặt vị trí ban đầu của activity ở dưới màn hình
-     */
-    private void setupInitialPosition() {
-        // Lấy kích thước màn hình
-        android.view.WindowManager windowManager = getWindowManager();
-        android.util.DisplayMetrics displayMetrics = new android.util.DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-        int screenHeight = displayMetrics.heightPixels;
-
-        // Đặt activity ở vị trí dưới màn hình
-        View decorView = getWindow().getDecorView();
-        decorView.setTranslationY(screenHeight);
-        decorView.setAlpha(1.0f);
-    }
-
-    /**
-     * Bắt đầu animation trượt lên từ dưới
-     */
-    private void startSlideUpAnimation() {
-        View decorView = getWindow().getDecorView();
-
-        // Animation trượt lên từ dưới với hiệu ứng mượt mà
-        decorView.animate()
-                .translationY(0)
-                .setDuration(300)
-                .setInterpolator(new android.view.animation.DecelerateInterpolator())
-                .setListener(new android.animation.AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(android.animation.Animator animation) {
-                        // Đảm bảo activity hiển thị trong suốt quá trình animation
-                        decorView.setAlpha(1.0f);
-                    }
-                })
-                .start();
     }
 
     /**
      * Khởi tạo các view
      */
     private void initViews() {
-        // Khởi tạo SwipeToDismissLayout
-        swipeToDismissLayout = findViewById(R.id.swipeToDismissLayout);
-        dragHandle = findViewById(R.id.dragHandle);
-
         // Khởi tạo toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -167,9 +114,6 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         buttonLike = findViewById(R.id.buttonLike);
         buttonShare = findViewById(R.id.buttonShare);
         progressBar = findViewById(R.id.progressBar);
-
-        // Khởi tạo background overlay
-        backgroundOverlay = findViewById(R.id.backgroundOverlay);
 
         // Ẩn tất cả nội dung cho đến khi dữ liệu được tải
         hideContentViews();
@@ -232,64 +176,6 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
                     .setInterpolator(new android.view.animation.DecelerateInterpolator())
                     .start();
             }
-        }
-    }
-
-    /**
-     * Thiết lập chức năng swipe-to-dismiss
-     */
-    private void setupSwipeToDismiss() {
-        if (swipeToDismissLayout != null) {
-            swipeToDismissLayout.setOnDismissListener(new SwipeToDismissLayout.OnDismissListener() {
-                @Override
-                public void onDismiss() {
-                    // Đóng activity với animation
-                    finishWithAnimation();
-                }
-
-                @Override
-                public void onDragProgress(float progress) {
-                    // Cập nhật hiệu ứng khi đang kéo
-                    // Progress từ 0.0 (không kéo) đến 1.0 (kéo hoàn toàn)
-                    updateDragProgress(progress);
-                }
-            });
-        }
-    }
-
-    /**
-     * Cập nhật hiệu ứng khi đang kéo - làm cho activity phía sau hiển thị rõ hơn
-     */
-    private void updateDragProgress(float progress) {
-        // Thay đổi độ mờ của drag handle
-        if (dragHandle != null) {
-            dragHandle.setAlpha(1.0f - progress * 0.5f);
-        }
-
-        // Thông báo cho activity phía trước để cập nhật hiệu ứng
-        // Activity phía trước sẽ được làm sáng dần khi kéo xuống
-        updateBackgroundActivityVisibility(progress);
-    }
-
-    /**
-     * Cập nhật hiển thị activity phía sau khi đang kéo
-     */
-    private void updateBackgroundActivityVisibility(float progress) {
-        // Tính toán độ mờ của overlay để làm cho activity phía sau hiển thị rõ hơn
-        // Khi progress = 0 (không kéo): overlay hoàn toàn mờ
-        // Khi progress = 1 (kéo hoàn toàn): overlay trong suốt, activity phía sau hiển thị rõ
-
-        // Tạo overlay effect để activity phía sau hiển thị dần
-        View rootView = findViewById(android.R.id.content);
-        if (rootView != null) {
-            // Thay đổi background alpha của window để thấy activity phía sau
-            float overlayAlpha = 0.3f * (1.0f - progress); // Bắt đầu từ 30% opacity, giảm dần về 0
-            getWindow().setStatusBarColor(
-                    android.graphics.Color.argb(
-                            (int) (overlayAlpha * 255),
-                            0, 0, 0
-                    )
-            );
         }
     }
 
@@ -460,20 +346,13 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
     @Override
     public void finish() {
-        finishWithAnimation();
+        super.finish();
+        // Không còn animation trượt xuống dưới nữa
     }
 
     @Override
     public void onBackPressed() {
-        finishWithAnimation();
-    }
-
-    /**
-     * Đóng activity với animation trượt xuống dưới
-     */
-    private void finishWithAnimation() {
-        super.finish();
-        // Áp dụng animation trượt xuống dưới khi đóng activity
-        overridePendingTransition(R.anim.restore_and_scale_up, R.anim.slide_down_to_bottom);
+        super.onBackPressed();
+        // Không còn animation trượt xuống dưới nữa
     }
 }

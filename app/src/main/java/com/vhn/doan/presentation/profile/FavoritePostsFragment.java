@@ -21,8 +21,8 @@ import com.vhn.doan.data.HealthTip;
 import com.vhn.doan.data.repository.FavoriteRepositoryImpl;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
 import com.vhn.doan.presentation.base.BaseFragment;
-import com.vhn.doan.presentation.favorite.FavoritePresenter;
-import com.vhn.doan.presentation.favorite.FavoriteView;
+import com.vhn.doan.presentation.profile.FavoritePresenter;
+import com.vhn.doan.presentation.profile.FavoriteView;
 import com.vhn.doan.presentation.profile.adapter.GridFavoriteAdapter;
 
 import java.util.ArrayList;
@@ -208,25 +208,34 @@ public class FavoritePostsFragment extends BaseFragment implements FavoriteView 
     }
 
     @Override
-    public void showRemovedFromFavorites(String healthTipTitle) {
-        showMessage("Đã xóa '" + healthTipTitle + "' khỏi danh sách yêu thích");
+    public void showRemoveFavoriteSuccess(String message) {
+        showMessage(message);
     }
 
     @Override
-    public void refreshFavoritesList() {
-        if (presenter != null) {
-            presenter.refreshFavorites();
-        }
+    public void showRemoveFavoriteError(String message) {
+        showError(message);
     }
 
     @Override
-    public void showLoading(boolean loading) {
+    public void showLoading() {
         if (progressBar != null) {
-            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
         }
 
         if (swipeRefreshLayout != null) {
-            swipeRefreshLayout.setRefreshing(loading);
+            swipeRefreshLayout.setRefreshing(true);
+        }
+    }
+
+    @Override
+    public void hideLoading() {
+        if (progressBar != null) {
+            progressBar.setVisibility(View.GONE);
+        }
+
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
 
