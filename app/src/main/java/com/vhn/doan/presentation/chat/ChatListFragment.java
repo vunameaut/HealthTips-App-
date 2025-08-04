@@ -304,7 +304,7 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
                     .setTitle(R.string.pin_conversation);
         }
 
-
+        
     }
 
     /**

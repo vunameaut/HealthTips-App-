@@ -175,10 +175,10 @@ public class Conversation {
         }
 
         String trimmed = firstMessage.trim();
-
+        
         // Loại bỏ các ký tự đặc biệt và emoji
         trimmed = trimmed.replaceAll("[^\\p{L}\\p{N}\\s\\?\\!\\.]", "");
-
+        
         // Cắt tại dấu câu đầu tiên để tạo tiêu đề ngắn gọn
         String[] sentences = trimmed.split("[.!?]");
         if (sentences.length > 0 && !sentences[0].trim().isEmpty()) {
@@ -189,7 +189,7 @@ public class Conversation {
             }
             trimmed = firstSentence;
         }
-
+        
         // Lấy tối đa 25 ký tự để có thể hiển thị đầy đủ hơn
         if (trimmed.length() <= 25) {
             return trimmed;

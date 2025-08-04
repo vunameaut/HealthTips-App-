@@ -297,7 +297,7 @@ public class ChatListPresenter implements ChatListContract.Presenter {
             public void onSuccess(Conversation updatedConversation) {
                 String message = newPinState ? "Đã ghim cuộc trò chuyện" : "Đã bỏ ghim cuộc trò chuyện";
                 Log.d(TAG, message + ": " + updatedConversation.getTitle());
-
+                
                 if (isViewAttached()) {
                     view.showMessage(message);
 
