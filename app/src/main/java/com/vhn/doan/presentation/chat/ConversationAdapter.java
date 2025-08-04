@@ -1,13 +1,16 @@
 package com.vhn.doan.presentation.chat;
 
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
 import com.vhn.doan.R;
 import com.vhn.doan.data.Conversation;
 
@@ -24,11 +27,16 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
     private List<Conversation> conversations;
     private OnConversationClickListener onConversationClickListener;
+    private OnConversationLongClickListener onConversationLongClickListener;
     private final SimpleDateFormat timeFormat;
     private final SimpleDateFormat dateFormat;
 
     public interface OnConversationClickListener {
         void onConversationClick(Conversation conversation);
+    }
+
+    public interface OnConversationLongClickListener {
+        void onConversationLongClick(Conversation conversation, View view);
     }
 
     public ConversationAdapter() {
@@ -39,6 +47,10 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
     public void setOnConversationClickListener(OnConversationClickListener listener) {
         this.onConversationClickListener = listener;
+    }
+
+    public void setOnConversationLongClickListener(OnConversationLongClickListener listener) {
+        this.onConversationLongClickListener = listener;
     }
 
     @NonNull
@@ -110,6 +122,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         private TextView timeText;
         private TextView messageCountText;
         private View unreadIndicator;
+        private ImageView pinIndicator;
+        private MaterialCardView cardView;
 
         public ConversationViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -118,12 +132,23 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
             timeText = itemView.findViewById(R.id.tv_conversation_time);
             messageCountText = itemView.findViewById(R.id.tv_message_count);
             unreadIndicator = itemView.findViewById(R.id.view_unread_indicator);
+            pinIndicator = itemView.findViewById(R.id.iv_pin_indicator);
+            cardView = (MaterialCardView) itemView;
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && onConversationClickListener != null) {
                     onConversationClickListener.onConversationClick(conversations.get(position));
                 }
+            });
+
+            itemView.setOnLongClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && onConversationLongClickListener != null) {
+                    onConversationLongClickListener.onConversationLongClick(conversations.get(position), v);
+                    return true;
+                }
+                return false;
             });
         }
 
@@ -159,6 +184,22 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                 messageCountText.setVisibility(View.VISIBLE);
             } else {
                 messageCountText.setVisibility(View.GONE);
+            }
+
+            // Hiển thị icon ghim và thay đổi màu nền
+            if (conversation.isPinned()) {
+                pinIndicator.setVisibility(View.VISIBLE);
+                // Thay đổi màu nền cho cuộc trò chuyện được ghim
+                cardView.setCardBackgroundColor(itemView.getContext().getResources().getColor(R.color.pinned_conversation_background, itemView.getContext().getTheme()));
+                cardView.setStrokeColor(itemView.getContext().getResources().getColor(R.color.pinned_conversation_stroke, itemView.getContext().getTheme()));
+                cardView.setStrokeWidth(2);
+            } else {
+                pinIndicator.setVisibility(View.GONE);
+                // Màu nền bình thường - sử dụng màu từ theme
+                TypedValue typedValue = new TypedValue();
+                itemView.getContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurface, typedValue, true);
+                cardView.setCardBackgroundColor(typedValue.data);
+                cardView.setStrokeWidth(0);
             }
 
             // Unread indicator (tạm thời ẩn, có thể implement sau)

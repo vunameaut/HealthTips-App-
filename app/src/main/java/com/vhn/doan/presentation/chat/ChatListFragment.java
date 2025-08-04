@@ -5,6 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import android.widget.PopupMenu;
+import android.widget.EditText;
+import androidx.appcompat.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -85,6 +92,9 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
                 presenter.onConversationClicked(conversation);
             }
         });
+
+        // Thêm listener cho long click để hiển thị menu ngữ cảnh
+        conversationAdapter.setOnConversationLongClickListener(this::showConversationContextMenu);
     }
 
     private void setupListeners() {
@@ -241,6 +251,167 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
     public void refreshConversations() {
         if (presenter != null) {
             presenter.refreshConversations();
+        }
+    }
+
+    /**
+     * Hiển thị menu ngữ cảnh khi nhấn giữ vào cuộc trò chuyện
+     */
+    private void showConversationContextMenu(Conversation conversation, View anchorView) {
+        if (getContext() == null) return;
+
+        PopupMenu popupMenu = new PopupMenu(getContext(), anchorView);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_conversation_context, popupMenu.getMenu());
+
+        // Cập nhật trạng thái menu items dựa trên trạng thái cuộc trò chuyện
+        updateMenuItemsState(popupMenu, conversation);
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.action_rename_conversation) {
+                showRenameConversationDialog(conversation);
+                return true;
+            } else if (itemId == R.id.action_pin_conversation) {
+                togglePinConversation(conversation);
+                return true;
+            } else if (itemId == R.id.action_delete_conversation) {
+                showDeleteConversationDialog(conversation);
+                return true;
+            }
+
+            return false;
+        });
+
+        popupMenu.show();
+    }
+
+    /**
+     * Cập nhật trạng thái các menu items dựa trên trạng thái cuộc trò chuyện
+     */
+    private void updateMenuItemsState(PopupMenu popupMenu, Conversation conversation) {
+        // Cập nhật text cho pin/unpin
+        if (conversation.isPinned()) {
+            popupMenu.getMenu().findItem(R.id.action_pin_conversation)
+                    .setTitle(R.string.unpin_conversation);
+        } else {
+            popupMenu.getMenu().findItem(R.id.action_pin_conversation)
+                    .setTitle(R.string.pin_conversation);
+        }
+    }
+
+    /**
+     * Hiển thị dialog đổi tên cuộc trò chuyện
+     */
+    private void showRenameConversationDialog(Conversation conversation) {
+        if (getContext() == null) return;
+
+        EditText editText = new EditText(getContext());
+        editText.setText(conversation.getTitle());
+        editText.setSelectAllOnFocus(true);
+
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.rename_conversation)
+                .setMessage(R.string.enter_new_name)
+                .setView(editText)
+                .setPositiveButton(R.string.rename, (dialog, which) -> {
+                    String newName = editText.getText().toString().trim();
+                    if (!newName.isEmpty() && presenter != null) {
+                        presenter.renameConversation(conversation, newName);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * Hiển thị dialog xác nhận xóa cuộc trò chuyện
+     */
+    private void showDeleteConversationDialog(Conversation conversation) {
+        if (getContext() == null) return;
+
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.delete_conversation_confirm)
+                .setMessage(R.string.delete_conversation_confirm_message)
+                .setPositiveButton(R.string.delete, (dialog, which) -> {
+                    if (presenter != null) {
+                        presenter.deleteConversation(conversation);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * Bật/tắt ghim cuộc trò chuyện
+     */
+    private void togglePinConversation(Conversation conversation) {
+        if (presenter != null) {
+            presenter.togglePinConversation(conversation);
+        }
+    }
+
+    /**
+     * Bật/tắt thông báo cuộc trò chuyện
+     */
+    private void toggleMuteConversation(Conversation conversation) {
+        if (presenter != null) {
+            presenter.toggleMuteConversation(conversation);
+        }
+    }
+
+    /**
+     * Chia sẻ nội dung cuộc trò chuyện
+     */
+    private void shareConversation(Conversation conversation) {
+        if (getContext() == null || presenter == null) return;
+
+        // Tạo nội dung chia sẻ
+        String shareText = "Cuộc trò chuyện: " + conversation.getTitle() + "\n\n";
+        if (conversation.getLastMessage() != null) {
+            shareText += "Tin nhắn cuối: " + conversation.getLastMessage();
+        }
+        shareText += "\n\nỨng dụng HealthTips - Chat AI về sức khỏe";
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Cuộc trò chuyện từ HealthTips");
+
+        try {
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.share_conversation)));
+        } catch (Exception e) {
+            showError("Không thể chia sẻ cuộc trò chuyện");
+        }
+    }
+
+    /**
+     * Sao chép tin nhắn của cuộc trò chuyện
+     */
+    private void copyConversationMessages(Conversation conversation) {
+        if (getContext() == null || presenter == null) return;
+
+        // Tạo nội dung sao chép
+        String copyText = "Cuộc trò chuyện: " + conversation.getTitle() + "\n\n";
+        if (conversation.getLastMessage() != null) {
+            copyText += conversation.getLastMessage();
+        }
+
+        ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Conversation", copyText);
+
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
+            showMessage(getString(R.string.messages_copied));
+        }
+    }
+
+    /**
+     * Đánh dấu cuộc trò chuyện là đã đọc
+     */
+    private void markConversationAsRead(Conversation conversation) {
+        if (presenter != null) {
+            presenter.markConversationAsRead(conversation);
         }
     }
 }

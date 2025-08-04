@@ -55,6 +55,18 @@
                     android:ellipsize="end"
                     tools:text="Làm thế nào để giảm cân hiệu quả?" />
 
+                <!-- Pin Icon -->
+                <ImageView
+                    android:id="@+id/iv_pin_indicator"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_pin"
+                    android:tint="?attr/colorPrimary"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:visibility="gone"
+                    android:contentDescription="Cuộc trò chuyện được ghim" />
+
                 <TextView
                     android:id="@+id/tv_conversation_time"
                     android:layout_width="wrap_content"

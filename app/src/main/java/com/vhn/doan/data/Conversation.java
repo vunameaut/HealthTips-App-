@@ -16,6 +16,9 @@ public class Conversation {
     private int messageCount; // Số lượng tin nhắn trong cuộc trò chuyện
     private long createdTime; // Thời gian tạo cuộc trò chuyện
     private String topic; // Chủ đề chính của cuộc trò chuyện
+    private boolean isPinned; // Cuộc trò chuyện có được ghim không
+    private boolean isMuted; // Cuộc trò chuyện có bị tắt thông báo không
+    private boolean isRead; // Cuộc trò chuyện đã được đọc chưa
 
     public Conversation() {
         // Constructor rỗng cho Firebase
@@ -31,7 +34,7 @@ public class Conversation {
 
     public Conversation(String id, String userId, String title, String lastMessage,
                        long lastMessageTime, boolean isFromUser, int messageCount,
-                       long createdTime, String topic) {
+                       long createdTime, String topic, boolean isPinned, boolean isMuted, boolean isRead) {
         this.id = id;
         this.userId = userId;
         this.title = title;
@@ -41,6 +44,9 @@ public class Conversation {
         this.messageCount = messageCount;
         this.createdTime = createdTime;
         this.topic = topic;
+        this.isPinned = isPinned;
+        this.isMuted = isMuted;
+        this.isRead = isRead;
     }
 
     // Getters
@@ -80,6 +86,18 @@ public class Conversation {
         return topic;
     }
 
+    public boolean isPinned() {
+        return isPinned;
+    }
+
+    public boolean isMuted() {
+        return isMuted;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
     // Setters
     public void setId(String id) {
         this.id = id;
@@ -117,6 +135,18 @@ public class Conversation {
         this.topic = topic;
     }
 
+    public void setPinned(boolean pinned) {
+        isPinned = pinned;
+    }
+
+    public void setMuted(boolean muted) {
+        isMuted = muted;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
+
     /**
      * Chuyển đổi object thành Map để lưu vào Firebase
      */
@@ -130,6 +160,9 @@ public class Conversation {
         map.put("messageCount", messageCount);
         map.put("createdTime", createdTime);
         map.put("topic", topic);
+        map.put("isPinned", isPinned);
+        map.put("isMuted", isMuted);
+        map.put("isRead", isRead);
         return map;
     }
 
@@ -162,6 +195,9 @@ public class Conversation {
                 ", messageCount=" + messageCount +
                 ", createdTime=" + createdTime +
                 ", topic='" + topic + '\'' +
+                ", isPinned=" + isPinned +
+                ", isMuted=" + isMuted +
+                ", isRead=" + isRead +
                 '}';
     }
 }

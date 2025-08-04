@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Đổi tên cuộc trò chuyện -->
+    <item
+        android:id="@+id/action_rename_conversation"
+        android:icon="@drawable/ic_edit"
+        android:title="@string/rename_conversation" />
+
+    <!-- Ghim cuộc trò chuyện -->
+    <item
+        android:id="@+id/action_pin_conversation"
+        android:icon="@drawable/ic_pin"
+        android:title="@string/pin_conversation" />
+
+    <!-- Xóa cuộc trò chuyện -->
+    <item
+        android:id="@+id/action_delete_conversation"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/delete_conversation" />
+
+</menu>

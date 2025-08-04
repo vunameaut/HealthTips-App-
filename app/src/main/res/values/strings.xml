@@ -49,7 +49,34 @@
     <string name="success_login">Đăng nhập thành công</string>
     <string name="success_register">Đăng ký thành công</string>
     <string name="success_reset_password">Đã gửi email đặt lại mật khẩu</string>
-    <string name="error_network">Lỗi kết nối mạng</string>
+
+    <!-- Các chuỗi cho menu ngữ cảnh cuộc trò chuyện -->
+    <string name="rename_conversation">Đổi tên cuộc trò chuyện</string>
+    <string name="pin_conversation">Ghim cuộc trò chuyện</string>
+    <string name="unpin_conversation">Bỏ ghim cuộc trò chuyện</string>
+    <string name="mute_conversation">Tắt thông báo</string>
+    <string name="unmute_conversation">Bật thông báo</string>
+    <string name="share_conversation">Chia sẻ cuộc trò chuyện</string>
+    <string name="copy_messages">Sao chép tin nhắn</string>
+    <string name="mark_as_read">Đánh dấu đã đọc</string>
+    <string name="delete_conversation">Xóa cuộc trò chuyện</string>
+
+    <!-- Dialog và thông báo cho menu ngữ cảnh -->
+    <string name="enter_new_name">Nhập tên mới cho cuộc trò chuyện</string>
+    <string name="conversation_name">Tên cuộc trò chuyện</string>
+    <string name="rename">Đổi tên</string>
+    <string name="cancel">Hủy</string>
+    <string name="delete_conversation_confirm">Bạn có chắc chắn muốn xóa cuộc trò chuyện này?</string>
+    <string name="delete_conversation_confirm_message">Tất cả tin nhắn trong cuộc trò chuyện sẽ bị xóa vĩnh viễn.</string>
+    <string name="delete">Xóa</string>
+    <string name="conversation_deleted">Đã xóa cuộc trò chuyện</string>
+    <string name="conversation_renamed">Đã đổi tên cuộc trò chuyện</string>
+    <string name="conversation_pinned">Đã ghim cuộc trò chuyện</string>
+    <string name="conversation_unpinned">Đã bỏ ghim cuộc trò chuyện</string>
+    <string name="conversation_muted">Đã tắt thông báo</string>
+    <string name="conversation_unmuted">Đã bật thông báo</string>
+    <string name="messages_copied">Đã sao chép tin nhắn</string>
+    <string name="marked_as_read">Đã đánh dấu là đã đọc</string>
 
     <!-- Các chuỗi cho màn hình nhắc nhở -->
     <string name="no_time_set">Chưa đặt thời gian</string>
@@ -94,7 +121,6 @@
 
     <!-- Các chuỗi chung -->
     <string name="ok">OK</string>
-    <string name="cancel">Hủy</string>
     <string name="yes">Có</string>
     <string name="no">Không</string>
     <string name="loading">Đang tải...</string>

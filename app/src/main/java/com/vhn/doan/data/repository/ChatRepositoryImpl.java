@@ -186,8 +186,79 @@ public class ChatRepositoryImpl implements ChatRepository {
 
     @Override
     public void deleteConversation(String conversationId, RepositoryCallback<Boolean> callback) {
-        // TODO: Implement delete conversation and all its messages
-        callback.onError("Chức năng xóa cuộc trò chuyện sẽ được triển khai sau");
+        try {
+            if (conversationId == null || conversationId.isEmpty()) {
+                callback.onError("ID cuộc trò chuyện không hợp lệ");
+                return;
+            }
+
+            // Đầu tiên, xóa tất cả tin nhắn trong cuộc trò chuyện
+            clearChatMessages(conversationId, new RepositoryCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    // Sau khi xóa tin nhắn thành công, tìm và xóa cuộc trò chuyện
+                    deleteConversationFromAllUsers(conversationId, callback);
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Failed to clear messages before deleting conversation: " + error);
+                    callback.onError("Không thể xóa tin nhắn: " + error);
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error deleting conversation", e);
+            callback.onError("Có lỗi xảy ra khi xóa cuộc trò chuyện: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Tìm và xóa cuộc trò chuyện từ tất cả người dùng
+     */
+    private void deleteConversationFromAllUsers(String conversationId, RepositoryCallback<Boolean> callback) {
+        // Query tất cả users để tìm cuộc trò chuyện
+        DatabaseReference conversationsRef = database.child(CONVERSATIONS_PATH);
+
+        conversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean conversationFound = false;
+
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String userId = userSnapshot.getKey();
+
+                    if (userSnapshot.hasChild(conversationId)) {
+                        conversationFound = true;
+
+                        // Xóa cuộc trò chuyện từ user này
+                        database.child(CONVERSATIONS_PATH)
+                                .child(userId)
+                                .child(conversationId)
+                                .removeValue()
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "Conversation deleted successfully: " + conversationId);
+                                    callback.onSuccess(true);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Failed to delete conversation: " + conversationId, e);
+                                    callback.onError("Không thể xóa cuộc trò chuyện: " + e.getMessage());
+                                });
+                        break;
+                    }
+                }
+
+                if (!conversationFound) {
+                    callback.onError("Không tìm thấy cuộc trò chuyện để xóa");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Error finding conversation to delete", databaseError.toException());
+                callback.onError("Lỗi tìm kiếm cuộc trò chuyện: " + databaseError.getMessage());
+            }
+        });
     }
 
     @Override
@@ -559,6 +630,23 @@ public class ChatRepositoryImpl implements ChatRepository {
             }
 
             conversation.setTopic(snapshot.child("topic").getValue(String.class));
+
+            // Parse các thuộc tính mới cho menu ngữ cảnh
+            Boolean isPinned = snapshot.child("isPinned").getValue(Boolean.class);
+            if (isPinned != null) {
+                conversation.setPinned(isPinned);
+            }
+
+            Boolean isMuted = snapshot.child("isMuted").getValue(Boolean.class);
+            if (isMuted != null) {
+                conversation.setMuted(isMuted);
+            }
+
+            Boolean isRead = snapshot.child("isRead").getValue(Boolean.class);
+            if (isRead != null) {
+                conversation.setRead(isRead);
+            }
+
             return conversation;
         } catch (Exception e) {
             Log.e(TAG, "Error parsing conversation from snapshot", e);

@@ -69,4 +69,9 @@
     <color name="bg_reminder_due">#FFEBEE</color>
     <color name="bg_reminder_normal">#F1F8E9</color>
 
+    <!-- Màu cho cuộc trò chuyện được ghim -->
+    <color name="pinned_conversation_background">#2A2A2D</color>  <!-- Màu nền nhạt hơn cho ghim -->
+    <color name="pinned_conversation_stroke">#4CAF50</color>      <!-- Màu viền xanh lá cho ghim -->
+    <color name="pinned_conversation_background_light">#F3E5F5</color>  <!-- Màu nền tím nhạt cho light mode -->
+    <color name="pinned_conversation_stroke_light">#9C27B0</color>      <!-- Màu viền tím cho light mode -->
 </resources>

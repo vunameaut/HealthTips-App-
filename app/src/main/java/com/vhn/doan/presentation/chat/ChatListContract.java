@@ -122,5 +122,32 @@ public interface ChatListContract {
          * Xử lý khi người dùng nhấn "Xem thêm"
          */
         void onLoadMoreClicked();
+
+        // ========== CONTEXT MENU ACTIONS ==========
+
+        /**
+         * Đổi tên cuộc trò chuyện
+         */
+        void renameConversation(Conversation conversation, String newName);
+
+        /**
+         * Bật/tắt ghim cuộc trò chuyện
+         */
+        void togglePinConversation(Conversation conversation);
+
+        /**
+         * Bật/tắt thông báo cuộc trò chuyện
+         */
+        void toggleMuteConversation(Conversation conversation);
+
+        /**
+         * Xóa cuộc trò chuyện
+         */
+        void deleteConversation(Conversation conversation);
+
+        /**
+         * Đánh dấu cuộc trò chuyện là đã đọc
+         */
+        void markConversationAsRead(Conversation conversation);
     }
 }
