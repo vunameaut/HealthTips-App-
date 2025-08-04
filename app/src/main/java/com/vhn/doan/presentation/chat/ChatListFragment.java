@@ -270,12 +270,17 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
             int itemId = item.getItemId();
 
             if (itemId == R.id.action_rename_conversation) {
+                // Đổi tên cuộc trò chuyện
                 showRenameConversationDialog(conversation);
                 return true;
             } else if (itemId == R.id.action_pin_conversation) {
-                togglePinConversation(conversation);
+                // Ghim/bỏ ghim cuộc trò chuyện
+                if (presenter != null) {
+                    presenter.togglePinConversation(conversation);
+                }
                 return true;
             } else if (itemId == R.id.action_delete_conversation) {
+                // Xóa cuộc trò chuyện
                 showDeleteConversationDialog(conversation);
                 return true;
             }
@@ -298,6 +303,8 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
             popupMenu.getMenu().findItem(R.id.action_pin_conversation)
                     .setTitle(R.string.pin_conversation);
         }
+
+
     }
 
     /**

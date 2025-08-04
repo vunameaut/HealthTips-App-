@@ -300,10 +300,16 @@ public class ChatListPresenter implements ChatListContract.Presenter {
 
                 if (isViewAttached()) {
                     view.showMessage(message);
-                    // Cập nhật trong danh sách local
-                    updateConversationInList(updatedConversation);
-                    // Sắp xếp lại danh sách để đưa cuộc trò chuyện được ghim lên đầu
-                    sortConversationsWithPinnedFirst();
+
+                    // Nếu bỏ ghim, reload lại danh sách để đảm bảo dữ liệu đồng bộ
+                    if (!newPinState) {
+                        Log.d(TAG, "Unpinned conversation - reloading conversations list");
+                        loadConversations();
+                    } else {
+                        // Nếu ghim, chỉ cập nhật local và sắp xếp lại
+                        updateConversationInList(updatedConversation);
+                        sortConversationsWithPinnedFirst();
+                    }
                 }
             }
 

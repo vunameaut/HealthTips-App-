@@ -175,11 +175,33 @@ public class Conversation {
         }
 
         String trimmed = firstMessage.trim();
-        // Lấy tối đa 30 ký tự đầu tiên
-        if (trimmed.length() <= 30) {
+
+        // Loại bỏ các ký tự đặc biệt và emoji
+        trimmed = trimmed.replaceAll("[^\\p{L}\\p{N}\\s\\?\\!\\.]", "");
+
+        // Cắt tại dấu câu đầu tiên để tạo tiêu đề ngắn gọn
+        String[] sentences = trimmed.split("[.!?]");
+        if (sentences.length > 0 && !sentences[0].trim().isEmpty()) {
+            String firstSentence = sentences[0].trim();
+            // Nếu câu đầu tiên đủ ngắn, sử dụng luôn không cần dấu ...
+            if (firstSentence.length() <= 25) {
+                return firstSentence;
+            }
+            trimmed = firstSentence;
+        }
+
+        // Lấy tối đa 25 ký tự để có thể hiển thị đầy đủ hơn
+        if (trimmed.length() <= 25) {
             return trimmed;
         } else {
-            return trimmed.substring(0, 27) + "...";
+            // Cắt tại từ cuối cùng để tránh cắt giữa từ
+            String shortened = trimmed.substring(0, 25);
+            int lastSpace = shortened.lastIndexOf(' ');
+            if (lastSpace > 15) { // Đảm bảo tiêu đề không quá ngắn
+                return trimmed.substring(0, lastSpace) + "...";
+            } else {
+                return shortened + "...";
+            }
         }
     }
 

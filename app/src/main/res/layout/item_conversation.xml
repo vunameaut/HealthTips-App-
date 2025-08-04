@@ -51,8 +51,9 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?android:attr/textColorPrimary"
-                    android:maxLines="1"
+                    android:maxLines="2"
                     android:ellipsize="end"
+                    android:lineSpacingExtra="2dp"
                     tools:text="Làm thế nào để giảm cân hiệu quả?" />
 
                 <!-- Pin Icon -->
