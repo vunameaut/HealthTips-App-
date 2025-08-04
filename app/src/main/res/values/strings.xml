@@ -29,6 +29,7 @@
 
     <!-- Các chuỗi cho bottom navigation -->
     <string name="nav_home">Trang chủ</string>
+    <string name="nav_chat">Chat AI</string>
     <string name="nav_reminders">Nhắc nhở</string>
     <string name="nav_videos">Video ngắn</string>
     <string name="nav_favorites">Yêu thích</string>

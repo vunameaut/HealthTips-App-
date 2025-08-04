@@ -131,6 +131,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     /**
+     * Kiểm tra AI có đang gõ không
+     */
+    public boolean isAiTyping() {
+        return isAiTyping;
+    }
+
+    /**
      * Xóa tất cả tin nhắn
      */
     public void clearMessages() {

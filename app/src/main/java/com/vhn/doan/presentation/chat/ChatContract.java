@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ChatContract {
 
-    interface View extends BaseView<Presenter> {
+    interface View extends BaseView {
         /**
          * Hiển thị danh sách tin nhắn chat
          */
@@ -71,9 +71,24 @@ public interface ChatContract {
          * Ẩn trạng thái đang tải tin nhắn
          */
         void hideLoadingMessages();
+
+        /**
+         * Hiển thị thông báo thành công
+         */
+        void showMessage(String message);
     }
 
-    interface Presenter extends BasePresenter<View> {
+    interface Presenter {
+        /**
+         * Gắn view vào presenter
+         */
+        void attachView(View view);
+
+        /**
+         * Gỡ bỏ view khỏi presenter
+         */
+        void detachView();
+
         /**
          * Tải danh sách tin nhắn từ Firebase
          */

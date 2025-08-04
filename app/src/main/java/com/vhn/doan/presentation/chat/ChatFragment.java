@@ -22,14 +22,13 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ChatMessage;
 import com.vhn.doan.data.repository.ChatRepositoryImpl;
-import com.vhn.doan.presentation.base.BaseFragment;
 
 import java.util.List;
 
 /**
  * Fragment hiển thị giao diện chat với AI về sức khỏe
  */
-public class ChatFragment extends BaseFragment<ChatContract.Presenter> implements ChatContract.View {
+public class ChatFragment extends Fragment implements ChatContract.View {
 
     private static final String TAG = "ChatFragment";
 
@@ -47,34 +46,24 @@ public class ChatFragment extends BaseFragment<ChatContract.Presenter> implement
     // Components
     private ChatAdapter chatAdapter;
     private LinearLayoutManager layoutManager;
+    private ChatContract.Presenter presenter;
 
     public static ChatFragment newInstance() {
         return new ChatFragment();
     }
 
     @Override
-    protected int getLayoutId() {
-        return R.layout.fragment_chat;
-    }
-
-    @Override
-    protected void initPresenter() {
-        ChatRepositoryImpl chatRepository = new ChatRepositoryImpl();
-        presenter = new ChatPresenter(chatRepository);
-    }
-
-    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        initViews(view);
-        setupRecyclerView();
-        setupListeners();
-        return view;
+        return inflater.inflate(R.layout.fragment_chat, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initViews(view);
+        setupRecyclerView();
+        setupListeners();
+        initPresenter();
         presenter.attachView(this);
     }
 
@@ -88,6 +77,11 @@ public class ChatFragment extends BaseFragment<ChatContract.Presenter> implement
         layoutStatus = view.findViewById(R.id.layout_status);
         progressSending = view.findViewById(R.id.progress_sending);
         tvStatus = view.findViewById(R.id.tv_status);
+    }
+
+    private void initPresenter() {
+        ChatRepositoryImpl chatRepository = new ChatRepositoryImpl();
+        presenter = new ChatPresenter(chatRepository);
     }
 
     private void setupRecyclerView() {
@@ -165,7 +159,7 @@ public class ChatFragment extends BaseFragment<ChatContract.Presenter> implement
     @Override
     public void hideSendingMessage() {
         btnSendMessage.setEnabled(true);
-        if (!chatAdapter.isAiTyping) {
+        if (!chatAdapter.isAiTyping()) {
             layoutStatus.setVisibility(View.GONE);
         }
     }

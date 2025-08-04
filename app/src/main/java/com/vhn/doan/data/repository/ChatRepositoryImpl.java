@@ -1,5 +1,7 @@
 package com.vhn.doan.data.repository;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
@@ -34,13 +36,15 @@ public class ChatRepositoryImpl implements ChatRepository {
 
     private static final String TAG = "ChatRepositoryImpl";
     private static final String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String API_KEY = "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";
+    // Thử với API key mới hoặc kiểm tra lại format
+    private static final String API_KEY = "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";
     private static final String CHAT_MESSAGES_PATH = "chat_messages";
     private static final String USER_TOPICS_PATH = "user_topics";
 
     private final DatabaseReference database;
     private final OkHttpClient httpClient;
     private final Gson gson;
+    private final Handler mainHandler;
 
     public ChatRepositoryImpl() {
         this.database = FirebaseDatabase.getInstance().getReference();
@@ -50,21 +54,26 @@ public class ChatRepositoryImpl implements ChatRepository {
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
         this.gson = new Gson();
+        this.mainHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
     public void sendMessageToAI(String message, RepositoryCallback<String> callback) {
         try {
-            // Tạo JSON request body
+            // Tạo JSON request body theo format chính xác của OpenRouter
             JsonObject requestJson = new JsonObject();
             requestJson.addProperty("model", "openai/gpt-3.5-turbo");
+
+            // Thêm các parameters bổ sung theo yêu cầu OpenRouter
+            requestJson.addProperty("max_tokens", 1000);
+            requestJson.addProperty("temperature", 0.7);
 
             JsonArray messagesArray = new JsonArray();
 
             // System message
             JsonObject systemMessage = new JsonObject();
             systemMessage.addProperty("role", "system");
-            systemMessage.addProperty("content", "Bạn là trợ lý chuyên về sức khỏe. Chỉ trả lời các câu hỏi liên quan đến sức khỏe, y tế, dinh dưỡng, tập luyện thể dục. Nếu người dùng hỏi ngoài lĩnh vực sức khỏe thì từ chối trả lời một cách lịch sự và gợi ý họ hỏi về sức khỏe.");
+            systemMessage.addProperty("content", "Bạn là trợ lý AI chuyên về sức khỏe. Chỉ trả lời các câu hỏi liên quan đến sức khỏe, y tế, dinh dưỡng, thể dục thể thao. Nếu người dùng hỏi ngoài lĩnh vực sức khỏe thì từ chối một cách lịch sự và đề nghị họ hỏi về sức khỏe.");
             messagesArray.add(systemMessage);
 
             // User message
@@ -75,9 +84,12 @@ public class ChatRepositoryImpl implements ChatRepository {
 
             requestJson.add("messages", messagesArray);
 
+            String jsonString = gson.toJson(requestJson);
+            Log.d(TAG, "Request JSON: " + jsonString);
+
             RequestBody body = RequestBody.create(
                     MediaType.parse("application/json"),
-                    requestJson.toString()
+                    jsonString
             );
 
             Request request = new Request.Builder()
@@ -85,44 +97,119 @@ public class ChatRepositoryImpl implements ChatRepository {
                     .post(body)
                     .addHeader("Authorization", "Bearer " + API_KEY)
                     .addHeader("Content-Type", "application/json")
+                    .addHeader("HTTP-Referer", "https://healthtips-vn.app")
+                    .addHeader("X-Title", "HealthTips Vietnam")
                     .build();
+
+            Log.d(TAG, "Sending request to: " + OPENROUTER_API_URL);
+            Log.d(TAG, "Authorization header: Bearer " + API_KEY.substring(0, 20) + "...");
 
             httpClient.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    Log.e(TAG, "API call failed", e);
-                    callback.onError("Không thể kết nối đến AI. Vui lòng kiểm tra kết nối mạng.");
+                    Log.e(TAG, "Network request failed", e);
+                    mainHandler.post(() -> {
+                        callback.onError("Không thể kết nối đến máy chủ AI. Kiểm tra kết nối mạng của bạn.");
+                    });
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    String responseBody = "";
                     try {
-                        String responseBody = response.body().string();
-                        Log.d(TAG, "API Response: " + responseBody);
+                        if (response.body() != null) {
+                            responseBody = response.body().string();
+                        }
+
+                        Log.d(TAG, "Response Code: " + response.code());
+                        Log.d(TAG, "Response Headers: " + response.headers().toString());
+                        Log.d(TAG, "Response Body: " + responseBody);
 
                         if (response.isSuccessful()) {
                             ChatApiResponse apiResponse = gson.fromJson(responseBody, ChatApiResponse.class);
 
-                            if (apiResponse.getChoices() != null && !apiResponse.getChoices().isEmpty()) {
+                            if (apiResponse != null &&
+                                apiResponse.getChoices() != null &&
+                                !apiResponse.getChoices().isEmpty() &&
+                                apiResponse.getChoices().get(0).getMessage() != null) {
+
                                 String aiMessage = apiResponse.getChoices().get(0).getMessage().getContent();
-                                callback.onSuccess(aiMessage);
+                                if (aiMessage != null && !aiMessage.trim().isEmpty()) {
+                                    mainHandler.post(() -> callback.onSuccess(aiMessage.trim()));
+                                } else {
+                                    mainHandler.post(() -> callback.onError("AI trả về phản hồi trống."));
+                                }
                             } else {
-                                callback.onError("AI không thể trả lời câu hỏi này.");
+                                mainHandler.post(() -> callback.onError("Định dạng phản hồi từ AI không hợp lệ."));
                             }
                         } else {
-                            Log.e(TAG, "API Error: " + responseBody);
-                            callback.onError("Có lỗi xảy ra khi gọi AI. Mã lỗi: " + response.code());
+                            // Xử lý các lỗi HTTP cụ thể
+                            String errorMessage = parseErrorMessage(response.code(), responseBody);
+                            Log.e(TAG, "API Error: " + errorMessage);
+
+                            mainHandler.post(() -> callback.onError(errorMessage));
                         }
                     } catch (Exception e) {
-                        Log.e(TAG, "Error parsing API response", e);
-                        callback.onError("Có lỗi xảy ra khi xử lý phản hồi từ AI.");
+                        Log.e(TAG, "Error parsing response", e);
+                        Log.e(TAG, "Response body was: " + responseBody);
+
+                        mainHandler.post(() -> {
+                            callback.onError("Lỗi xử lý phản hồi từ AI. Vui lòng thử lại.");
+                        });
                     }
                 }
             });
 
         } catch (Exception e) {
-            Log.e(TAG, "Error creating API request", e);
-            callback.onError("Có lỗi xảy ra khi tạo yêu cầu gửi đến AI.");
+            Log.e(TAG, "Error creating request", e);
+            callback.onError("Lỗi tạo yêu cầu gửi đến AI.");
+        }
+    }
+
+    /**
+     * Phân tích thông báo lỗi từ API response
+     */
+    private String parseErrorMessage(int responseCode, String responseBody) {
+        try {
+            // Thử parse JSON error response
+            JsonObject errorResponse = gson.fromJson(responseBody, JsonObject.class);
+            if (errorResponse.has("error")) {
+                JsonObject error = errorResponse.getAsJsonObject("error");
+                if (error.has("message")) {
+                    String apiErrorMessage = error.get("message").getAsString();
+                    Log.d(TAG, "API Error Message: " + apiErrorMessage);
+
+                    // Dịch một số lỗi phổ biến
+                    if (apiErrorMessage.contains("No auth credentials")) {
+                        return "Lỗi xác thực API. Vui lòng liên hệ quản trị viên.";
+                    } else if (apiErrorMessage.contains("Rate limit")) {
+                        return "Đã vượt quá giới hạn yêu cầu. Vui lòng thử lại sau ít phút.";
+                    } else if (apiErrorMessage.contains("Invalid model")) {
+                        return "Mô hình AI không hợp lệ. Vui lòng thử lại.";
+                    }
+                    return "Lỗi từ AI: " + apiErrorMessage;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing error response", e);
+        }
+
+        // Fallback cho các HTTP status codes
+        switch (responseCode) {
+            case 401:
+                return "Lỗi xác thực. API key có thể đã hết hạn hoặc không hợp lệ.";
+            case 403:
+                return "Không có quyền truy cập. Vui lòng kiểm tra cấu hình API.";
+            case 429:
+                return "Quá nhiều yêu cầu. Vui lòng chờ một chút rồi thử lại.";
+            case 500:
+                return "Lỗi máy chủ AI. Vui lòng thử lại sau.";
+            case 502:
+            case 503:
+            case 504:
+                return "Máy chủ AI tạm thời không khả dụng. Vui lòng thử lại sau.";
+            default:
+                return "Lỗi không xác định từ AI (Mã: " + responseCode + "). Vui lòng thử lại.";
         }
     }
 
