@@ -14,6 +14,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.vhn.doan.data.ChatMessage;
 import com.vhn.doan.data.ChatApiResponse;
+import com.vhn.doan.data.Conversation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,16 +31,23 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Implementation của ChatRepository
+ * Implementation của ChatRepository với hỗ trợ multiple conversations
  */
 public class ChatRepositoryImpl implements ChatRepository {
 
     private static final String TAG = "ChatRepositoryImpl";
     private static final String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    // Thử với API key mới hoặc kiểm tra lại format
+    // Sử dụng API key mới
     private static final String API_KEY = "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";
+
+    // Firebase paths
+    private static final String CONVERSATIONS_PATH = "conversations";
     private static final String CHAT_MESSAGES_PATH = "chat_messages";
     private static final String USER_TOPICS_PATH = "user_topics";
+
+    // Pagination constants
+    private static final int DEFAULT_CONVERSATIONS_LIMIT = 8;
+    private static final int LOAD_MORE_CONVERSATIONS_LIMIT = 3;
 
     private final DatabaseReference database;
     private final OkHttpClient httpClient;
@@ -56,6 +64,162 @@ public class ChatRepositoryImpl implements ChatRepository {
         this.gson = new Gson();
         this.mainHandler = new Handler(Looper.getMainLooper());
     }
+
+    // ========== CONVERSATION MANAGEMENT ==========
+
+    @Override
+    public void createConversation(String userId, String firstMessage, RepositoryCallback<Conversation> callback) {
+        try {
+            long currentTime = System.currentTimeMillis();
+            String title = Conversation.generateTitle(firstMessage);
+            String topic = extractTopic(firstMessage);
+
+            Conversation conversation = new Conversation(userId, title, currentTime);
+            conversation.setTopic(topic);
+
+            String conversationId = database.child(CONVERSATIONS_PATH)
+                    .child(userId)
+                    .push().getKey();
+
+            if (conversationId != null) {
+                conversation.setId(conversationId);
+
+                database.child(CONVERSATIONS_PATH)
+                        .child(userId)
+                        .child(conversationId)
+                        .setValue(conversation.toMap())
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "Conversation created successfully: " + conversationId);
+                            callback.onSuccess(conversation);
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Failed to create conversation", e);
+                            callback.onError("Không thể tạo cuộc trò chuyện: " + e.getMessage());
+                        });
+            } else {
+                callback.onError("Không thể tạo ID cho cuộc trò chuyện");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating conversation", e);
+            callback.onError("Có lỗi xảy ra khi tạo cuộc trò chuyện: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void getConversations(String userId, int limit, Long lastConversationTime, RepositoryCallback<List<Conversation>> callback) {
+        try {
+            DatabaseReference conversationsRef = database.child(CONVERSATIONS_PATH).child(userId);
+
+            // Sắp xếp theo lastMessageTime giảm dần (mới nhất trước)
+            Query query = conversationsRef.orderByChild("lastMessageTime");
+
+            // Nếu có lastConversationTime, query từ thời điểm đó trở về trước
+            if (lastConversationTime != null) {
+                query = query.endBefore(lastConversationTime);
+            }
+
+            // Giới hạn số lượng kết quả
+            query = query.limitToLast(limit);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<Conversation> conversations = new ArrayList<>();
+
+                    for (DataSnapshot conversationSnapshot : dataSnapshot.getChildren()) {
+                        try {
+                            Conversation conversation = parseConversationFromSnapshot(conversationSnapshot);
+                            if (conversation != null) {
+                                conversations.add(conversation);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing conversation", e);
+                        }
+                    }
+
+                    // Sắp xếp lại theo thời gian giảm dần (mới nhất trước)
+                    Collections.sort(conversations, (c1, c2) ->
+                        Long.compare(c2.getLastMessageTime(), c1.getLastMessageTime()));
+
+                    Log.d(TAG, "Loaded " + conversations.size() + " conversations");
+                    callback.onSuccess(conversations);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Failed to load conversations", databaseError.toException());
+                    callback.onError("Không thể tải danh sách cuộc trò chuyện: " + databaseError.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading conversations", e);
+            callback.onError("Có lỗi xảy ra khi tải danh sách cuộc trò chuyện: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateConversation(Conversation conversation, RepositoryCallback<Conversation> callback) {
+        try {
+            if (conversation.getId() == null || conversation.getUserId() == null) {
+                callback.onError("Thông tin cuộc trò chuyện không hợp lệ");
+                return;
+            }
+
+            database.child(CONVERSATIONS_PATH)
+                    .child(conversation.getUserId())
+                    .child(conversation.getId())
+                    .setValue(conversation.toMap())
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Conversation updated successfully: " + conversation.getId());
+                        callback.onSuccess(conversation);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to update conversation", e);
+                        callback.onError("Không thể cập nhật cuộc trò chuyện: " + e.getMessage());
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating conversation", e);
+            callback.onError("Có lỗi xảy ra khi cập nhật cuộc trò chuyện: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteConversation(String conversationId, RepositoryCallback<Boolean> callback) {
+        // TODO: Implement delete conversation and all its messages
+        callback.onError("Chức năng xóa cuộc trò chuyện sẽ được triển khai sau");
+    }
+
+    @Override
+    public void hasMoreConversations(String userId, Long lastConversationTime, RepositoryCallback<Boolean> callback) {
+        try {
+            DatabaseReference conversationsRef = database.child(CONVERSATIONS_PATH).child(userId);
+
+            Query query = conversationsRef.orderByChild("lastMessageTime");
+            if (lastConversationTime != null) {
+                query = query.endBefore(lastConversationTime);
+            }
+            query = query.limitToLast(1);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    boolean hasMore = dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0;
+                    callback.onSuccess(hasMore);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Failed to check more conversations", databaseError.toException());
+                    callback.onError("Không thể kiểm tra cuộc trò chuyện: " + databaseError.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking more conversations", e);
+            callback.onError("Có lỗi xảy ra khi kiểm tra cuộc trò chuyện: " + e.getMessage());
+        }
+    }
+
+    // ========== MESSAGE MANAGEMENT ==========
 
     @Override
     public void sendMessageToAI(String message, RepositoryCallback<String> callback) {
@@ -213,147 +377,6 @@ public class ChatRepositoryImpl implements ChatRepository {
         }
     }
 
-    @Override
-    public void saveChatMessage(ChatMessage chatMessage, RepositoryCallback<ChatMessage> callback) {
-        try {
-            String messageId = database.child(CHAT_MESSAGES_PATH)
-                    .child(chatMessage.getUserId())
-                    .push().getKey();
-
-            if (messageId != null) {
-                chatMessage.setId(messageId);
-
-                database.child(CHAT_MESSAGES_PATH)
-                        .child(chatMessage.getUserId())
-                        .child(messageId)
-                        .setValue(chatMessage.toMap())
-                        .addOnSuccessListener(aVoid -> {
-                            Log.d(TAG, "Message saved successfully");
-
-                            // Lưu chủ đề nếu có
-                            if (chatMessage.getTopic() != null && !chatMessage.getTopic().isEmpty()) {
-                                saveUserTopic(chatMessage.getUserId(), chatMessage.getTopic());
-                            }
-
-                            callback.onSuccess(chatMessage);
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.e(TAG, "Failed to save message", e);
-                            callback.onError("Không thể lưu tin nhắn: " + e.getMessage());
-                        });
-            } else {
-                callback.onError("Không thể tạo ID cho tin nhắn");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error saving chat message", e);
-            callback.onError("Có lỗi xảy ra khi lưu tin nhắn: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void getChatMessages(String userId, RepositoryCallback<List<ChatMessage>> callback) {
-        try {
-            database.child(CHAT_MESSAGES_PATH)
-                    .child(userId)
-                    .orderByChild("timestamp")
-                    .addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            List<ChatMessage> messages = new ArrayList<>();
-
-                            for (DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
-                                try {
-                                    ChatMessage message = new ChatMessage();
-                                    message.setId(messageSnapshot.getKey());
-                                    message.setUserId(messageSnapshot.child("userId").getValue(String.class));
-                                    message.setContent(messageSnapshot.child("content").getValue(String.class));
-                                    message.setFromUser(messageSnapshot.child("isFromUser").getValue(Boolean.class));
-                                    message.setTimestamp(messageSnapshot.child("timestamp").getValue(Long.class));
-                                    message.setTopic(messageSnapshot.child("topic").getValue(String.class));
-
-                                    messages.add(message);
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Error parsing message", e);
-                                }
-                            }
-
-                            // Sắp xếp theo thời gian
-                            Collections.sort(messages, (m1, m2) -> Long.compare(m1.getTimestamp(), m2.getTimestamp()));
-
-                            Log.d(TAG, "Loaded " + messages.size() + " messages");
-                            callback.onSuccess(messages);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            Log.e(TAG, "Failed to load messages", databaseError.toException());
-                            callback.onError("Không thể tải tin nhắn: " + databaseError.getMessage());
-                        }
-                    });
-        } catch (Exception e) {
-            Log.e(TAG, "Error loading chat messages", e);
-            callback.onError("Có lỗi xảy ra khi tải tin nhắn: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void clearChatHistory(String userId, RepositoryCallback<Boolean> callback) {
-        try {
-            database.child(CHAT_MESSAGES_PATH)
-                    .child(userId)
-                    .removeValue()
-                    .addOnSuccessListener(aVoid -> {
-                        Log.d(TAG, "Chat history cleared successfully");
-                        callback.onSuccess(true);
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to clear chat history", e);
-                        callback.onError("Không thể xóa lịch sử chat: " + e.getMessage());
-                    });
-        } catch (Exception e) {
-            Log.e(TAG, "Error clearing chat history", e);
-            callback.onError("Có lỗi xảy ra khi xóa lịch sử chat: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public String extractTopic(String content) {
-        try {
-            // Các từ khóa chủ đề về sức khỏe
-            String[] healthTopics = {
-                "tim mạch", "huyết áp", "cholesterol", "đường huyết", "tiểu đường",
-                "dinh dưỡng", "vitamin", "protein", "carb", "chất béo",
-                "tập luyện", "thể dục", "yoga", "cardio", "cơ bắp",
-                "giảm cân", "tăng cân", "béo phì", "ăn kiêng",
-                "stress", "lo âu", "trầm cảm", "tâm lý", "tinh thần",
-                "giấc ngủ", "mất ngủ", "ngủ", "nghỉ ngơi",
-                "da", "tóc", "móng", "mỹ phẩm", "chăm sóc da",
-                "mang thai", "sinh sản", "kinh nguyệt", "phụ khoa",
-                "trẻ em", "em bé", "sức khỏe trẻ", "phát triển",
-                "người cao tuổi", "lão hóa", "xương khớp", "cột sống",
-                "mắt", "thị lực", "tai", "thính giác",
-                "răng", "miệng", "nha khoa", "vệ sinh răng miệng",
-                "cảm cúm", "sốt", "ho", "viêm họng", "virus",
-                "thuốc", "dược phẩm", "tác dụng phụ", "liều dùng"
-            };
-
-            content = content.toLowerCase();
-
-            for (String topic : healthTopics) {
-                if (content.contains(topic)) {
-                    return topic;
-                }
-            }
-
-            // Nếu không tìm thấy chủ đề cụ thể, trả về chủ đề chung
-            return "sức khỏe tổng quát";
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error extracting topic", e);
-            return "sức khỏe tổng quát";
-        }
-    }
-
     /**
      * Lưu chủ đề mà người dùng quan tâm vào Firebase
      */
@@ -367,6 +390,76 @@ public class ChatRepositoryImpl implements ChatRepository {
                     .addOnFailureListener(e -> Log.e(TAG, "Failed to save user topic", e));
         } catch (Exception e) {
             Log.e(TAG, "Error saving user topic", e);
+        }
+    }
+
+    // ========== HELPER METHODS ==========
+
+    /**
+     * Parse Conversation từ Firebase DataSnapshot
+     */
+    private Conversation parseConversationFromSnapshot(DataSnapshot snapshot) {
+        try {
+            Conversation conversation = new Conversation();
+            conversation.setId(snapshot.getKey());
+            conversation.setUserId(snapshot.child("userId").getValue(String.class));
+            conversation.setTitle(snapshot.child("title").getValue(String.class));
+            conversation.setLastMessage(snapshot.child("lastMessage").getValue(String.class));
+
+            Long lastMessageTime = snapshot.child("lastMessageTime").getValue(Long.class);
+            if (lastMessageTime != null) {
+                conversation.setLastMessageTime(lastMessageTime);
+            }
+
+            Boolean isFromUser = snapshot.child("isFromUser").getValue(Boolean.class);
+            if (isFromUser != null) {
+                conversation.setFromUser(isFromUser);
+            }
+
+            Integer messageCount = snapshot.child("messageCount").getValue(Integer.class);
+            if (messageCount != null) {
+                conversation.setMessageCount(messageCount);
+            }
+
+            Long createdTime = snapshot.child("createdTime").getValue(Long.class);
+            if (createdTime != null) {
+                conversation.setCreatedTime(createdTime);
+            }
+
+            conversation.setTopic(snapshot.child("topic").getValue(String.class));
+            return conversation;
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing conversation from snapshot", e);
+            return null;
+        }
+    }
+
+    /**
+     * Parse ChatMessage từ Firebase DataSnapshot
+     */
+    private ChatMessage parseChatMessageFromSnapshot(DataSnapshot snapshot) {
+        try {
+            ChatMessage message = new ChatMessage();
+            message.setId(snapshot.getKey());
+            message.setConversationId(snapshot.child("conversationId").getValue(String.class));
+            message.setUserId(snapshot.child("userId").getValue(String.class));
+            message.setContent(snapshot.child("content").getValue(String.class));
+
+            Boolean isFromUser = snapshot.child("isFromUser").getValue(Boolean.class);
+            if (isFromUser != null) {
+                message.setFromUser(isFromUser);
+            }
+
+            Long timestamp = snapshot.child("timestamp").getValue(Long.class);
+            if (timestamp != null) {
+                message.setTimestamp(timestamp);
+            }
+
+            message.setTopic(snapshot.child("topic").getValue(String.class));
+            return message;
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing message from snapshot", e);
+            return null;
         }
     }
 }

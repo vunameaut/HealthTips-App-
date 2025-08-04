@@ -8,6 +8,7 @@ import java.util.Map;
  */
 public class ChatMessage {
     private String id;
+    private String conversationId; // ID của cuộc trò chuyện chứa tin nhắn này
     private String userId;
     private String content;
     private boolean isFromUser; // true nếu tin nhắn từ user, false nếu từ AI
@@ -18,15 +19,17 @@ public class ChatMessage {
         // Constructor rỗng cho Firebase
     }
 
-    public ChatMessage(String userId, String content, boolean isFromUser, long timestamp) {
+    public ChatMessage(String conversationId, String userId, String content, boolean isFromUser, long timestamp) {
+        this.conversationId = conversationId;
         this.userId = userId;
         this.content = content;
         this.isFromUser = isFromUser;
         this.timestamp = timestamp;
     }
 
-    public ChatMessage(String id, String userId, String content, boolean isFromUser, long timestamp, String topic) {
+    public ChatMessage(String id, String conversationId, String userId, String content, boolean isFromUser, long timestamp, String topic) {
         this.id = id;
+        this.conversationId = conversationId;
         this.userId = userId;
         this.content = content;
         this.isFromUser = isFromUser;
@@ -37,6 +40,10 @@ public class ChatMessage {
     // Getters
     public String getId() {
         return id;
+    }
+
+    public String getConversationId() {
+        return conversationId;
     }
 
     public String getUserId() {
@@ -64,6 +71,10 @@ public class ChatMessage {
         this.id = id;
     }
 
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
+
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -89,6 +100,7 @@ public class ChatMessage {
      */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
+        map.put("conversationId", conversationId);
         map.put("userId", userId);
         map.put("content", content);
         map.put("isFromUser", isFromUser);
@@ -101,6 +113,7 @@ public class ChatMessage {
     public String toString() {
         return "ChatMessage{" +
                 "id='" + id + '\'' +
+                ", conversationId='" + conversationId + '\'' +
                 ", userId='" + userId + '\'' +
                 ", content='" + content + '\'' +
                 ", isFromUser=" + isFromUser +

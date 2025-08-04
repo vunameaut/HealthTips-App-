@@ -13,7 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.auth.LoginActivity;
-import com.vhn.doan.presentation.chat.ChatFragment;
+import com.vhn.doan.presentation.chat.ChatListFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.services.AuthManager;
@@ -108,8 +108,8 @@ public class HomeActivity extends AppCompatActivity {
                 if (itemId == R.id.nav_home) {
                     fragment = HomeFragment.newInstance();
                 } else if (itemId == R.id.nav_chat) {
-                    // Kích hoạt ChatFragment - Trợ lý AI về sức khỏe
-                    fragment = ChatFragment.newInstance();
+                    // Kích hoạt ChatListFragment - Danh sách cuộc trò chuyện với AI
+                    fragment = ChatListFragment.newInstance();
                 } else if (itemId == R.id.nav_reminders) {
                     // Kích hoạt ReminderFragment
                     fragment = ReminderFragment.newInstance();
