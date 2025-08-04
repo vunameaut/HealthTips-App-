@@ -37,9 +37,10 @@ import okhttp3.Response;
 public class ChatRepositoryImpl implements ChatRepository {
 
     private static final String TAG = "ChatRepositoryImpl";
-    private static final String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    // Sử dụng API key mới
-    private static final String API_KEY = "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";
+    // Thay đổi sang RapidAPI ChatGPT-42
+    private static final String RAPIDAPI_URL = "https://chatgpt-42.p.rapidapi.com/chatgpt";
+    private static final String RAPIDAPI_KEY = "062f6aca45mshe36de3f71654aecp1590e4jsn0d0d26277bde";
+    private static final String RAPIDAPI_HOST = "chatgpt-42.p.rapidapi.com";
 
     // Firebase paths
     private static final String CONVERSATIONS_PATH = "conversations";
@@ -296,17 +297,12 @@ public class ChatRepositoryImpl implements ChatRepository {
     @Override
     public void sendMessageToAI(String message, RepositoryCallback<String> callback) {
         try {
-            // Tạo JSON request body theo format chính xác của OpenRouter
+            // Tạo JSON request body theo format của RapidAPI ChatGPT-42
             JsonObject requestJson = new JsonObject();
-            requestJson.addProperty("model", "openai/gpt-3.5-turbo");
-
-            // Thêm các parameters bổ sung theo yêu cầu OpenRouter
-            requestJson.addProperty("max_tokens", 1000);
-            requestJson.addProperty("temperature", 0.7);
 
             JsonArray messagesArray = new JsonArray();
 
-            // System message
+            // System message để định hướng AI về sức khỏe
             JsonObject systemMessage = new JsonObject();
             systemMessage.addProperty("role", "system");
             systemMessage.addProperty("content", "Bạn là trợ lý AI chuyên về sức khỏe. Chỉ trả lời các câu hỏi liên quan đến sức khỏe, y tế, dinh dưỡng, thể dục thể thao. Nếu người dùng hỏi ngoài lĩnh vực sức khỏe thì từ chối một cách lịch sự và đề nghị họ hỏi về sức khỏe.");
@@ -319,9 +315,10 @@ public class ChatRepositoryImpl implements ChatRepository {
             messagesArray.add(userMessage);
 
             requestJson.add("messages", messagesArray);
+            requestJson.addProperty("web_access", false);
 
             String jsonString = gson.toJson(requestJson);
-            Log.d(TAG, "Request JSON: " + jsonString);
+            Log.d(TAG, "RapidAPI Request JSON: " + jsonString);
 
             RequestBody body = RequestBody.create(
                     MediaType.parse("application/json"),
@@ -329,16 +326,15 @@ public class ChatRepositoryImpl implements ChatRepository {
             );
 
             Request request = new Request.Builder()
-                    .url(OPENROUTER_API_URL)
+                    .url(RAPIDAPI_URL)
                     .post(body)
-                    .addHeader("Authorization", "Bearer " + API_KEY)
                     .addHeader("Content-Type", "application/json")
-                    .addHeader("HTTP-Referer", "https://healthtips-vn.app")
-                    .addHeader("X-Title", "HealthTips Vietnam")
+                    .addHeader("x-rapidapi-host", RAPIDAPI_HOST)
+                    .addHeader("x-rapidapi-key", RAPIDAPI_KEY)
                     .build();
 
-            Log.d(TAG, "Sending request to: " + OPENROUTER_API_URL);
-            Log.d(TAG, "Authorization header: Bearer " + API_KEY.substring(0, 20) + "...");
+            Log.d(TAG, "Sending request to RapidAPI: " + RAPIDAPI_URL);
+            Log.d(TAG, "RapidAPI key: " + RAPIDAPI_KEY.substring(0, 20) + "...");
 
             httpClient.newCall(request).enqueue(new Callback() {
                 @Override
@@ -357,36 +353,48 @@ public class ChatRepositoryImpl implements ChatRepository {
                             responseBody = response.body().string();
                         }
 
-                        Log.d(TAG, "Response Code: " + response.code());
-                        Log.d(TAG, "Response Headers: " + response.headers().toString());
-                        Log.d(TAG, "Response Body: " + responseBody);
+                        Log.d(TAG, "RapidAPI Response Code: " + response.code());
+                        Log.d(TAG, "RapidAPI Response Headers: " + response.headers().toString());
+                        Log.d(TAG, "RapidAPI Response Body: " + responseBody);
 
                         if (response.isSuccessful()) {
-                            ChatApiResponse apiResponse = gson.fromJson(responseBody, ChatApiResponse.class);
+                            // Parse response theo format của RapidAPI ChatGPT-42
+                            JsonObject responseJson = gson.fromJson(responseBody, JsonObject.class);
 
-                            if (apiResponse != null &&
-                                apiResponse.getChoices() != null &&
-                                !apiResponse.getChoices().isEmpty() &&
-                                apiResponse.getChoices().get(0).getMessage() != null) {
-
-                                String aiMessage = apiResponse.getChoices().get(0).getMessage().getContent();
+                            if (responseJson != null && responseJson.has("result")) {
+                                String aiMessage = responseJson.get("result").getAsString();
                                 if (aiMessage != null && !aiMessage.trim().isEmpty()) {
                                     mainHandler.post(() -> callback.onSuccess(aiMessage.trim()));
                                 } else {
                                     mainHandler.post(() -> callback.onError("AI trả về phản hồi trống."));
                                 }
                             } else {
-                                mainHandler.post(() -> callback.onError("Định dạng phản hồi từ AI không hợp lệ."));
+                                // Fallback: thử parse theo format OpenAI cũ nếu có
+                                ChatApiResponse apiResponse = gson.fromJson(responseBody, ChatApiResponse.class);
+                                if (apiResponse != null &&
+                                    apiResponse.getChoices() != null &&
+                                    !apiResponse.getChoices().isEmpty() &&
+                                    apiResponse.getChoices().get(0).getMessage() != null) {
+
+                                    String aiMessage = apiResponse.getChoices().get(0).getMessage().getContent();
+                                    if (aiMessage != null && !aiMessage.trim().isEmpty()) {
+                                        mainHandler.post(() -> callback.onSuccess(aiMessage.trim()));
+                                    } else {
+                                        mainHandler.post(() -> callback.onError("AI trả về phản hồi trống."));
+                                    }
+                                } else {
+                                    mainHandler.post(() -> callback.onError("Định dạng phản hồi từ AI không hợp lệ."));
+                                }
                             }
                         } else {
-                            // Xử lý các lỗi HTTP cụ thể
-                            String errorMessage = parseErrorMessage(response.code(), responseBody);
-                            Log.e(TAG, "API Error: " + errorMessage);
+                            // Xử lý các lỗi HTTP cụ thể cho RapidAPI
+                            String errorMessage = parseRapidAPIErrorMessage(response.code(), responseBody);
+                            Log.e(TAG, "RapidAPI Error: " + errorMessage);
 
                             mainHandler.post(() -> callback.onError(errorMessage));
                         }
                     } catch (Exception e) {
-                        Log.e(TAG, "Error parsing response", e);
+                        Log.e(TAG, "Error parsing RapidAPI response", e);
                         Log.e(TAG, "Response body was: " + responseBody);
 
                         mainHandler.post(() -> {
@@ -397,55 +405,55 @@ public class ChatRepositoryImpl implements ChatRepository {
             });
 
         } catch (Exception e) {
-            Log.e(TAG, "Error creating request", e);
+            Log.e(TAG, "Error creating RapidAPI request", e);
             callback.onError("Lỗi tạo yêu cầu gửi đến AI.");
         }
     }
 
     /**
-     * Phân tích thông báo lỗi từ API response
+     * Phân tích thông báo lỗi từ RapidAPI response
      */
-    private String parseErrorMessage(int responseCode, String responseBody) {
+    private String parseRapidAPIErrorMessage(int responseCode, String responseBody) {
         try {
-            // Thử parse JSON error response
+            // Thử parse JSON error response từ RapidAPI
             JsonObject errorResponse = gson.fromJson(responseBody, JsonObject.class);
             if (errorResponse.has("error")) {
-                JsonObject error = errorResponse.getAsJsonObject("error");
-                if (error.has("message")) {
-                    String apiErrorMessage = error.get("message").getAsString();
-                    Log.d(TAG, "API Error Message: " + apiErrorMessage);
+                String apiErrorMessage = errorResponse.get("error").getAsString();
+                Log.d(TAG, "RapidAPI Error Message: " + apiErrorMessage);
 
-                    // Dịch một số lỗi phổ biến
-                    if (apiErrorMessage.contains("No auth credentials")) {
-                        return "Lỗi xác thực API. Vui lòng liên hệ quản trị viên.";
-                    } else if (apiErrorMessage.contains("Rate limit")) {
-                        return "Đã vượt quá giới hạn yêu cầu. Vui lòng thử lại sau ít phút.";
-                    } else if (apiErrorMessage.contains("Invalid model")) {
-                        return "Mô hình AI không hợp lệ. Vui lòng thử lại.";
-                    }
-                    return "Lỗi từ AI: " + apiErrorMessage;
+                // Dịch một số lỗi phổ biến của RapidAPI
+                if (apiErrorMessage.contains("invalid key")) {
+                    return "Lỗi xác thực RapidAPI. API key không hợp lệ.";
+                } else if (apiErrorMessage.contains("quota exceeded")) {
+                    return "Đã vượt quá hạn mức sử dụng API. Vui lòng thử lại sau.";
+                } else if (apiErrorMessage.contains("rate limit")) {
+                    return "Đã vượt quá giới hạn yêu cầu. Vui lòng thử lại sau ít phút.";
                 }
+                return "Lỗi từ RapidAPI: " + apiErrorMessage;
+            } else if (errorResponse.has("message")) {
+                String message = errorResponse.get("message").getAsString();
+                return "Lỗi từ AI: " + message;
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error parsing error response", e);
+            Log.e(TAG, "Error parsing RapidAPI error response", e);
         }
 
-        // Fallback cho các HTTP status codes
+        // Fallback cho các HTTP status codes của RapidAPI
         switch (responseCode) {
             case 401:
-                return "Lỗi xác thực. API key có thể đã hết hạn hoặc không hợp lệ.";
+                return "Lỗi xác thực RapidAPI. API key có thể đã hết hạn hoặc không hợp lệ.";
             case 403:
-                return "Không có quyền truy cập. Vui lòng kiểm tra cấu hình API.";
+                return "Không có quyền truy cập RapidAPI. Vui lòng kiểm tra subscription.";
             case 429:
-                return "Quá nhiều yêu cầu. Vui lòng chờ một chút rồi thử lại.";
+                return "Quá nhiều yêu cầu tới RapidAPI. Vui lòng chờ một chút rồi thử lại.";
             case 500:
-                return "Lỗi máy chủ AI. Vui lòng thử lại sau.";
+                return "Lỗi máy chủ RapidAPI. Vui lòng thử lại sau.";
             case 502:
             case 503:
             case 504:
-                return "Máy chủ AI tạm thời không khả dụng. Vui lòng thử lại sau.";
+                return "RapidAPI tạm thời không khả dụng. Vui lòng thử lại sau.";
             default:
-                return "Lỗi không xác định từ AI (Mã: " + responseCode + "). Vui lòng thử lại.";
+                return "Lỗi không xác định từ RapidAPI (Mã: " + responseCode + "). Vui lòng thử lại.";
         }
     }
 
