@@ -101,8 +101,11 @@ public class ChatPresenter implements ChatContract.Presenter {
         long timestamp = System.currentTimeMillis();
         String userId = currentUser.getUid();
 
+        // Tạo conversationId tạm thời hoặc sử dụng conversationId hiện tại
+        String conversationId = "temp_" + userId + "_" + timestamp; // Tạo conversationId tạm thời
+
         // Hiển thị tin nhắn của người dùng ngay lập tức
-        ChatMessage userMessage = new ChatMessage(userId, trimmedContent, true, timestamp);
+        ChatMessage userMessage = new ChatMessage(conversationId, userId, trimmedContent, true, timestamp);
         String topic = chatRepository.extractTopic(trimmedContent);
         userMessage.setTopic(topic);
 
@@ -130,7 +133,7 @@ public class ChatPresenter implements ChatContract.Presenter {
                         Log.d(TAG, "AI response received: " + aiResponse);
 
                         // Tạo tin nhắn phản hồi từ AI
-                        ChatMessage aiMessage = new ChatMessage(userId, aiResponse, false, System.currentTimeMillis());
+                        ChatMessage aiMessage = new ChatMessage(conversationId, userId, aiResponse, false, System.currentTimeMillis());
                         aiMessage.setTopic(topic);
 
                         if (isViewAttached()) {
@@ -162,7 +165,7 @@ public class ChatPresenter implements ChatContract.Presenter {
                             view.hideAiTyping();
 
                             // Hiển thị tin nhắn lỗi từ AI
-                            ChatMessage errorMessage = new ChatMessage(userId,
+                            ChatMessage errorMessage = new ChatMessage(conversationId, userId,
                                 "Xin lỗi, tôi không thể trả lời câu hỏi của bạn lúc này. Vui lòng thử lại sau.",
                                 false, System.currentTimeMillis());
                             view.addMessage(errorMessage);

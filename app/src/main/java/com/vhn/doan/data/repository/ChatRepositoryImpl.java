@@ -8,6 +8,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -38,7 +39,7 @@ public class ChatRepositoryImpl implements ChatRepository {
     private static final String TAG = "ChatRepositoryImpl";
     private static final String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
     // Sử dụng API key mới
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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";
 
     // Firebase paths
     private static final String CONVERSATIONS_PATH = "conversations";
@@ -377,6 +378,44 @@ public class ChatRepositoryImpl implements ChatRepository {
         }
     }
 
+    @Override
+    public String extractTopic(String content) {
+        try {
+            // Các từ khóa chủ đề về sức khỏe
+            String[] healthTopics = {
+                "tim mạch", "huyết áp", "cholesterol", "đường huyết", "tiểu đường",
+                "dinh dưỡng", "vitamin", "protein", "carb", "chất béo",
+                "tập luyện", "thể dục", "yoga", "cardio", "cơ bắp",
+                "giảm cân", "tăng cân", "béo phì", "ăn kiêng",
+                "stress", "lo âu", "trầm cảm", "tâm lý", "tinh thần",
+                "giấc ngủ", "mất ngủ", "ngủ", "nghỉ ngơi",
+                "da", "tóc", "móng", "mỹ phẩm", "chăm sóc da",
+                "mang thai", "sinh sản", "kinh nguyệt", "phụ khoa",
+                "trẻ em", "em bé", "sức khỏe trẻ", "phát triển",
+                "người cao tuổi", "lão hóa", "xương khớp", "cột sống",
+                "mắt", "thị lực", "tai", "thính giác",
+                "răng", "miệng", "nha khoa", "vệ sinh răng miệng",
+                "cảm cúm", "sốt", "ho", "viêm họng", "virus",
+                "thuốc", "dược phẩm", "tác dụng phụ", "liều dùng"
+            };
+
+            content = content.toLowerCase();
+
+            for (String topic : healthTopics) {
+                if (content.contains(topic)) {
+                    return topic;
+                }
+            }
+
+            // Nếu không tìm thấy chủ đề cụ thể, trả về chủ đề chung
+            return "sức khỏe tổng quát";
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error extracting topic", e);
+            return "sức khỏe tổng quát";
+        }
+    }
+
     /**
      * Lưu chủ đề mà người dùng quan tâm vào Firebase
      */
@@ -394,6 +433,99 @@ public class ChatRepositoryImpl implements ChatRepository {
     }
 
     // ========== HELPER METHODS ==========
+
+    @Override
+    public void saveChatMessage(ChatMessage chatMessage, RepositoryCallback<ChatMessage> callback) {
+        try {
+            if (chatMessage.getConversationId() == null || chatMessage.getUserId() == null || chatMessage.getContent() == null) {
+                callback.onError("Thông tin tin nhắn không hợp lệ");
+                return;
+            }
+
+            String messageId = database.child(CHAT_MESSAGES_PATH)
+                    .child(chatMessage.getConversationId())
+                    .push().getKey();
+
+            if (messageId != null) {
+                chatMessage.setId(messageId);
+
+                database.child(CHAT_MESSAGES_PATH)
+                        .child(chatMessage.getConversationId())
+                        .child(messageId)
+                        .setValue(chatMessage.toMap())
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "Chat message saved successfully: " + messageId);
+                            callback.onSuccess(chatMessage);
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Failed to save chat message", e);
+                            callback.onError("Không thể lưu tin nhắn: " + e.getMessage());
+                        });
+            } else {
+                callback.onError("Không thể tạo ID cho tin nhắn");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving chat message", e);
+            callback.onError("Có lỗi xảy ra khi lưu tin nhắn: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void getChatMessages(String conversationId, RepositoryCallback<List<ChatMessage>> callback) {
+        try {
+            DatabaseReference messagesRef = database.child(CHAT_MESSAGES_PATH).child(conversationId);
+
+            messagesRef.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<ChatMessage> messages = new ArrayList<>();
+
+                    for (DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
+                        try {
+                            ChatMessage message = parseChatMessageFromSnapshot(messageSnapshot);
+                            if (message != null) {
+                                messages.add(message);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing chat message", e);
+                        }
+                    }
+
+                    Log.d(TAG, "Loaded " + messages.size() + " chat messages");
+                    callback.onSuccess(messages);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Failed to load chat messages", databaseError.toException());
+                    callback.onError("Không thể tải tin nhắn: " + databaseError.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading chat messages", e);
+            callback.onError("Có lỗi xảy ra khi tải tin nhắn: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void clearChatMessages(String conversationId, RepositoryCallback<Boolean> callback) {
+        try {
+            database.child(CHAT_MESSAGES_PATH)
+                    .child(conversationId)
+                    .removeValue()
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Chat messages cleared successfully for conversation: " + conversationId);
+                        callback.onSuccess(true);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to clear chat messages", e);
+                        callback.onError("Không thể xóa tin nhắn: " + e.getMessage());
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Error clearing chat messages", e);
+            callback.onError("Có lỗi xảy ra khi xóa tin nhắn: " + e.getMessage());
+        }
+    }
 
     /**
      * Parse Conversation từ Firebase DataSnapshot
@@ -461,5 +593,89 @@ public class ChatRepositoryImpl implements ChatRepository {
             Log.e(TAG, "Error parsing message from snapshot", e);
             return null;
         }
+    }
+
+    @Override
+    public void clearChatHistory(String userId, RepositoryCallback<Boolean> callback) {
+        try {
+            // Xóa tất cả cuộc trò chuyện của user
+            DatabaseReference userConversationsRef = database.child(CONVERSATIONS_PATH).child(userId);
+
+            userConversationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    try {
+                        List<String> conversationIds = new ArrayList<>();
+
+                        // Lấy danh sách ID các cuộc trò chuyện
+                        for (DataSnapshot conversationSnapshot : dataSnapshot.getChildren()) {
+                            conversationIds.add(conversationSnapshot.getKey());
+                        }
+
+                        if (conversationIds.isEmpty()) {
+                            callback.onSuccess(true);
+                            return;
+                        }
+
+                        // Xóa từng cuộc trò chuyện và tin nhắn của nó
+                        deleteConversationsRecursively(conversationIds, 0, userId, callback);
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error processing chat history deletion", e);
+                        callback.onError("Lỗi xử lý xóa lịch sử chat: " + e.getMessage());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Error clearing chat history", databaseError.toException());
+                    callback.onError("Lỗi xóa lịch sử chat: " + databaseError.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error initiating chat history clear", e);
+            callback.onError("Lỗi khởi tạo xóa lịch sử chat: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Xóa các cuộc trò chuyện một cách đệ quy
+     */
+    private void deleteConversationsRecursively(List<String> conversationIds, int index, String userId, RepositoryCallback<Boolean> callback) {
+        if (index >= conversationIds.size()) {
+            // Xóa xong tất cả cuộc trò chuyện, xóa thư mục user trong conversations
+            database.child(CONVERSATIONS_PATH).child(userId).removeValue()
+                    .addOnSuccessListener(aVoid -> callback.onSuccess(true))
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error removing user conversations folder", e);
+                        callback.onError("Lỗi xóa thư mục cuộc trò chuyện: " + e.getMessage());
+                    });
+            return;
+        }
+
+        String conversationId = conversationIds.get(index);
+
+        // Xóa tin nhắn của cuộc trò chuyện này trước
+        clearChatMessages(conversationId, new RepositoryCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                // Sau khi xóa tin nhắn, xóa cuộc trò chuyện
+                database.child(CONVERSATIONS_PATH).child(userId).child(conversationId).removeValue()
+                        .addOnSuccessListener(aVoid -> {
+                            // Tiếp tục xóa cuộc trò chuyện tiếp theo
+                            deleteConversationsRecursively(conversationIds, index + 1, userId, callback);
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Error deleting conversation: " + conversationId, e);
+                            callback.onError("Lỗi xóa cuộc trò chuyện: " + e.getMessage());
+                        });
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Error clearing messages for conversation: " + conversationId + ", error: " + error);
+                callback.onError("Lỗi xóa tin nhắn cuộc trò chuyện: " + error);
+            }
+        });
     }
 }

@@ -73,6 +73,13 @@ public interface ChatRepository {
      */
     void clearChatMessages(String conversationId, RepositoryCallback<Boolean> callback);
 
+    /**
+     * Xóa lịch sử chat của người dùng (tất cả cuộc trò chuyện)
+     * @param userId ID người dùng
+     * @param callback Callback để nhận kết quả
+     */
+    void clearChatHistory(String userId, RepositoryCallback<Boolean> callback);
+
     // ========== UTILITY METHODS ==========
 
     /**
