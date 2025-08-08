@@ -76,8 +76,7 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
                 }
 
                 // Sắp xếp theo uploadDate giảm dần (mới nhất trước)
-                videos.sort((v1, v2) -> Long.compare(v2.getUploadDate(), v1.getUploadDate()));
-
+                Collections.sort(videos, (v1, v2) -> Long.compare(v2.getUploadDate(), v1.getUploadDate()));
                 callback.onSuccess(videos);
             }
 
