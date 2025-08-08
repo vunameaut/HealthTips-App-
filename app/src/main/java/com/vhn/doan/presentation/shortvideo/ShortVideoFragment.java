@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.ShortVideoRepositoryImpl;
@@ -30,6 +31,7 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
     private RecyclerView recyclerViewVideos;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private LinearProgressIndicator progressIndicatorLoading;
     private View viewLoading;
     private View viewEmptyState;
 
@@ -104,6 +106,7 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     private void initViews(View view) {
         recyclerViewVideos = view.findViewById(R.id.recyclerViewVideos);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        progressIndicatorLoading = view.findViewById(R.id.progressIndicatorLoading);
         viewLoading = view.findViewById(R.id.viewLoading);
         viewEmptyState = view.findViewById(R.id.viewEmptyState);
     }
@@ -215,13 +218,24 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
     @Override
     public void showLoading() {
-        viewLoading.setVisibility(View.VISIBLE);
-        recyclerViewVideos.setVisibility(View.GONE);
+        // Hiển thị Linear Progress Indicator ở đầu màn hình
+        progressIndicatorLoading.setVisibility(View.VISIBLE);
+
+        // Chỉ hiển thị loading overlay nếu chưa có dữ liệu
+        if (adapter == null || adapter.getItemCount() == 0) {
+            viewLoading.setVisibility(View.VISIBLE);
+            recyclerViewVideos.setVisibility(View.GONE);
+        }
+
         viewEmptyState.setVisibility(View.GONE);
     }
 
     @Override
     public void hideLoading() {
+        // Ẩn Linear Progress Indicator
+        progressIndicatorLoading.setVisibility(View.GONE);
+
+        // Ẩn loading overlay
         viewLoading.setVisibility(View.GONE);
 
         // Tắt refresh indicator nếu đang hiển thị
