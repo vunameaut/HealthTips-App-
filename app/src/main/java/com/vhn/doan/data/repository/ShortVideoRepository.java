@@ -1,0 +1,55 @@
+package com.vhn.doan.data.repository;
+
+import com.vhn.doan.data.ShortVideo;
+import java.util.List;
+
+/**
+ * Repository interface để quản lý dữ liệu video ngắn
+ */
+public interface ShortVideoRepository {
+
+    /**
+     * Lấy danh sách video được đề xuất cho người dùng
+     * @param userId ID của người dùng
+     * @param limit Số lượng video tối đa cần lấy
+     * @param callback Callback để xử lý kết quả
+     */
+    void getRecommendedVideos(String userId, int limit, RepositoryCallback<List<ShortVideo>> callback);
+
+    /**
+     * Lấy danh sách video theo categoryId
+     * @param categoryId ID của danh mục
+     * @param limit Số lượng video tối đa cần lấy
+     * @param callback Callback để xử lý kết quả
+     */
+    void getVideosByCategory(String categoryId, int limit, RepositoryCallback<List<ShortVideo>> callback);
+
+    /**
+     * Lấy danh sách video trending
+     * @param limit Số lượng video tối đa cần lấy
+     * @param callback Callback để xử lý kết quả
+     */
+    void getTrendingVideos(int limit, RepositoryCallback<List<ShortVideo>> callback);
+
+    /**
+     * Tăng view count cho video
+     * @param videoId ID của video
+     * @param callback Callback để xử lý kết quả
+     */
+    void incrementViewCount(String videoId, RepositoryCallback<Void> callback);
+
+    /**
+     * Tăng/giảm like count cho video
+     * @param videoId ID của video
+     * @param isLiked true nếu like, false nếu unlike
+     * @param callback Callback để xử lý kết quả
+     */
+    void updateLikeCount(String videoId, boolean isLiked, RepositoryCallback<Void> callback);
+
+    /**
+     * Lấy sở thích người dùng từ preferences và user_topics
+     * @param userId ID của người dùng
+     * @param callback Callback để xử lý kết quả
+     */
+    void getUserPreferences(String userId, RepositoryCallback<java.util.Map<String, Float>> callback);
+}

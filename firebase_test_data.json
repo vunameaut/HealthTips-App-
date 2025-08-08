@@ -238,7 +238,145 @@
       "isLiked": false
     }
   },
- "users": {
+  "videos": {
+    "video001": {
+      "id": "video001",
+      "title": "5 bài tập giảm cân hiệu quả tại nhà",
+      "caption": "Cùng tập luyện 5 bài tập đơn giản giúp đốt cháy calo nhanh chóng. Chỉ cần 15 phút mỗi ngày! #giamcan #tapluyen #suckhoe",
+      "uploadDate": 1733702400000,
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fgiamcan%2Fvideo001.mp4?alt=media",
+      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fgiamcan%2Fvideo001.jpg?alt=media",
+      "categoryId": "giamcan",
+      "tags": {
+        "giamcan": true,
+        "tapluyen": true,
+        "suckhoe": true
+      },
+      "viewCount": 1250,
+      "likeCount": 89,
+      "userId": "user001"
+    },
+    "video002": {
+      "id": "video002",
+      "title": "Yoga buổi sáng để khởi động ngày mới",
+      "caption": "10 phút yoga nhẹ nhàng để thức dậy cơ thể và tinh thần. Hoàn hảo cho buổi sáng! #yoga #suckhoe #thiendinhduong",
+      "uploadDate": 1733616000000,
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Ftapluyen%2Fvideo002.mp4?alt=media",
+      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Ftapluyen%2Fvideo002.jpg?alt=media",
+      "categoryId": "tapluyen",
+      "tags": {
+        "yoga": true,
+        "suckhoe": true,
+        "tapluyen": true
+      },
+      "viewCount": 2100,
+      "likeCount": 156,
+      "userId": "user002"
+    },
+    "video003": {
+      "id": "video003",
+      "title": "Smoothie xanh bổ dưỡng cho bữa sáng",
+      "caption": "Công thức smoothie xanh giàu vitamin và khoáng chất. Dễ làm, ngon miệng và cực kỳ bổ dưỡng! #dinhduong #smoothie #suckhoe",
+      "uploadDate": 1733529600000,
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fdinhduong%2Fvideo003.mp4?alt=media",
+      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fdinhduong%2Fvideo003.jpg?alt=media",
+      "categoryId": "dinhduong",
+      "tags": {
+        "dinhduong": true,
+        "vitamin": true,
+        "suckhoe": true
+      },
+      "viewCount": 890,
+      "likeCount": 67,
+      "userId": "user003"
+    },
+    "video004": {
+      "id": "video004",
+      "title": "Kỹ thuật thở để giảm stress ngay lập tức",
+      "caption": "Học cách thở đúng để xua tan căng thẳng chỉ trong 3 phút. Thực hành mọi lúc mọi nơi! #stress #thiendinhduong #suckhoe",
+      "uploadDate": 1733443200000,
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fsuckhoe%2Fvideo004.mp4?alt=media",
+      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fsuckhoe%2Fvideo004.jpg?alt=media",
+      "categoryId": "suckhoe",
+      "tags": {
+        "stress": true,
+        "thiendinhduong": true,
+        "suckhoe": true
+      },
+      "viewCount": 1580,
+      "likeCount": 123,
+      "userId": "user004"
+    },
+    "video005": {
+      "id": "video005",
+      "title": "HIIT 7 phút đốt cháy mỡ bụng",
+      "caption": "Bài tập HIIT cường độ cao chỉ 7 phút. Hiệu quả tối đa cho việc giảm mỡ bụng! #hiit #giamcan #tapluyen",
+      "uploadDate": 1733356800000,
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fgiamcan%2Fvideo005.mp4?alt=media",
+      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fgiamcan%2Fvideo005.jpg?alt=media",
+      "categoryId": "giamcan",
+      "tags": {
+        "hiit": true,
+        "giamcan": true,
+        "tapluyen": true
+      },
+      "viewCount": 3200,
+      "likeCount": 245,
+      "userId": "user001"
+    },
+    "video006": {
+      "id": "video006",
+      "title": "Cách làm salad protein đầy đủ dinh dưỡng",
+      "caption": "Salad protein với đầy đủ vitamin, khoáng chất và protein cần thiết. Thích hợp cho người tập gym! #protein #dinhduong #salad",
+      "uploadDate": 1733270400000,
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fdinhduong%2Fvideo006.mp4?alt=media",
+      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fdinhduong%2Fvideo006.jpg?alt=media",
+      "categoryId": "dinhduong",
+      "tags": {
+        "protein": true,
+        "dinhduong": true,
+        "tapluyen": true
+      },
+      "viewCount": 1450,
+      "likeCount": 98,
+      "userId": "user005"
+    },
+    "video007": {
+      "id": "video007",
+      "title": "Thiền 5 phút cho giấc ngủ ngon",
+      "caption": "Bài thiền ngắn giúp thư giãn tâm trí và có giấc ngủ sâu. Thực hành trước khi đi ngủ! #thien #ngu #suckhoe",
+      "uploadDate": 1733184000000,
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fsuckhoe%2Fvideo007.mp4?alt=media",
+      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fsuckhoe%2Fvideo007.jpg?alt=media",
+      "categoryId": "suckhoe",
+      "tags": {
+        "thien": true,
+        "ngu": true,
+        "suckhoe": true
+      },
+      "viewCount": 2800,
+      "likeCount": 201,
+      "userId": "user006"
+    },
+    "video008": {
+      "id": "video008",
+      "title": "Bài tập cardio không cần dụng cụ",
+      "caption": "15 phút cardio tại nhà không cần thiết bị. Đổ mồ hôi ngay lập tức! #cardio #tapluyen #giamcan",
+      "uploadDate": 1733097600000,
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Ftapluyen%2Fvideo008.mp4?alt=media",
+      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Ftapluyen%2Fvideo008.jpg?alt=media",
+      "categoryId": "tapluyen",
+      "tags": {
+        "cardio": true,
+        "tapluyen": true,
+        "giamcan": true
+      },
+      "viewCount": 1890,
+      "likeCount": 142,
+      "userId": "user007"
+    }
+  },
+  "users": {
     "JsqrVnadK9QV08CeWWf5zqfsIDX2": {
       "active": true,
       "createdAt": 1753162800504,
@@ -254,6 +392,15 @@
       },
       "lastLoginAt": 1753162800504,
       "uid": "JsqrVnadK9QV08CeWWf5zqfsIDX2"
+    }
+  },
+  "trendingVideos": {
+    "vietnam": {
+      "video005": true,
+      "video007": true,
+      "video002": true,
+      "video008": true,
+      "video001": true
     }
   }
 }

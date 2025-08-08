@@ -71,6 +71,7 @@ dependencies {
 
 
     implementation("androidx.work:work-runtime:2.9.0")
+    implementation(libs.core)
 
     // Thêm thư viện Desugaring để hỗ trợ tính năng Java 8+ trên các thiết bị cũ
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
@@ -87,4 +88,15 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // Thêm dependencies cho chức năng video ngắn
+    // CircleImageView cho avatar tròn
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+
+    // Glide cho load ảnh/video
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+    // ExoPlayer cho video playback (tùy chọn thay thế VideoView)
+    implementation("com.google.android.exoplayer:exoplayer:2.19.1")
 }

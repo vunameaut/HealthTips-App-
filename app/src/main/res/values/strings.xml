@@ -131,7 +131,32 @@
     <string name="back">Quay lại</string>
 
     <!-- Các chuỗi cho màn hình chi tiết danh mục -->
-    <string name="empty_tips_description">Chưa có mẹo nào trong danh mục này</string>
+    <string name="empty_tips_description">Chưa có mẹo nào trong danh m���c này</string>
     <string name="empty_tips_title">Danh sách trống</string>
     <string name="empty_tips_message">Danh mục này hiện không có mẹo sức khỏe nào</string>
+
+    <!-- Các chuỗi cho chức năng video ngắn -->
+    <string name="loading_videos">Đang tải video...</string>
+    <string name="no_videos_available">Không có video nào</string>
+    <string name="pull_to_refresh_videos">Kéo xuống để làm mới danh sách video</string>
+    <string name="video_liked">Đã thích video</string>
+    <string name="video_unliked">Đã bỏ thích video</string>
+    <string name="video_shared">Đã chia sẻ video</string>
+    <string name="comment_feature_coming_soon">Chức năng bình luận sẽ được phát triển trong tương lai</string>
+    <string name="view_user_profile">Xem thông tin người đăng</string>
+    <string name="error_loading_videos">Không thể tải video. Vui lòng thử lại.</string>
+    <string name="trending_videos">Video thịnh hành</string>
+
+    <!-- Icon placeholders cho chức năng video ngắn -->
+    <string name="ic_video_placeholder">ic_video_placeholder</string>
+    <string name="ic_video_error">ic_video_error</string>
+    <string name="ic_user_placeholder">ic_user_placeholder</string>
+    <string name="ic_heart_filled">ic_heart_filled</string>
+    <string name="ic_heart_outline">ic_heart_outline</string>
+    <string name="ic_comment">ic_comment</string>
+    <string name="ic_share">ic_share</string>
+    <string name="ic_play_arrow">ic_play_arrow</string>
+    <string name="ic_visibility">ic_visibility</string>
+    <string name="ic_schedule">ic_schedule</string>
+    <string name="ic_video_empty">ic_video_empty</string>
 </resources>

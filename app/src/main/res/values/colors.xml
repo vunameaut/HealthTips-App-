@@ -8,10 +8,13 @@
     <color name="background_dark">#1A1A1D</color>
     <color name="background_dark_alt">#212124</color>
     <color name="background_color">#1A1A1D</color>       <!-- Alias cho background_dark -->
+    <color name="background_light">#FFFFFF</color>
 
     <!-- Màu text -->
     <color name="text_primary">#FFFFFF</color>           <!-- Màu chữ chính - trắng cho dark theme -->
     <color name="text_secondary">#B0BEC5</color>         <!-- Màu chữ phụ - xám nhạt -->
+    <color name="text_primary_light">#212124</color>
+    <color name="text_secondary_light">#424242</color>
 
     <!-- Màu cho nút chính -->
     <color name="primary_button_start">#2E7D32</color>   <!-- Xanh lá đậm -->
@@ -69,9 +72,23 @@
     <color name="bg_reminder_due">#FFEBEE</color>
     <color name="bg_reminder_normal">#F1F8E9</color>
 
+    <!-- Theme Colors -->
+    <color name="colorPrimary">#4CAF50</color>
+    <color name="colorPrimaryDark">#2E7D32</color>
+    <color name="colorAccent">#FF9800</color>
+
+    <!-- Màu chính cho Short Video Fragment -->
+    <color name="primary_green">#4CAF50</color>
+    <color name="accent_orange">#FF9800</color>
+
     <!-- Màu cho cuộc trò chuyện được ghim -->
-    <color name="pinned_conversation_background">#2A2A2D</color>  <!-- Màu nền nhạt hơn cho ghim -->
-    <color name="pinned_conversation_stroke">#4CAF50</color>      <!-- Màu viền xanh lá cho ghim -->
-    <color name="pinned_conversation_background_light">#F3E5F5</color>  <!-- Màu nền tím nhạt cho light mode -->
-    <color name="pinned_conversation_stroke_light">#9C27B0</color>      <!-- Màu viền tím cho light mode -->
+    <color name="pinned_conversation_background">#2D2D30</color>
+    <color name="pinned_conversation_stroke">#4CAF50</color>
+
+    <!-- Màu cho nút like trong video -->
+    <color name="color_like">#E91E63</color>
+
+    <!-- Màu cho favorite -->
+    <color name="color_favorite">#E91E63</color>
+    <color name="color_favorite_outline">#757575</color>
 </resources>

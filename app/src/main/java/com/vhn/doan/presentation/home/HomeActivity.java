@@ -16,6 +16,7 @@ import com.vhn.doan.presentation.auth.LoginActivity;
 import com.vhn.doan.presentation.chat.ChatListFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
+import com.vhn.doan.presentation.shortvideo.ShortVideoFragment;
 import com.vhn.doan.services.AuthManager;
 import com.vhn.doan.services.ReminderManager;
 import com.vhn.doan.utils.UserSessionManager;
@@ -114,10 +115,8 @@ public class HomeActivity extends AppCompatActivity {
                     // Kích hoạt ReminderFragment
                     fragment = ReminderFragment.newInstance();
                 } else if (itemId == R.id.nav_videos) {
-                    // Tạm thời vẫn dùng HomeFragment
-                    // Sẽ thay thế bằng ShortVideoFragment khi phát triển
-                    fragment = HomeFragment.newInstance();
-                    // fragment = ShortVideoFragment.newInstance();
+                    // Kích hoạt ShortVideoFragment - Chức năng video ngắn giống TikTok/Facebook Reels
+                    fragment = ShortVideoFragment.newInstance();
                 } else if (itemId == R.id.nav_profile) {
                     // Sử dụng ProfileFragment - chức năng yêu thích đã được tích hợp vào đây
                     fragment = ProfileFragment.newInstance();
