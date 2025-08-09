@@ -204,6 +204,7 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
     @Override
     public void addComment(String videoId, com.vhn.doan.data.VideoComment comment, RepositoryCallback<Void> callback) {
         DatabaseReference commentsRef = videosRef.child(videoId).child("comments").push();
+        comment.setId(commentsRef.getKey());
         commentsRef.setValue(comment).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 callback.onSuccess(null);
@@ -223,6 +224,28 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
                 for (DataSnapshot child : snapshot.getChildren()) {
                     com.vhn.doan.data.VideoComment comment = child.getValue(com.vhn.doan.data.VideoComment.class);
                     if (comment != null) {
+                        comment.setId(child.getKey());
+
+                        // Parse likes
+                        DataSnapshot likesSnap = child.child("likes");
+                        Map<String, Boolean> likes = new HashMap<>();
+                        for (DataSnapshot like : likesSnap.getChildren()) {
+                            likes.put(like.getKey(), Boolean.TRUE);
+                        }
+                        comment.setLikes(likes);
+
+                        // Parse replies
+                        DataSnapshot repliesSnap = child.child("replies");
+                        java.util.List<com.vhn.doan.data.VideoComment> replies = new ArrayList<>();
+                        for (DataSnapshot replyChild : repliesSnap.getChildren()) {
+                            com.vhn.doan.data.VideoComment reply = replyChild.getValue(com.vhn.doan.data.VideoComment.class);
+                            if (reply != null) {
+                                reply.setId(replyChild.getKey());
+                                replies.add(reply);
+                            }
+                        }
+                        comment.setReplies(replies);
+
                         comments.add(comment);
                     }
                 }
@@ -232,6 +255,41 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
             @Override
             public void onCancelled(DatabaseError error) {
                 callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void likeComment(String videoId, String commentId, String userId, boolean like, RepositoryCallback<Void> callback) {
+        DatabaseReference likeRef = videosRef.child(videoId).child("comments").child(commentId).child("likes").child(userId);
+        if (like) {
+            likeRef.setValue(true).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    callback.onError("Không thể thích bình luận");
+                }
+            });
+        } else {
+            likeRef.removeValue().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    callback.onError("Không thể bỏ thích bình luận");
+                }
+            });
+        }
+    }
+
+    @Override
+    public void addReply(String videoId, String commentId, com.vhn.doan.data.VideoComment reply, RepositoryCallback<Void> callback) {
+        DatabaseReference repliesRef = videosRef.child(videoId).child("comments").child(commentId).child("replies").push();
+        reply.setId(repliesRef.getKey());
+        repliesRef.setValue(reply).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                callback.onSuccess(null);
+            } else {
+                callback.onError("Không thể thêm phản hồi");
             }
         });
     }

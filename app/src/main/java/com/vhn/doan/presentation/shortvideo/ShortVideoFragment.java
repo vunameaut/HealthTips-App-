@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -136,13 +137,16 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
         if (adapter != null) {
             adapter.pauseAllVideos();
             adapter.hideAllVideoViews();
+            adapter.releaseAllResources();
         }
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         isFragmentVisible = true;
+        requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // Không gọi handleVideoPlayback() ngay - để cho onVideoPlayerReady callback xử lý
     }
 

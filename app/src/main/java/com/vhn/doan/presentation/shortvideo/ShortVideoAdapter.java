@@ -173,6 +173,8 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         private ImageView btnLike;
         private ImageView btnShare;
         private ImageView btnComment;
+        private TextView btnSeeMore;
+        private TextView txtHashtags;
         private FrameLayout rootLayout;
         private GestureDetector gestureDetector;
 
@@ -198,6 +200,8 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             txtViewCount = itemView.findViewById(R.id.txtViewCount);
             txtLikeCount = itemView.findViewById(R.id.txtLikeCount);
             txtUploadDate = itemView.findViewById(R.id.txtUploadDate);
+            btnSeeMore = itemView.findViewById(R.id.btnSeeMore);
+            txtHashtags = itemView.findViewById(R.id.txtHashtags);
             btnLike = itemView.findViewById(R.id.btnLike);
             btnShare = itemView.findViewById(R.id.btnShare);
             btnComment = itemView.findViewById(R.id.btnComment);
@@ -389,6 +393,31 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             // Hiển thị thông tin video
             txtTitle.setText(video.getTitle());
             txtCaption.setText(video.getCaption());
+            btnSeeMore.setVisibility(View.GONE);
+            txtCaption.post(() -> {
+                if (txtCaption.getLineCount() > 2) {
+                    txtCaption.setMaxLines(2);
+                    btnSeeMore.setVisibility(View.VISIBLE);
+                } else {
+                    txtCaption.setMaxLines(Integer.MAX_VALUE);
+                    btnSeeMore.setVisibility(View.GONE);
+                }
+            });
+            btnSeeMore.setOnClickListener(v -> {
+                txtCaption.setMaxLines(Integer.MAX_VALUE);
+                btnSeeMore.setVisibility(View.GONE);
+            });
+
+            if (video.getTags() != null && !video.getTags().isEmpty()) {
+                StringBuilder tagsLine = new StringBuilder();
+                for (String tag : video.getTags().keySet()) {
+                    tagsLine.append("#").append(tag).append(" ");
+                }
+                txtHashtags.setText(tagsLine.toString().trim());
+                txtHashtags.setVisibility(View.VISIBLE);
+            } else {
+                txtHashtags.setVisibility(View.GONE);
+            }
             txtViewCount.setText(formatCount(video.getViewCount()) + " lượt xem");
             txtLikeCount.setText(formatCount(video.getLikeCount()));
             isLiked = video.isLikedByCurrentUser();

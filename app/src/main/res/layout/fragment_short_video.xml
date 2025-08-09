@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
+    android:fitsSystemWindows="false"
     android:background="@color/black">
 
     <!-- Linear Progress Indicator for loading videos - positioned at very top -->
