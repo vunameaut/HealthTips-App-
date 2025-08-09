@@ -47,6 +47,40 @@ public interface ShortVideoRepository {
     void updateLikeCount(String videoId, boolean isLiked, RepositoryCallback<Void> callback);
 
     /**
+     * Thêm bình luận cho video
+     * @param videoId ID của video
+     * @param comment Đối tượng bình luận
+     * @param callback Callback xử lý kết quả
+     */
+    void addComment(String videoId, com.vhn.doan.data.VideoComment comment, RepositoryCallback<Void> callback);
+
+    /**
+     * Lấy danh sách bình luận của video
+     * @param videoId ID của video
+     * @param callback Callback xử lý kết quả
+     */
+    void getComments(String videoId, RepositoryCallback<java.util.List<com.vhn.doan.data.VideoComment>> callback);
+
+    /**
+     * Thích hoặc bỏ thích một bình luận hoặc phản hồi
+     * @param videoId ID video chứa bình luận
+     * @param commentPath Đường dẫn tới bình luận (ví dụ: commentId hoặc commentId/replies/replyId)
+     * @param userId ID người dùng thực hiện
+     * @param like true nếu thích, false nếu bỏ thích
+     * @param callback Callback xử lý kết quả
+     */
+    void likeComment(String videoId, String commentPath, String userId, boolean like, RepositoryCallback<Void> callback);
+
+    /**
+     * Thêm phản hồi cho một bình luận
+     * @param videoId ID video chứa bình luận
+     * @param commentId ID của bình luận cha
+     * @param reply Đối tượng bình luận phản hồi
+     * @param callback Callback xử lý kết quả
+     */
+    void addReply(String videoId, String commentId, com.vhn.doan.data.VideoComment reply, RepositoryCallback<Void> callback);
+
+    /**
      * Lấy sở thích người dùng từ preferences và user_topics
      * @param userId ID của người dùng
      * @param callback Callback để xử lý kết quả
