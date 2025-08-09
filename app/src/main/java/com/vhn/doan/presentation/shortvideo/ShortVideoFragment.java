@@ -275,8 +275,7 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
                         // Play video mới (chỉ khi fragment visible)
                         currentPosition = newPosition;
                         if (isFragmentVisible && isVideoPlayerReady) {
-                            // Delay playback until RecyclerView has completed layout for the new item
-                            recyclerView.post(() -> adapter.playVideoAt(currentPosition));
+                            adapter.playVideoAt(currentPosition);
                         }
 
                         // Thông báo presenter về việc xem video
