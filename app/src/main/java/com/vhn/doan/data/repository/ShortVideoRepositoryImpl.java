@@ -202,6 +202,41 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
     }
 
     @Override
+    public void addComment(String videoId, com.vhn.doan.data.VideoComment comment, RepositoryCallback<Void> callback) {
+        DatabaseReference commentsRef = videosRef.child(videoId).child("comments").push();
+        commentsRef.setValue(comment).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                callback.onSuccess(null);
+            } else {
+                callback.onError("Không thể thêm bình luận");
+            }
+        });
+    }
+
+    @Override
+    public void getComments(String videoId, RepositoryCallback<java.util.List<com.vhn.doan.data.VideoComment>> callback) {
+        DatabaseReference commentsRef = videosRef.child(videoId).child("comments");
+        commentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                java.util.List<com.vhn.doan.data.VideoComment> comments = new ArrayList<>();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    com.vhn.doan.data.VideoComment comment = child.getValue(com.vhn.doan.data.VideoComment.class);
+                    if (comment != null) {
+                        comments.add(comment);
+                    }
+                }
+                callback.onSuccess(comments);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    @Override
     public void getUserPreferences(String userId, RepositoryCallback<Map<String, Float>> callback) {
         Map<String, Float> combinedPreferences = new HashMap<>();
 

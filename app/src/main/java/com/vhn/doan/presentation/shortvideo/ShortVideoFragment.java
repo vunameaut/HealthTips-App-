@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.shortvideo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -104,6 +105,16 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        isFragmentVisible = false;
+        if (adapter != null) {
+            adapter.pauseAllVideos();
+            adapter.hideAllVideoViews();
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (presenter != null) {
@@ -193,13 +204,20 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
             @Override
             public void onVideoShared(int position, String videoId) {
+                ShortVideo video = presenter.getVideoAt(position);
+                if (video != null) {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_SUBJECT, video.getTitle());
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, video.getVideoUrl());
+                    startActivity(Intent.createChooser(shareIntent, getString(R.string.share_video)));
+                }
                 presenter.onVideoShared(videoId);
             }
 
             @Override
             public void onVideoCommented(int position, String videoId) {
-                // TODO: Implement comment functionality in future
-                showSuccess(getString(R.string.comment_feature_coming_soon));
+                showCommentDialog(videoId);
             }
 
             @Override
@@ -271,6 +289,11 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
         // Thiết lập background color cho refresh indicator
         swipeRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.black);
+    }
+
+    private void showCommentDialog(String videoId) {
+        VideoCommentsBottomSheet sheet = VideoCommentsBottomSheet.newInstance(videoId);
+        sheet.show(getChildFragmentManager(), "video_comments");
     }
 
     // Implement ShortVideoContract.View
