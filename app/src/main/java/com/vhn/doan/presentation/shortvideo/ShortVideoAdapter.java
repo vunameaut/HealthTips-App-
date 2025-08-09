@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
+import com.vhn.doan.services.CloudinaryVideoHelper;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -335,16 +336,25 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             txtUploadDate.setText(sdf.format(new Date(video.getUploadDate())));
 
-            // Load thumbnail
+            // Load thumbnail - Sử dụng Cloudinary thumbnail nếu có
+            String thumbnailUrl = video.getThumbnailUrl();
+            if (video.isCloudinaryVideo() && (thumbnailUrl == null || thumbnailUrl.isEmpty())) {
+                // Tự động tạo thumbnail từ video URL nếu chưa có
+                thumbnailUrl = CloudinaryVideoHelper.getThumbnailFromVideoUrl(video.getVideoUrl());
+            }
+
             Glide.with(itemView.getContext())
-                    .load(video.getThumbnailUrl())
+                    .load(thumbnailUrl)
                     .placeholder(R.drawable.ic_video_placeholder)
                     .error(R.drawable.ic_video_error)
                     .centerCrop()
                     .into(imgThumbnail);
 
-            // Setup video
-            setupVideo(video.getVideoUrl());
+            // Setup video - Sử dụng URL được tối ưu cho mobile
+            String optimizedVideoUrl = video.getOptimizedVideoUrl();
+            android.util.Log.d("ShortVideoAdapter", "Loading video - Original: " + video.getVideoUrl());
+            android.util.Log.d("ShortVideoAdapter", "Loading video - Optimized: " + optimizedVideoUrl);
+            setupVideo(optimizedVideoUrl);
 
             // Reset trạng thái
             isVideoLoaded = false;

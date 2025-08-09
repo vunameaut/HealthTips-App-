@@ -1,11 +1,13 @@
 package com.vhn.doan.data;
 
 import com.google.firebase.database.PropertyName;
+import com.vhn.doan.services.CloudinaryVideoHelper;
 import java.util.Map;
 
 /**
  * Model class để đại diện cho video ngắn trong ứng dụng
  * Được sử dụng với Firebase Realtime Database
+ * Video URLs sẽ đến từ Cloudinary thay vì Firebase Storage
  */
 public class ShortVideo {
     @PropertyName("id")
@@ -45,6 +47,7 @@ public class ShortVideo {
     public ShortVideo() {
     }
 
+    // Constructor cập nhật - loại bỏ cloudinaryPublicId
     public ShortVideo(String id, String title, String caption, long uploadDate,
                      String videoUrl, String thumbnailUrl, String categoryId,
                      Map<String, Boolean> tags, int viewCount, int likeCount, String userId) {
@@ -148,6 +151,26 @@ public class ShortVideo {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    /**
+     * Kiểm tra xem video có sử dụng Cloudinary không
+     * @return true nếu video URL từ Cloudinary
+     */
+    public boolean isCloudinaryVideo() {
+        return CloudinaryVideoHelper.isCloudinaryVideoUrl(this.videoUrl);
+    }
+
+    /**
+     * Lấy optimized video URL cho mobile
+     * @return URL video được tối ưu cho mobile
+     */
+    public String getOptimizedVideoUrl() {
+        if (isCloudinaryVideo()) {
+            // Sử dụng trực tiếp URL gốc thay vì extract public ID
+            return CloudinaryVideoHelper.getOptimizedVideoUrl(this.videoUrl, "auto:good");
+        }
+        return this.videoUrl; // Trả về URL gốc nếu không phải Cloudinary
     }
 
     @Override
