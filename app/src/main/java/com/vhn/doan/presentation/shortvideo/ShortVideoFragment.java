@@ -1,9 +1,11 @@
 package com.vhn.doan.presentation.shortvideo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -104,6 +106,18 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        isFragmentVisible = false;
+        if (adapter != null) {
+            adapter.pauseAllVideos();
+            adapter.hideAllVideoViews();
+            adapter.releaseAllResources();
+            recyclerViewVideos.setAdapter(null);
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (presenter != null) {
@@ -125,13 +139,18 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
         if (adapter != null) {
             adapter.pauseAllVideos();
             adapter.hideAllVideoViews();
+            adapter.releaseAllResources();
         }
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        recyclerViewVideos.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         isFragmentVisible = true;
+        requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        recyclerViewVideos.setVisibility(View.VISIBLE);
         // Không gọi handleVideoPlayback() ngay - để cho onVideoPlayerReady callback xử lý
     }
 
@@ -150,6 +169,7 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
         if (adapter != null) {
             adapter.pauseAllVideos();
             adapter.hideAllVideoViews();
+            adapter.releaseAllResources();
         }
     }
 
@@ -183,6 +203,8 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
         // Sử dụng LinearLayoutManager theo chiều dọc
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerViewVideos.setLayoutManager(layoutManager);
+        // Giữ sẵn vài item kế tiếp để video chuyển mượt mà
+        recyclerViewVideos.setItemViewCacheSize(5);
 
         // Khởi tạo adapter
         adapter = new ShortVideoAdapter(new ArrayList<>(), new ShortVideoAdapter.VideoInteractionListener() {
@@ -193,13 +215,20 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
             @Override
             public void onVideoShared(int position, String videoId) {
+                ShortVideo video = presenter.getVideoAt(position);
+                if (video != null) {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_SUBJECT, video.getTitle());
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, video.getVideoUrl());
+                    startActivity(Intent.createChooser(shareIntent, getString(R.string.share_video)));
+                }
                 presenter.onVideoShared(videoId);
             }
 
             @Override
             public void onVideoCommented(int position, String videoId) {
-                // TODO: Implement comment functionality in future
-                showSuccess(getString(R.string.comment_feature_coming_soon));
+                showCommentDialog(videoId);
             }
 
             @Override
@@ -271,6 +300,11 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
         // Thiết lập background color cho refresh indicator
         swipeRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.black);
+    }
+
+    private void showCommentDialog(String videoId) {
+        VideoCommentsBottomSheet sheet = VideoCommentsBottomSheet.newInstance(videoId);
+        sheet.show(getChildFragmentManager(), "video_comments");
     }
 
     // Implement ShortVideoContract.View

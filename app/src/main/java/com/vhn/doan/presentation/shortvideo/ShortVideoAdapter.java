@@ -1,27 +1,30 @@
 package com.vhn.doan.presentation.shortvideo;
 
+import android.animation.ObjectAnimator;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
-import com.vhn.doan.services.CloudinaryVideoHelper;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +39,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     private final List<ShortVideo> videos;
     private final VideoInteractionListener listener;
     private int currentPlayingPosition = -1;
+    private final List<VideoViewHolder> activeHolders = new ArrayList<>();
 
     public interface VideoInteractionListener {
         void onVideoLiked(int position, String videoId, boolean isCurrentlyLiked);
@@ -88,7 +92,9 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
 
     public void updateVideoLike(int position, boolean isLiked, int newLikeCount) {
         if (position >= 0 && position < videos.size()) {
-            videos.get(position).setLikeCount(newLikeCount);
+            ShortVideo video = videos.get(position);
+            video.setLikeCount(newLikeCount);
+            video.setLikedByCurrentUser(isLiked);
             notifyItemChanged(position, "like_update");
         }
     }
@@ -146,11 +152,33 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     }
 
     public void releaseAllResources() {
-        // Release tất cả MediaPlayer instances để tránh memory leak
-        for (int i = 0; i < getItemCount(); i++) {
-            notifyItemChanged(i, "release_resources");
+        for (VideoViewHolder holder : new ArrayList<>(activeHolders)) {
+            holder.releaseResources();
         }
+        activeHolders.clear();
         currentPlayingPosition = -1;
+    }
+
+    @Override
+    public void onViewAttachedToWindow(@NonNull VideoViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        if (!activeHolders.contains(holder)) {
+            activeHolders.add(holder);
+        }
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull VideoViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        holder.releaseResources();
+        activeHolders.remove(holder);
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull VideoViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.releaseResources();
+        activeHolders.remove(holder);
     }
 
     public class VideoViewHolder extends RecyclerView.ViewHolder implements TextureView.SurfaceTextureListener {
@@ -167,15 +195,21 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         private ImageView btnLike;
         private ImageView btnShare;
         private ImageView btnComment;
+        private TextView btnSeeMore;
+        private TextView txtHashtags;
+        private FrameLayout rootLayout;
+        private GestureDetector gestureDetector;
 
         private boolean isLiked = false;
         private boolean isVideoLoaded = false;
         private boolean isTextureAvailable = false;
         private String pendingVideoUrl = null;
+        private boolean isCaptionExpanded = false;
 
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
             initViews();
+            setupGestureDetector();
             setupClickListeners();
             setupTextureView();
         }
@@ -189,13 +223,56 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             txtViewCount = itemView.findViewById(R.id.txtViewCount);
             txtLikeCount = itemView.findViewById(R.id.txtLikeCount);
             txtUploadDate = itemView.findViewById(R.id.txtUploadDate);
+            btnSeeMore = itemView.findViewById(R.id.btnSeeMore);
+            txtHashtags = itemView.findViewById(R.id.txtHashtags);
             btnLike = itemView.findViewById(R.id.btnLike);
             btnShare = itemView.findViewById(R.id.btnShare);
             btnComment = itemView.findViewById(R.id.btnComment);
+            rootLayout = (FrameLayout) itemView;
         }
 
         private void setupTextureView() {
             textureView.setSurfaceTextureListener(this);
+        }
+
+        private void setupGestureDetector() {
+            gestureDetector = new GestureDetector(itemView.getContext(), new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDown(MotionEvent e) {
+                    // Cho phép nhận các sự kiện tiếp theo
+                    return true;
+                }
+
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    togglePlayPause();
+                    return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    showHeartAnimation(e.getX(), e.getY());
+                    if (!isLiked && listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            ShortVideo video = videos.get(position);
+                            listener.onVideoLiked(position, video.getId(), isLiked);
+                        }
+                    }
+                    return true;
+                }
+            });
+
+            textureView.setOnTouchListener((v, event) -> {
+                // Sinh tim liên tục khi người dùng chạm/di chuyển trên màn hình
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                    case MotionEvent.ACTION_MOVE:
+                        showHeartAnimation(event.getX(), event.getY());
+                        break;
+                }
+                return gestureDetector.onTouchEvent(event);
+            });
         }
 
         // Implement TextureView.SurfaceTextureListener
@@ -252,45 +329,26 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                 float scaleX = 1.0f;
                 float scaleY = 1.0f;
 
-                // Logic mới: Scale để fill màn hình NHƯNG ưu tiên giữ nguyên nội dung
+                // Scale giữ nguyên tỷ lệ gốc của video
                 if (videoAspectRatio > viewAspectRatio) {
-                    // Video rộng hơn -> scale theo width, có thể có letterbox nhỏ trên/dưới
+                    // Video rộng hơn -> fit theo chiều rộng
                     scaleX = (float) viewWidth / videoWidth;
                     scaleY = scaleX;
                 } else {
-                    // Video cao hơn -> scale theo height, có thể có letterbox nhỏ trái/phải
+                    // Video cao hơn -> fit theo chiều cao
                     scaleY = (float) viewHeight / videoHeight;
                     scaleX = scaleY;
                 }
 
-                // Tăng scale một chút để loại bỏ letterbox nhưng không crop quá nhiều
-                float adjustmentFactor = 1.05f; // Tăng 5% để loại bỏ letterbox
-                scaleX *= adjustmentFactor;
-                scaleY *= adjustmentFactor;
-
-                // Đảm bảo không scale quá mức
-                float maxScale = 1.2f; // Giới hạn scale tối đa
-                scaleX = Math.min(scaleX, maxScale);
-                scaleY = Math.min(scaleY, maxScale);
-
-                // Tính toán kích thước sau scale
                 float scaledWidth = videoWidth * scaleX;
                 float scaledHeight = videoHeight * scaleY;
 
-                // Tính translation để center video
                 float translationX = (viewWidth - scaledWidth) / 2f;
                 float translationY = (viewHeight - scaledHeight) / 2f;
 
-                // Tạo Matrix
                 Matrix matrix = new Matrix();
-                matrix.reset();
-
-                // Áp dụng scale từ center
-                matrix.setScale(scaleX, scaleY, viewWidth / 2f, viewHeight / 2f);
-
-                // Thêm translation để center hoàn hảo
+                matrix.postScale(scaleX, scaleY);
                 matrix.postTranslate(translationX, translationY);
-
                 textureView.setTransform(matrix);
 
                 android.util.Log.d("VideoAdjust", String.format(
@@ -305,8 +363,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
 
         private void setupClickListeners() {
-            // Click video để play/pause
-            textureView.setOnClickListener(v -> togglePlayPause());
+            // Click video play/pause handled by gesture detector
             imgPlayPause.setOnClickListener(v -> togglePlayPause());
 
             // Click like button
@@ -316,6 +373,9 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                     if (position != RecyclerView.NO_POSITION) {
                         ShortVideo video = videos.get(position);
                         listener.onVideoLiked(position, video.getId(), isLiked);
+                        // Cập nhật trạng thái local ngay để tránh tăng tim liên tục
+                        isLiked = !isLiked;
+                        updateLikeButton();
                     }
                 }
             });
@@ -350,26 +410,54 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             // Hiển thị thông tin video
             txtTitle.setText(video.getTitle());
             txtCaption.setText(video.getCaption());
+            btnSeeMore.setVisibility(View.GONE);
+            isCaptionExpanded = false;
+            txtCaption.post(() -> {
+                if (txtCaption.getLineCount() > 2) {
+                    txtCaption.setMaxLines(2);
+                    btnSeeMore.setVisibility(View.VISIBLE);
+                } else {
+                    txtCaption.setMaxLines(Integer.MAX_VALUE);
+                    btnSeeMore.setVisibility(View.GONE);
+                }
+            });
+            btnSeeMore.setOnClickListener(v -> {
+                txtCaption.setMaxLines(Integer.MAX_VALUE);
+                btnSeeMore.setVisibility(View.GONE);
+                isCaptionExpanded = true;
+            });
+            txtCaption.setOnClickListener(v -> {
+                if (isCaptionExpanded) {
+                    txtCaption.setMaxLines(2);
+                    btnSeeMore.setVisibility(View.VISIBLE);
+                    isCaptionExpanded = false;
+                }
+            });
+
+            if (video.getTags() != null && !video.getTags().isEmpty()) {
+                StringBuilder tagsLine = new StringBuilder();
+                for (String tag : video.getTags().keySet()) {
+                    tagsLine.append("#").append(tag).append(" ");
+                }
+                txtHashtags.setText(tagsLine.toString().trim());
+                txtHashtags.setVisibility(View.VISIBLE);
+            } else {
+                txtHashtags.setVisibility(View.GONE);
+            }
             txtViewCount.setText(formatCount(video.getViewCount()) + " lượt xem");
             txtLikeCount.setText(formatCount(video.getLikeCount()));
+            isLiked = video.isLikedByCurrentUser();
+            updateLikeButton();
 
             // Format ngày upload
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             txtUploadDate.setText(sdf.format(new Date(video.getUploadDate())));
 
-            // Load thumbnail - Sử dụng Cloudinary thumbnail nếu có
-            String thumbnailUrl = video.getThumbnailUrl();
-            if (video.isCloudinaryVideo() && (thumbnailUrl == null || thumbnailUrl.isEmpty())) {
-                // Tự động tạo thumbnail từ video URL nếu chưa có
-                thumbnailUrl = CloudinaryVideoHelper.getThumbnailFromVideoUrl(video.getVideoUrl());
-            }
+            // Ẩn thumbnail để video phát ngay khi hiển thị
+            imgThumbnail.setVisibility(View.GONE);
 
-            Glide.with(itemView.getContext())
-                    .load(thumbnailUrl)
-                    .placeholder(R.drawable.ic_video_placeholder)
-                    .error(R.drawable.ic_video_error)
-                    .centerCrop()
-                    .into(imgThumbnail);
+            // Đảm bảo TextureView xuất hiện để tạo surface
+            textureView.setVisibility(View.INVISIBLE);
 
             // Setup video - Sử dụng URL được tối ưu cho mobile
             String optimizedVideoUrl = video.getOptimizedVideoUrl();
@@ -379,8 +467,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
 
             // Reset trạng thái
             isVideoLoaded = false;
-            imgPlayPause.setVisibility(View.VISIBLE);
-            imgThumbnail.setVisibility(View.VISIBLE);
+            imgPlayPause.setVisibility(View.GONE);
         }
 
         public void bind(ShortVideo video, int position, List<Object> payloads) {
@@ -392,6 +479,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             for (Object payload : payloads) {
                 if ("like_update".equals(payload)) {
                     txtLikeCount.setText(formatCount(video.getLikeCount()));
+                    isLiked = video.isLikedByCurrentUser();
                     updateLikeButton();
                 } else if ("view_update".equals(payload)) {
                     txtViewCount.setText(formatCount(video.getViewCount()) + " lượt xem");
@@ -407,8 +495,6 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                     hideVideoView();
                 } else if ("show_video".equals(payload)) {
                     showVideoView();
-                } else if ("release_resources".equals(payload)) {
-                    releaseAllPlayerResources();
                 }
             }
         }
@@ -438,8 +524,9 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                     isVideoLoaded = true;
                     mp.setLooping(true);
 
-                    // Điều chỉnh kích thước video sau khi prepared
+                    // Điều chỉnh kích thước và hiển thị video sau khi prepared
                     adjustVideoSize();
+                    showVideoView();
 
                     // Tự động phát nếu đây là video hiện tại
                     int position = getAdapterPosition();
@@ -530,7 +617,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             }
         }
 
-        private void releaseAllPlayerResources() {
+        public void releaseResources() {
             // Release MediaPlayer hoàn toàn
             releaseMediaPlayer();
 
@@ -539,16 +626,48 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             isTextureAvailable = false;
             pendingVideoUrl = null;
 
-            // Hiện thumbnail và ẩn TextureView
             if (imgThumbnail != null) {
-                imgThumbnail.setVisibility(View.VISIBLE);
+                imgThumbnail.setVisibility(View.GONE);
             }
             if (imgPlayPause != null) {
-                imgPlayPause.setVisibility(View.VISIBLE);
+                imgPlayPause.setVisibility(View.GONE);
             }
             if (textureView != null) {
-                textureView.setVisibility(View.GONE);
+                textureView.setVisibility(View.INVISIBLE);
             }
+        }
+
+        private void showHeartAnimation(float x, float y) {
+            if (rootLayout == null) return;
+            ImageView heart = new ImageView(itemView.getContext());
+            heart.setImageResource(R.drawable.ic_heart_filled);
+            heart.setColorFilter(itemView.getContext().getResources().getColor(R.color.color_like));
+            // Tăng kích thước trái tim gấp ~15 lần để dễ nhìn hơn
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(300, 300);
+            params.leftMargin = (int) x - 150;
+            params.topMargin = (int) y - 300;
+            rootLayout.addView(heart, params);
+
+            heart.setScaleX(0f);
+            heart.setScaleY(0f);
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(heart, View.SCALE_X, 1f);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(heart, View.SCALE_Y, 1f);
+            ObjectAnimator alpha = ObjectAnimator.ofFloat(heart, View.ALPHA, 0f);
+            ObjectAnimator translate = ObjectAnimator.ofFloat(heart, View.TRANSLATION_Y, -300f);
+            scaleX.setDuration(600);
+            scaleY.setDuration(600);
+            alpha.setDuration(600);
+            translate.setDuration(600);
+            scaleX.start();
+            scaleY.start();
+            translate.start();
+            alpha.start();
+            alpha.addListener(new android.animation.AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    rootLayout.removeView(heart);
+                }
+            });
         }
 
         private void updateLikeButton() {
@@ -572,15 +691,15 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
 
         private void hideVideoView() {
-            // Ẩn TextureView ngay lập tức và hiện thumbnail để tránh nháy
+            // Ẩn TextureView ngay lập tức
             if (textureView != null) {
                 textureView.setVisibility(View.INVISIBLE); // Dùng INVISIBLE thay vì GONE để tránh layout shift
             }
             if (imgThumbnail != null) {
-                imgThumbnail.setVisibility(View.VISIBLE);
+                imgThumbnail.setVisibility(View.GONE);
             }
             if (imgPlayPause != null) {
-                imgPlayPause.setVisibility(View.VISIBLE);
+                imgPlayPause.setVisibility(View.GONE);
             }
 
             // Dừng video nếu đang phát
@@ -594,8 +713,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
 
         private void showVideoView() {
-            // Chỉ hiện TextureView khi thực sự cần thiết
-            if (textureView != null && isVideoLoaded) {
+            if (textureView != null) {
                 textureView.setVisibility(View.VISIBLE);
             }
         }
