@@ -143,6 +143,13 @@
     <string name="video_unliked">Đã bỏ thích video</string>
     <string name="video_shared">Đã chia sẻ video</string>
     <string name="comment_feature_coming_soon">Chức năng bình luận sẽ được phát triển trong tương lai</string>
+    <string name="enter_comment">Nhập bình luận</string>
+    <string name="send_comment">Gửi</string>
+    <string name="comments">Bình luận</string>
+    <string name="no_comments">Chưa có bình luận nào</string>
+    <string name="reply">Trả lời</string>
+    <string name="reply_to">Trả lời %1$s</string>
+    <string name="share_video">Chia sẻ video</string>
     <string name="view_user_profile">Xem thông tin người đăng</string>
     <string name="error_loading_videos">Không thể tải video. Vui lòng thử lại.</string>
     <string name="trending_videos">Video thịnh hành</string>
