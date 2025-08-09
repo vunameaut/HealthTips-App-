@@ -326,4 +326,23 @@ public class ShortVideoPresenter implements ShortVideoContract.Presenter {
     public int getVideoCount() {
         return currentVideos.size();
     }
+
+    /**
+     * Thiết lập danh sách video ban đầu khi đã được preload sẵn.
+     */
+    public void setInitialVideos(List<ShortVideo> videos) {
+        currentVideos.clear();
+        if (videos != null) {
+            currentVideos.addAll(videos);
+        }
+    }
+
+    /**
+     * Thêm các video mới vào danh sách hiện tại (khi preload thêm).
+     */
+    public void appendVideos(List<ShortVideo> videos) {
+        if (videos != null) {
+            currentVideos.addAll(videos);
+        }
+    }
 }
