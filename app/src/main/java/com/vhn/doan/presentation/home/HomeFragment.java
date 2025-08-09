@@ -29,6 +29,7 @@ import com.vhn.doan.presentation.home.adapter.CategoryAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipAdapter;
 import com.vhn.doan.presentation.home.adapter.CategorySkeletonAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipSkeletonAdapter;
+import com.vhn.doan.presentation.category.CategoryFragment;
 import com.vhn.doan.utils.Constants;
 
 import java.util.ArrayList;
@@ -348,39 +349,27 @@ public class HomeFragment extends Fragment implements HomeView {
         });
 
         // Xem tất cả danh mục
-        textViewSeeAllCategories.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMessage("Xem tất cả danh mục");
-                // Chức năng sẽ được triển khai sau
-            }
+        textViewSeeAllCategories.setOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, CategoryFragment.newInstance())
+                    .addToBackStack(null)
+                    .commit();
         });
 
         // Xem tất cả mẹo mới nhất
-        textViewSeeAllLatestTips.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMessage("Xem tất cả mẹo mới nhất");
-                // Chức năng sẽ được triển khai sau
-            }
+        textViewSeeAllLatestTips.setOnClickListener(v -> {
+            startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_LATEST));
         });
 
         // Xem tất cả mẹo xem nhiều nhất
-        textViewSeeAllMostViewed.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMessage("Xem tất cả mẹo xem nhiều nhất");
-                // Chức năng sẽ được triển khai sau
-            }
+        textViewSeeAllMostViewed.setOnClickListener(v -> {
+            startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_MOST_VIEWED));
         });
 
         // Xem tất cả mẹo được yêu thích nhất
-        textViewSeeAllMostLiked.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMessage("Xem tất cả mẹo được yêu thích nhất");
-                // Chức năng sẽ được triển khai sau
-            }
+        textViewSeeAllMostLiked.setOnClickListener(v -> {
+            startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_MOST_LIKED));
         });
     }
 
