@@ -59,6 +59,14 @@
             android:exported="false" />
 
         <activity
+            android:name=".presentation.home.AllHealthTipsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.profile.SettingsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".presentation.healthtip.detail.HealthTipDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
