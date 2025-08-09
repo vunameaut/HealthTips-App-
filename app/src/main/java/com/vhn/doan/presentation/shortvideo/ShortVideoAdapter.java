@@ -85,8 +85,17 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
 
     public void updateVideos(List<ShortVideo> newVideos) {
         this.videos.clear();
+       this.videos.addAll(newVideos);
+       notifyDataSetChanged();
+    }
+
+    public void addVideos(List<ShortVideo> newVideos) {
+        if (newVideos == null || newVideos.isEmpty()) {
+            return;
+        }
+        int start = this.videos.size();
         this.videos.addAll(newVideos);
-        notifyDataSetChanged();
+        notifyItemRangeInserted(start, newVideos.size());
     }
 
     public void updateVideoLike(int position, boolean isLiked, int newLikeCount) {

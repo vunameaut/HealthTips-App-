@@ -17,6 +17,7 @@ import com.vhn.doan.presentation.chat.ChatListFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.presentation.shortvideo.ShortVideoFragment;
+import com.vhn.doan.presentation.shortvideo.ShortVideoPreloadManager;
 import com.vhn.doan.services.AuthManager;
 import com.vhn.doan.services.ReminderManager;
 import com.vhn.doan.utils.UserSessionManager;
@@ -56,6 +57,9 @@ public class HomeActivity extends AppCompatActivity {
         // Khởi động ReminderForegroundService
         reminderManager.startReminderService(this);
         Log.d(TAG, "ReminderForegroundService đã được khởi động từ HomeActivity");
+
+        // Preload video ngắn để vào xem ngay không cần chờ load
+        ShortVideoPreloadManager.getInstance().preloadInitialVideos();
 
         // Khởi tạo và thiết lập BottomNavigationView
         setupBottomNavigation();
