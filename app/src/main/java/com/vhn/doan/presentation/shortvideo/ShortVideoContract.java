@@ -115,6 +115,11 @@ public interface ShortVideoContract {
         void filterVideosByTag(String tag);
 
         /**
+         * Thêm bình luận cho video
+         */
+        void addComment(String videoId, String commentText);
+
+        /**
          * Get video at position
          */
         ShortVideo getVideoAt(int position);
