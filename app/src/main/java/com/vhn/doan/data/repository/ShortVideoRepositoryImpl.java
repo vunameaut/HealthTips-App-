@@ -1,10 +1,15 @@
 package com.vhn.doan.data.repository;
 
+import androidx.annotation.NonNull;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.vhn.doan.data.ShortVideo;
 
@@ -176,27 +181,178 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
 
     @Override
     public void updateLikeCount(String videoId, boolean isLiked, RepositoryCallback<Void> callback) {
-        DatabaseReference videoRef = videosRef.child(videoId).child("likeCount");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            callback.onError("Người dùng chưa đăng nhập");
+            return;
+        }
 
-        videoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        String uid = user.getUid();
+        DatabaseReference userLikeRef = videosRef.child(videoId).child("likes").child(uid);
+        DatabaseReference likeCountRef = videosRef.child(videoId).child("likeCount");
+
+        userLikeRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Integer currentCount = dataSnapshot.getValue(Integer.class);
-                int currentLikes = (currentCount != null) ? currentCount : 0;
-                int newCount = isLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
+            public void onDataChange(DataSnapshot snapshot) {
+                boolean alreadyLiked = snapshot.exists();
 
-                videoRef.setValue(newCount).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        callback.onSuccess(null);
-                    } else {
-                        callback.onError("Không thể cập nhật like count");
+                if (isLiked && alreadyLiked) {
+                    callback.onSuccess(null);
+                    return;
+                }
+
+                if (!isLiked && !alreadyLiked) {
+                    callback.onSuccess(null);
+                    return;
+                }
+
+                com.google.android.gms.tasks.Task<Void> likeTask =
+                        isLiked ? userLikeRef.setValue(true) : userLikeRef.removeValue();
+
+                likeTask.addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        callback.onError("Không thể cập nhật like");
+                        return;
                     }
+
+                    likeCountRef.runTransaction(new Transaction.Handler() {
+                        @NonNull
+                        @Override
+                        public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                            Integer current = currentData.getValue(Integer.class);
+                            if (current == null) current = 0;
+                            currentData.setValue(isLiked ? current + 1 : Math.max(0, current - 1));
+                            return Transaction.success(currentData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
+                            if (error != null) {
+                                callback.onError(error.getMessage());
+                            } else {
+                                callback.onSuccess(null);
+                            }
+                        }
+                    });
                 });
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+            public void onCancelled(DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void addComment(String videoId, com.vhn.doan.data.VideoComment comment, RepositoryCallback<Void> callback) {
+        if (videoId == null || videoId.trim().isEmpty()) {
+            callback.onError("Video ID không hợp lệ");
+            return;
+        }
+
+        DatabaseReference commentsRef = videosRef.child(videoId).child("comments").push();
+        comment.setId(commentsRef.getKey());
+        commentsRef.setValue(comment).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                callback.onSuccess(null);
+            } else {
+                callback.onError("Không thể thêm bình luận");
+            }
+        });
+    }
+
+    @Override
+    public void getComments(String videoId, RepositoryCallback<java.util.List<com.vhn.doan.data.VideoComment>> callback) {
+        if (videoId == null || videoId.trim().isEmpty()) {
+            callback.onError("Video ID không hợp lệ");
+            return;
+        }
+
+        DatabaseReference commentsRef = videosRef.child(videoId).child("comments");
+        commentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                java.util.List<com.vhn.doan.data.VideoComment> comments = new ArrayList<>();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    com.vhn.doan.data.VideoComment comment = child.getValue(com.vhn.doan.data.VideoComment.class);
+                    if (comment != null) {
+                        comment.setId(child.getKey());
+
+                        // Parse likes
+                        DataSnapshot likesSnap = child.child("likes");
+                        Map<String, Boolean> likes = new HashMap<>();
+                        for (DataSnapshot like : likesSnap.getChildren()) {
+                            likes.put(like.getKey(), Boolean.TRUE);
+                        }
+                        comment.setLikes(likes);
+
+                        // Parse replies
+                        DataSnapshot repliesSnap = child.child("replies");
+                        java.util.List<com.vhn.doan.data.VideoComment> replies = new ArrayList<>();
+                        for (DataSnapshot replyChild : repliesSnap.getChildren()) {
+                            com.vhn.doan.data.VideoComment reply = replyChild.getValue(com.vhn.doan.data.VideoComment.class);
+                            if (reply != null) {
+                                reply.setId(replyChild.getKey());
+                                replies.add(reply);
+                            }
+                        }
+                        comment.setReplies(replies);
+
+                        comments.add(comment);
+                    }
+                }
+                callback.onSuccess(comments);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void likeComment(String videoId, String commentPath, String userId, boolean like, RepositoryCallback<Void> callback) {
+        DatabaseReference likeRef = videosRef.child(videoId).child("comments");
+        for (String part : commentPath.split("/")) {
+            likeRef = likeRef.child(part);
+        }
+        likeRef = likeRef.child("likes").child(userId);
+
+        if (like) {
+            likeRef.setValue(true).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    callback.onError("Không thể thích bình luận");
+                }
+            });
+        } else {
+            likeRef.removeValue().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    callback.onError("Không thể bỏ thích bình luận");
+                }
+            });
+        }
+    }
+
+    @Override
+    public void addReply(String videoId, String commentId, com.vhn.doan.data.VideoComment reply, RepositoryCallback<Void> callback) {
+        if (videoId == null || videoId.trim().isEmpty() || commentId == null || commentId.trim().isEmpty()) {
+            callback.onError("Comment path không hợp lệ");
+            return;
+        }
+
+        DatabaseReference repliesRef = videosRef.child(videoId).child("comments").child(commentId).child("replies").push();
+        reply.setId(repliesRef.getKey());
+        repliesRef.setValue(reply).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                callback.onSuccess(null);
+            } else {
+                callback.onError("Không thể thêm phản hồi");
             }
         });
     }
