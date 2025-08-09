@@ -20,6 +20,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.ShortVideoRepositoryImpl;
+import com.vhn.doan.data.repository.RepositoryCallback;
 import com.vhn.doan.utils.SharedPreferencesHelper;
 
 import java.util.ArrayList;
@@ -73,7 +74,13 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        presenter.start();
+        List<ShortVideo> cached = ShortVideoPreloadManager.getInstance().getCachedVideos();
+        if (!cached.isEmpty()) {
+            presenter.setInitialVideos(cached);
+            showVideos(cached);
+        } else {
+            presenter.start();
+        }
     }
 
     @Override
@@ -284,6 +291,27 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
                         if (video != null) {
                             presenter.onVideoViewed(currentPosition, video.getId());
                         }
+                    }
+
+                    // Khi người dùng xem đến video thứ 5 cuối cùng, preload thêm 10 video
+                    int total = ShortVideoPreloadManager.getInstance().getCachedVideos().size();
+                    if (newPosition >= total - 5) {
+                        ShortVideoPreloadManager.getInstance().ensurePreloaded(total + 10, new RepositoryCallback<List<ShortVideo>>() {
+                            @Override
+                            public void onSuccess(List<ShortVideo> videos) {
+                                int oldSize = adapter.getItemCount();
+                                if (videos.size() > oldSize) {
+                                    List<ShortVideo> newList = videos.subList(oldSize, videos.size());
+                                    presenter.appendVideos(newList);
+                                    adapter.addVideos(newList);
+                                }
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                // Bỏ qua lỗi preload để không ảnh hưởng tới trải nghiệm hiện tại
+                            }
+                        });
                     }
                 }
             }
