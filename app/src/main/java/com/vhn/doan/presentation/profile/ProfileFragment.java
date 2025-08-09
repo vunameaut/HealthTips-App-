@@ -1,7 +1,6 @@
 package com.vhn.doan.presentation.profile;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +21,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.auth.LoginActivity;
+import android.content.Intent;
+import com.vhn.doan.presentation.profile.SettingsActivity;
 import com.vhn.doan.presentation.base.BaseFragment;
 
 /**
@@ -172,10 +173,9 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
     }
 
     private void openSettings() {
-        // Xử lý mở màn hình cài đặt
         if (getContext() != null) {
-            Toast.makeText(getContext(), "Chức năng cài đặt đang phát triển", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to settings screen
+            Intent intent = new Intent(getContext(), SettingsActivity.class);
+            startActivity(intent);
         }
     }
 

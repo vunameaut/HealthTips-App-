@@ -166,4 +166,8 @@
     <string name="ic_visibility">ic_visibility</string>
     <string name="ic_schedule">ic_schedule</string>
     <string name="ic_video_empty">ic_video_empty</string>
+
+    <!-- Chuỗi bổ sung -->
+    <string name="settings_under_development">Chức năng cài đặt đang phát triển</string>
+    <string name="video_thumbnail">Ảnh đại diện video</string>
 </resources>
