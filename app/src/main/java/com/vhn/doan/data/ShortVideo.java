@@ -1,5 +1,6 @@
 package com.vhn.doan.data;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.PropertyName;
 import com.vhn.doan.services.CloudinaryVideoHelper;
 import java.util.Map;
@@ -42,6 +43,9 @@ public class ShortVideo {
 
     @PropertyName("userId")
     private String userId;
+
+    @Exclude
+    private boolean likedByCurrentUser;
 
     // Constructor mặc định cần thiết cho Firebase
     public ShortVideo() {
@@ -151,6 +155,16 @@ public class ShortVideo {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    @Exclude
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    @Exclude
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
     }
 
     /**

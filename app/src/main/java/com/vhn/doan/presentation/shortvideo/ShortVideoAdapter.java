@@ -1,14 +1,18 @@
 package com.vhn.doan.presentation.shortvideo;
 
+import android.animation.ObjectAnimator;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -88,7 +92,9 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
 
     public void updateVideoLike(int position, boolean isLiked, int newLikeCount) {
         if (position >= 0 && position < videos.size()) {
-            videos.get(position).setLikeCount(newLikeCount);
+            ShortVideo video = videos.get(position);
+            video.setLikeCount(newLikeCount);
+            video.setLikedByCurrentUser(isLiked);
             notifyItemChanged(position, "like_update");
         }
     }
@@ -167,15 +173,21 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         private ImageView btnLike;
         private ImageView btnShare;
         private ImageView btnComment;
+        private TextView btnSeeMore;
+        private TextView txtHashtags;
+        private FrameLayout rootLayout;
+        private GestureDetector gestureDetector;
 
         private boolean isLiked = false;
         private boolean isVideoLoaded = false;
         private boolean isTextureAvailable = false;
         private String pendingVideoUrl = null;
+        private boolean isCaptionExpanded = false;
 
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
             initViews();
+            setupGestureDetector();
             setupClickListeners();
             setupTextureView();
         }
@@ -189,13 +201,46 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             txtViewCount = itemView.findViewById(R.id.txtViewCount);
             txtLikeCount = itemView.findViewById(R.id.txtLikeCount);
             txtUploadDate = itemView.findViewById(R.id.txtUploadDate);
+            btnSeeMore = itemView.findViewById(R.id.btnSeeMore);
+            txtHashtags = itemView.findViewById(R.id.txtHashtags);
             btnLike = itemView.findViewById(R.id.btnLike);
             btnShare = itemView.findViewById(R.id.btnShare);
             btnComment = itemView.findViewById(R.id.btnComment);
+            rootLayout = (FrameLayout) itemView;
         }
 
         private void setupTextureView() {
             textureView.setSurfaceTextureListener(this);
+        }
+
+        private void setupGestureDetector() {
+            gestureDetector = new GestureDetector(itemView.getContext(), new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDown(MotionEvent e) {
+                    return true;
+                }
+
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    togglePlayPause();
+                    return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    showHeartAnimation(e.getX(), e.getY());
+                    if (!isLiked && listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            ShortVideo video = videos.get(position);
+                            listener.onVideoLiked(position, video.getId(), isLiked);
+                        }
+                    }
+                    return true;
+                }
+            });
+
+            textureView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
         }
 
         // Implement TextureView.SurfaceTextureListener
@@ -305,8 +350,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
 
         private void setupClickListeners() {
-            // Click video để play/pause
-            textureView.setOnClickListener(v -> togglePlayPause());
+            // Click video play/pause handled by gesture detector
             imgPlayPause.setOnClickListener(v -> togglePlayPause());
 
             // Click like button
@@ -350,8 +394,44 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             // Hiển thị thông tin video
             txtTitle.setText(video.getTitle());
             txtCaption.setText(video.getCaption());
+            btnSeeMore.setVisibility(View.GONE);
+            isCaptionExpanded = false;
+            txtCaption.post(() -> {
+                if (txtCaption.getLineCount() > 2) {
+                    txtCaption.setMaxLines(2);
+                    btnSeeMore.setVisibility(View.VISIBLE);
+                } else {
+                    txtCaption.setMaxLines(Integer.MAX_VALUE);
+                    btnSeeMore.setVisibility(View.GONE);
+                }
+            });
+            btnSeeMore.setOnClickListener(v -> {
+                txtCaption.setMaxLines(Integer.MAX_VALUE);
+                btnSeeMore.setVisibility(View.GONE);
+                isCaptionExpanded = true;
+            });
+            txtCaption.setOnClickListener(v -> {
+                if (isCaptionExpanded) {
+                    txtCaption.setMaxLines(2);
+                    btnSeeMore.setVisibility(View.VISIBLE);
+                    isCaptionExpanded = false;
+                }
+            });
+
+            if (video.getTags() != null && !video.getTags().isEmpty()) {
+                StringBuilder tagsLine = new StringBuilder();
+                for (String tag : video.getTags().keySet()) {
+                    tagsLine.append("#").append(tag).append(" ");
+                }
+                txtHashtags.setText(tagsLine.toString().trim());
+                txtHashtags.setVisibility(View.VISIBLE);
+            } else {
+                txtHashtags.setVisibility(View.GONE);
+            }
             txtViewCount.setText(formatCount(video.getViewCount()) + " lượt xem");
             txtLikeCount.setText(formatCount(video.getLikeCount()));
+            isLiked = video.isLikedByCurrentUser();
+            updateLikeButton();
 
             // Format ngày upload
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -392,6 +472,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             for (Object payload : payloads) {
                 if ("like_update".equals(payload)) {
                     txtLikeCount.setText(formatCount(video.getLikeCount()));
+                    isLiked = video.isLikedByCurrentUser();
                     updateLikeButton();
                 } else if ("view_update".equals(payload)) {
                     txtViewCount.setText(formatCount(video.getViewCount()) + " lượt xem");
@@ -549,6 +630,39 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             if (textureView != null) {
                 textureView.setVisibility(View.GONE);
             }
+        }
+
+        private void showHeartAnimation(float x, float y) {
+            if (rootLayout == null) return;
+            ImageView heart = new ImageView(itemView.getContext());
+            heart.setImageResource(R.drawable.ic_heart_filled);
+            heart.setColorFilter(itemView.getContext().getResources().getColor(R.color.color_like));
+            // Tăng kích thước trái tim gấp ~15 lần để dễ nhìn hơn
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(300, 300);
+            params.leftMargin = (int) x - 150;
+            params.topMargin = (int) y - 300;
+            rootLayout.addView(heart, params);
+
+            heart.setScaleX(0f);
+            heart.setScaleY(0f);
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(heart, View.SCALE_X, 1f);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(heart, View.SCALE_Y, 1f);
+            ObjectAnimator alpha = ObjectAnimator.ofFloat(heart, View.ALPHA, 0f);
+            ObjectAnimator translate = ObjectAnimator.ofFloat(heart, View.TRANSLATION_Y, -300f);
+            scaleX.setDuration(600);
+            scaleY.setDuration(600);
+            alpha.setDuration(600);
+            translate.setDuration(600);
+            scaleX.start();
+            scaleY.start();
+            translate.start();
+            alpha.start();
+            alpha.addListener(new android.animation.AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    rootLayout.removeView(heart);
+                }
+            });
         }
 
         private void updateLikeButton() {

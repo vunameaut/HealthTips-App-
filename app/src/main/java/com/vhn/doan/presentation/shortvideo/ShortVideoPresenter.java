@@ -169,6 +169,7 @@ public class ShortVideoPresenter implements ShortVideoContract.Presenter {
 
         // Cập nhật dữ liệu local
         video.setLikeCount(newLikeCount);
+        video.setLikedByCurrentUser(newLikedState);
 
         if (view != null) {
             view.updateVideoLike(position, newLikedState, newLikeCount);
@@ -187,6 +188,7 @@ public class ShortVideoPresenter implements ShortVideoContract.Presenter {
                 boolean originalState = !newLikedState;
                 int originalCount = originalState ? video.getLikeCount() + 1 : Math.max(0, video.getLikeCount() - 1);
                 video.setLikeCount(originalCount);
+                video.setLikedByCurrentUser(originalState);
 
                 if (view != null) {
                     view.updateVideoLike(position, originalState, originalCount);
@@ -274,6 +276,38 @@ public class ShortVideoPresenter implements ShortVideoContract.Presenter {
                 view.showVideos(filteredVideos);
             }
         }
+    }
+
+    @Override
+    public void addComment(String videoId, String commentText) {
+        if (currentUserId == null || commentText == null || commentText.trim().isEmpty()) {
+            if (view != null) {
+                view.showError("Không thể gửi bình luận");
+            }
+            return;
+        }
+
+        com.vhn.doan.data.VideoComment comment = new com.vhn.doan.data.VideoComment(
+                currentUserId,
+                commentText,
+                System.currentTimeMillis()
+        );
+
+        repository.addComment(videoId, comment, new RepositoryCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                if (view != null) {
+                    view.showSuccess("Đã gửi bình luận");
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                if (view != null) {
+                    view.showError("Không thể gửi bình luận");
+                }
+            }
+        });
     }
 
     /**
