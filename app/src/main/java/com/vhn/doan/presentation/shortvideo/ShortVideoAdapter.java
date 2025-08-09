@@ -43,6 +43,7 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         void onVideoCommented(int position, String videoId);
         void onVideoViewed(int position, String videoId);
         void onVideoProfileClicked(int position, String userId);
+        void onVideoPlayerReady(); // Callback khi video player sẵn sàng
     }
 
     public ShortVideoAdapter(List<ShortVideo> videos, VideoInteractionListener listener) {
@@ -128,6 +129,26 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     public void pauseAllVideos() {
         for (int i = 0; i < getItemCount(); i++) {
             notifyItemChanged(i, "pause");
+        }
+        currentPlayingPosition = -1;
+    }
+
+    public void hideAllVideoViews() {
+        for (int i = 0; i < getItemCount(); i++) {
+            notifyItemChanged(i, "hide_video");
+        }
+    }
+
+    public void showAllVideoViews() {
+        for (int i = 0; i < getItemCount(); i++) {
+            notifyItemChanged(i, "show_video");
+        }
+    }
+
+    public void releaseAllResources() {
+        // Release tất cả MediaPlayer instances để tránh memory leak
+        for (int i = 0; i < getItemCount(); i++) {
+            notifyItemChanged(i, "release_resources");
         }
         currentPlayingPosition = -1;
     }
@@ -375,11 +396,19 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                 } else if ("view_update".equals(payload)) {
                     txtViewCount.setText(formatCount(video.getViewCount()) + " lượt xem");
                 } else if ("play".equals(payload)) {
+                    showVideoView();
                     playVideo();
                 } else if ("pause".equals(payload)) {
                     pauseVideo();
                 } else if ("resume".equals(payload)) {
+                    showVideoView();
                     resumeVideo();
+                } else if ("hide_video".equals(payload)) {
+                    hideVideoView();
+                } else if ("show_video".equals(payload)) {
+                    showVideoView();
+                } else if ("release_resources".equals(payload)) {
+                    releaseAllPlayerResources();
                 }
             }
         }
@@ -416,6 +445,11 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                     int position = getAdapterPosition();
                     if (position == currentPlayingPosition) {
                         playVideo();
+                    }
+
+                    // Gọi callback thông báo video player đã sẵn sàng
+                    if (listener != null) {
+                        listener.onVideoPlayerReady();
                     }
                 });
 
@@ -496,6 +530,27 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             }
         }
 
+        private void releaseAllPlayerResources() {
+            // Release MediaPlayer hoàn toàn
+            releaseMediaPlayer();
+
+            // Reset tất cả trạng thái
+            isVideoLoaded = false;
+            isTextureAvailable = false;
+            pendingVideoUrl = null;
+
+            // Hiện thumbnail và ẩn TextureView
+            if (imgThumbnail != null) {
+                imgThumbnail.setVisibility(View.VISIBLE);
+            }
+            if (imgPlayPause != null) {
+                imgPlayPause.setVisibility(View.VISIBLE);
+            }
+            if (textureView != null) {
+                textureView.setVisibility(View.GONE);
+            }
+        }
+
         private void updateLikeButton() {
             if (isLiked) {
                 btnLike.setImageResource(R.drawable.ic_heart_filled);
@@ -513,6 +568,35 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                 return String.format(Locale.getDefault(), "%.1fK", count / 1000.0);
             } else {
                 return String.format(Locale.getDefault(), "%.1fM", count / 1000000.0);
+            }
+        }
+
+        private void hideVideoView() {
+            // Ẩn TextureView ngay lập tức và hiện thumbnail để tránh nháy
+            if (textureView != null) {
+                textureView.setVisibility(View.INVISIBLE); // Dùng INVISIBLE thay vì GONE để tránh layout shift
+            }
+            if (imgThumbnail != null) {
+                imgThumbnail.setVisibility(View.VISIBLE);
+            }
+            if (imgPlayPause != null) {
+                imgPlayPause.setVisibility(View.VISIBLE);
+            }
+
+            // Dừng video nếu đang phát
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                try {
+                    mediaPlayer.pause();
+                } catch (Exception e) {
+                    // Ignore exception khi pause
+                }
+            }
+        }
+
+        private void showVideoView() {
+            // Chỉ hiện TextureView khi thực sự cần thiết
+            if (textureView != null && isVideoLoaded) {
+                textureView.setVisibility(View.VISIBLE);
             }
         }
     }

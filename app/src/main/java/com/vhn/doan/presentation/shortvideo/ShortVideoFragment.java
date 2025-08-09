@@ -40,6 +40,8 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     private LinearLayoutManager layoutManager;
 
     private int currentPosition = 0;
+    private boolean isFragmentVisible = false;
+    private boolean isVideoPlayerReady = false;
 
     public static ShortVideoFragment newInstance() {
         return new ShortVideoFragment();
@@ -73,33 +75,99 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     }
 
     @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        isFragmentVisible = isVisibleToUser;
+        // Chỉ xử lý khi fragment thực sự thay đổi trạng thái
+        if (!isVisibleToUser) {
+            // Fragment bị ẩn - dừng video ngay lập tức
+            if (adapter != null) {
+                adapter.pauseAllVideos();
+                adapter.hideAllVideoViews();
+            }
+        }
+        // Không gọi handleVideoPlayback() ở đây để tránh xung đột
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        isFragmentVisible = !hidden;
+        // Chỉ xử lý khi fragment bị ẩn
+        if (hidden) {
+            if (adapter != null) {
+                adapter.pauseAllVideos();
+                adapter.hideAllVideoViews();
+            }
+        }
+        // Không gọi handleVideoPlayback() ở đây để tránh xung đột
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (presenter != null) {
             presenter.detachView();
         }
 
-        // Dừng tất cả video khi destroy
+        // Release tất cả resources để tránh memory leak và vấn đề nháy video
         if (adapter != null) {
-            adapter.pauseAllVideos();
+            adapter.releaseAllResources();
         }
+        isVideoPlayerReady = false;
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        // Tạm dừng video hiện tại khi Fragment bị pause
+        isFragmentVisible = false;
+        // Dừng và ẩn video NGAY LẬP TỨC không delay
         if (adapter != null) {
-            adapter.pauseCurrentVideo();
+            adapter.pauseAllVideos();
+            adapter.hideAllVideoViews();
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // Tiếp tục phát video hiện tại khi Fragment được resume
+        isFragmentVisible = true;
+        // Không gọi handleVideoPlayback() ngay - để cho onVideoPlayerReady callback xử lý
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        isFragmentVisible = true;
+        // Không làm gì cả để tránh xung đột
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        isFragmentVisible = false;
+        // Dừng và ẩn video NGAY LẬP TỨC không delay
         if (adapter != null) {
+            adapter.pauseAllVideos();
+            adapter.hideAllVideoViews();
+        }
+    }
+
+    /**
+     * Xử lý logic phát/dừng video dựa trên trạng thái fragment
+     * CHỈ được gọi từ onVideoPlayerReady callback
+     */
+    private void handleVideoPlayback() {
+        if (adapter == null || !isVideoPlayerReady) return;
+
+        if (isFragmentVisible) {
+            // Fragment visible -> hiện video và tiếp tục phát
+            adapter.showAllVideoViews();
             adapter.resumeCurrentVideo();
+        } else {
+            // Fragment không visible -> dừng video
+            adapter.pauseCurrentVideo();
+            adapter.hideAllVideoViews();
         }
     }
 
@@ -144,6 +212,13 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
                 // TODO: Navigate to user profile
                 showSuccess(getString(R.string.view_user_profile));
             }
+
+            @Override
+            public void onVideoPlayerReady() {
+                // Callback khi video player sẵn sàng
+                isVideoPlayerReady = true;
+                handleVideoPlayback();
+            }
         });
 
         recyclerViewVideos.setAdapter(adapter);
@@ -165,9 +240,11 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
                         // Pause video cũ
                         adapter.pauseVideoAt(currentPosition);
 
-                        // Play video mới
+                        // Play video mới (chỉ khi fragment visible)
                         currentPosition = newPosition;
-                        adapter.playVideoAt(currentPosition);
+                        if (isFragmentVisible && isVideoPlayerReady) {
+                            adapter.playVideoAt(currentPosition);
+                        }
 
                         // Thông báo presenter về việc xem video
                         ShortVideo video = presenter.getVideoAt(currentPosition);
