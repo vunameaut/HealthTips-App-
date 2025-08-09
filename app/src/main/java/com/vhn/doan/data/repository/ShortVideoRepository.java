@@ -47,6 +47,14 @@ public interface ShortVideoRepository {
     void updateLikeCount(String videoId, boolean isLiked, RepositoryCallback<Void> callback);
 
     /**
+     * Thêm bình luận cho video
+     * @param videoId ID của video
+     * @param comment Đối tượng bình luận
+     * @param callback Callback xử lý kết quả
+     */
+    void addComment(String videoId, com.vhn.doan.data.VideoComment comment, RepositoryCallback<Void> callback);
+
+    /**
      * Lấy sở thích người dùng từ preferences và user_topics
      * @param userId ID của người dùng
      * @param callback Callback để xử lý kết quả

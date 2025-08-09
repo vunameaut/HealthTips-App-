@@ -1,9 +1,11 @@
 package com.vhn.doan.presentation.shortvideo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+import androidx.appcompat.app.AlertDialog;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.ShortVideoRepositoryImpl;
@@ -101,6 +104,16 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
             }
         }
         // Không gọi handleVideoPlayback() ở đây để tránh xung đột
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        isFragmentVisible = false;
+        if (adapter != null) {
+            adapter.pauseAllVideos();
+            adapter.hideAllVideoViews();
+        }
     }
 
     @Override
@@ -193,13 +206,20 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
             @Override
             public void onVideoShared(int position, String videoId) {
+                ShortVideo video = presenter.getVideoAt(position);
+                if (video != null) {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_SUBJECT, video.getTitle());
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, video.getVideoUrl());
+                    startActivity(Intent.createChooser(shareIntent, getString(R.string.share_video)));
+                }
                 presenter.onVideoShared(videoId);
             }
 
             @Override
             public void onVideoCommented(int position, String videoId) {
-                // TODO: Implement comment functionality in future
-                showSuccess(getString(R.string.comment_feature_coming_soon));
+                showCommentDialog(videoId);
             }
 
             @Override
@@ -271,6 +291,19 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
         // Thiết lập background color cho refresh indicator
         swipeRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.black);
+    }
+
+    private void showCommentDialog(String videoId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(R.string.enter_comment);
+        final EditText input = new EditText(requireContext());
+        builder.setView(input);
+        builder.setPositiveButton(R.string.send_comment, (dialog, which) -> {
+            String comment = input.getText().toString().trim();
+            presenter.addComment(videoId, comment);
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
     }
 
     // Implement ShortVideoContract.View
