@@ -49,7 +49,7 @@ public class AllHealthTipsActivity extends AppCompatActivity implements HealthTi
         progressBar = findViewById(R.id.progressBarLoading);
         emptyLayout = findViewById(R.id.layoutEmpty);
 
-        adapter = new HealthTipAdapter(this, this);
+        adapter = new HealthTipAdapter(this, new java.util.ArrayList<>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
