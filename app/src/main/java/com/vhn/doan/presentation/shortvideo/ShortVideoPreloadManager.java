@@ -75,4 +75,14 @@ public class ShortVideoPreloadManager {
     public List<ShortVideo> getCachedVideos() {
         return new ArrayList<>(cachedVideos);
     }
+
+    /**
+     * Gán danh sách video sẵn có (ví dụ: danh sách video đã like hoặc kết quả tìm kiếm)
+     */
+    public void setCachedVideos(List<ShortVideo> videos) {
+        cachedVideos.clear();
+        if (videos != null) {
+            cachedVideos.addAll(videos);
+        }
+    }
 }

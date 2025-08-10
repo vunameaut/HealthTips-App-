@@ -18,7 +18,7 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="48dp"
             android:background="?attr/colorSurface"
             app:contentInsetStart="0dp"
             app:contentInsetEnd="0dp"
@@ -71,9 +71,9 @@
             <!-- Profile Header -->
             <ImageView
                 android:id="@+id/profile_image"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginTop="8dp"
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:layout_marginTop="4dp"
                 android:src="@drawable/default_avatar"
                 android:background="@drawable/circle_background"
                 android:padding="2dp"
@@ -86,9 +86,9 @@
                 android:id="@+id/profile_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:text="Tên Người Dùng"
-                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

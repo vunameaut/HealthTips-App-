@@ -63,7 +63,15 @@
             android:exported="false" />
 
         <activity
+            android:name=".presentation.home.SearchHealthTipsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".presentation.profile.SettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.shortvideo.SearchShortVideoActivity"
             android:exported="false" />
 
         <activity

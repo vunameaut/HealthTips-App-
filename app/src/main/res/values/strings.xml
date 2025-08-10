@@ -25,6 +25,12 @@
     <string name="most_liked">Yêu thích nhất</string>
     <string name="see_all">Xem tất cả</string>
     <string name="search">Tìm kiếm</string>
+    <string name="search_short_videos">Tìm video ngắn</string>
+    <string name="search_health_tips">Tìm bài viết</string>
+    <string name="enter_search_keyword">Nhập từ khóa tìm kiếm</string>
+    <string name="no_results_found">Không tìm thấy kết quả</string>
+    <string name="search_error">Lỗi khi tìm kiếm</string>
+    <string name="search">Tìm kiếm</string>
     <string name="offline_mode">Đang ở chế độ ngoại tuyến</string>
 
     <!-- Các chuỗi cho bottom navigation -->

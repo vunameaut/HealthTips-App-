@@ -499,35 +499,110 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
 
         // Điểm từ tags khớp với sở thích
         if (video.getTags() != null) {
-            for (String tag : video.getTags().keySet()) {
-                if (Boolean.TRUE.equals(video.getTags().get(tag)) && userPreferences.containsKey(tag)) {
-                    score += userPreferences.get(tag) * 10; // Nhân 10 để tăng trọng số
+            for (Map.Entry<String, Boolean> entry : video.getTags().entrySet()) {
+                if (Boolean.TRUE.equals(entry.getValue())) {
+                    Float weight = userPreferences.get(entry.getKey());
+                    if (weight != null) {
+                        score += weight;
+                    }
                 }
             }
         }
 
-        // Bonus cho video mới
-        long daysSinceUpload = (System.currentTimeMillis() - video.getUploadDate()) / (24 * 60 * 60 * 1000);
-        if (daysSinceUpload <= 7) {
-            score += 5.0f; // Bonus cho video mới trong 7 ngày
-        }
+        // Điểm thưởng theo like và view
+        score += video.getLikeCount() * 0.1f;
+        score += video.getViewCount() * 0.05f;
 
-        // Bonus từ engagement (view và like)
-        score += video.getViewCount() * 0.01f + video.getLikeCount() * 0.1f;
+        // Bonus cho video mới hơn
+        long age = System.currentTimeMillis() - video.getUploadDate();
+        long day = 24L * 60L * 60L * 1000L;
+        if (age < 7 * day) score += 2.0f;
+        if (age < 30 * day) score += 1.0f;
 
         return score;
     }
 
-    /**
-     * Class helper để lưu video kèm điểm số
-     */
-    private static class VideoWithScore {
-        final ShortVideo video;
-        final float score;
-
-        VideoWithScore(ShortVideo video, float score) {
-            this.video = video;
-            this.score = score;
+    @Override
+    public void getLikedVideosByUser(String userId, RepositoryCallback<List<ShortVideo>> callback) {
+        if (userId == null || userId.trim().isEmpty()) {
+            callback.onError("ID người dùng không hợp lệ");
+            return;
         }
+        videosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                List<ShortVideo> liked = new ArrayList<>();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    DataSnapshot likes = child.child("likes");
+                    if (likes.hasChild(userId)) {
+                        ShortVideo video = child.getValue(ShortVideo.class);
+                        if (video != null) {
+                            video.setId(child.getKey());
+                            video.setLikedByCurrentUser(true);
+                            liked.add(video);
+                        }
+                    }
+                }
+                // Mới nhất trước
+                Collections.sort(liked, (a, b) -> Long.compare(b.getUploadDate(), a.getUploadDate()));
+                callback.onSuccess(liked);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void searchShortVideos(String query, RepositoryCallback<List<ShortVideo>> callback) {
+        if (query == null || query.trim().isEmpty()) {
+            callback.onSuccess(new ArrayList<>());
+            return;
+        }
+        String q = query.toLowerCase();
+        videosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                List<ShortVideo> result = new ArrayList<>();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    ShortVideo video = child.getValue(ShortVideo.class);
+                    if (video == null) continue;
+                    video.setId(child.getKey());
+                    boolean match = false;
+                    if (video.getTitle() != null && video.getTitle().toLowerCase().contains(q)) {
+                        match = true;
+                    } else if (video.getCaption() != null && video.getCaption().toLowerCase().contains(q)) {
+                        match = true;
+                    } else if (video.getTags() != null) {
+                        for (String tag : video.getTags().keySet()) {
+                            if (tag.toLowerCase().contains(q)) { match = true; break; }
+                        }
+                    }
+                    if (match) {
+                        result.add(video);
+                    }
+                }
+                // Sắp xếp theo độ liên quan cơ bản: likeCount, viewCount
+                Collections.sort(result, (a, b) -> {
+                    int sA = a.getLikeCount() * 2 + a.getViewCount();
+                    int sB = b.getLikeCount() * 2 + b.getViewCount();
+                    return Integer.compare(sB, sA);
+                });
+                callback.onSuccess(result);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    private static class VideoWithScore {
+        ShortVideo video;
+        float score;
+        VideoWithScore(ShortVideo v, float s) { this.video = v; this.score = s; }
     }
 }

@@ -496,90 +496,25 @@ public class HomeFragment extends Fragment implements HomeView {
 
     @Override
     public void navigateToSearch() {
-        // Triển khai chức năng chuyển đến trang tìm kiếm
-        showMessage("Chuyển đến trang tìm kiếm");
-        // Sẽ triển khai sau khi có SearchActivity/Fragment
+        startActivity(new android.content.Intent(requireContext(), com.vhn.doan.presentation.home.SearchHealthTipsActivity.class));
     }
 
     @Override
     public void showLoading(boolean loading) {
-        // Với skeleton loading, không cần hiển thị progress bar chính
-        // Skeleton đã thay thế loading indicator
-        if (progressBar != null) {
-            progressBar.setVisibility(View.GONE);
-        }
+        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public void showMessage(String message) {
-        if (isAdded() && getView() != null) {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-        }
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void showError(String errorMessage) {
-        if (isAdded() && getView() != null) {
-            Snackbar.make(getView(), errorMessage, Snackbar.LENGTH_LONG).show();
-        }
+        Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_LONG).show();
     }
 
-    /**
-     * Xử lý khi người dùng click vào nút yêu thích
-     * Đồng bộ trạng thái yêu thích giữa tất cả các adapter
-     */
     private void handleFavoriteClick(HealthTip healthTip, boolean isFavorite) {
-        if (healthTip == null || healthTip.getId() == null) {
-            showError("Không thể cập nhật trạng thái yêu thích");
-            return;
-        }
-
-        // Hiển thị thông báo cho người dùng
-        if (isFavorite) {
-            showMessage("Đã thêm '" + healthTip.getTitle() + "' vào danh sách yêu thích");
-        } else {
-            showMessage("Đã xóa '" + healthTip.getTitle() + "' khỏi danh sách yêu thích");
-        }
-
-        // Đồng bộ trạng thái yêu thích giữa tất cả các adapter
-        syncFavoriteStatusAcrossAdapters(healthTip.getId(), isFavorite);
-    }
-
-    /**
-     * Đồng bộ trạng thái yêu thích của một health tip trên tất cả các adapter
-     * @param healthTipId ID của health tip cần đồng bộ
-     * @param isFavorite Trạng thái yêu thích mới
-     */
-    private void syncFavoriteStatusAcrossAdapters(String healthTipId, boolean isFavorite) {
-        // Đồng bộ cho adapter Latest Tips
-        if (latestTipsAdapter != null) {
-            latestTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
-        }
-
-        // Đồng bộ cho adapter Most Viewed Tips
-        if (mostViewedTipsAdapter != null) {
-            mostViewedTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
-        }
-
-        // Đồng bộ cho adapter Most Liked Tips
-        if (mostLikedTipsAdapter != null) {
-            mostLikedTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
-        }
-    }
-
-    /**
-     * Navigation đến màn hình profile (nơi chứa chức năng yêu thích)
-     * Được gọi khi người dùng muốn xem toàn bộ danh sách yêu thích
-     */
-    public void navigateToFavorites() {
-        // Chuyển tab bottom navigation đến profile (nơi chứa chức năng yêu thích)
-        if (getActivity() != null) {
-            // Trigger bottom navigation để chuyển đến ProfileFragment
-            com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
-                    getActivity().findViewById(R.id.bottom_navigation);
-            if (bottomNav != null) {
-                bottomNav.setSelectedItemId(R.id.nav_profile);
-            }
-        }
+        // TODO: Tùy logic như lưu vào favorites
     }
 }

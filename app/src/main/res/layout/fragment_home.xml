@@ -12,13 +12,13 @@
         android:layout_height="wrap_content">
 
         <!-- Thanh tiêu đề - Đã hạ thấp xuống -->
-        <androidx.constraintlayout.widget.ConstraintLayout
+                    <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
             android:paddingTop="0dp"
-            android:paddingBottom="8dp"
+            android:paddingBottom="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">

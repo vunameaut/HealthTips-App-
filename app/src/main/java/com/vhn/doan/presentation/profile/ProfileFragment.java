@@ -131,13 +131,11 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
     private void toggleDarkMode() {
         int currentNightMode = AppCompatDelegate.getDefaultNightMode();
         if (currentNightMode == AppCompatDelegate.MODE_NIGHT_YES) {
-            // Đang ở chế độ tối, chuyển sang chế độ sáng
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             if (getContext() != null) {
                 Toast.makeText(getContext(), "Đã chuyển sang chế độ sáng", Toast.LENGTH_SHORT).show();
             }
         } else {
-            // Đang ở chế độ sáng, chuyển sang chế độ tối
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             if (getContext() != null) {
                 Toast.makeText(getContext(), "Đã chuyển sang chế độ tối", Toast.LENGTH_SHORT).show();
@@ -148,16 +146,13 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
     private void showMenuOptions() {
         if (getContext() == null) return;
 
-        // Sử dụng BottomSheetDialog với theme bo góc
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext(), R.style.BottomSheetDialogTheme);
         View bottomSheetView = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_menu, null);
         bottomSheetDialog.setContentView(bottomSheetView);
 
-        // Khởi tạo các view trong BottomSheetDialog
         TextView txtSetting = bottomSheetView.findViewById(R.id.txt_setting);
         TextView txtLogout = bottomSheetView.findViewById(R.id.txt_logout);
 
-        // Thiết lập sự kiện click cho các tùy chọn
         txtSetting.setOnClickListener(v -> {
             openSettings();
             bottomSheetDialog.dismiss();
@@ -168,7 +163,6 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
             bottomSheetDialog.dismiss();
         });
 
-        // Hiển thị BottomSheetDialog
         bottomSheetDialog.show();
     }
 
@@ -179,13 +173,9 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         }
     }
 
-    /**
-     * Tải thông tin profile người dùng từ Firebase
-     */
     private void loadUserProfile() {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
-            // Hiển thị thông tin người dùng lên giao diện
             String displayName = currentUser.getDisplayName();
             String email = currentUser.getEmail();
 
@@ -193,7 +183,6 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
             profileUsername.setText("@" + (email != null ? email.split("@")[0] : "user"));
             profileBio.setText("Mô tả của người dùng chưa được cập nhật. Hãy thêm mô tả để mọi người biết thêm về bạn.");
         } else {
-            // Nếu chưa đăng nhập, hiển thị thông báo
             profileName.setText("Chưa đăng nhập");
             profileUsername.setText("@guest");
             profileBio.setText("Vui lòng đăng nhập để xem thông tin cá nhân");
@@ -213,21 +202,12 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
     private void performLogout() {
         try {
-            // Hiển thị loading
             showLoading(true);
-
-            // Đăng xuất Firebase
             firebaseAuth.signOut();
-
-            // Ẩn loading
             showLoading(false);
-
-            // Hiển thị thông báo thành công
             if (getContext() != null) {
                 Toast.makeText(getContext(), "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
             }
-
-            // Chuyển về màn hình đăng nhập
             navigateToLogin();
 
         } catch (Exception e) {
@@ -249,7 +229,6 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
     @Override
     public void displayUserProfile(String userInfo) {
-        // Phương thức này sẽ được presenter gọi để hiển thị thông tin người dùng
         if (profileBio != null) {
             profileBio.setText(userInfo);
         }
@@ -286,8 +265,6 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         if (getContext() != null) {
             Toast.makeText(getContext(), "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
         }
-
-        // Chuyển về màn hình đăng nhập
         navigateToLogin();
     }
 }

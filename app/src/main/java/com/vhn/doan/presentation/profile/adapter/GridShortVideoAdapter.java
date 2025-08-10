@@ -71,6 +71,10 @@ public class GridShortVideoAdapter extends RecyclerView.Adapter<GridShortVideoAd
         notifyDataSetChanged();
     }
 
+    public List<ShortVideo> getCurrentData() {
+        return new ArrayList<>(videos);
+    }
+
     static class VideoViewHolder extends RecyclerView.ViewHolder {
         private final CardView cardView;
         private final ImageView imageView;

@@ -50,6 +50,8 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
         return new ShortVideoFragment();
     }
 
+    private int initialStartPosition = 0;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +77,9 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         List<ShortVideo> cached = ShortVideoPreloadManager.getInstance().getCachedVideos();
+        if (getArguments() != null) {
+            initialStartPosition = getArguments().getInt("start_position", 0);
+        }
         if (!cached.isEmpty()) {
             presenter.setInitialVideos(cached);
             showVideos(cached);
@@ -204,6 +209,13 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
         progressIndicatorLoading = view.findViewById(R.id.progressIndicatorLoading);
         viewLoading = view.findViewById(R.id.viewLoading);
         viewEmptyState = view.findViewById(R.id.viewEmptyState);
+        View btnSearch = view.findViewById(R.id.btnSearchShortVideo);
+        if (btnSearch != null) {
+            btnSearch.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(requireContext(), com.vhn.doan.presentation.shortvideo.SearchShortVideoActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void setupRecyclerView() {
@@ -348,13 +360,14 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
         adapter.updateVideos(videos);
 
-        // Auto-play video đầu tiên
-        if (!videos.isEmpty() && currentPosition == 0) {
+        // Auto-play video tại vị trí được yêu cầu (mặc định 0)
+        if (!videos.isEmpty()) {
+            int startPos = Math.max(0, Math.min(initialStartPosition, videos.size() - 1));
+            currentPosition = startPos;
+            recyclerViewVideos.scrollToPosition(startPos);
             recyclerViewVideos.post(() -> {
-                adapter.playVideoAt(0);
-
-                // Thông báo presenter về việc xem video đầu tiên
-                presenter.onVideoViewed(0, videos.get(0).getId());
+                adapter.playVideoAt(startPos);
+                presenter.onVideoViewed(startPos, videos.get(startPos).getId());
             });
         }
     }

@@ -70,9 +70,25 @@ public class LikedVideosFragment extends BaseFragment {
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new GridShortVideoAdapter(requireContext(), video -> {
-            if (getContext() != null) {
-                android.widget.Toast.makeText(getContext(), R.string.comment_feature_coming_soon, android.widget.Toast.LENGTH_SHORT).show();
+            // Mở ShortVideo xem theo danh sách video đã like, cho phép lướt trong danh sách này
+            java.util.List<com.vhn.doan.data.ShortVideo> current = adapter.getCurrentData();
+            int startIndex = 0;
+            for (int i = 0; i < current.size(); i++) {
+                if (current.get(i).getId() != null && current.get(i).getId().equals(video.getId())) {
+                    startIndex = i;
+                    break;
+                }
             }
+            com.vhn.doan.presentation.shortvideo.ShortVideoPreloadManager.getInstance().setCachedVideos(current);
+            androidx.fragment.app.Fragment fragment = com.vhn.doan.presentation.shortvideo.ShortVideoFragment.newInstance();
+            android.os.Bundle args = new android.os.Bundle();
+            args.putInt("start_position", startIndex);
+            fragment.setArguments(args);
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commit();
         });
         recyclerView.setAdapter(adapter);
     }
@@ -88,7 +104,15 @@ public class LikedVideosFragment extends BaseFragment {
         emptyStateLayout.setVisibility(View.GONE);
 
         ShortVideoRepository repository = new ShortVideoRepositoryImpl();
-        repository.getTrendingVideos(20, new RepositoryCallback<List<ShortVideo>>() {
+        String userId = com.vhn.doan.services.FirebaseManager.getInstance().getCurrentUserId();
+        if (userId == null) {
+            progressBar.setVisibility(View.GONE);
+            swipeRefreshLayout.setRefreshing(false);
+            emptyStateLayout.setVisibility(View.VISIBLE);
+            showError("Vui lòng đăng nhập để xem video đã like");
+            return;
+        }
+        repository.getLikedVideosByUser(userId, new RepositoryCallback<List<ShortVideo>>() {
             @Override
             public void onSuccess(List<ShortVideo> result) {
                 if (!isAdded()) return;
