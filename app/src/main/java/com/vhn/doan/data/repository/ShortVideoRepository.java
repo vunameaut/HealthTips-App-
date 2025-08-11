@@ -32,6 +32,14 @@ public interface ShortVideoRepository {
     void getTrendingVideos(int limit, RepositoryCallback<List<ShortVideo>> callback);
 
     /**
+     * Lấy danh sách video mà người dùng đã thích
+     * @param userId ID của người dùng
+     * @param limit Số lượng video tối đa cần lấy
+     * @param callback Callback xử lý kết quả
+     */
+    void getLikedVideos(String userId, int limit, RepositoryCallback<List<ShortVideo>> callback);
+
+    /**
      * Tăng view count cho video
      * @param videoId ID của video
      * @param callback Callback để xử lý kết quả

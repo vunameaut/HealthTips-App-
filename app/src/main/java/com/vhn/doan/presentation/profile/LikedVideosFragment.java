@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +19,11 @@ import com.vhn.doan.R;
 import com.vhn.doan.presentation.base.BaseFragment;
 import com.vhn.doan.presentation.profile.adapter.GridShortVideoAdapter;
 import com.vhn.doan.data.ShortVideo;
+import com.vhn.doan.data.repository.RepositoryCallback;
 import com.vhn.doan.data.repository.ShortVideoRepository;
 import com.vhn.doan.data.repository.ShortVideoRepositoryImpl;
-import com.vhn.doan.data.repository.RepositoryCallback;
+import com.vhn.doan.presentation.shortvideo.ShortVideoPlayerActivity;
+import com.vhn.doan.utils.SharedPreferencesHelper;
 
 import java.util.List;
 
@@ -31,6 +34,7 @@ public class LikedVideosFragment extends BaseFragment {
 
     private RecyclerView recyclerView;
     private GridShortVideoAdapter adapter;
+    private List<ShortVideo> likedVideos;
     private ProgressBar progressBar;
     private ConstraintLayout emptyStateLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -67,11 +71,16 @@ public class LikedVideosFragment extends BaseFragment {
     }
 
     private void setupRecyclerView() {
+        likedVideos = new java.util.ArrayList<>();
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new GridShortVideoAdapter(requireContext(), video -> {
-            if (getContext() != null) {
-                android.widget.Toast.makeText(getContext(), R.string.comment_feature_coming_soon, android.widget.Toast.LENGTH_SHORT).show();
+            int position = likedVideos.indexOf(video);
+            if (position >= 0 && getContext() != null) {
+                Intent intent = new Intent(getContext(), ShortVideoPlayerActivity.class);
+                intent.putExtra(ShortVideoPlayerActivity.EXTRA_VIDEOS, new java.util.ArrayList<>(likedVideos));
+                intent.putExtra(ShortVideoPlayerActivity.EXTRA_START_POSITION, position);
+                startActivity(intent);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -87,8 +96,17 @@ public class LikedVideosFragment extends BaseFragment {
         progressBar.setVisibility(View.VISIBLE);
         emptyStateLayout.setVisibility(View.GONE);
 
+        SharedPreferencesHelper preferencesHelper = new SharedPreferencesHelper(requireContext());
+        String userId = preferencesHelper.getCurrentUserId();
+        if (userId == null || userId.isEmpty()) {
+            progressBar.setVisibility(View.GONE);
+            swipeRefreshLayout.setRefreshing(false);
+            emptyStateLayout.setVisibility(View.VISIBLE);
+            return;
+        }
+
         ShortVideoRepository repository = new ShortVideoRepositoryImpl();
-        repository.getTrendingVideos(20, new RepositoryCallback<List<ShortVideo>>() {
+        repository.getLikedVideos(userId, 50, new RepositoryCallback<List<ShortVideo>>() {
             @Override
             public void onSuccess(List<ShortVideo> result) {
                 if (!isAdded()) return;
@@ -98,7 +116,9 @@ public class LikedVideosFragment extends BaseFragment {
                     emptyStateLayout.setVisibility(View.VISIBLE);
                 } else {
                     emptyStateLayout.setVisibility(View.GONE);
-                    adapter.updateData(result);
+                    likedVideos.clear();
+                    likedVideos.addAll(result);
+                    adapter.updateData(likedVideos);
                 }
             }
 

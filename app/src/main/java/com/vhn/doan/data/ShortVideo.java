@@ -3,6 +3,7 @@ package com.vhn.doan.data;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.PropertyName;
 import com.vhn.doan.services.CloudinaryVideoHelper;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Map;
  * Được sử dụng với Firebase Realtime Database
  * Video URLs sẽ đến từ Cloudinary thay vì Firebase Storage
  */
-public class ShortVideo {
+public class ShortVideo implements Serializable {
     @PropertyName("id")
     private String id;
 

@@ -148,6 +148,37 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
     }
 
     @Override
+    public void getLikedVideos(String userId, int limit, RepositoryCallback<List<ShortVideo>> callback) {
+        Query query = videosRef.orderByChild("likes/" + userId).equalTo(true);
+        if (limit > 0) {
+            query = query.limitToFirst(limit);
+        }
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<ShortVideo> videos = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    ShortVideo video = snapshot.getValue(ShortVideo.class);
+                    if (video != null) {
+                        video.setId(snapshot.getKey());
+                        video.setLikedByCurrentUser(true);
+                        videos.add(video);
+                    }
+                }
+
+                Collections.sort(videos, (v1, v2) -> Long.compare(v2.getUploadDate(), v1.getUploadDate()));
+                callback.onSuccess(videos);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError(databaseError.getMessage());
+            }
+        });
+    }
+
+    @Override
     public void incrementViewCount(String videoId, RepositoryCallback<Void> callback) {
         // Kiểm tra videoId không null để tránh crash
         if (videoId == null || videoId.trim().isEmpty()) {

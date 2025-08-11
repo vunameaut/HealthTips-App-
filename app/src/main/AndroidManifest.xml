@@ -67,6 +67,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".presentation.shortvideo.ShortVideoPlayerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".presentation.healthtip.detail.HealthTipDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
