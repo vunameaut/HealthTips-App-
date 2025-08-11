@@ -34,7 +34,7 @@ public class GridShortVideoAdapter extends RecyclerView.Adapter<GridShortVideoAd
      * Interface callback khi người dùng click vào video.
      */
     public interface OnVideoClickListener {
-        void onVideoClick(ShortVideo video);
+        void onVideoClick(int position);
     }
 
     public GridShortVideoAdapter(Context context, OnVideoClickListener listener) {
@@ -52,7 +52,7 @@ public class GridShortVideoAdapter extends RecyclerView.Adapter<GridShortVideoAd
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
         ShortVideo video = videos.get(position);
-        holder.bind(video, listener);
+        holder.bind(video, position, listener);
     }
 
     @Override
@@ -71,6 +71,13 @@ public class GridShortVideoAdapter extends RecyclerView.Adapter<GridShortVideoAd
         notifyDataSetChanged();
     }
 
+    public ShortVideo getVideoAt(int position) {
+        if (position >= 0 && position < videos.size()) {
+            return videos.get(position);
+        }
+        return null;
+    }
+
     static class VideoViewHolder extends RecyclerView.ViewHolder {
         private final CardView cardView;
         private final ImageView imageView;
@@ -81,7 +88,7 @@ public class GridShortVideoAdapter extends RecyclerView.Adapter<GridShortVideoAd
             imageView = itemView.findViewById(R.id.imageView);
         }
 
-        void bind(final ShortVideo video, final OnVideoClickListener listener) {
+        void bind(final ShortVideo video, final int position, final OnVideoClickListener listener) {
             if (video.getThumbnailUrl() != null && !video.getThumbnailUrl().isEmpty()) {
                 RequestOptions options = new RequestOptions()
                         .transforms(new CenterCrop(), new RoundedCorners(8));
@@ -96,7 +103,7 @@ public class GridShortVideoAdapter extends RecyclerView.Adapter<GridShortVideoAd
 
             cardView.setOnClickListener(v -> {
                 if (listener != null) {
-                    listener.onVideoClick(video);
+                    listener.onVideoClick(position);
                 }
             });
         }

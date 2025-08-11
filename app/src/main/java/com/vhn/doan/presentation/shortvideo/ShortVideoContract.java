@@ -85,6 +85,11 @@ public interface ShortVideoContract {
         void loadTrendingVideos();
 
         /**
+         * Tải danh sách video đã like của người dùng
+         */
+        void loadLikedVideos();
+
+        /**
          * Xử lý khi người dùng like/unlike video
          */
         void onVideoLiked(int position, String videoId, boolean isCurrentlyLiked);

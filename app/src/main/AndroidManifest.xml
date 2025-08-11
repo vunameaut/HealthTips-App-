@@ -71,6 +71,11 @@
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
 
+        <activity
+            android:name=".presentation.profile.LikedVideoPlayerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
         <!-- Debug Activity -->
         <activity
             android:name=".presentation.debug.ReminderTestActivity"

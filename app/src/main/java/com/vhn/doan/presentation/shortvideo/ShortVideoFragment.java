@@ -46,8 +46,24 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     private boolean isFragmentVisible = false;
     private boolean isVideoPlayerReady = false;
 
+    private static final String ARG_MODE = "mode";
+    private static final String ARG_START_VIDEO_ID = "start_video_id";
+    private static final String MODE_LIKED = "liked";
+
+    private String mode = null;
+    private String startVideoId = null;
+
     public static ShortVideoFragment newInstance() {
         return new ShortVideoFragment();
+    }
+
+    public static ShortVideoFragment newInstanceForLiked(String startVideoId) {
+        ShortVideoFragment fragment = new ShortVideoFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_MODE, MODE_LIKED);
+        args.putString(ARG_START_VIDEO_ID, startVideoId);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -58,6 +74,12 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
         SharedPreferencesHelper preferencesHelper = new SharedPreferencesHelper(requireContext());
         presenter = new ShortVideoPresenter(new ShortVideoRepositoryImpl(), preferencesHelper);
         presenter.attachView(this);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            mode = args.getString(ARG_MODE);
+            startVideoId = args.getString(ARG_START_VIDEO_ID);
+        }
     }
 
     @Nullable
@@ -74,12 +96,16 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        List<ShortVideo> cached = ShortVideoPreloadManager.getInstance().getCachedVideos();
-        if (!cached.isEmpty()) {
-            presenter.setInitialVideos(cached);
-            showVideos(cached);
+        if (MODE_LIKED.equals(mode)) {
+            presenter.loadLikedVideos();
         } else {
-            presenter.start();
+            List<ShortVideo> cached = ShortVideoPreloadManager.getInstance().getCachedVideos();
+            if (!cached.isEmpty()) {
+                presenter.setInitialVideos(cached);
+                showVideos(cached);
+            } else {
+                presenter.start();
+            }
         }
     }
 
@@ -348,12 +374,25 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
 
         adapter.updateVideos(videos);
 
-        // Auto-play video đầu tiên
-        if (!videos.isEmpty() && currentPosition == 0) {
+        if (MODE_LIKED.equals(mode) && startVideoId != null) {
+            int index = 0;
+            for (int i = 0; i < videos.size(); i++) {
+                if (startVideoId.equals(videos.get(i).getId())) {
+                    index = i;
+                    break;
+                }
+            }
+            currentPosition = index;
+            recyclerViewVideos.scrollToPosition(index);
+            recyclerViewVideos.post(() -> {
+                adapter.playVideoAt(index);
+                presenter.onVideoViewed(index, videos.get(index).getId());
+            });
+            startVideoId = null;
+        } else if (!videos.isEmpty() && currentPosition == 0) {
+            // Auto-play video đầu tiên
             recyclerViewVideos.post(() -> {
                 adapter.playVideoAt(0);
-
-                // Thông báo presenter về việc xem video đầu tiên
                 presenter.onVideoViewed(0, videos.get(0).getId());
             });
         }

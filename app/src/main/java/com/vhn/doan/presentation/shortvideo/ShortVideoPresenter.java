@@ -233,6 +233,8 @@ public class ShortVideoPresenter implements ShortVideoContract.Presenter {
             loadRecommendedVideos();
         } else if ("trending".equals(currentFilter)) {
             loadTrendingVideos();
+        } else if ("liked".equals(currentFilter)) {
+            loadLikedVideos();
         } else {
             loadVideosByCategory(currentFilter);
         }
@@ -344,5 +346,46 @@ public class ShortVideoPresenter implements ShortVideoContract.Presenter {
         if (videos != null) {
             currentVideos.addAll(videos);
         }
+    }
+
+    @Override
+    public void loadLikedVideos() {
+        if (view != null) {
+            view.showLoading();
+        }
+
+        currentFilter = "liked";
+        currentUserId = preferencesHelper.getCurrentUserId();
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            if (view != null) {
+                view.hideLoading();
+                view.showError("Bạn cần đăng nhập");
+            }
+            return;
+        }
+
+        repository.getLikedVideos(currentUserId, VIDEO_LIMIT, new RepositoryCallback<List<ShortVideo>>() {
+            @Override
+            public void onSuccess(List<ShortVideo> videos) {
+                if (view != null) {
+                    view.hideLoading();
+                    currentVideos.clear();
+                    currentVideos.addAll(videos);
+                    if (videos.isEmpty()) {
+                        view.showEmptyState();
+                    } else {
+                        view.showVideos(videos);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                if (view != null) {
+                    view.hideLoading();
+                    view.showError("Không thể tải video: " + error);
+                }
+            }
+        });
     }
 }
