@@ -1,6 +1,8 @@
 package com.vhn.doan.presentation.shortvideo;
 
 import android.animation.ObjectAnimator;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -40,6 +42,11 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     private int currentPlayingPosition = -1;
     private final List<VideoViewHolder> activeHolders = new ArrayList<>();
 
+    // Thêm ExoPlayerPreloadManager và Handler
+    private ExoPlayerPreloadManager preloadManager;
+    private Handler mainHandler;
+    private RecyclerView attachedRecyclerView;
+
     public interface VideoInteractionListener {
         void onVideoLiked(int position, String videoId, boolean isCurrentlyLiked);
         void onVideoShared(int position, String videoId);
@@ -52,13 +59,60 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     public ShortVideoAdapter(List<ShortVideo> videos, VideoInteractionListener listener) {
         this.videos = videos;
         this.listener = listener;
+        this.mainHandler = new Handler(Looper.getMainLooper());
+        // Context sẽ được set khi onCreateViewHolder được gọi
+    }
+
+    // Constructor mới cho LikedVideoPlayerFragment (không cần listener)
+    public ShortVideoAdapter(android.content.Context context, List<ShortVideo> videos) {
+        this.videos = videos;
+        this.mainHandler = new Handler(Looper.getMainLooper());
+        // Khởi tạo preload manager
+        this.preloadManager = new ExoPlayerPreloadManager(context);
+        this.listener = new VideoInteractionListener() {
+            @Override
+            public void onVideoLiked(int position, String videoId, boolean isCurrentlyLiked) {
+                // Default implementation - có thể để trống hoặc hiển thị Toast
+            }
+
+            @Override
+            public void onVideoShared(int position, String videoId) {
+                // Default implementation
+            }
+
+            @Override
+            public void onVideoCommented(int position, String videoId) {
+                // Default implementation
+            }
+
+            @Override
+            public void onVideoViewed(int position, String videoId) {
+                // Default implementation
+            }
+
+            @Override
+            public void onVideoProfileClicked(int position, String userId) {
+                // Default implementation
+            }
+
+            @Override
+            public void onVideoPlayerReady() {
+                // Default implementation
+            }
+        };
     }
 
     @NonNull
     @Override
     public VideoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_short_video, parent, false);
+                .inflate(R.layout.item_short_video_simple, parent, false);
+
+        // Khởi tạo preload manager nếu chưa có
+        if (preloadManager == null) {
+            preloadManager = new ExoPlayerPreloadManager(parent.getContext());
+        }
+
         return new VideoViewHolder(view);
     }
 
@@ -98,64 +152,97 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         notifyItemRangeInserted(start, newVideos.size());
     }
 
+    /**
+     * Method an toàn để notify item changed, tránh conflict với RecyclerView scroll
+     */
+    private void safeNotifyItemChanged(int position, Object payload) {
+        if (attachedRecyclerView != null && attachedRecyclerView.isComputingLayout()) {
+            // Delay notify nếu RecyclerView đang computing layout
+            mainHandler.post(() -> safeNotifyItemChanged(position, payload));
+            return;
+        }
+
+        try {
+            if (payload != null) {
+                notifyItemChanged(position, payload);
+            } else {
+                notifyItemChanged(position);
+            }
+        } catch (Exception e) {
+            android.util.Log.w("ShortVideoAdapter", "Error notifying item changed: " + e.getMessage());
+            // Retry sau delay nhỏ
+            mainHandler.postDelayed(() -> {
+                try {
+                    if (payload != null) {
+                        notifyItemChanged(position, payload);
+                    } else {
+                        notifyItemChanged(position);
+                    }
+                } catch (Exception retryError) {
+                    android.util.Log.e("ShortVideoAdapter", "Retry notify failed: " + retryError.getMessage());
+                }
+            }, 50);
+        }
+    }
+
     public void updateVideoLike(int position, boolean isLiked, int newLikeCount) {
         if (position >= 0 && position < videos.size()) {
             ShortVideo video = videos.get(position);
             video.setLikeCount(newLikeCount);
             video.setLikedByCurrentUser(isLiked);
-            notifyItemChanged(position, "like_update");
+            safeNotifyItemChanged(position, "like_update");
         }
     }
 
     public void updateVideoView(int position, int newViewCount) {
         if (position >= 0 && position < videos.size()) {
             videos.get(position).setViewCount(newViewCount);
-            notifyItemChanged(position, "view_update");
+            safeNotifyItemChanged(position, "view_update");
         }
     }
 
     public void playVideoAt(int position) {
         if (currentPlayingPosition != -1 && currentPlayingPosition != position) {
-            notifyItemChanged(currentPlayingPosition, "pause");
+            safeNotifyItemChanged(currentPlayingPosition, "pause");
         }
         currentPlayingPosition = position;
-        notifyItemChanged(position, "play");
+        safeNotifyItemChanged(position, "play");
     }
 
     public void pauseVideoAt(int position) {
         if (position >= 0 && position < getItemCount()) {
-            notifyItemChanged(position, "pause");
+            safeNotifyItemChanged(position, "pause");
         }
     }
 
     public void pauseCurrentVideo() {
         if (currentPlayingPosition != -1) {
-            notifyItemChanged(currentPlayingPosition, "pause");
+            safeNotifyItemChanged(currentPlayingPosition, "pause");
         }
     }
 
     public void resumeCurrentVideo() {
         if (currentPlayingPosition != -1) {
-            notifyItemChanged(currentPlayingPosition, "resume");
+            safeNotifyItemChanged(currentPlayingPosition, "resume");
         }
     }
 
     public void pauseAllVideos() {
         for (int i = 0; i < getItemCount(); i++) {
-            notifyItemChanged(i, "pause");
+            safeNotifyItemChanged(i, "pause");
         }
         currentPlayingPosition = -1;
     }
 
     public void hideAllVideoViews() {
         for (int i = 0; i < getItemCount(); i++) {
-            notifyItemChanged(i, "hide_video");
+            safeNotifyItemChanged(i, "hide_video");
         }
     }
 
     public void showAllVideoViews() {
         for (int i = 0; i < getItemCount(); i++) {
-            notifyItemChanged(i, "show_video");
+            safeNotifyItemChanged(i, "show_video");
         }
     }
 
@@ -165,6 +252,53 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
         activeHolders.clear();
         currentPlayingPosition = -1;
+
+        // Release preload manager resources
+        if (preloadManager != null) {
+            preloadManager.releaseAllResources();
+        }
+    }
+
+    // Thêm các method còn thiếu cho LikedVideoPlayerFragment
+    public void updateData(List<ShortVideo> newVideos) {
+        // Release preload manager trước khi update data
+        if (preloadManager != null) {
+            preloadManager.releaseAllResources();
+        }
+
+        this.videos.clear();
+        if (newVideos != null) {
+            this.videos.addAll(newVideos);
+        }
+        notifyDataSetChanged();
+    }
+
+    public void releasePlayer() {
+        releaseAllResources();
+    }
+
+    /**
+     * Method để trigger preload khi người dùng scroll đến vị trí mới
+     * Gọi từ Fragment/Activity khi detect scroll
+     */
+    public void onScrollToPosition(int position) {
+        if (preloadManager != null && position >= 0 && position < videos.size()) {
+            android.util.Log.d("ShortVideoAdapter", "Scrolled to position: " + position + ", triggering preload");
+            // Setup current video và preload xung quanh
+            preloadManager.setupCurrentVideo(videos, position);
+        }
+    }
+
+    /**
+     * Lấy thông tin debug về preload manager
+     */
+    public String getPreloadDebugInfo() {
+        if (preloadManager == null) {
+            return "Preload Manager: null";
+        }
+        return String.format("Preload Manager - Current: %d, Preloaded: %d",
+                preloadManager.getCurrentPosition(),
+                preloadManager.getPreloadedCount());
     }
 
     @Override
@@ -220,8 +354,10 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
 
         private void initViews() {
             playerView = itemView.findViewById(R.id.playerView);
-            playerView.setUseController(false);
-            playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+            if (playerView != null) {
+                playerView.setUseController(false);
+                playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+            }
             imgThumbnail = itemView.findViewById(R.id.imgThumbnail);
             imgPlayPause = itemView.findViewById(R.id.imgPlayPause);
             txtTitle = itemView.findViewById(R.id.txtTitle);
@@ -235,6 +371,9 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             btnShare = itemView.findViewById(R.id.btnShare);
             btnComment = itemView.findViewById(R.id.btnComment);
             rootLayout = (FrameLayout) itemView;
+
+            // Log để debug
+            android.util.Log.d("VideoViewHolder", "Views initialized - PlayerView: " + (playerView != null));
         }
 
         private void setupGestureDetector() {
@@ -414,33 +553,110 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
 
         private void setupVideo(String videoUrl) {
+            android.util.Log.d("VideoViewHolder", "setupVideo called with URL: " + videoUrl);
+
             if (videoUrl == null || videoUrl.isEmpty()) {
+                android.util.Log.e("VideoViewHolder", "Video URL is null or empty");
+                showErrorMessage("URL video không hợp lệ");
                 return;
             }
 
             releasePlayer();
 
-            exoPlayer = new ExoPlayer.Builder(itemView.getContext()).build();
-            playerView.setPlayer(exoPlayer);
-            MediaItem item = MediaItem.fromUri(videoUrl);
-            exoPlayer.setMediaItem(item);
-            exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
-            exoPlayer.prepare();
+            try {
+                int position = getAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) {
+                    android.util.Log.w("VideoViewHolder", "Invalid position, creating new player");
+                    createNewPlayer(videoUrl);
+                    return;
+                }
+
+                // Luôn tạo player mới để đảm bảo ổn định
+                android.util.Log.d("VideoViewHolder", "Creating new player for position: " + position);
+                createNewPlayer(videoUrl);
+
+                // Chỉ thử preload manager như một optimization, không bắt buộc
+                if (preloadManager != null) {
+                    try {
+                        preloadManager.schedulePreload(videos, position);
+                    } catch (Exception e) {
+                        android.util.Log.w("VideoViewHolder", "Preload scheduling failed: " + e.getMessage());
+                    }
+                }
+
+            } catch (Exception e) {
+                android.util.Log.e("VideoViewHolder", "Error setting up video: " + e.getMessage());
+                showErrorMessage("Lỗi khi thiết lập video: " + e.getMessage());
+            }
+        }
+
+        private void createNewPlayer(String videoUrl) {
+            try {
+                exoPlayer = new ExoPlayer.Builder(itemView.getContext()).build();
+                playerView.setPlayer(exoPlayer);
+
+                MediaItem item = MediaItem.fromUri(videoUrl);
+                exoPlayer.setMediaItem(item);
+                exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+
+                setupPlayerListener();
+                exoPlayer.prepare();
+                android.util.Log.d("VideoViewHolder", "New ExoPlayer created and prepared");
+
+            } catch (Exception e) {
+                android.util.Log.e("VideoViewHolder", "Error creating new player: " + e.getMessage());
+                showErrorMessage("Lỗi khi tạo video player: " + e.getMessage());
+            }
+        }
+
+        private void setupPlayerListener() {
+            if (exoPlayer == null) return;
+
             exoPlayer.addListener(new Player.Listener() {
                 @Override
                 public void onPlaybackStateChanged(int state) {
-                    if (state == Player.STATE_READY) {
-                        isVideoLoaded = true;
-                        playerView.setVisibility(View.VISIBLE);
-                        imgPlayPause.setVisibility(View.GONE);
-                        if (listener != null) {
-                            listener.onVideoPlayerReady();
-                        }
-                        int position = getAdapterPosition();
-                        if (position == currentPlayingPosition) {
-                            playVideo();
-                        }
+                    android.util.Log.d("VideoViewHolder", "Playback state changed: " + state);
+
+                    switch (state) {
+                        case Player.STATE_BUFFERING:
+                            android.util.Log.d("VideoViewHolder", "Video buffering...");
+                            showLoadingIndicator(true);
+                            break;
+
+                        case Player.STATE_READY:
+                            android.util.Log.d("VideoViewHolder", "Video ready to play");
+                            isVideoLoaded = true;
+                            showLoadingIndicator(false);
+                            playerView.setVisibility(View.VISIBLE);
+
+                            if (listener != null) {
+                                listener.onVideoPlayerReady();
+                            }
+
+                            // Auto play nếu đây là video hiện tại
+                            int position = getAdapterPosition();
+                            if (position == currentPlayingPosition || position == 0) {
+                                playVideo();
+                            }
+                            break;
+
+                        case Player.STATE_ENDED:
+                            android.util.Log.d("VideoViewHolder", "Video ended");
+                            exoPlayer.seekTo(0);
+                            exoPlayer.play();
+                            break;
+
+                        case Player.STATE_IDLE:
+                            android.util.Log.d("VideoViewHolder", "Player idle");
+                            break;
                     }
+                }
+
+                @Override
+                public void onPlayerError(com.google.android.exoplayer2.PlaybackException error) {
+                    android.util.Log.e("VideoViewHolder", "Player error: " + error.getMessage());
+                    showErrorMessage("Không thể phát video: " + error.getMessage());
+                    showLoadingIndicator(false);
                 }
             });
         }
@@ -581,5 +797,36 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                 playerView.setVisibility(View.VISIBLE);
             }
         }
+
+        private void showLoadingIndicator(boolean show) {
+            View loadingProgressBar = itemView.findViewById(R.id.loadingProgressBar);
+            if (loadingProgressBar != null) {
+                loadingProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        }
+
+        private void showErrorMessage(String message) {
+            TextView errorMessage = itemView.findViewById(R.id.errorMessage);
+            if (errorMessage != null) {
+                errorMessage.setText(message);
+                errorMessage.setVisibility(View.VISIBLE);
+
+                // Ẩn error message sau 5 giây
+                errorMessage.postDelayed(() -> {
+                    if (errorMessage != null) {
+                        errorMessage.setVisibility(View.GONE);
+                    }
+                }, 5000);
+            }
+            android.util.Log.e("VideoViewHolder", message);
+        }
+    }
+
+    /**
+     * Set RecyclerView reference để kiểm tra trạng thái layout
+     * Gọi method này trong Fragment/Activity sau khi khởi tạo adapter
+     */
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.attachedRecyclerView = recyclerView;
     }
 }

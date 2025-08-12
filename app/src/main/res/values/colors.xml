@@ -96,4 +96,11 @@
     <!-- Màu cho favorite -->
     <color name="color_favorite">#E91E63</color>
     <color name="color_favorite_outline">#757575</color>
+
+
+    <!-- Thêm primary_color_variant mới -->
+    <color name="primary_color_variant">#303F9F</color>
+
+
+
 </resources>

@@ -183,11 +183,14 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
     public void updateLikeCount(String videoId, boolean isLiked, RepositoryCallback<Void> callback) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
+            android.util.Log.e("LikeVideo", "User not logged in");
             callback.onError("Người dùng chưa đăng nhập");
             return;
         }
 
         String uid = user.getUid();
+        android.util.Log.d("LikeVideo", "User " + uid + " attempting to " + (isLiked ? "like" : "unlike") + " video " + videoId);
+
         DatabaseReference userLikeRef = videosRef.child(videoId).child("likes").child(uid);
         DatabaseReference likeCountRef = videosRef.child(videoId).child("likeCount");
 
@@ -195,13 +198,16 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 boolean alreadyLiked = snapshot.exists();
+                android.util.Log.d("LikeVideo", "Video " + videoId + " already liked by user: " + alreadyLiked);
 
                 if (isLiked && alreadyLiked) {
+                    android.util.Log.d("LikeVideo", "Video already liked, no action needed");
                     callback.onSuccess(null);
                     return;
                 }
 
                 if (!isLiked && !alreadyLiked) {
+                    android.util.Log.d("LikeVideo", "Video not liked, no action needed");
                     callback.onSuccess(null);
                     return;
                 }
@@ -211,9 +217,12 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
 
                 likeTask.addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
+                        android.util.Log.e("LikeVideo", "Failed to update like status: " + task.getException());
                         callback.onError("Không thể cập nhật like");
                         return;
                     }
+
+                    android.util.Log.d("LikeVideo", "Like status updated successfully, now updating like count");
 
                     likeCountRef.runTransaction(new Transaction.Handler() {
                         @NonNull
@@ -221,15 +230,19 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
                         public Transaction.Result doTransaction(@NonNull MutableData currentData) {
                             Integer current = currentData.getValue(Integer.class);
                             if (current == null) current = 0;
-                            currentData.setValue(isLiked ? current + 1 : Math.max(0, current - 1));
+                            int newCount = isLiked ? current + 1 : Math.max(0, current - 1);
+                            android.util.Log.d("LikeVideo", "Updating like count from " + current + " to " + newCount);
+                            currentData.setValue(newCount);
                             return Transaction.success(currentData);
                         }
 
                         @Override
                         public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
                             if (error != null) {
+                                android.util.Log.e("LikeVideo", "Failed to update like count: " + error.getMessage());
                                 callback.onError(error.getMessage());
                             } else {
+                                android.util.Log.d("LikeVideo", "Like count updated successfully");
                                 callback.onSuccess(null);
                             }
                         }
@@ -239,6 +252,7 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
 
             @Override
             public void onCancelled(DatabaseError error) {
+                android.util.Log.e("LikeVideo", "Error checking like status: " + error.getMessage());
                 callback.onError(error.getMessage());
             }
         });
@@ -385,6 +399,88 @@ public class ShortVideoRepositoryImpl implements ShortVideoRepository {
             public void onCancelled(DatabaseError databaseError) {
                 // Nếu lỗi khi lấy preferences, vẫn thử lấy user_topics
                 getUserTopicsAsPreferences(userId, combinedPreferences, callback);
+            }
+        });
+    }
+
+    @Override
+    public void getLikedVideos(String userId, RepositoryCallback<List<ShortVideo>> callback) {
+        if (userId == null || userId.trim().isEmpty()) {
+            callback.onError("User ID không hợp lệ");
+            return;
+        }
+
+        android.util.Log.d("LikedVideos", "Getting liked videos for user: " + userId);
+
+        // Tạo list để chứa video đã like
+        List<ShortVideo> likedVideos = new ArrayList<>();
+
+        // Lấy tất cả video và kiểm tra xem user đã like video nào
+        videosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                android.util.Log.d("LikedVideos", "Total videos in database: " + dataSnapshot.getChildrenCount());
+
+                int totalVideos = (int) dataSnapshot.getChildrenCount();
+                int[] processedCount = {0}; // Sử dụng array để có thể modify trong inner class
+
+                if (totalVideos == 0) {
+                    android.util.Log.d("LikedVideos", "No videos found in database");
+                    callback.onSuccess(likedVideos);
+                    return;
+                }
+
+                for (DataSnapshot videoSnapshot : dataSnapshot.getChildren()) {
+                    String videoId = videoSnapshot.getKey();
+                    ShortVideo video = videoSnapshot.getValue(ShortVideo.class);
+
+                    if (video != null && videoId != null) {
+                        video.setId(videoId);
+
+                        // Kiểm tra xem user đã like video này chưa
+                        DataSnapshot likesSnapshot = videoSnapshot.child("likes").child(userId);
+                        boolean isLiked = likesSnapshot.exists();
+
+                        android.util.Log.d("LikedVideos", "Video " + videoId + " - liked by user: " + isLiked);
+
+                        // Log cấu trúc likes để debug
+                        DataSnapshot allLikesSnapshot = videoSnapshot.child("likes");
+                        if (allLikesSnapshot.exists()) {
+                            android.util.Log.d("LikedVideos", "Likes structure for " + videoId + ":");
+                            for (DataSnapshot likeSnapshot : allLikesSnapshot.getChildren()) {
+                                android.util.Log.d("LikedVideos", "  - User: " + likeSnapshot.getKey() + " = " + likeSnapshot.getValue());
+                            }
+                        } else {
+                            android.util.Log.d("LikedVideos", "No likes found for video " + videoId);
+                        }
+
+                        if (isLiked) {
+                            video.setLikedByCurrentUser(true);
+                            likedVideos.add(video);
+                            android.util.Log.d("LikedVideos", "Added liked video: " + video.getTitle());
+                        }
+                    }
+
+                    processedCount[0]++;
+
+                    // Khi đã xử lý hết tất cả video, trả về kết quả
+                    if (processedCount[0] == totalVideos) {
+                        android.util.Log.d("LikedVideos", "Total liked videos found: " + likedVideos.size());
+
+                        // Sắp xếp theo thời gian like (mới nhất trước)
+                        // Vì Firebase không lưu thời gian like, ta sắp xếp theo uploadDate
+                        Collections.sort(likedVideos, (v1, v2) ->
+                            Long.compare(v2.getUploadDate(), v1.getUploadDate()));
+
+                        callback.onSuccess(likedVideos);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                android.util.Log.e("LikedVideos", "Error loading liked videos: " + databaseError.getMessage());
+                callback.onError("Không thể tải danh sách video đã like: " + databaseError.getMessage());
             }
         });
     }
