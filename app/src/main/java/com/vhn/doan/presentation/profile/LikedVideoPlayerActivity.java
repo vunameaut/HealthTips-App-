@@ -93,18 +93,19 @@ public class LikedVideoPlayerActivity extends AppCompatActivity {
                 adapter.updateData(likedVideos);
             }
 
-            // Scroll đến vị trí được chỉ định sau khi adapter đã sẵn sàng
+            // Scroll đến vị trí được chỉ định và phát video ngay lập tức
             recyclerViewVideos.post(() -> {
                 if (currentPosition < likedVideos.size()) {
                     android.util.Log.d("LikedVideoPlayer", "Scrolling to position: " + currentPosition);
                     recyclerViewVideos.scrollToPosition(currentPosition);
 
-                    // Đảm bảo video được phát sau khi scroll
+                    // Đảm bảo video được phát ngay sau khi scroll - delay ngắn hơn
                     recyclerViewVideos.postDelayed(() -> {
                         if (adapter != null) {
+                            android.util.Log.d("LikedVideoPlayer", "Force playing video at position: " + currentPosition);
                             adapter.playVideoAt(currentPosition);
                         }
-                    }, 500); // Delay 500ms để đảm bảo scroll hoàn tất
+                    }, 200); // Giảm delay xuống 200ms
                 }
             });
         }
@@ -143,7 +144,7 @@ public class LikedVideoPlayerActivity extends AppCompatActivity {
         snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(recyclerViewVideos);
 
-        // Listener để theo dõi video hiện tại
+        // Listener để theo dõi video hiện tại - SỬA LOGIC Ở ĐÂY
         recyclerViewVideos.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -154,8 +155,16 @@ public class LikedVideoPlayerActivity extends AppCompatActivity {
                     if (centerView != null) {
                         int position = layoutManager.getPosition(centerView);
                         if (position != currentPosition) {
+                            int oldPosition = currentPosition;
                             currentPosition = position;
-                            android.util.Log.d("LikedVideoPlayer", "Video position changed to: " + position);
+
+                            android.util.Log.d("LikedVideoPlayer", "Video position changed from " + oldPosition + " to: " + position);
+
+                            // CHỈ pause video cũ, KHÔNG gọi play cho video mới
+                            // Video mới sẽ tự động play khi ExoPlayer ready
+                            if (oldPosition != -1) {
+                                adapter.pauseVideoAt(oldPosition);
+                            }
 
                             // Tải thêm video nếu gần hết danh sách
                             if (position >= likedVideos.size() - 3 && !isLoading) {
@@ -167,13 +176,8 @@ public class LikedVideoPlayerActivity extends AppCompatActivity {
             }
         });
 
-        // Auto play video đầu tiên sau khi setup xong
-        recyclerViewVideos.post(() -> {
-            if (!likedVideos.isEmpty() && adapter != null) {
-                android.util.Log.d("LikedVideoPlayer", "Auto playing video at position: " + currentPosition);
-                adapter.playVideoAt(currentPosition);
-            }
-        });
+        // Set RecyclerView reference cho adapter
+        adapter.setRecyclerView(recyclerViewVideos);
     }
 
     private void setupListeners() {

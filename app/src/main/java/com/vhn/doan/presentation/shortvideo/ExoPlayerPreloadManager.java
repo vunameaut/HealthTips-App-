@@ -54,7 +54,7 @@ public class ExoPlayerPreloadManager {
                 currentPosition = position;
 
                 // Trigger preload background sau khi setup xong
-                schedulePreload(videos, position);
+                schedulePreloadInternal(videos, position);
                 return currentPlayer;
             }
 
@@ -66,7 +66,7 @@ public class ExoPlayerPreloadManager {
             currentPosition = position;
 
             // Trigger preload background
-            schedulePreload(videos, position);
+            schedulePreloadInternal(videos, position);
             return currentPlayer;
 
         } catch (Exception e) {

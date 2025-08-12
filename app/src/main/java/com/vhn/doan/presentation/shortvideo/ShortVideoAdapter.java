@@ -462,6 +462,8 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
 
         public void bind(ShortVideo video, int position) {
+            android.util.Log.d("VideoViewHolder", "Binding video at position: " + position + " - " + video.getTitle());
+
             // Hiển thị thông tin video
             txtTitle.setText(video.getTitle());
             txtCaption.setText(video.getCaption());
@@ -508,19 +510,32 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             txtUploadDate.setText(sdf.format(new Date(video.getUploadDate())));
 
-            // Ẩn thumbnail để video phát ngay khi hiển thị
-            imgThumbnail.setVisibility(View.GONE);
-            playerView.setVisibility(View.INVISIBLE);
+            // QUAN TRỌNG: Reset UI state trước khi setup video
+            resetPlayerViewState();
 
             // Setup video - Sử dụng URL được tối ưu cho mobile
             String optimizedVideoUrl = video.getOptimizedVideoUrl();
-            android.util.Log.d("ShortVideoAdapter", "Loading video - Original: " + video.getVideoUrl());
-            android.util.Log.d("ShortVideoAdapter", "Loading video - Optimized: " + optimizedVideoUrl);
+            android.util.Log.d("ShortVideoAdapter", "Loading video at position " + position + " - Original: " + video.getVideoUrl());
+            android.util.Log.d("ShortVideoAdapter", "Loading video at position " + position + " - Optimized: " + optimizedVideoUrl);
             setupVideo(optimizedVideoUrl);
+        }
 
-            // Reset trạng thái
+        /**
+         * Reset trạng thái UI trước khi setup video mới
+         */
+        private void resetPlayerViewState() {
+            android.util.Log.d("VideoViewHolder", "Resetting player view state");
+
+            // Reset các trạng thái
             isVideoLoaded = false;
+
+            // Ẩn các element UI
+            imgThumbnail.setVisibility(View.GONE);
             imgPlayPause.setVisibility(View.GONE);
+
+            // Ẩn PlayerView và hiển thị loading
+            playerView.setVisibility(View.INVISIBLE);
+            showLoadingIndicator(true);
         }
 
         public void bind(ShortVideo video, int position, List<Object> payloads) {
@@ -591,7 +606,69 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
 
         private void createNewPlayer(String videoUrl) {
+            int position = getAdapterPosition();
+            android.util.Log.d("VideoViewHolder", "=== Creating new player for position: " + position + " ===");
+            android.util.Log.d("VideoViewHolder", "Video URL: " + videoUrl);
+
             try {
+                // Kiểm tra URL trước khi tạo player
+                if (videoUrl == null || videoUrl.isEmpty()) {
+                    android.util.Log.e("VideoViewHolder", "FATAL: Video URL is null/empty for position " + position);
+                    showErrorMessage("URL video không hợp lệ cho video " + (position + 1));
+                    return;
+                }
+
+                // Kiểm tra định dạng URL
+                if (!videoUrl.startsWith("http://") && !videoUrl.startsWith("https://") && !videoUrl.startsWith("content://")) {
+                    android.util.Log.e("VideoViewHolder", "FATAL: Invalid URL format for position " + position + ": " + videoUrl);
+                    showErrorMessage("Định dạng URL không hợp lệ cho video " + (position + 1));
+                    return;
+                }
+
+                exoPlayer = new ExoPlayer.Builder(itemView.getContext()).build();
+                android.util.Log.d("VideoViewHolder", "ExoPlayer created successfully for position " + position);
+
+                playerView.setPlayer(exoPlayer);
+                android.util.Log.d("VideoViewHolder", "PlayerView linked to ExoPlayer for position " + position);
+
+                MediaItem item = MediaItem.fromUri(videoUrl);
+                exoPlayer.setMediaItem(item);
+                exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+
+                android.util.Log.d("VideoViewHolder", "MediaItem set for position " + position + ", preparing...");
+
+                setupPlayerListener();
+                exoPlayer.prepare();
+
+                android.util.Log.d("VideoViewHolder", "ExoPlayer prepared successfully for position " + position);
+
+            } catch (Exception e) {
+                android.util.Log.e("VideoViewHolder", "CRITICAL ERROR creating player for position " + position + ": " + e.getMessage());
+                e.printStackTrace();
+                showErrorMessage("Lỗi nghiêm trọng khi tạo video player cho video " + (position + 1) + ": " + e.getMessage());
+
+                // Fallback: Thử tạo lại player với delay
+                itemView.postDelayed(() -> {
+                    android.util.Log.d("VideoViewHolder", "Attempting fallback player creation for position " + position);
+                    retryCreatePlayer(videoUrl, position);
+                }, 1000);
+            }
+        }
+
+        /**
+         * Phương thức fallback để thử tạo lại player khi có lỗi
+         */
+        private void retryCreatePlayer(String videoUrl, int position) {
+            try {
+                android.util.Log.d("VideoViewHolder", "Retry attempt for position " + position);
+
+                // Release player cũ nếu có
+                if (exoPlayer != null) {
+                    exoPlayer.release();
+                    exoPlayer = null;
+                }
+
+                // Đơn giản hóa tạo player
                 exoPlayer = new ExoPlayer.Builder(itemView.getContext()).build();
                 playerView.setPlayer(exoPlayer);
 
@@ -601,11 +678,33 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
 
                 setupPlayerListener();
                 exoPlayer.prepare();
-                android.util.Log.d("VideoViewHolder", "New ExoPlayer created and prepared");
 
-            } catch (Exception e) {
-                android.util.Log.e("VideoViewHolder", "Error creating new player: " + e.getMessage());
-                showErrorMessage("Lỗi khi tạo video player: " + e.getMessage());
+                android.util.Log.d("VideoViewHolder", "Retry successful for position " + position);
+
+            } catch (Exception retryError) {
+                android.util.Log.e("VideoViewHolder", "Retry also failed for position " + position + ": " + retryError.getMessage());
+                showErrorMessage("Không thể phát video " + (position + 1) + " sau khi thử lại");
+
+                // Hiển thị thông báo lỗi cho user
+                showVideoErrorState(position);
+            }
+        }
+
+        /**
+         * Hiển thị trạng thái lỗi cho video
+         */
+        private void showVideoErrorState(int position) {
+            showLoadingIndicator(false);
+            playerView.setVisibility(View.GONE);
+
+            // Hiển thị message lỗi persistent
+            TextView errorMessage = itemView.findViewById(R.id.errorMessage);
+            if (errorMessage != null) {
+                errorMessage.setText("Video " + (position + 1) + " không thể phát. Vui lòng thử lại sau.");
+                errorMessage.setVisibility(View.VISIBLE);
+                errorMessage.setBackgroundColor(itemView.getContext().getResources().getColor(android.R.color.black));
+                errorMessage.setTextColor(itemView.getContext().getResources().getColor(android.R.color.white));
+                errorMessage.setPadding(32, 32, 32, 32);
             }
         }
 
@@ -615,48 +714,72 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             exoPlayer.addListener(new Player.Listener() {
                 @Override
                 public void onPlaybackStateChanged(int state) {
-                    android.util.Log.d("VideoViewHolder", "Playback state changed: " + state);
+                    int position = getAdapterPosition();
+                    android.util.Log.d("VideoViewHolder", "Playback state changed: " + state + " at position: " + position);
 
                     switch (state) {
                         case Player.STATE_BUFFERING:
-                            android.util.Log.d("VideoViewHolder", "Video buffering...");
+                            android.util.Log.d("VideoViewHolder", "Video buffering at position: " + position);
                             showLoadingIndicator(true);
+                            // ĐẢM BẢO PlayerView được hiển thị ngay cả khi buffering
+                            if (playerView != null) {
+                                playerView.setVisibility(View.VISIBLE);
+                            }
                             break;
 
                         case Player.STATE_READY:
-                            android.util.Log.d("VideoViewHolder", "Video ready to play");
+                            android.util.Log.d("VideoViewHolder", "Video ready to play at position: " + position);
                             isVideoLoaded = true;
                             showLoadingIndicator(false);
-                            playerView.setVisibility(View.VISIBLE);
+
+                            // QUAN TRỌNG: Đảm bảo PlayerView luôn được hiển thị khi ready
+                            if (playerView != null) {
+                                playerView.setVisibility(View.VISIBLE);
+                                android.util.Log.d("VideoViewHolder", "PlayerView set to VISIBLE for position: " + position);
+                            }
 
                             if (listener != null) {
                                 listener.onVideoPlayerReady();
                             }
 
-                            // Auto play nếu đây là video hiện tại
-                            int position = getAdapterPosition();
-                            if (position == currentPlayingPosition || position == 0) {
-                                playVideo();
+                            // LUÔN auto play khi video ready
+                            if (position != RecyclerView.NO_POSITION) {
+                                android.util.Log.d("VideoViewHolder", "Auto playing video at position: " + position);
+                                // Đảm bảo play sau khi PlayerView đã visible
+                                itemView.post(() -> playVideo());
                             }
                             break;
 
                         case Player.STATE_ENDED:
-                            android.util.Log.d("VideoViewHolder", "Video ended");
-                            exoPlayer.seekTo(0);
-                            exoPlayer.play();
+                            android.util.Log.d("VideoViewHolder", "Video ended at position: " + position);
+                            if (exoPlayer != null) {
+                                exoPlayer.seekTo(0);
+                                exoPlayer.play();
+                            }
                             break;
 
                         case Player.STATE_IDLE:
-                            android.util.Log.d("VideoViewHolder", "Player idle");
+                            android.util.Log.d("VideoViewHolder", "Player idle at position: " + position);
                             break;
                     }
                 }
 
                 @Override
                 public void onPlayerError(com.google.android.exoplayer2.PlaybackException error) {
-                    android.util.Log.e("VideoViewHolder", "Player error: " + error.getMessage());
+                    int position = getAdapterPosition();
+                    android.util.Log.e("VideoViewHolder", "Player error at position " + position + ": " + error.getMessage());
                     showErrorMessage("Không thể phát video: " + error.getMessage());
                     showLoadingIndicator(false);
+
+                    // Thử tạo lại player nếu có lỗi
+                    itemView.postDelayed(() -> {
+                        String videoUrl = null;
+                        if (position != RecyclerView.NO_POSITION && position < videos.size()) {
+                            videoUrl = videos.get(position).getOptimizedVideoUrl();
+                            android.util.Log.d("VideoViewHolder", "Retrying player creation for position: " + position);
+                            createNewPlayer(videoUrl);
+                        }
+                    }, 2000); // Retry sau 2 giây
                 }
             });
         }
