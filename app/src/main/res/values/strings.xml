@@ -42,6 +42,11 @@
     <string name="views">lượt xem</string>
     <string name="likes">lượt thích</string>
 
+    <!-- Các chuỗi cho video đã like -->
+    <string name="liked_videos">Video đã thích</string>
+    <string name="no_liked_videos">Chưa có video nào được thích</string>
+    <string name="no_liked_videos_subtitle">Hãy thích những video yêu thích để xem lại sau</string>
+
     <!-- Thông báo lỗi và thành công -->
     <string name="error_login">Đăng nhập thất bại</string>
     <string name="error_register">Đăng ký thất bại</string>

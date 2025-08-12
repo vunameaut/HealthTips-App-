@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +22,9 @@ import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.ShortVideoRepository;
 import com.vhn.doan.data.repository.ShortVideoRepositoryImpl;
 import com.vhn.doan.data.repository.RepositoryCallback;
+import com.vhn.doan.utils.FirebaseAuthHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +37,9 @@ public class LikedVideosFragment extends BaseFragment {
     private ProgressBar progressBar;
     private ConstraintLayout emptyStateLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
+
+    private ShortVideoRepository repository;
+    private List<ShortVideo> likedVideos = new ArrayList<>();
 
     public static LikedVideosFragment newInstance() {
         return new LikedVideosFragment();
@@ -48,6 +54,7 @@ public class LikedVideosFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        repository = new ShortVideoRepositoryImpl();
         setupRecyclerView();
         setupSwipeRefresh();
         loadLikedVideos();
@@ -69,10 +76,11 @@ public class LikedVideosFragment extends BaseFragment {
     private void setupRecyclerView() {
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         recyclerView.setLayoutManager(layoutManager);
+
+        // Tạo adapter với listener để xử lý click vào video
         adapter = new GridShortVideoAdapter(requireContext(), video -> {
-            if (getContext() != null) {
-                android.widget.Toast.makeText(getContext(), R.string.comment_feature_coming_soon, android.widget.Toast.LENGTH_SHORT).show();
-            }
+            // Khi click vào video, mở LikedVideoPlayerFragment
+            openVideoPlayer(video);
         });
         recyclerView.setAdapter(adapter);
     }
@@ -84,32 +92,98 @@ public class LikedVideosFragment extends BaseFragment {
     }
 
     private void loadLikedVideos() {
-        progressBar.setVisibility(View.VISIBLE);
-        emptyStateLayout.setVisibility(View.GONE);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        if (emptyStateLayout != null) {
+            emptyStateLayout.setVisibility(View.GONE);
+        }
 
-        ShortVideoRepository repository = new ShortVideoRepositoryImpl();
-        repository.getTrendingVideos(20, new RepositoryCallback<List<ShortVideo>>() {
+        String currentUserId = FirebaseAuthHelper.getCurrentUserId();
+        if (currentUserId == null) {
+            showError("Vui lòng đăng nhập để xem video đã like");
+            return;
+        }
+
+        repository.getLikedVideos(currentUserId, new RepositoryCallback<List<ShortVideo>>() {
             @Override
             public void onSuccess(List<ShortVideo> result) {
                 if (!isAdded()) return;
-                progressBar.setVisibility(View.GONE);
-                swipeRefreshLayout.setRefreshing(false);
+
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+
                 if (result == null || result.isEmpty()) {
-                    emptyStateLayout.setVisibility(View.VISIBLE);
+                    if (emptyStateLayout != null) {
+                        emptyStateLayout.setVisibility(View.VISIBLE);
+                    }
+                    likedVideos.clear();
                 } else {
-                    emptyStateLayout.setVisibility(View.GONE);
-                    adapter.updateData(result);
+                    if (emptyStateLayout != null) {
+                        emptyStateLayout.setVisibility(View.GONE);
+                    }
+                    likedVideos.clear();
+                    likedVideos.addAll(result);
+                    adapter.updateData(likedVideos);
                 }
             }
 
             @Override
             public void onError(String error) {
                 if (!isAdded()) return;
-                progressBar.setVisibility(View.GONE);
-                swipeRefreshLayout.setRefreshing(false);
-                emptyStateLayout.setVisibility(View.VISIBLE);
-                showError("Không thể tải video: " + error);
+
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+
+                showError(error);
             }
         });
+    }
+
+    /**
+     * Mở video player với khả năng swipe giống TikTok
+     */
+    private void openVideoPlayer(ShortVideo selectedVideo) {
+        if (likedVideos.isEmpty()) {
+            showError("Không có video để phát");
+            return;
+        }
+
+        // Tìm vị trí của video được chọn
+        int selectedPosition = 0;
+        for (int i = 0; i < likedVideos.size(); i++) {
+            if (likedVideos.get(i).getId().equals(selectedVideo.getId())) {
+                selectedPosition = i;
+                break;
+            }
+        }
+
+        // Mở LikedVideoPlayerActivity với Intent
+        Intent intent = LikedVideoPlayerActivity.createIntent(
+            getContext(),
+            new ArrayList<>(likedVideos),
+            selectedPosition
+        );
+        startActivity(intent);
+
+        // Thêm animation chuyển màn hình
+        if (getActivity() != null) {
+            getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        }
+    }
+
+    @Override
+    public void showError(String message) {
+        if (getContext() != null) {
+            android.widget.Toast.makeText(getContext(), message, android.widget.Toast.LENGTH_SHORT).show();
+        }
     }
 }

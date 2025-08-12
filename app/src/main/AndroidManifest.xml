@@ -71,6 +71,13 @@
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
 
+        <!-- Video Player Activity cho danh sách video đã like -->
+        <activity
+            android:name=".presentation.profile.LikedVideoPlayerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.VideoPlayer" />
+
         <!-- Debug Activity -->
         <activity
             android:name=".presentation.debug.ReminderTestActivity"

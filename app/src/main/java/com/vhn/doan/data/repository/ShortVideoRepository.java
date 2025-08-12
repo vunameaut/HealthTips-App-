@@ -86,4 +86,11 @@ public interface ShortVideoRepository {
      * @param callback Callback để xử lý kết quả
      */
     void getUserPreferences(String userId, RepositoryCallback<java.util.Map<String, Float>> callback);
+
+    /**
+     * Lấy danh sách video đã like của người dùng
+     * @param userId ID của người dùng
+     * @param callback Callback để xử lý kết quả
+     */
+    void getLikedVideos(String userId, RepositoryCallback<List<ShortVideo>> callback);
 }
