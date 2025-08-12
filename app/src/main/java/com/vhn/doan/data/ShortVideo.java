@@ -209,10 +209,26 @@ public class ShortVideo implements Parcelable {
      * @return URL video được tối ưu cho mobile
      */
     public String getOptimizedVideoUrl() {
+        android.util.Log.d("ShortVideo", "=== Getting optimized URL for video: " + this.id + " ===");
+        android.util.Log.d("ShortVideo", "Original URL: " + this.videoUrl);
+        android.util.Log.d("ShortVideo", "Is Cloudinary: " + isCloudinaryVideo());
+
         if (isCloudinaryVideo()) {
             // Sử dụng trực tiếp URL gốc thay vì extract public ID
-            return CloudinaryVideoHelper.getOptimizedVideoUrl(this.videoUrl, "auto:good");
+            String optimizedUrl = CloudinaryVideoHelper.getOptimizedVideoUrl(this.videoUrl, "auto:good");
+            android.util.Log.d("ShortVideo", "Optimized URL: " + optimizedUrl);
+
+            // Kiểm tra URL có hợp lệ không
+            if (optimizedUrl == null || optimizedUrl.isEmpty()) {
+                android.util.Log.e("ShortVideo", "FATAL: Cloudinary optimization returned null/empty URL for video: " + this.id);
+                android.util.Log.e("ShortVideo", "Falling back to original URL: " + this.videoUrl);
+                return this.videoUrl; // Fallback về URL gốc
+            }
+
+            return optimizedUrl;
         }
+
+        android.util.Log.d("ShortVideo", "Not Cloudinary video, returning original URL: " + this.videoUrl);
         return this.videoUrl; // Trả về URL gốc nếu không phải Cloudinary
     }
 
