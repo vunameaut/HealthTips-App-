@@ -18,9 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 
@@ -32,8 +29,8 @@ import java.util.Locale;
 
 /**
  * Adapter cho RecyclerView hiển thị danh sách video ngắn
- * Tối ưu hóa cho hiệu ứng vuốt giống TikTok/Facebook Reels
- * Sử dụng ExoPlayer để hiển thị video đúng tỷ lệ mà không bị crop
+ * Sử dụng SingleExoPlayerManager để quản lý 1 ExoPlayer duy nhất cho toàn bộ feed
+ * Giải quyết vấn đề "video #2 phải lướt qua rồi lướt lại mới play"
  */
 public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.VideoViewHolder> {
 
@@ -42,8 +39,8 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     private int currentPlayingPosition = -1;
     private final List<VideoViewHolder> activeHolders = new ArrayList<>();
 
-    // Thêm ExoPlayerPreloadManager và Handler
-    private ExoPlayerPreloadManager preloadManager;
+    // Sử dụng SingleExoPlayerManager thay vì ExoPlayerPreloadManager
+    private SingleExoPlayerManager playerManager;
     private Handler mainHandler;
     private RecyclerView attachedRecyclerView;
 
@@ -60,15 +57,16 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         this.videos = videos;
         this.listener = listener;
         this.mainHandler = new Handler(Looper.getMainLooper());
-        // Context sẽ được set khi onCreateViewHolder được gọi
+        // PlayerManager sẽ được khởi tạo khi onCreateViewHolder được gọi
     }
 
     // Constructor mới cho LikedVideoPlayerFragment (không cần listener)
     public ShortVideoAdapter(android.content.Context context, List<ShortVideo> videos) {
         this.videos = videos;
         this.mainHandler = new Handler(Looper.getMainLooper());
-        // Khởi tạo preload manager
-        this.preloadManager = new ExoPlayerPreloadManager(context);
+        // Khởi tạo player manager
+        this.playerManager = new SingleExoPlayerManager(context);
+        setupPlayerManagerListener();
         this.listener = new VideoInteractionListener() {
             @Override
             public void onVideoLiked(int position, String videoId, boolean isCurrentlyLiked) {
@@ -102,15 +100,47 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         };
     }
 
+    private void setupPlayerManagerListener() {
+        if (playerManager != null) {
+            playerManager.setVideoPlayerListener(new SingleExoPlayerManager.VideoPlayerListener() {
+                @Override
+                public void onVideoReady(int position) {
+                    android.util.Log.d("ShortVideoAdapter", "Video ready at position: " + position);
+                    if (listener != null) {
+                        listener.onVideoPlayerReady();
+                    }
+                    // Gọi callback view count
+                    if (position >= 0 && position < videos.size() && listener != null) {
+                        ShortVideo video = videos.get(position);
+                        listener.onVideoViewed(position, video.getId());
+                    }
+                }
+
+                @Override
+                public void onVideoEnded(int position) {
+                    android.util.Log.d("ShortVideoAdapter", "Video ended at position: " + position);
+                    // Video đã kết thúc, có thể tự động chuyển sang video tiếp theo hoặc loop
+                }
+
+                @Override
+                public void onVideoError(int position, Exception error) {
+                    android.util.Log.e("ShortVideoAdapter", "Video error at position " + position + ": " + error.getMessage());
+                    // Xử lý lỗi video - có thể hiển thị placeholder hoặc skip video
+                }
+            });
+        }
+    }
+
     @NonNull
     @Override
     public VideoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_short_video_simple, parent, false);
 
-        // Khởi tạo preload manager nếu chưa có
-        if (preloadManager == null) {
-            preloadManager = new ExoPlayerPreloadManager(parent.getContext());
+        // Khởi tạo player manager nếu chưa có
+        if (playerManager == null) {
+            playerManager = new SingleExoPlayerManager(parent.getContext());
+            setupPlayerManagerListener();
         }
 
         return new VideoViewHolder(view);
@@ -138,9 +168,15 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     }
 
     public void updateVideos(List<ShortVideo> newVideos) {
+        // Dừng video hiện tại trước khi update
+        if (playerManager != null) {
+            playerManager.detachFromPlayerView();
+        }
+        currentPlayingPosition = -1;
+
         this.videos.clear();
-       this.videos.addAll(newVideos);
-       notifyDataSetChanged();
+        this.videos.addAll(newVideos);
+        notifyDataSetChanged();
     }
 
     public void addVideos(List<ShortVideo> newVideos) {
@@ -202,32 +238,80 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     }
 
     public void playVideoAt(int position) {
+        android.util.Log.d("ShortVideoAdapter", "Playing video at position: " + position);
+
+        if (position < 0 || position >= videos.size()) {
+            android.util.Log.w("ShortVideoAdapter", "Invalid position: " + position);
+            return;
+        }
+
+        // Nếu đang phát video khác, detach trước
         if (currentPlayingPosition != -1 && currentPlayingPosition != position) {
+            if (playerManager != null) {
+                playerManager.detachFromPlayerView();
+            }
+            // Notify item cũ để ẩn player view
             safeNotifyItemChanged(currentPlayingPosition, "pause");
         }
+
         currentPlayingPosition = position;
-        safeNotifyItemChanged(position, "play");
+
+        // Tìm ViewHolder cho position này
+        VideoViewHolder targetHolder = findViewHolderForPosition(position);
+        if (targetHolder != null && targetHolder.playerView != null) {
+            // Attach player manager vào PlayerView của ViewHolder
+            if (playerManager != null) {
+                playerManager.attachToPlayerView(targetHolder.playerView, videos, position);
+            }
+            // Notify để hiển thị player view
+            safeNotifyItemChanged(position, "play");
+        } else {
+            android.util.Log.w("ShortVideoAdapter", "ViewHolder not found for position: " + position);
+            // Nếu không tìm thấy ViewHolder, chỉ update position và notify
+            safeNotifyItemChanged(position, "play");
+        }
+    }
+
+    private VideoViewHolder findViewHolderForPosition(int position) {
+        for (VideoViewHolder holder : activeHolders) {
+            if (holder.getAdapterPosition() == position) {
+                return holder;
+            }
+        }
+        return null;
     }
 
     public void pauseVideoAt(int position) {
         if (position >= 0 && position < getItemCount()) {
+            if (playerManager != null && currentPlayingPosition == position) {
+                playerManager.pause();
+            }
             safeNotifyItemChanged(position, "pause");
         }
     }
 
     public void pauseCurrentVideo() {
         if (currentPlayingPosition != -1) {
+            if (playerManager != null) {
+                playerManager.pause();
+            }
             safeNotifyItemChanged(currentPlayingPosition, "pause");
         }
     }
 
     public void resumeCurrentVideo() {
         if (currentPlayingPosition != -1) {
+            if (playerManager != null) {
+                playerManager.play();
+            }
             safeNotifyItemChanged(currentPlayingPosition, "resume");
         }
     }
 
     public void pauseAllVideos() {
+        if (playerManager != null) {
+            playerManager.detachFromPlayerView();
+        }
         for (int i = 0; i < getItemCount(); i++) {
             safeNotifyItemChanged(i, "pause");
         }
@@ -253,18 +337,20 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         activeHolders.clear();
         currentPlayingPosition = -1;
 
-        // Release preload manager resources
-        if (preloadManager != null) {
-            preloadManager.releaseAllResources();
+        // Release player manager resources
+        if (playerManager != null) {
+            playerManager.release();
+            playerManager = null;
         }
     }
 
     // Thêm các method còn thiếu cho LikedVideoPlayerFragment
     public void updateData(List<ShortVideo> newVideos) {
-        // Release preload manager trước khi update data
-        if (preloadManager != null) {
-            preloadManager.releaseAllResources();
+        // Release player manager trước khi update data
+        if (playerManager != null) {
+            playerManager.detachFromPlayerView();
         }
+        currentPlayingPosition = -1;
 
         this.videos.clear();
         if (newVideos != null) {
@@ -278,27 +364,25 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
     }
 
     /**
-     * Method để trigger preload khi người dùng scroll đến vị trí mới
+     * Method để trigger khi người dùng scroll đến vị trí mới
      * Gọi từ Fragment/Activity khi detect scroll
      */
     public void onScrollToPosition(int position) {
-        if (preloadManager != null && position >= 0 && position < videos.size()) {
-            android.util.Log.d("ShortVideoAdapter", "Scrolled to position: " + position + ", triggering preload");
-            // Setup current video và preload xung quanh
-            preloadManager.setupCurrentVideo(videos, position);
+        if (position >= 0 && position < videos.size()) {
+            android.util.Log.d("ShortVideoAdapter", "Scrolled to position: " + position);
+            // Tự động phát video tại vị trí mới
+            playVideoAt(position);
         }
     }
 
     /**
-     * Lấy thông tin debug về preload manager
+     * Lấy thông tin debug về player manager
      */
-    public String getPreloadDebugInfo() {
-        if (preloadManager == null) {
-            return "Preload Manager: null";
+    public String getPlayerDebugInfo() {
+        if (playerManager == null) {
+            return "Player Manager: null";
         }
-        return String.format("Preload Manager - Current: %d, Preloaded: %d",
-                preloadManager.getCurrentPosition(),
-                preloadManager.getPreloadedCount());
+        return playerManager.getDebugInfo();
     }
 
     @Override
@@ -307,6 +391,12 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         if (!activeHolders.contains(holder)) {
             activeHolders.add(holder);
         }
+
+        // Nếu đây là ViewHolder cho vị trí hiện tại đang phát, attach player
+        int position = holder.getAdapterPosition();
+        if (position == currentPlayingPosition && playerManager != null && holder.playerView != null) {
+            playerManager.attachToPlayerView(holder.playerView, videos, position);
+        }
     }
 
     @Override
@@ -314,6 +404,12 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         super.onViewDetachedFromWindow(holder);
         holder.releaseResources();
         activeHolders.remove(holder);
+
+        // Nếu đây là ViewHolder cho vị trí hiện tại đang phát, detach player
+        int position = holder.getAdapterPosition();
+        if (position == currentPlayingPosition && playerManager != null) {
+            playerManager.detachFromPlayerView();
+        }
     }
 
     @Override
@@ -325,7 +421,6 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
 
     public class VideoViewHolder extends RecyclerView.ViewHolder {
         private PlayerView playerView;
-        private ExoPlayer exoPlayer;
         private ImageView imgThumbnail;
         private ImageView imgPlayPause;
         private TextView txtTitle;
@@ -576,32 +671,30 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                 return;
             }
 
-            releasePlayer();
-
-            try {
-                int position = getAdapterPosition();
-                if (position == RecyclerView.NO_POSITION) {
-                    android.util.Log.w("VideoViewHolder", "Invalid position, creating new player");
-                    createNewPlayer(videoUrl);
-                    return;
+            // Nếu đang phát video khác, detach trước
+            if (currentPlayingPosition != -1) {
+                if (playerManager != null) {
+                    playerManager.detachFromPlayerView();
                 }
+                // Notify item cũ để ẩn player view
+                safeNotifyItemChanged(currentPlayingPosition, "pause");
+            }
 
-                // Luôn tạo player mới để đảm bảo ổn định
-                android.util.Log.d("VideoViewHolder", "Creating new player for position: " + position);
-                createNewPlayer(videoUrl);
+            currentPlayingPosition = getAdapterPosition();
 
-                // Chỉ thử preload manager như một optimization, không bắt buộc
-                if (preloadManager != null) {
-                    try {
-                        preloadManager.schedulePreload(videos, position);
-                    } catch (Exception e) {
-                        android.util.Log.w("VideoViewHolder", "Preload scheduling failed: " + e.getMessage());
-                    }
+            // Tìm ViewHolder cho position này
+            VideoViewHolder targetHolder = findViewHolderForPosition(currentPlayingPosition);
+            if (targetHolder != null && targetHolder.playerView != null) {
+                // Attach player manager vào PlayerView của ViewHolder
+                if (playerManager != null) {
+                    playerManager.attachToPlayerView(targetHolder.playerView, videos, currentPlayingPosition);
                 }
-
-            } catch (Exception e) {
-                android.util.Log.e("VideoViewHolder", "Error setting up video: " + e.getMessage());
-                showErrorMessage("Lỗi khi thiết lập video: " + e.getMessage());
+                // Notify để hiển thị player view
+                safeNotifyItemChanged(currentPlayingPosition, "play");
+            } else {
+                android.util.Log.w("ShortVideoAdapter", "ViewHolder not found for position: " + currentPlayingPosition);
+                // Nếu không tìm thấy ViewHolder, chỉ update position và notify
+                safeNotifyItemChanged(currentPlayingPosition, "play");
             }
         }
 
@@ -625,22 +718,12 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                     return;
                 }
 
-                exoPlayer = new ExoPlayer.Builder(itemView.getContext()).build();
-                android.util.Log.d("VideoViewHolder", "ExoPlayer created successfully for position " + position);
+                // Chỉ cần gọi attachToPlayerView với position đúng
+                if (playerManager != null) {
+                    playerManager.attachToPlayerView(playerView, videos, position);
+                }
 
-                playerView.setPlayer(exoPlayer);
-                android.util.Log.d("VideoViewHolder", "PlayerView linked to ExoPlayer for position " + position);
-
-                MediaItem item = MediaItem.fromUri(videoUrl);
-                exoPlayer.setMediaItem(item);
-                exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
-
-                android.util.Log.d("VideoViewHolder", "MediaItem set for position " + position + ", preparing...");
-
-                setupPlayerListener();
-                exoPlayer.prepare();
-
-                android.util.Log.d("VideoViewHolder", "ExoPlayer prepared successfully for position " + position);
+                android.util.Log.d("VideoViewHolder", "Player attached successfully for position " + position);
 
             } catch (Exception e) {
                 android.util.Log.e("VideoViewHolder", "CRITICAL ERROR creating player for position " + position + ": " + e.getMessage());
@@ -663,21 +746,14 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                 android.util.Log.d("VideoViewHolder", "Retry attempt for position " + position);
 
                 // Release player cũ nếu có
-                if (exoPlayer != null) {
-                    exoPlayer.release();
-                    exoPlayer = null;
+                if (playerManager != null) {
+                    playerManager.detachFromPlayerView();
                 }
 
                 // Đơn giản hóa tạo player
-                exoPlayer = new ExoPlayer.Builder(itemView.getContext()).build();
-                playerView.setPlayer(exoPlayer);
-
-                MediaItem item = MediaItem.fromUri(videoUrl);
-                exoPlayer.setMediaItem(item);
-                exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
-
-                setupPlayerListener();
-                exoPlayer.prepare();
+                if (playerManager != null) {
+                    playerManager.attachToPlayerView(playerView, videos, position);
+                }
 
                 android.util.Log.d("VideoViewHolder", "Retry successful for position " + position);
 
@@ -708,93 +784,20 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
             }
         }
 
-        private void setupPlayerListener() {
-            if (exoPlayer == null) return;
-
-            exoPlayer.addListener(new Player.Listener() {
-                @Override
-                public void onPlaybackStateChanged(int state) {
-                    int position = getAdapterPosition();
-                    android.util.Log.d("VideoViewHolder", "Playback state changed: " + state + " at position: " + position);
-
-                    switch (state) {
-                        case Player.STATE_BUFFERING:
-                            android.util.Log.d("VideoViewHolder", "Video buffering at position: " + position);
-                            showLoadingIndicator(true);
-                            // ĐẢM BẢO PlayerView được hiển thị ngay cả khi buffering
-                            if (playerView != null) {
-                                playerView.setVisibility(View.VISIBLE);
-                            }
-                            break;
-
-                        case Player.STATE_READY:
-                            android.util.Log.d("VideoViewHolder", "Video ready to play at position: " + position);
-                            isVideoLoaded = true;
-                            showLoadingIndicator(false);
-
-                            // QUAN TRỌNG: Đảm bảo PlayerView luôn được hiển thị khi ready
-                            if (playerView != null) {
-                                playerView.setVisibility(View.VISIBLE);
-                                android.util.Log.d("VideoViewHolder", "PlayerView set to VISIBLE for position: " + position);
-                            }
-
-                            if (listener != null) {
-                                listener.onVideoPlayerReady();
-                            }
-
-                            // LUÔN auto play khi video ready
-                            if (position != RecyclerView.NO_POSITION) {
-                                android.util.Log.d("VideoViewHolder", "Auto playing video at position: " + position);
-                                // Đảm bảo play sau khi PlayerView đã visible
-                                itemView.post(() -> playVideo());
-                            }
-                            break;
-
-                        case Player.STATE_ENDED:
-                            android.util.Log.d("VideoViewHolder", "Video ended at position: " + position);
-                            if (exoPlayer != null) {
-                                exoPlayer.seekTo(0);
-                                exoPlayer.play();
-                            }
-                            break;
-
-                        case Player.STATE_IDLE:
-                            android.util.Log.d("VideoViewHolder", "Player idle at position: " + position);
-                            break;
-                    }
-                }
-
-                @Override
-                public void onPlayerError(com.google.android.exoplayer2.PlaybackException error) {
-                    int position = getAdapterPosition();
-                    android.util.Log.e("VideoViewHolder", "Player error at position " + position + ": " + error.getMessage());
-                    showErrorMessage("Không thể phát video: " + error.getMessage());
-                    showLoadingIndicator(false);
-
-                    // Thử tạo lại player nếu có lỗi
-                    itemView.postDelayed(() -> {
-                        String videoUrl = null;
-                        if (position != RecyclerView.NO_POSITION && position < videos.size()) {
-                            videoUrl = videos.get(position).getOptimizedVideoUrl();
-                            android.util.Log.d("VideoViewHolder", "Retrying player creation for position: " + position);
-                            createNewPlayer(videoUrl);
-                        }
-                    }, 2000); // Retry sau 2 giây
-                }
-            });
-        }
-
         private void togglePlayPause() {
-            if (exoPlayer != null && exoPlayer.isPlaying()) {
-                pauseVideo();
+            if (playerManager != null && playerManager.isPlaying()) {
+                playerManager.pause();
+                imgPlayPause.setVisibility(View.VISIBLE);
             } else {
-                playVideo();
+                playerManager.play();
+                imgPlayPause.setVisibility(View.GONE);
+                imgThumbnail.setVisibility(View.GONE);
             }
         }
 
         private void playVideo() {
-            if (exoPlayer != null) {
-                exoPlayer.play();
+            if (playerManager != null) {
+                playerManager.play();
                 imgPlayPause.setVisibility(View.GONE);
                 imgThumbnail.setVisibility(View.GONE);
                 if (listener != null) {
@@ -808,29 +811,23 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
         }
 
         private void pauseVideo() {
-            if (exoPlayer != null && exoPlayer.isPlaying()) {
-                exoPlayer.pause();
+            if (playerManager != null && playerManager.isPlaying()) {
+                playerManager.pause();
                 imgPlayPause.setVisibility(View.VISIBLE);
             }
         }
 
         private void resumeVideo() {
-            if (exoPlayer != null && !exoPlayer.isPlaying()) {
-                exoPlayer.play();
+            if (playerManager != null && !playerManager.isPlaying()) {
+                playerManager.play();
                 imgPlayPause.setVisibility(View.GONE);
             }
         }
 
-        private void releasePlayer() {
-            if (exoPlayer != null) {
-                exoPlayer.release();
-                exoPlayer = null;
-                isVideoLoaded = false;
-            }
-        }
-
         public void releaseResources() {
-            releasePlayer();
+            if (playerManager != null) {
+                playerManager.detachFromPlayerView();
+            }
             isVideoLoaded = false;
             if (imgThumbnail != null) {
                 imgThumbnail.setVisibility(View.GONE);
@@ -907,9 +904,9 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
                 imgPlayPause.setVisibility(View.GONE);
             }
 
-            if (exoPlayer != null && exoPlayer.isPlaying()) {
+            if (playerManager != null && playerManager.isPlaying()) {
                 try {
-                    exoPlayer.pause();
+                    playerManager.pause();
                 } catch (Exception ignored) {
                 }
             }

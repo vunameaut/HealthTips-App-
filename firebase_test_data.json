@@ -188,7 +188,7 @@
     "tip012": {
       "id": "tip012",
       "title": "Workout cho người bận rộn",
-      "content": "Không có thời gian không còn là lý do để không tập thể dục. Bài tập 15 phút cho người bận rộn: 1. Warm-up (2 phút): Đi bộ tại chỗ, xoay khớp, 2. Circuit training (10 phút): Push-ups, Squats, Planks, Lunges (mỗi bài 45 giây, nghỉ 15 giây), 3. Cool-down (3 phút): Kéo dãn toàn thân. Thực hiện 3-4 lần/tuần sẽ mang lại hiệu quả rõ rệt.",
+      "content": "Không có thời gian không còn là lý do để không tập thể dục. Bài tập 15 phút cho người bận rộn: 1. Warm-up (2 phút): Đi bộ tại chỗ, xoay khớp, 2. Circuit training (10 phút): Push-ups, Squats, Planks, Lunges (mỗi bài 45 giây, nghỉ 15 giây), 3. Cool-down (3 phút): Kéo dãn toàn thân. Thực hiện 3-4 lần/tuần sẽ mang l���i hiệu quả rõ rệt.",
       "categoryId": "cat002",
       "categoryName": "Tập luyện",
       "imageUrl": "https://scontent.fhan20-1.fna.fbcdn.net/v/t39.30808-6/476832127_1286442219076854_3102223766865603634_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGKsfHnc7YfyGCCUiZ2WqZcD4EO1CV98pIPgQ7UJX3ykq8SxetLGiPT8l-eEqeIgCo1ZA1i5GjnxIkoAP-YAorw&_nc_ohc=yW-25uJzoqEQ7kNvwFFKaea&_nc_oc=Adk55THicezgt6yG54EX--VtvHT5mpFpDayseXFQb40EP6UNYOephp7zc0a2BssuyykbH38S5MLk5_MC4tJLrOgy&_nc_zt=23&_nc_ht=scontent.fhan20-1.fna&_nc_gid=ONiRbs8lrNG5luCpuRoBPw&oh=00_AfRXNPW4mZ9kRrnsEruhb-F5m-0Kh-DKXWz0mIrUdNPuqQ&oe=6882E5FD",
@@ -241,84 +241,93 @@
   "videos": {
     "video001": {
       "id": "video001",
-      "title": "5 bài tập giảm cân hiệu quả tại nhà",
-      "caption": "Cùng tập luyện 5 bài tập đơn giản giúp đốt cháy calo nhanh chóng. Chỉ cần 15 phút mỗi ngày! #giamcan #tapluyen #suckhoe",
+      "title": "Smoothie xanh detox bổ dưỡng",
+      "caption": "Công thức smoothie xanh giàu vitamin và khoáng chất giúp detox cơ thể hiệu quả. Dễ làm, ngon miệng và cực kỳ bổ dưỡng! #dinhduong #smoothie #detox #suckhoe",
       "uploadDate": 1733702400000,
-      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fgiamcan%2Fvideo001.mp4?alt=media",
-      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fgiamcan%2Fvideo001.jpg?alt=media",
-      "categoryId": "giamcan",
+      "cldPublicId": "smoothie-xanh-detox_ooplld",
+      "cldVersion": "1755156065",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156065/smoothie-xanh-detox_ooplld.jpg",
+      "categoryId": "dinhduong",
       "tags": {
-        "giamcan": true,
-        "tapluyen": true,
+        "dinhduong": true,
+        "smoothie": true,
+        "detox": true,
         "suckhoe": true
       },
-      "viewCount": 1250,
-      "likeCount": 89,
+      "viewCount": 2150,
+      "likeCount": 189,
       "userId": "user001"
     },
     "video002": {
       "id": "video002",
-      "title": "Yoga buổi sáng để khởi động ngày mới",
-      "caption": "10 phút yoga nhẹ nhàng để thức dậy cơ thể và tinh thần. Hoàn hảo cho buổi sáng! #yoga #suckhoe #thiendinhduong",
+      "title": "Tăng cường miễn dịch tự nhiên",
+      "caption": "Những cách đơn giản để tăng cường hệ miễn dịch tự nhiên qua chế độ ��n uống và lối sống lành mạnh. #mienDich #suckhoe #dinhduong",
       "uploadDate": 1733616000000,
-      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Ftapluyen%2Fvideo002.mp4?alt=media",
-      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Ftapluyen%2Fvideo002.jpg?alt=media",
-      "categoryId": "tapluyen",
+      "cldPublicId": "tang-cuong-mien-dich_dewnsb",
+      "cldVersion": "1755155910",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755155910/tang-cuong-mien-dich_dewnsb.jpg",
+      "categoryId": "suckhoe",
       "tags": {
-        "yoga": true,
+        "mienDich": true,
         "suckhoe": true,
-        "tapluyen": true
+        "dinhduong": true
       },
-      "viewCount": 2100,
+      "viewCount": 1890,
       "likeCount": 156,
       "userId": "user002"
     },
     "video003": {
       "id": "video003",
-      "title": "Smoothie xanh bổ dưỡng cho bữa sáng",
-      "caption": "Công thức smoothie xanh giàu vitamin và khoáng chất. Dễ làm, ngon miệng và cực kỳ bổ dưỡng! #dinhduong #smoothie #suckhoe",
+      "title": "Thiền chánh niệm cho tâm trí an lạc",
+      "caption": "Hướng dẫn thiền chánh niệm cơ bản giúp giảm stress và tăng cường sức khỏe tinh thần. Thực hành mọi lúc mọi nơi! #thien #tinhThan #stress #suckhoe",
       "uploadDate": 1733529600000,
-      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fdinhduong%2Fvideo003.mp4?alt=media",
-      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fdinhduong%2Fvideo003.jpg?alt=media",
-      "categoryId": "dinhduong",
+      "cldPublicId": "thien-chanh-niem_atzjao",
+      "cldVersion": "1755156237",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156237/thien-chanh-niem_atzjao.jpg",
+      "categoryId": "tamly",
       "tags": {
-        "dinhduong": true,
-        "vitamin": true,
-        "suckhoe": true
-      },
-      "viewCount": 890,
-      "likeCount": 67,
-      "userId": "user003"
-    },
-    "video004": {
-      "id": "video004",
-      "title": "Kỹ thuật thở để giảm stress ngay lập tức",
-      "caption": "Học cách thở đúng để xua tan căng thẳng chỉ trong 3 phút. Thực hành mọi lúc mọi nơi! #stress #thiendinhduong #suckhoe",
-      "uploadDate": 1733443200000,
-      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fsuckhoe%2Fvideo004.mp4?alt=media",
-      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fsuckhoe%2Fvideo004.jpg?alt=media",
-      "categoryId": "suckhoe",
-      "tags": {
+        "thien": true,
+        "tinhThan": true,
         "stress": true,
-        "thiendinhduong": true,
         "suckhoe": true
       },
       "viewCount": 1580,
       "likeCount": 123,
+      "userId": "user003"
+    },
+    "video004": {
+      "id": "video004",
+      "title": "Kỹ thuật thở sâu để giảm căng thẳng",
+      "caption": "Học cách thở đúng để xua tan căng thẳng chỉ trong 3 phút. Kỹ thuật thở sâu hiệu quả cho mọi lúc! #tho #stress #thusiGian #suckhoe",
+      "uploadDate": 1733443200000,
+      "cldPublicId": "ky-thuat-tho-sau_ip7gzo",
+      "cldVersion": "1755156221",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156221/ky-thuat-tho-sau_ip7gzo.jpg",
+      "categoryId": "tamly",
+      "tags": {
+        "tho": true,
+        "stress": true,
+        "thusiGian": true,
+        "suckhoe": true
+      },
+      "viewCount": 2240,
+      "likeCount": 198,
       "userId": "user004"
     },
     "video005": {
       "id": "video005",
-      "title": "HIIT 7 phút đốt cháy mỡ bụng",
-      "caption": "Bài tập HIIT cường độ cao chỉ 7 phút. Hiệu quả tối đa cho việc giảm mỡ bụng! #hiit #giamcan #tapluyen",
+      "title": "Tập squat đúng cách cho chân khỏe",
+      "caption": "Hướng dẫn chi tiết cách tập squat đúng kỹ thuật để có đôi chân khỏe mạnh và săn chắc. Phù hợp cho mọi trình độ! #squat #tapluyen #chan #theThanh",
       "uploadDate": 1733356800000,
-      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fgiamcan%2Fvideo005.mp4?alt=media",
-      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fgiamcan%2Fvideo005.jpg?alt=media",
-      "categoryId": "giamcan",
+      "cldPublicId": "tap-squat-dung-cach_djxmgy",
+      "cldVersion": "1755156198",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156198/tap-squat-dung-cach_djxmgy.jpg",
+      "categoryId": "thetduc",
       "tags": {
-        "hiit": true,
-        "giamcan": true,
-        "tapluyen": true
+        "squat": true,
+        "tapluyen": true,
+        "chan": true,
+        "theThanh": true
       },
       "viewCount": 3200,
       "likeCount": 245,
@@ -326,54 +335,98 @@
     },
     "video006": {
       "id": "video006",
-      "title": "Cách làm salad protein đầy đủ dinh dưỡng",
-      "caption": "Salad protein với đầy đủ vitamin, khoáng chất và protein cần thiết. Thích hợp cho người tập gym! #protein #dinhduong #salad",
+      "title": "Cardio tại nhà đốt cháy calo",
+      "caption": "Bài tập cardio cường độ cao tại nhà giúp đốt cháy calo hiệu quả. Chỉ cần 15 phút mỗi ngày! #cardio #tapluyen #dotChay #taiNha",
       "uploadDate": 1733270400000,
-      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fdinhduong%2Fvideo006.mp4?alt=media",
-      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fdinhduong%2Fvideo006.jpg?alt=media",
-      "categoryId": "dinhduong",
+      "cldPublicId": "cardio-tai-nha_xs9yzj",
+      "cldVersion": "1755156180",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156180/cardio-tai-nha_xs9yzj.jpg",
+      "categoryId": "thetduc",
       "tags": {
-        "protein": true,
-        "dinhduong": true,
-        "tapluyen": true
+        "cardio": true,
+        "tapluyen": true,
+        "dotChay": true,
+        "taiNha": true
       },
-      "viewCount": 1450,
-      "likeCount": 98,
+      "viewCount": 2890,
+      "likeCount": 221,
       "userId": "user005"
     },
     "video007": {
       "id": "video007",
-      "title": "Thiền 5 phút cho giấc ngủ ngon",
-      "caption": "Bài thiền ngắn giúp thư giãn tâm trí và có giấc ngủ sâu. Thực hành trước khi đi ngủ! #thien #ngu #suckhoe",
+      "title": "Yoga buổi sáng khởi động năng lượng",
+      "caption": "10 phút yoga nhẹ nhàng để thức dậy cơ thể và tinh thần. Hoàn hảo cho buổi sáng tràn đầy năng lượng! #yoga #buoiSang #nangLuong #suckhoe",
       "uploadDate": 1733184000000,
-      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Fsuckhoe%2Fvideo007.mp4?alt=media",
-      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Fsuckhoe%2Fvideo007.jpg?alt=media",
-      "categoryId": "suckhoe",
+      "cldPublicId": "yoga-buoi-sang_whl2bl",
+      "cldVersion": "1755156165",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156165/yoga-buoi-sang_whl2bl.jpg",
+      "categoryId": "thetduc",
       "tags": {
-        "thien": true,
-        "ngu": true,
+        "yoga": true,
+        "buoiSang": true,
+        "nangLuong": true,
         "suckhoe": true
       },
-      "viewCount": 2800,
-      "likeCount": 201,
-      "userId": "user006"
+      "viewCount": 2100,
+      "likeCount": 167,
+      "userId": "user002"
     },
     "video008": {
       "id": "video008",
-      "title": "Bài tập cardio không cần dụng cụ",
-      "caption": "15 phút cardio tại nhà không cần thiết bị. Đổ mồ hôi ngay lập tức! #cardio #tapluyen #giamcan",
+      "title": "Massage bấm huyệt thư giãn",
+      "caption": "Kỹ thuật massage bấm huyệt đơn giản giúp thư giãn cơ bắp và giảm đau nhức hiệu quả. Tự làm tại nhà! #massage #bamHuyet #thuGian #suckhoe",
       "uploadDate": 1733097600000,
-      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/video%2Ftapluyen%2Fvideo008.mp4?alt=media",
-      "thumbnailUrl": "https://firebasestorage.googleapis.com/v0/b/reminderwater-84694.appspot.com/o/image%2Ftapluyen%2Fvideo008.jpg?alt=media",
-      "categoryId": "tapluyen",
+      "cldPublicId": "massage-bam-huyet_i04cdc",
+      "cldVersion": "1755156141",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156141/massage-bam-huyet_i04cdc.jpg",
+      "categoryId": "suckhoe",
       "tags": {
-        "cardio": true,
-        "tapluyen": true,
-        "giamcan": true
+        "massage": true,
+        "bamHuyet": true,
+        "thuGian": true,
+        "suckhoe": true
+      },
+      "viewCount": 1750,
+      "likeCount": 134,
+      "userId": "user003"
+    },
+    "video009": {
+      "id": "video009",
+      "title": "Chăm sóc da mặt tự nhiên",
+      "caption": "Những cách chăm sóc da mặt tự nhiên với nguyên liệu có sẵn tại nhà. An toàn và hiệu quả cho mọi loại da! #chamSoc #daMat #tuNhien #lamDep",
+      "uploadDate": 1733011200000,
+      "cldPublicId": "cham-soc-da-mat_hdncrt",
+      "cldVersion": "1755156127",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156127/cham-soc-da-mat_hdncrt.jpg",
+      "categoryId": "suckhoe",
+      "tags": {
+        "chamSoc": true,
+        "daMat": true,
+        "tuNhien": true,
+        "lamDep": true
+      },
+      "viewCount": 1420,
+      "likeCount": 98,
+      "userId": "user004"
+    },
+    "video010": {
+      "id": "video010",
+      "title": "Uống nước đúng cách cho sức khỏe",
+      "caption": "Hướng dẫn uống nước đúng cách để tối ưu hóa sức khỏe và năng lượng. Bí quyết đơn giản nhưng hiệu quả! #uongNuoc #suckhoe #nangLuong #hydration",
+      "uploadDate": 1732924800000,
+      "cldPublicId": "uong-nuoc-dung-cach_fi126b",
+      "cldVersion": "1755156110",
+      "thumbnailUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/v1755156110/uong-nuoc-dung-cach_fi126b.jpg",
+      "categoryId": "dinhduong",
+      "tags": {
+        "uongNuoc": true,
+        "suckhoe": true,
+        "nangLuong": true,
+        "hydration": true
       },
       "viewCount": 1890,
-      "likeCount": 142,
-      "userId": "user007"
+      "likeCount": 145,
+      "userId": "user005"
     }
   },
   "users": {
