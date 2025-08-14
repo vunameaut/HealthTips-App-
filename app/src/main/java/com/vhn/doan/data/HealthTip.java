@@ -193,7 +193,7 @@ public class HealthTip {
     public String getOptimizedImageUrl() {
         if (isCloudinaryImage()) {
             // Tạo URL tối ưu cho ảnh mobile
-            return getCloudinaryOptimizedImageUrl(this.imageUrl, 800, 600);
+            return CloudinaryVideoHelper.getOptimizedImageUrl(this.imageUrl, 800, 600, "auto:good");
         }
         return this.imageUrl; // Trả về URL gốc nếu không phải Cloudinary
     }
@@ -205,52 +205,9 @@ public class HealthTip {
     public String getThumbnailUrl() {
         if (isCloudinaryImage()) {
             // Tạo thumbnail nhỏ cho danh sách
-            return getCloudinaryOptimizedImageUrl(this.imageUrl, 300, 200);
+            return CloudinaryVideoHelper.getOptimizedImageUrl(this.imageUrl, 300, 200, "auto:good");
         }
         return this.imageUrl; // Trả về URL gốc nếu không phải Cloudinary
-    }
-
-    /**
-     * Tạo URL ảnh Cloudinary được tối ưu
-     * @param originalUrl URL gốc
-     * @param width Chiều rộng mong muốn
-     * @param height Chiều cao mong muốn
-     * @return URL ảnh được tối ưu
-     */
-    private String getCloudinaryOptimizedImageUrl(String originalUrl, int width, int height) {
-        if (originalUrl == null || originalUrl.trim().isEmpty()) {
-            return "";
-        }
-
-        try {
-            // Tìm vị trí của "/upload/" để chèn transformations
-            String uploadMarker = "/upload/";
-            int uploadIndex = originalUrl.indexOf(uploadMarker);
-
-            if (uploadIndex != -1) {
-                String beforeUpload = originalUrl.substring(0, uploadIndex + uploadMarker.length());
-                String afterUpload = originalUrl.substring(uploadIndex + uploadMarker.length());
-
-                // Loại bỏ transformations cũ nếu có
-                if (afterUpload.matches("^[a-z]_.*")) {
-                    int firstSlash = afterUpload.indexOf('/');
-                    if (firstSlash != -1) {
-                        afterUpload = afterUpload.substring(firstSlash + 1);
-                    }
-                }
-
-                // Tạo URL với optimization cho mobile
-                String optimizedUrl =
-                    beforeUpload +
-                    "w_" + width + ",h_" + height + ",c_fill,f_auto,q_auto:good/" + afterUpload;
-
-                return optimizedUrl;
-            }
-        } catch (Exception e) {
-            android.util.Log.e("HealthTip", "Lỗi khi tối ưu ảnh URL: " + e.getMessage());
-        }
-
-        return originalUrl; // Trả về URL gốc nếu có lỗi
     }
 
     @Override
