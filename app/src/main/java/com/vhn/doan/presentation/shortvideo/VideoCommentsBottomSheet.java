@@ -95,10 +95,13 @@ public class VideoCommentsBottomSheet extends BottomSheetDialogFragment {
                     repository.addComment(videoId, comment, new RepositoryCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
-                            editComment.setText("");
-                            editComment.setHint(getString(R.string.enter_comment));
-                            // Tải lại danh sách bình luận từ Firebase để đảm bảo dữ liệu đồng bộ
-                            loadComments();
+                            // Kiểm tra xem fragment có còn attached không trước khi truy cập context
+                            if (isAdded() && getContext() != null) {
+                                editComment.setText("");
+                                editComment.setHint(getString(R.string.enter_comment));
+                                // Tải lại danh sách bình luận từ Firebase để đ���m bảo dữ liệu đồng bộ
+                                loadComments();
+                            }
                         }
 
                         @Override
@@ -110,10 +113,13 @@ public class VideoCommentsBottomSheet extends BottomSheetDialogFragment {
                     repository.addReply(videoId, replyPath, comment, new RepositoryCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
-                            editComment.setText("");
-                            editComment.setHint(getString(R.string.enter_comment));
-                            replyPath = null;
-                            loadComments();
+                            // Kiểm tra xem fragment có còn attached không trước khi truy cập context
+                            if (isAdded() && getContext() != null) {
+                                editComment.setText("");
+                                editComment.setHint(getString(R.string.enter_comment));
+                                replyPath = null;
+                                loadComments();
+                            }
                         }
 
                         @Override
@@ -312,4 +318,3 @@ public class VideoCommentsBottomSheet extends BottomSheetDialogFragment {
         }
     }
 }
-
