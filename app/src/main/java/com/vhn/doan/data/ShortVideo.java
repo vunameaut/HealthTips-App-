@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.PropertyName;
-import com.vhn.doan.services.CloudinaryVideoHelper;
+import com.vhn.doan.services.CloudinaryUrlBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,8 +26,16 @@ public class ShortVideo implements Parcelable {
     @PropertyName("uploadDate")
     private long uploadDate;
 
-    @PropertyName("videoUrl")
-    private String videoUrl;
+    // Cloudinary identifiers
+    @PropertyName("cldPublicId")
+    private String cldPublicId;
+
+    @PropertyName("cldVersion")
+    private long cldVersion;
+
+    // Legacy field kept only for backward compatibility
+    @PropertyName("videoUrl_deprecated")
+    private String videoUrlDeprecated;
 
     @PropertyName("thumbnailUrl")
     private String thumbnailUrl;
@@ -54,15 +62,16 @@ public class ShortVideo implements Parcelable {
     public ShortVideo() {
     }
 
-    // Constructor cập nhật - loại bỏ cloudinaryPublicId
+    // Constructor cập nhật sử dụng Cloudinary
     public ShortVideo(String id, String title, String caption, long uploadDate,
-                     String videoUrl, String thumbnailUrl, String categoryId,
+                     String cldPublicId, long cldVersion, String thumbnailUrl, String categoryId,
                      Map<String, Boolean> tags, int viewCount, int likeCount, String userId) {
         this.id = id;
         this.title = title;
         this.caption = caption;
         this.uploadDate = uploadDate;
-        this.videoUrl = videoUrl;
+        this.cldPublicId = cldPublicId;
+        this.cldVersion = cldVersion;
         this.thumbnailUrl = thumbnailUrl;
         this.categoryId = categoryId;
         this.tags = tags;
@@ -77,7 +86,9 @@ public class ShortVideo implements Parcelable {
         title = in.readString();
         caption = in.readString();
         uploadDate = in.readLong();
-        videoUrl = in.readString();
+        cldPublicId = in.readString();
+        cldVersion = in.readLong();
+        videoUrlDeprecated = in.readString();
         thumbnailUrl = in.readString();
         categoryId = in.readString();
         viewCount = in.readInt();
@@ -130,16 +141,35 @@ public class ShortVideo implements Parcelable {
         this.uploadDate = uploadDate;
     }
 
-    public String getVideoUrl() {
-        return videoUrl;
+    public String getCldPublicId() {
+        return cldPublicId;
     }
 
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
+    public void setCldPublicId(String cldPublicId) {
+        this.cldPublicId = cldPublicId;
+    }
+
+    public long getCldVersion() {
+        return cldVersion;
+    }
+
+    public void setCldVersion(long cldVersion) {
+        this.cldVersion = cldVersion;
+    }
+
+    public String getVideoUrlDeprecated() {
+        return videoUrlDeprecated;
+    }
+
+    public void setVideoUrlDeprecated(String videoUrlDeprecated) {
+        this.videoUrlDeprecated = videoUrlDeprecated;
     }
 
     public String getThumbnailUrl() {
-        return thumbnailUrl;
+        if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+            return thumbnailUrl;
+        }
+        return CloudinaryUrlBuilder.posterUrlFrom(cldPublicId, cldVersion);
     }
 
     public void setThumbnailUrl(String thumbnailUrl) {
@@ -201,7 +231,7 @@ public class ShortVideo implements Parcelable {
      * @return true nếu video URL từ Cloudinary
      */
     public boolean isCloudinaryVideo() {
-        return CloudinaryVideoHelper.isCloudinaryVideoUrl(this.videoUrl);
+        return cldPublicId != null && !cldPublicId.isEmpty();
     }
 
     /**
@@ -209,27 +239,11 @@ public class ShortVideo implements Parcelable {
      * @return URL video được tối ưu cho mobile
      */
     public String getOptimizedVideoUrl() {
-        android.util.Log.d("ShortVideo", "=== Getting optimized URL for video: " + this.id + " ===");
-        android.util.Log.d("ShortVideo", "Original URL: " + this.videoUrl);
-        android.util.Log.d("ShortVideo", "Is Cloudinary: " + isCloudinaryVideo());
+        return CloudinaryUrlBuilder.mp4UrlFrom(cldPublicId, cldVersion);
+    }
 
-        if (isCloudinaryVideo()) {
-            // Sử dụng trực tiếp URL gốc thay vì extract public ID
-            String optimizedUrl = CloudinaryVideoHelper.getOptimizedVideoUrl(this.videoUrl, "auto:good");
-            android.util.Log.d("ShortVideo", "Optimized URL: " + optimizedUrl);
-
-            // Kiểm tra URL có hợp lệ không
-            if (optimizedUrl == null || optimizedUrl.isEmpty()) {
-                android.util.Log.e("ShortVideo", "FATAL: Cloudinary optimization returned null/empty URL for video: " + this.id);
-                android.util.Log.e("ShortVideo", "Falling back to original URL: " + this.videoUrl);
-                return this.videoUrl; // Fallback về URL gốc
-            }
-
-            return optimizedUrl;
-        }
-
-        android.util.Log.d("ShortVideo", "Not Cloudinary video, returning original URL: " + this.videoUrl);
-        return this.videoUrl; // Trả về URL gốc nếu không phải Cloudinary
+    public String getPosterUrl() {
+        return CloudinaryUrlBuilder.posterUrlFrom(cldPublicId, cldVersion);
     }
 
     // Parcelable implementation
@@ -239,7 +253,9 @@ public class ShortVideo implements Parcelable {
         dest.writeString(title);
         dest.writeString(caption);
         dest.writeLong(uploadDate);
-        dest.writeString(videoUrl);
+        dest.writeString(cldPublicId);
+        dest.writeLong(cldVersion);
+        dest.writeString(videoUrlDeprecated);
         dest.writeString(thumbnailUrl);
         dest.writeString(categoryId);
         dest.writeInt(viewCount);
@@ -283,7 +299,8 @@ public class ShortVideo implements Parcelable {
                 ", title='" + title + '\'' +
                 ", caption='" + caption + '\'' +
                 ", uploadDate=" + uploadDate +
-                ", videoUrl='" + videoUrl + '\'' +
+                ", cldPublicId='" + cldPublicId + '\'' +
+                ", cldVersion=" + cldVersion +
                 ", thumbnailUrl='" + thumbnailUrl + '\'' +
                 ", categoryId='" + categoryId + '\'' +
                 ", tags=" + tags +

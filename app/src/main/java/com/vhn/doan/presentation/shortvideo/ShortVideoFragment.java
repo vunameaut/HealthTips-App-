@@ -227,7 +227,7 @@ public class ShortVideoFragment extends Fragment implements ShortVideoContract.V
                     Intent shareIntent = new Intent(Intent.ACTION_SEND);
                     shareIntent.setType("text/plain");
                     shareIntent.putExtra(Intent.EXTRA_SUBJECT, video.getTitle());
-                    shareIntent.putExtra(Intent.EXTRA_TEXT, video.getVideoUrl());
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, video.getOptimizedVideoUrl());
                     startActivity(Intent.createChooser(shareIntent, getString(R.string.share_video)));
                 }
                 presenter.onVideoShared(videoId);

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
+import com.bumptech.glide.Glide;
 
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
@@ -515,8 +516,17 @@ public class ShortVideoAdapter extends RecyclerView.Adapter<ShortVideoAdapter.Vi
 
             // Setup video - Sử dụng URL được tối ưu cho mobile
             String optimizedVideoUrl = video.getOptimizedVideoUrl();
-            android.util.Log.d("ShortVideoAdapter", "Loading video at position " + position + " - Original: " + video.getVideoUrl());
-            android.util.Log.d("ShortVideoAdapter", "Loading video at position " + position + " - Optimized: " + optimizedVideoUrl);
+            android.util.Log.d("ShortVideoAdapter", "Loading video at position " + position + " - URL: " + optimizedVideoUrl);
+
+            // Load poster while the video is prepared
+            String posterUrl = video.getPosterUrl();
+            if (posterUrl != null && !posterUrl.isEmpty()) {
+                imgThumbnail.setVisibility(View.VISIBLE);
+                com.bumptech.glide.Glide.with(imgThumbnail.getContext())
+                        .load(posterUrl)
+                        .into(imgThumbnail);
+            }
+
             setupVideo(optimizedVideoUrl);
         }
 
