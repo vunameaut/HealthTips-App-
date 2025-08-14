@@ -228,11 +228,18 @@ public class ShortVideo implements Parcelable {
         android.util.Log.d("ShortVideo", "=== Getting optimized URL for video: " + this.id + " ===");
         android.util.Log.d("ShortVideo", "PublicId: " + this.cldPublicId);
         android.util.Log.d("ShortVideo", "Version: " + this.cldVersion);
+        android.util.Log.d("ShortVideo", "ThumbnailUrl: " + this.thumbnailUrl); // Log thumbnail đ��� so sánh
+
+        // Kiểm tra dữ liệu Cloudinary
+        if (this.cldPublicId == null || this.cldPublicId.trim().isEmpty()) {
+            android.util.Log.e("ShortVideo", "FATAL: cldPublicId is null or empty for video: " + this.id);
+            return null;
+        }
 
         String optimizedUrl = CloudinaryVideoHelper.buildOptimizedVideoUrl(this.cldPublicId, this.cldVersion, "auto:good");
-        android.util.Log.d("ShortVideo", "Optimized URL: " + optimizedUrl);
+        android.util.Log.d("ShortVideo", "Generated optimized URL: " + optimizedUrl);
 
-        // Kiểm tra URL có hợp lệ không
+        // Validation URL
         if (optimizedUrl == null || optimizedUrl.isEmpty()) {
             android.util.Log.e("ShortVideo", "FATAL: Cloudinary optimization returned null/empty URL for video: " + this.id);
             // Fallback về URL cơ bản
@@ -241,7 +248,42 @@ public class ShortVideo implements Parcelable {
             return fallbackUrl;
         }
 
+        // Kiểm tra URL có chứa video/upload không (không phải image/upload)
+        if (!optimizedUrl.contains("video/upload")) {
+            android.util.Log.e("ShortVideo", "WARNING: Generated URL is not a video URL: " + optimizedUrl);
+            android.util.Log.e("ShortVideo", "This might be why video is not playing!");
+        }
+
+        // Sử dụng method debug để test URL chi tiết
+        CloudinaryVideoHelper.testVideoUrl(optimizedUrl, this.id);
+
         return optimizedUrl;
+    }
+
+    /**
+     * Lấy URL video với fallback strategy
+     * Thử URL tối ưu trước, nếu không được thì fallback về URL cơ bản
+     * @return URL video để phát
+     */
+    @Exclude
+    public String getVideoUrlWithFallback() {
+        android.util.Log.d("ShortVideo", "=== Getting video URL with fallback for: " + this.id + " ===");
+
+        if (this.cldPublicId == null || this.cldPublicId.trim().isEmpty()) {
+            android.util.Log.e("ShortVideo", "FATAL: cldPublicId is null or empty for video: " + this.id);
+            return null;
+        }
+
+        // Thử URL cơ bản trước (không tối ưu hóa)
+        String basicUrl = CloudinaryVideoHelper.buildVideoUrl(this.cldPublicId, this.cldVersion);
+        android.util.Log.d("ShortVideo", "Basic URL (fallback): " + basicUrl);
+
+        // Test basic URL
+        if (basicUrl != null) {
+            CloudinaryVideoHelper.testVideoUrl(basicUrl, this.id + "_basic");
+        }
+
+        return basicUrl;
     }
 
     /**

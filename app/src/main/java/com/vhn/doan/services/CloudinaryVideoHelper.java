@@ -54,30 +54,58 @@ public class CloudinaryVideoHelper {
      * @return URL video được tối ưu hóa
      */
     public static String buildOptimizedVideoUrl(String cldPublicId, String cldVersion, String quality) {
+        Log.d(TAG, "=== Building optimized video URL ===");
+        Log.d(TAG, "Input - PublicId: " + cldPublicId);
+        Log.d(TAG, "Input - Version: " + cldVersion);
+        Log.d(TAG, "Input - Quality: " + quality);
+
         if (TextUtils.isEmpty(cldPublicId)) {
-            Log.e(TAG, "publicId không được để trống");
+            Log.e(TAG, "❌ publicId không được để trống");
             return null;
         }
 
+        // Validation: đảm bảo publicId không chứa extension không mong muốn
+        String cleanPublicId = cldPublicId;
+        if (cleanPublicId.contains(".")) {
+            // Loại bỏ extension nếu có (Cloudinary sẽ tự thêm .mp4)
+            cleanPublicId = cleanPublicId.substring(0, cleanPublicId.lastIndexOf("."));
+            Log.d(TAG, "Cleaned publicId (removed extension): " + cleanPublicId);
+        }
+
         StringBuilder urlBuilder = new StringBuilder(BASE_VIDEO_URL);
+        Log.d(TAG, "Base URL: " + BASE_VIDEO_URL);
 
         // Thêm các tham số tối ưu hóa
-        urlBuilder.append("q_").append(quality != null ? quality : "auto:good").append("/");
+        String finalQuality = quality != null ? quality : "auto:good";
+        urlBuilder.append("q_").append(finalQuality).append("/");
+        Log.d(TAG, "Added quality parameter: q_" + finalQuality);
+
         urlBuilder.append("f_auto/"); // Tự động chọn format
+        Log.d(TAG, "Added auto format: f_auto");
 
         // Thêm version nếu có
         if (!TextUtils.isEmpty(cldVersion)) {
             urlBuilder.append("v").append(cldVersion).append("/");
+            Log.d(TAG, "Added version: v" + cldVersion);
+        } else {
+            Log.d(TAG, "No version specified");
         }
 
         // Thêm publicId và định dạng
-        urlBuilder.append(cldPublicId);
-        if (!cldPublicId.endsWith(".mp4")) {
+        urlBuilder.append(cleanPublicId);
+        if (!cleanPublicId.endsWith(".mp4")) {
             urlBuilder.append(".mp4");
+            Log.d(TAG, "Added .mp4 extension");
         }
 
         String finalUrl = urlBuilder.toString();
-        Log.d(TAG, "Đã tạo URL tối ưu: " + finalUrl);
+        Log.d(TAG, "✅ Generated optimized URL: " + finalUrl);
+
+        // Validation cuối cùng
+        if (!isValidCloudinaryVideoUrl(finalUrl)) {
+            Log.e(TAG, "❌ Generated URL failed validation: " + finalUrl);
+            return null;
+        }
 
         return finalUrl;
     }
@@ -258,5 +286,103 @@ public class CloudinaryVideoHelper {
         }
         
         return null;
+    }
+
+    /**
+     * Validate URL Cloudinary video
+     */
+    private static boolean isValidCloudinaryVideoUrl(String url) {
+        if (TextUtils.isEmpty(url)) {
+            Log.e(TAG, "URL validation failed: URL is empty");
+            return false;
+        }
+
+        if (!url.startsWith("https://res.cloudinary.com/")) {
+            Log.e(TAG, "URL validation failed: Not a valid Cloudinary URL");
+            return false;
+        }
+
+        if (!url.contains("/video/upload/")) {
+            Log.e(TAG, "URL validation failed: Not a video URL (missing /video/upload/)");
+            return false;
+        }
+
+        if (!url.endsWith(".mp4")) {
+            Log.e(TAG, "URL validation failed: Does not end with .mp4");
+            return false;
+        }
+
+        Log.d(TAG, "✅ URL validation passed");
+        return true;
+    }
+
+    /**
+     * Method debug để test URL video
+     * Gọi method này để kiểm tra URL có accessible không
+     */
+    public static void testVideoUrl(String videoUrl, String videoId) {
+        Log.d(TAG, "=== TESTING VIDEO URL ===");
+        Log.d(TAG, "Video ID: " + videoId);
+        Log.d(TAG, "Video URL: " + videoUrl);
+
+        if (TextUtils.isEmpty(videoUrl)) {
+            Log.e(TAG, "❌ URL is null or empty");
+            return;
+        }
+
+        // Test các thành phần của URL
+        if (!videoUrl.startsWith("https://")) {
+            Log.e(TAG, "❌ URL does not start with https://");
+        } else {
+            Log.d(TAG, "✅ URL starts with https://");
+        }
+
+        if (!videoUrl.contains("cloudinary.com")) {
+            Log.e(TAG, "❌ URL is not from Cloudinary");
+        } else {
+            Log.d(TAG, "✅ URL is from Cloudinary");
+        }
+
+        if (!videoUrl.contains("video/upload")) {
+            Log.e(TAG, "❌ URL is not a video URL (missing video/upload)");
+            Log.e(TAG, "❌ This might be an IMAGE URL instead of VIDEO URL!");
+        } else {
+            Log.d(TAG, "✅ URL contains video/upload");
+        }
+
+        if (!videoUrl.endsWith(".mp4")) {
+            Log.e(TAG, "❌ URL does not end with .mp4");
+        } else {
+            Log.d(TAG, "✅ URL ends with .mp4");
+        }
+
+        // Phân tích các component
+        try {
+            String[] parts = videoUrl.split("/");
+            Log.d(TAG, "URL parts count: " + parts.length);
+            for (int i = 0; i < parts.length; i++) {
+                Log.d(TAG, "Part[" + i + "]: " + parts[i]);
+            }
+
+            // Tìm cloud name
+            for (int i = 0; i < parts.length; i++) {
+                if (parts[i].equals("res.cloudinary.com") && i + 1 < parts.length) {
+                    Log.d(TAG, "Cloud name: " + parts[i + 1]);
+                    break;
+                }
+            }
+
+            // Tìm publicId
+            if (parts.length > 0) {
+                String lastPart = parts[parts.length - 1];
+                String publicId = lastPart.replace(".mp4", "");
+                Log.d(TAG, "Extracted publicId: " + publicId);
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error analyzing URL: " + e.getMessage());
+        }
+
+        Log.d(TAG, "=== END TEST VIDEO URL ===");
     }
 }
