@@ -6,10 +6,11 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 /**
  * Adapter cho ViewPager2 trong profile fragment để chuyển đổi giữa các tab
+ * Đã khôi phục lại tab video với placeholder cho chức năng tương lai
  */
 public class ProfileViewPagerAdapter extends FragmentStateAdapter {
 
-    private static final int TAB_COUNT = 2;
+    private static final int TAB_COUNT = 2; // Khôi phục lại 2 tab
     private static final int TAB_FAVORITE_POSTS = 0;
     private static final int TAB_LIKED_VIDEOS = 1;
 
