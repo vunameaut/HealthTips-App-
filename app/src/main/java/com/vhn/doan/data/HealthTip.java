@@ -1,6 +1,5 @@
 package com.vhn.doan.data;
 
-import com.vhn.doan.services.CloudinaryVideoHelper;
 
 /**
  * Class đại diện cho một mẹo sức khỏe
@@ -176,38 +175,6 @@ public class HealthTip {
         return id != null && !id.isEmpty() &&
                title != null && !title.isEmpty() &&
                content != null && !content.isEmpty();
-    }
-
-    /**
-     * Kiểm tra xem ảnh có sử dụng Cloudinary không
-     * @return true nếu image URL từ Cloudinary
-     */
-    public boolean isCloudinaryImage() {
-        return CloudinaryVideoHelper.isCloudinaryImageUrl(this.imageUrl);
-    }
-
-    /**
-     * Lấy optimized image URL cho mobile
-     * @return URL ảnh được tối ưu cho mobile
-     */
-    public String getOptimizedImageUrl() {
-        if (isCloudinaryImage()) {
-            // Tạo URL tối ưu cho ảnh mobile
-            return CloudinaryVideoHelper.getOptimizedImageUrl(this.imageUrl, 800, 600, "auto:good");
-        }
-        return this.imageUrl; // Trả về URL gốc nếu không phải Cloudinary
-    }
-
-    /**
-     * Lấy thumbnail URL cho danh sách
-     * @return URL thumbnail nhỏ để hiển thị trong danh sách
-     */
-    public String getThumbnailUrl() {
-        if (isCloudinaryImage()) {
-            // Tạo thumbnail nhỏ cho danh sách
-            return CloudinaryVideoHelper.getOptimizedImageUrl(this.imageUrl, 300, 200, "auto:good");
-        }
-        return this.imageUrl; // Trả về URL gốc nếu không phải Cloudinary
     }
 
     @Override

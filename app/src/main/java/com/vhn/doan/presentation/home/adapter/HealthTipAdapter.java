@@ -276,17 +276,13 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
             textViewViewCount.setText(String.valueOf(healthTip.getViewCount()));
             textViewLikeCount.setText(String.valueOf(healthTip.getLikeCount()));
 
-            // Tải hình ảnh thumbnail bằng Glide với Cloudinary optimization
+            // Tải hình ảnh bằng Glide
             String imageUrl = healthTip.getImageUrl();
             if (imageUrl != null && !imageUrl.isEmpty()) {
-                // Sử dụng thumbnail URL được tối ưu cho danh sách
-                String optimizedImageUrl = healthTip.getThumbnailUrl();
-
-                android.util.Log.d("HealthTipAdapter", "Loading image - Original: " + imageUrl);
-                android.util.Log.d("HealthTipAdapter", "Loading image - Optimized: " + optimizedImageUrl);
+                android.util.Log.d("HealthTipAdapter", "Loading image: " + imageUrl);
 
                 Glide.with(itemView.getContext())
-                        .load(optimizedImageUrl)
+                        .load(imageUrl)
                         .centerCrop()
                         .placeholder(R.drawable.placeholder_image)
                         .error(R.drawable.error_image)
