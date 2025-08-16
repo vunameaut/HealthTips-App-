@@ -1,6 +1,7 @@
 package com.vhn.doan.presentation.video.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,27 +23,28 @@ import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.utils.CloudinaryUrls;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 
 /**
- * Short video feed (TikTok-like) với quản lý ExoPlayer được tối ưu
+ * Adapter hiển thị feed short-video kiểu TikTok:
+ * - 1 player chính cho item đang hiển thị
+ * - Preload player (mute) cho các item lân cận để tránh "nháy đen"
+ * - Khi lướt đi rồi quay lại: luôn REPLAY từ đầu
  */
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
 
+    // ================== Cấu hình hành vi ==================
+    private static final boolean REPLAY_ON_REVISIT = true; // lướt quay lại -> phát từ đầu
+    private static final int PRELOAD_AHEAD = 2;            // số item preload trước/sau
+
+    // ================== Dữ liệu / listener ==================
     private final List<ShortVideo> videos = new ArrayList<>();
     private OnVideoInteractionListener listener;
-
-    // Chỉ cho 1 video phát tại 1 thời điểm
-    private int currentPlayingPosition = -1;
-    private ExoPlayer currentPlayer;
-
-    // Đơn giản hóa: chỉ cache vị trí cho video hiện tại để resume khi pause/play
-    private final Map<String, Long> sessionPositions = new HashMap<>();
 
     public interface OnVideoInteractionListener {
         void onVideoClick(ShortVideo video, int position);
@@ -61,8 +63,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         releaseAllPlayers();
         videos.clear();
         if (newVideos != null) videos.addAll(newVideos);
-        currentPlayingPosition = -1;
-        sessionPositions.clear();
+        currentPlayingPosition = RecyclerView.NO_POSITION;
         notifyDataSetChanged();
     }
 
@@ -73,46 +74,74 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         }
     }
 
-    /**
-     * Cập nhật trạng thái phát cho video tại position
-     */
-    public void setCurrentPlayingPosition(int position) {
-        if (currentPlayingPosition == position) return;
+    // ================== Player chính + preload ==================
+    private ExoPlayer currentPlayer;                       // chỉ 1 player đang phát
+    private int currentPlayingPosition = RecyclerView.NO_POSITION;
+    private final Map<Integer, ExoPlayer> preloadedPlayers = new HashMap<>(); // đã prepare, mute
+    private VideoViewHolder activeHolder;                  // holder đang gắn player
+    private Context appContext;
 
-        // Pause video hiện tại
-        pauseAllVideos();
-
-        currentPlayingPosition = position;
-        if (position >= 0) {
-            notifyItemChanged(position);
-        }
-
-        // Thông báo cho listener (nếu có)
-        if (listener != null && position >= 0) {
-            listener.onVideoVisible(position);
-        }
+    private void ensureCurrentPlayer(Context context) {
+        if (currentPlayer != null) return;
+        appContext = context.getApplicationContext();
+        currentPlayer = new ExoPlayer.Builder(appContext).build();
+        currentPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+        currentPlayer.setPlayWhenReady(true);
+        attachMainPlayerListener();
     }
 
-    /**
-     * Pause tất cả video - được gọi khi scroll
-     */
-    public void pauseAllVideos() {
-        if (currentPlayingPosition >= 0) {
-            notifyItemChanged(currentPlayingPosition, "payload_pause");
-        }
-        currentPlayingPosition = -1;
+    private void attachMainPlayerListener() {
+        currentPlayer.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                if (activeHolder == null) return;
+                switch (state) {
+                    case Player.STATE_BUFFERING:
+                        activeHolder.showLoading(true);
+                        activeHolder.showPoster(true);
+                        break;
+                    case Player.STATE_READY:
+                        activeHolder.showLoading(false);
+                        activeHolder.showPoster(false);
+                        break;
+                    case Player.STATE_ENDED:
+                        // Loop êm
+                        currentPlayer.seekTo(0);
+                        currentPlayer.play();
+                        break;
+                    case Player.STATE_IDLE:
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onPlayerError(@NonNull PlaybackException error) {
+                if (activeHolder != null) {
+                    activeHolder.showLoading(false);
+                    activeHolder.showPoster(true);
+                }
+            }
+        });
     }
 
-    /**
-     * Resume video tại position
-     */
-    public void resumeVideoAt(int position) {
-        setCurrentPlayingPosition(position);
+    private ExoPlayer createPreloadPlayer(String url) {
+        ExoPlayer p = new ExoPlayer.Builder(appContext != null ? appContext : lastKnownContext).build();
+        p.setRepeatMode(Player.REPEAT_MODE_ONE);
+        p.setPlayWhenReady(false);      // preload -> không phát
+        p.setVolume(0f);                // luôn mute trong preload
+        p.setMediaItem(MediaItem.fromUri(Uri.parse(url)));
+        p.prepare();                    // sẵn sàng
+        return p;
     }
 
+    private Context lastKnownContext; // fallback nếu appContext chưa set
+
+    // ================== RecyclerView ==================
     @NonNull
     @Override
     public VideoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        lastKnownContext = parent.getContext();
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_short_video, parent, false);
         return new VideoViewHolder(view);
@@ -124,14 +153,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             onBindViewHolder(holder, position);
             return;
         }
-
-        // Chỉ cập nhật play/pause khi có payload để tránh rebind media không cần thiết
-        for (Object payload : payloads) {
-            if ("payload_pause".equals(payload)) {
-                holder.updatePlayState(false);
-            } else if ("payload_play".equals(payload)) {
-                holder.updatePlayState(true);
-            } else if ("payload_metadata".equals(payload)) {
+        for (Object p : payloads) {
+            if ("payload_metadata".equals(p)) {
                 holder.bindMetadata(videos.get(position));
             }
         }
@@ -139,7 +162,44 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
-        holder.bind(videos.get(position), position);
+        ShortVideo video = videos.get(position);
+        holder.bindMetadata(video);
+
+        // Cấu hình PlayerView anti-flicker
+        holder.playerView.setUseController(false);
+        holder.playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER);
+        holder.playerView.setKeepContentOnPlayerReset(true);
+        holder.playerView.setShutterBackgroundColor(Color.TRANSPARENT);
+
+        // Nếu là item đang phát -> gắn player chính
+        if (position == currentPlayingPosition && currentPlayer != null) {
+            activeHolder = holder;
+            holder.playerView.setPlayer(currentPlayer);
+            // đồng bộ UI theo state hiện tại
+            int state = currentPlayer.getPlaybackState();
+            holder.showLoading(state == Player.STATE_BUFFERING);
+            holder.showPoster(state != Player.STATE_READY);
+        } else {
+            holder.playerView.setPlayer(null);
+            holder.showLoading(false);
+            // Khi không phải item đang phát thì để poster hiển thị sẵn
+            holder.showPoster(true);
+        }
+
+        // Preload xung quanh
+        preloadAround(position);
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull VideoViewHolder holder) {
+        // ngắt liên kết player với holder cũ
+        if (holder == activeHolder) {
+            holder.playerView.setPlayer(null);
+            activeHolder = null;
+        } else {
+            holder.playerView.setPlayer(null);
+        }
+        super.onViewRecycled(holder);
     }
 
     @Override
@@ -147,69 +207,170 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         return videos.size();
     }
 
-    @Override
-    public void onViewRecycled(@NonNull VideoViewHolder holder) {
-        super.onViewRecycled(holder);
-        holder.releasePlayer();
+    // ================== API điều khiển phát ==================
+
+    /**
+     * Gọi từ Fragment khi item này trở thành visible.
+     */
+    public void playVideoAt(int position, @NonNull RecyclerView recyclerView) {
+        if (position < 0 || position >= getItemCount()) return;
+
+        ensureCurrentPlayer(recyclerView.getContext());
+        String url = getVideoUrl(videos.get(position));
+
+        // 1) Nếu đã có player preload cho vị trí này -> handover sang player chính
+        ExoPlayer pre = preloadedPlayers.remove(position);
+        if (pre != null) {
+            // Giải phóng player chính cũ
+            if (currentPlayer != null) {
+                try { currentPlayer.release(); } catch (Exception ignore) {}
+            }
+            currentPlayer = pre;
+            attachMainPlayerListener(); // gắn listener cho player chính mới
+            currentPlayer.setPlayWhenReady(true);
+            currentPlayer.setVolume(1f); // phát bình thường
+
+        } else {
+            // 2) Dùng player chính hiện tại:
+            // - Nếu media giống nhau -> (nếu config REPLAY) thì seek về 0
+            // - Nếu khác -> set media mới + prepare
+            boolean same = false;
+            if (currentPlayer.getMediaItemCount() > 0) {
+                MediaItem cur = currentPlayer.getCurrentMediaItem();
+                if (cur != null && cur.localConfiguration != null && cur.localConfiguration.uri != null) {
+                    same = url.equals(cur.localConfiguration.uri.toString());
+                }
+            }
+            if (same) {
+                if (REPLAY_ON_REVISIT) currentPlayer.seekTo(0);
+                currentPlayer.setPlayWhenReady(true);
+            } else {
+                currentPlayer.stop();
+                currentPlayer.clearMediaItems();
+                currentPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(url)), /*resetPosition=*/true);
+                currentPlayer.prepare();
+                currentPlayer.setPlayWhenReady(true);
+            }
+        }
+
+        // 3) Cập nhật UI holder mới
+        int previous = currentPlayingPosition;
+        currentPlayingPosition = position;
+
+        if (previous != RecyclerView.NO_POSITION) notifyItemChanged(previous);
+        notifyItemChanged(position);
+
+        // 4) Gọi preload vòng quanh
+        preloadAround(position);
     }
 
     /**
-     * Release tất cả players khi không cần thiết
+     * Gọi khi cần tạm dừng (ví dụ Fragment onPause hoặc khi user chạm tạm dừng).
      */
-    private void releaseAllPlayers() {
+    public void pauseAllVideos() {
         if (currentPlayer != null) {
-            currentPlayer.release();
-            currentPlayer = null;
+            currentPlayer.setPlayWhenReady(false);
         }
-        currentPlayingPosition = -1;
-        sessionPositions.clear();
+        int previous = currentPlayingPosition;
+        currentPlayingPosition = RecyclerView.NO_POSITION;
+        if (previous != RecyclerView.NO_POSITION) notifyItemChanged(previous);
     }
 
-    // ====================== ViewHolder ======================
+    /**
+     * Dọn dẹp toàn bộ players (Fragment onDestroyView/onDestroy).
+     */
+    public void releaseAllPlayers() {
+        if (currentPlayer != null) {
+            try { currentPlayer.release(); } catch (Exception ignore) {}
+            currentPlayer = null;
+        }
+        for (ExoPlayer p : preloadedPlayers.values()) {
+            try { p.release(); } catch (Exception ignore) {}
+        }
+        preloadedPlayers.clear();
+        activeHolder = null;
+        currentPlayingPosition = RecyclerView.NO_POSITION;
+    }
 
+    // ================== Preload ==================
+    private void preloadAround(int anchorPosition) {
+        if (appContext == null) appContext = lastKnownContext;
+        if (appContext == null) return;
+
+        // dọn những player preload quá xa
+        preloadedPlayers.entrySet().removeIf(e -> {
+            int pos = e.getKey();
+            if (Math.abs(pos - anchorPosition) > PRELOAD_AHEAD) {
+                try { e.getValue().release(); } catch (Exception ignore) {}
+                return true;
+            }
+            return false;
+        });
+
+        // preload phía trước
+        for (int i = 1; i <= PRELOAD_AHEAD; i++) {
+            int next = anchorPosition + i;
+            if (next < getItemCount() && !preloadedPlayers.containsKey(next)) {
+                String url = getVideoUrl(videos.get(next));
+                preloadedPlayers.put(next, createPreloadPlayer(url));
+            }
+            int prev = anchorPosition - i;
+            if (prev >= 0 && !preloadedPlayers.containsKey(prev)) {
+                String url = getVideoUrl(videos.get(prev));
+                preloadedPlayers.put(prev, createPreloadPlayer(url));
+            }
+        }
+    }
+
+    // ================== ViewHolder ==================
     public class VideoViewHolder extends RecyclerView.ViewHolder {
 
-        private PlayerView playerView;
-        private ImageView posterImageView;
-        private ImageView playPauseOverlay;
-        private View loadingView;
+        // Video
+        private final PlayerView playerView;
+        private final ImageView posterImageView;
+        private final ImageView playPauseOverlay;
+        private final View loadingView;
 
-        private TextView titleTextView, captionTextView, viewCountTextView, likeCountTextView, uploadDateTextView;
-        private LinearLayout likeButton, shareButton, commentButton;
+        // Metadata
+        private final TextView titleTextView;
+        private final TextView captionTextView;
+        private final TextView viewCountTextView;
+        private final TextView likeCountTextView;
+        private final TextView uploadDateTextView;
 
-        private ExoPlayer player;
-        private String currentVideoId = "";
-        private boolean isPlayerReady = false;
-        private boolean isCurrentlyPlaying = false;
+        // Actions
+        private final LinearLayout likeButton, shareButton, commentButton;
 
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
-            initViews();
-            setupClicks();
-        }
 
-        private void initViews() {
+            // Video
             playerView = itemView.findViewById(R.id.player_view);
             posterImageView = itemView.findViewById(R.id.iv_poster);
             playPauseOverlay = itemView.findViewById(R.id.play_pause_overlay);
             loadingView = itemView.findViewById(R.id.loading_view);
 
+            // Metadata
             titleTextView = itemView.findViewById(R.id.tv_title);
             captionTextView = itemView.findViewById(R.id.tv_caption);
             viewCountTextView = itemView.findViewById(R.id.tv_view_count);
             uploadDateTextView = itemView.findViewById(R.id.tv_upload_date);
             likeCountTextView = itemView.findViewById(R.id.tv_like_count);
 
+            // Actions
             likeButton = itemView.findViewById(R.id.btn_like);
             shareButton = itemView.findViewById(R.id.btn_share);
             commentButton = itemView.findViewById(R.id.btn_comment);
-        }
 
-        private void setupClicks() {
-            View tapArea = itemView.findViewById(R.id.video_tap_area);
-            if (tapArea != null) tapArea.setOnClickListener(v -> togglePlayPause());
-            playerView.setOnClickListener(v -> togglePlayPause());
+            // Tap để pause/play
+            View videoTapArea = itemView.findViewById(R.id.video_tap_area);
+            if (videoTapArea != null) {
+                videoTapArea.setOnClickListener(v -> togglePlayPause());
+            } else {
+                playerView.setOnClickListener(v -> togglePlayPause());
+            }
 
+            // Buttons
             likeButton.setOnClickListener(v -> {
                 int p = getBindingAdapterPosition();
                 if (p != RecyclerView.NO_POSITION && listener != null) {
@@ -230,107 +391,19 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             });
         }
 
-        private ExoPlayer createPlayer(Context ctx) {
-            ExoPlayer newPlayer = new ExoPlayer.Builder(ctx)
-                    .setSeekBackIncrementMs(5000)
-                    .setSeekForwardIncrementMs(10000)
-                    .build();
-
-            newPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
-
-            // Listener để theo dõi trạng thái
-            newPlayer.addListener(new Player.Listener() {
-                @Override
-                public void onPlaybackStateChanged(int state) {
-                    switch (state) {
-                        case Player.STATE_BUFFERING:
-                            showLoading(true);
-                            isPlayerReady = false;
-                            break;
-                        case Player.STATE_READY:
-                            showLoading(false);
-                            isPlayerReady = true;
-                            // Chỉ seek nếu có vị trí đã lưu và đang trong cùng session
-                            Long savedPosition = sessionPositions.get(currentVideoId);
-                            if (savedPosition != null && savedPosition > 1000) { // Chỉ seek nếu > 1 giây
-                                newPlayer.seekTo(savedPosition);
-                                sessionPositions.remove(currentVideoId); // Xóa sau khi đã sử dụng
-                            }
-                            break;
-                        case Player.STATE_ENDED:
-                            // Reset video về đầu khi kết thúc
-                            sessionPositions.put(currentVideoId, 0L);
-                            isCurrentlyPlaying = false;
-                            showPlayOverlay(true);
-                            break;
-                        case Player.STATE_IDLE:
-                            isPlayerReady = false;
-                            break;
-                    }
-                }
-
-                @Override
-                public void onPlayerError(@NonNull PlaybackException error) {
-                    showLoading(false);
-                    isPlayerReady = false;
-                    // Có thể hiển thị thông báo lỗi hoặc retry
-                }
-
-                @Override
-                public void onIsPlayingChanged(boolean isPlaying) {
-                    isCurrentlyPlaying = isPlaying;
-                    showPlayOverlay(!isPlaying);
-                }
-            });
-
-            return newPlayer;
-        }
-
-        void bind(ShortVideo video, int position) {
-            bindMetadata(video);
-
-            String videoId = video.getId();
-            if (videoId == null || videoId.isEmpty()) {
-                return; // Skip nếu không có ID
-            }
-
-            currentVideoId = videoId;
-            String url = getVideoUrl(video);
-
-            // Tạo player mới cho mỗi video để tránh xung đột
-            if (player != null) {
-                player.release();
-            }
-
-            player = createPlayer(itemView.getContext());
-            playerView.setPlayer(player);
-            playerView.setUseController(false);
-            playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER);
-
-            // Load media - luôn bắt đầu từ đầu khi bind mới
-            MediaItem item = MediaItem.fromUri(Uri.parse(url));
-            player.setMediaItem(item);
-            player.prepare();
-            isPlayerReady = false;
-
-            // Cập nhật trạng thái play/pause
-            updatePlayState(position == currentPlayingPosition);
-        }
-
         void bindMetadata(ShortVideo video) {
-            titleTextView.setText(video.getTitle());
+            titleTextView.setText(video.getTitle() != null ? video.getTitle() : "");
 
-            // Caption + See more
+            // Caption + "Xem thêm"
+            TextView seeMore = itemView.findViewById(R.id.tv_see_more);
             if (video.getCaption() == null || video.getCaption().trim().isEmpty()) {
                 captionTextView.setVisibility(View.GONE);
-                TextView seeMore = itemView.findViewById(R.id.tv_see_more);
                 if (seeMore != null) seeMore.setVisibility(View.GONE);
             } else {
                 captionTextView.setVisibility(View.VISIBLE);
                 captionTextView.setText(video.getCaption());
                 captionTextView.setMaxLines(2);
                 captionTextView.post(() -> {
-                    TextView seeMore = itemView.findViewById(R.id.tv_see_more);
                     if (seeMore != null) {
                         if (captionTextView.getLineCount() > 2) {
                             seeMore.setVisibility(View.VISIBLE);
@@ -356,76 +429,32 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             uploadDateTextView.setText(formatDate(video.getUploadDate()));
         }
 
-        void updatePlayState(boolean shouldPlay) {
-            if (player == null) return;
-
-            if (shouldPlay) {
-                // Pause player cũ nếu có
-                if (currentPlayer != null && currentPlayer != player) {
-                    currentPlayer.setPlayWhenReady(false);
-                }
-
-                currentPlayer = player;
-                player.setPlayWhenReady(true);
-                showPlayOverlay(false);
-            } else {
-                // Lưu vị trí hiện tại để resume khi tap play lại
-                if (player != null && isPlayerReady) {
-                    long currentPos = player.getCurrentPosition();
-                    if (currentPos > 0) {
-                        sessionPositions.put(currentVideoId, currentPos);
-                    }
-                }
-                player.setPlayWhenReady(false);
-                showPlayOverlay(true);
-            }
-        }
-
         private void togglePlayPause() {
-            int p = getBindingAdapterPosition();
-            if (p == RecyclerView.NO_POSITION) return;
-
-            if (p == currentPlayingPosition) {
-                // Đang phát -> pause
-                setCurrentPlayingPosition(-1);
+            if (getBindingAdapterPosition() != currentPlayingPosition || currentPlayer == null) return;
+            if (currentPlayer.isPlaying()) {
+                currentPlayer.pause();
+                showPlayOverlay(true);
             } else {
-                // Chưa phát -> play
-                setCurrentPlayingPosition(p);
-            }
-        }
-
-        public void releasePlayer() {
-            if (player != null) {
-                // Lưu vị trí trước khi release
-                if (isPlayerReady && !currentVideoId.isEmpty()) {
-                    long currentPos = player.getCurrentPosition();
-                    if (currentPos > 0) {
-                        sessionPositions.put(currentVideoId, currentPos);
-                    }
+                // Nếu đã ENDED -> phát lại từ đầu
+                if (currentPlayer.getPlaybackState() == Player.STATE_ENDED) {
+                    currentPlayer.seekTo(0);
                 }
-
-                player.release();
-                player = null;
-            }
-
-            playerView.setPlayer(null);
-            currentVideoId = "";
-            isPlayerReady = false;
-            isCurrentlyPlaying = false;
-        }
-
-        private void showLoading(boolean show) {
-            if (loadingView != null) {
-                loadingView.setVisibility(show ? View.VISIBLE : View.GONE);
+                currentPlayer.play();
+                showPlayOverlay(false);
             }
         }
 
-        private void showPlayOverlay(boolean show) {
-            if (playPauseOverlay != null) {
-                playPauseOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
+        void showLoading(boolean show) {
+            if (loadingView != null) loadingView.setVisibility(show ? View.VISIBLE : View.GONE);
         }
 
+        void showPoster(boolean show) {
+            if (posterImageView != null) posterImageView.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+
+        void showPlayOverlay(boolean show) {
+            if (playPauseOverlay != null) playPauseOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
 
         private String formatCount(long count) {
             if (count < 1000) return String.valueOf(count);
@@ -434,13 +463,13 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         }
 
         private String formatDate(long timestamp) {
-            if (timestamp == 0) return "";
-            Date date = new Date(timestamp);
+            if (timestamp <= 0) return "";
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            return sdf.format(date);
+            return sdf.format(new Date(timestamp));
         }
     }
 
+    // ================== Helpers ==================
     private String getVideoUrl(ShortVideo v) {
         if (v.getCldPublicId() != null && !v.getCldPublicId().isEmpty()) {
             return CloudinaryUrls.mp4(v.getCldPublicId(), v.getCldVersion());
