@@ -41,6 +41,9 @@ public class ShortVideo {
     @PropertyName("cldVersion")
     private long cldVersion;
 
+    @PropertyName("thumbnailUrl")
+    private String thumbnailUrl;
+
     @PropertyName("status")
     private String status;
 
@@ -52,7 +55,7 @@ public class ShortVideo {
     public ShortVideo(String id, String title, String caption, long uploadDate, 
                      String categoryId, Map<String, Boolean> tags, long viewCount, 
                      long likeCount, String userId, String cldPublicId, 
-                     long cldVersion, String status) {
+                     long cldVersion, String thumbnailUrl, String status) {
         this.id = id;
         this.title = title;
         this.caption = caption;
@@ -64,6 +67,7 @@ public class ShortVideo {
         this.userId = userId;
         this.cldPublicId = cldPublicId;
         this.cldVersion = cldVersion;
+        this.thumbnailUrl = thumbnailUrl;
         this.status = status;
     }
 
@@ -110,6 +114,10 @@ public class ShortVideo {
 
     public long getCldVersion() {
         return cldVersion;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
     }
 
     public String getStatus() {
@@ -161,6 +169,10 @@ public class ShortVideo {
         this.cldVersion = cldVersion;
     }
 
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
     public void setStatus(String status) {
         this.status = status;
     }
@@ -179,6 +191,7 @@ public class ShortVideo {
                 ", userId='" + userId + '\'' +
                 ", cldPublicId='" + cldPublicId + '\'' +
                 ", cldVersion=" + cldVersion +
+                ", thumbnailUrl='" + thumbnailUrl + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }

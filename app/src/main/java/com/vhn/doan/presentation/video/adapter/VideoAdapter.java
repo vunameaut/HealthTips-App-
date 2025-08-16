@@ -24,15 +24,13 @@ import com.vhn.doan.utils.CloudinaryUrls;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * Short video feed (TikTok-like) với quản lý vị trí thông minh - chỉ lưu vị trí tạm thời trong session
+ * Short video feed (TikTok-like) với quản lý ExoPlayer được tối ưu
  */
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
 
@@ -43,20 +41,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     private int currentPlayingPosition = -1;
     private ExoPlayer currentPlayer;
 
-    // Lưu vị trí phát tạm thời cho session hiện tại (chỉ cho video đang active hoặc gần đó)
-    private final Map<String, Long> temporaryPositions = new HashMap<>();
-
-    // Cache player instances để tránh tạo lại liên tục
-    private final Map<String, ExoPlayer> playerCache = new HashMap<>();
-    private static final int MAX_CACHED_PLAYERS = 3; // Giới hạn số lượng player cache
-
-    // Quản lý vị trí video được viewed (để reset về đầu khi lướt lại)
-    private final Set<String> viewedVideos = new HashSet<>();
-    private final Map<String, Long> lastViewTime = new HashMap<>();
-
-    // Cấu hình auto-cleanup
-    private static final long SESSION_TIMEOUT = 5 * 60 * 1000; // 5 phút
-    private static final int MAX_POSITION_CACHE = 10; // Tối đa 10 video lưu vị trí tạm thời
+    // Đơn giản hóa: chỉ cache vị trí cho video hiện tại để resume khi pause/play
+    private final Map<String, Long> sessionPositions = new HashMap<>();
 
     public interface OnVideoInteractionListener {
         void onVideoClick(ShortVideo video, int position);
@@ -76,6 +62,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         videos.clear();
         if (newVideos != null) videos.addAll(newVideos);
         currentPlayingPosition = -1;
+        sessionPositions.clear();
         notifyDataSetChanged();
     }
 
@@ -86,52 +73,41 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         }
     }
 
+    /**
+     * Cập nhật trạng thái phát cho video tại position
+     */
     public void setCurrentPlayingPosition(int position) {
-        int old = currentPlayingPosition;
-        currentPlayingPosition = position;
+        if (currentPlayingPosition == position) return;
 
-        // Pause video cũ
-        if (old != -1 && old != position) {
-            notifyItemChanged(old, "payload_pause");
+        // Pause video hiện tại
+        pauseAllVideos();
+
+        currentPlayingPosition = position;
+        if (position >= 0) {
+            notifyItemChanged(position);
         }
 
-        // Play video mới
-        if (position != -1) {
-            notifyItemChanged(position, "payload_play");
+        // Thông báo cho listener (nếu có)
+        if (listener != null && position >= 0) {
+            listener.onVideoVisible(position);
         }
     }
 
+    /**
+     * Pause tất cả video - được gọi khi scroll
+     */
     public void pauseAllVideos() {
-        if (currentPlayer != null) {
-            // Lưu vị trí hiện tại trước khi pause (để resume khi tap lại trên cùng item)
-            if (currentPlayingPosition != -1 && currentPlayingPosition < videos.size()) {
-                String videoId = videos.get(currentPlayingPosition).getId();
-                if (videoId != null) {
-                    temporaryPositions.put(videoId, currentPlayer.getCurrentPosition());
-                }
-            }
-            currentPlayer.setPlayWhenReady(false);
+        if (currentPlayingPosition >= 0) {
+            notifyItemChanged(currentPlayingPosition, "payload_pause");
         }
         currentPlayingPosition = -1;
     }
 
-    private void releaseAllPlayers() {
-        // Lưu vị trí của player hiện tại trước khi release
-        if (currentPlayer != null && currentPlayingPosition != -1 && currentPlayingPosition < videos.size()) {
-            String videoId = videos.get(currentPlayingPosition).getId();
-            if (videoId != null) {
-                temporaryPositions.put(videoId, currentPlayer.getCurrentPosition());
-            }
-        }
-
-        // Release tất cả cached players
-        for (ExoPlayer player : playerCache.values()) {
-            if (player != null) {
-                player.release();
-            }
-        }
-        playerCache.clear();
-        currentPlayer = null;
+    /**
+     * Resume video tại position
+     */
+    public void resumeVideoAt(int position) {
+        setCurrentPlayingPosition(position);
     }
 
     @NonNull
@@ -174,8 +150,19 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     @Override
     public void onViewRecycled(@NonNull VideoViewHolder holder) {
         super.onViewRecycled(holder);
-        holder.saveCurrentPosition(); // lưu vị trí trước khi recycle (để resume nếu user vẫn ở cùng item)
         holder.releasePlayer();
+    }
+
+    /**
+     * Release tất cả players khi không cần thiết
+     */
+    private void releaseAllPlayers() {
+        if (currentPlayer != null) {
+            currentPlayer.release();
+            currentPlayer = null;
+        }
+        currentPlayingPosition = -1;
+        sessionPositions.clear();
     }
 
     // ====================== ViewHolder ======================
@@ -193,6 +180,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         private ExoPlayer player;
         private String currentVideoId = "";
         private boolean isPlayerReady = false;
+        private boolean isCurrentlyPlaying = false;
 
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -242,14 +230,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             });
         }
 
-        private ExoPlayer getOrCreatePlayer(Context ctx, String videoId) {
-            // Kiểm tra cache trước
-            ExoPlayer cachedPlayer = playerCache.get(videoId);
-            if (cachedPlayer != null) {
-                return cachedPlayer;
-            }
-
-            // Tạo player mới
+        private ExoPlayer createPlayer(Context ctx) {
             ExoPlayer newPlayer = new ExoPlayer.Builder(ctx)
                     .setSeekBackIncrementMs(5000)
                     .setSeekForwardIncrementMs(10000)
@@ -261,21 +242,30 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             newPlayer.addListener(new Player.Listener() {
                 @Override
                 public void onPlaybackStateChanged(int state) {
-                    if (state == Player.STATE_BUFFERING) {
-                        showLoading(true);
-                        isPlayerReady = false;
-                    } else if (state == Player.STATE_READY) {
-                        showLoading(false);
-                        isPlayerReady = true;
-
-                        // Seek về vị trí đã lưu nếu có (trừ khi đã bị reset về 0 trong bind)
-                        Long savedPosition = temporaryPositions.get(videoId);
-                        if (savedPosition != null && savedPosition > 0) {
-                            newPlayer.seekTo(savedPosition);
-                        }
-                    } else if (state == Player.STATE_ENDED) {
-                        // Reset về đầu video khi kết thúc
-                        temporaryPositions.put(videoId, 0L);
+                    switch (state) {
+                        case Player.STATE_BUFFERING:
+                            showLoading(true);
+                            isPlayerReady = false;
+                            break;
+                        case Player.STATE_READY:
+                            showLoading(false);
+                            isPlayerReady = true;
+                            // Chỉ seek nếu có vị trí đã lưu và đang trong cùng session
+                            Long savedPosition = sessionPositions.get(currentVideoId);
+                            if (savedPosition != null && savedPosition > 1000) { // Chỉ seek nếu > 1 giây
+                                newPlayer.seekTo(savedPosition);
+                                sessionPositions.remove(currentVideoId); // Xóa sau khi đã sử dụng
+                            }
+                            break;
+                        case Player.STATE_ENDED:
+                            // Reset video về đầu khi kết thúc
+                            sessionPositions.put(currentVideoId, 0L);
+                            isCurrentlyPlaying = false;
+                            showPlayOverlay(true);
+                            break;
+                        case Player.STATE_IDLE:
+                            isPlayerReady = false;
+                            break;
                     }
                 }
 
@@ -283,20 +273,16 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                 public void onPlayerError(@NonNull PlaybackException error) {
                     showLoading(false);
                     isPlayerReady = false;
+                    // Có thể hiển thị thông báo lỗi hoặc retry
+                }
+
+                @Override
+                public void onIsPlayingChanged(boolean isPlaying) {
+                    isCurrentlyPlaying = isPlaying;
+                    showPlayOverlay(!isPlaying);
                 }
             });
 
-            // Cache player (giới hạn số lượng)
-            if (playerCache.size() >= MAX_CACHED_PLAYERS) {
-                // Remove oldest player
-                String oldestKey = playerCache.keySet().iterator().next();
-                ExoPlayer oldPlayer = playerCache.remove(oldestKey);
-                if (oldPlayer != null && oldPlayer != currentPlayer) {
-                    oldPlayer.release();
-                }
-            }
-
-            playerCache.put(videoId, newPlayer);
             return newPlayer;
         }
 
@@ -308,36 +294,24 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                 return; // Skip nếu không có ID
             }
 
-            // ---------- QUY TẮC REPLAY KHI QUAY LẠI ITEM ----------
-            // Mỗi lần ViewHolder được bind (tức là quay lại item), buộc phát lại từ đầu
-            temporaryPositions.put(videoId, 0L);
-            // ------------------------------------------------------
-
-            // Lưu vị trí cũ của item trước đó nếu có
-            saveCurrentPosition();
-
             currentVideoId = videoId;
             String url = getVideoUrl(video);
 
-            // Lấy hoặc tạo player cho video này
-            player = getOrCreatePlayer(itemView.getContext(), videoId);
+            // Tạo player mới cho mỗi video để tránh xung đột
+            if (player != null) {
+                player.release();
+            }
+
+            player = createPlayer(itemView.getContext());
             playerView.setPlayer(player);
             playerView.setUseController(false);
             playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER);
 
-            // Kiểm tra xem đã load media chưa
-            if (player.getCurrentMediaItem() == null ||
-                    !url.equals(getCurrentMediaUrl(player))) {
-
-                // Load media mới
-                MediaItem item = MediaItem.fromUri(Uri.parse(url));
-                player.setMediaItem(item);
-                player.prepare();
-                isPlayerReady = false;
-            } else {
-                // Nếu media giống nhau, seek về 0 theo quy tắc replay
-                player.seekTo(0);
-            }
+            // Load media - luôn bắt đầu từ đầu khi bind mới
+            MediaItem item = MediaItem.fromUri(Uri.parse(url));
+            player.setMediaItem(item);
+            player.prepare();
+            isPlayerReady = false;
 
             // Cập nhật trạng thái play/pause
             updatePlayState(position == currentPlayingPosition);
@@ -392,19 +366,16 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                 }
 
                 currentPlayer = player;
-
-                // Khi play lại item vừa quay về, theo luật replay (đã set về 0 ở bind)
-                // Khi tap pause/play trên cùng item thì không re-bind, nên vẫn resume vị trí hiện tại
-                if (isPlayerReady) {
-                    player.setPlayWhenReady(true);
-                    showPlayOverlay(false);
-                } else {
-                    player.setPlayWhenReady(true);
-                    showLoading(true);
-                }
+                player.setPlayWhenReady(true);
+                showPlayOverlay(false);
             } else {
-                // Lưu vị trí hiện tại để RESUME khi tap trên cùng item (không qua re-bind)
-                saveCurrentPosition();
+                // Lưu vị trí hiện tại để resume khi tap play lại
+                if (player != null && isPlayerReady) {
+                    long currentPos = player.getCurrentPosition();
+                    if (currentPos > 0) {
+                        sessionPositions.put(currentVideoId, currentPos);
+                    }
+                }
                 player.setPlayWhenReady(false);
                 showPlayOverlay(true);
             }
@@ -415,33 +386,32 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             if (p == RecyclerView.NO_POSITION) return;
 
             if (p == currentPlayingPosition) {
-                // Đang phát -> pause (sẽ lưu vị trí để resume nếu tap lại ngay)
+                // Đang phát -> pause
                 setCurrentPlayingPosition(-1);
             } else {
-                // Chưa phát -> play (nếu là re-bind do quay lại, bind() đã reset về 0)
+                // Chưa phát -> play
                 setCurrentPlayingPosition(p);
             }
         }
 
-        void saveCurrentPosition() {
-            if (player != null && !currentVideoId.isEmpty()) {
-                long pos = player.getCurrentPosition();
-                temporaryPositions.put(currentVideoId, pos);
-            }
-        }
-
         public void releasePlayer() {
-            saveCurrentPosition();
-
-            // Không release player ngay, để lại trong cache
             if (player != null) {
-                player.setPlayWhenReady(false);
-                playerView.setPlayer(null);
+                // Lưu vị trí trước khi release
+                if (isPlayerReady && !currentVideoId.isEmpty()) {
+                    long currentPos = player.getCurrentPosition();
+                    if (currentPos > 0) {
+                        sessionPositions.put(currentVideoId, currentPos);
+                    }
+                }
+
+                player.release();
                 player = null;
             }
 
+            playerView.setPlayer(null);
             currentVideoId = "";
             isPlayerReady = false;
+            isCurrentlyPlaying = false;
         }
 
         private void showLoading(boolean show) {
@@ -456,12 +426,6 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             }
         }
 
-        private String getCurrentMediaUrl(ExoPlayer player) {
-            if (player == null || player.getCurrentMediaItem() == null) return null;
-            MediaItem mi = player.getCurrentMediaItem();
-            if (mi.localConfiguration == null || mi.localConfiguration.uri == null) return null;
-            return mi.localConfiguration.uri.toString();
-        }
 
         private String formatCount(long count) {
             if (count < 1000) return String.valueOf(count);
@@ -482,158 +446,5 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             return CloudinaryUrls.mp4(v.getCldPublicId(), v.getCldVersion());
         }
         return "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-    }
-
-    /**
-     * Resume video tại position (dùng khi quay lại màn hình và muốn phát auto)
-     */
-    public void resumeVideoAt(int position) {
-        setCurrentPlayingPosition(position);
-    }
-
-    /**
-     * Preload video ở vị trí gần đó để cải thiện trải nghiệm
-     */
-    public void preloadVideoAt(int position, Context context) {
-        if (position >= 0 && position < videos.size() && context != null) {
-            ShortVideo video = videos.get(position);
-            String videoId = video.getId();
-            if (videoId != null && !playerCache.containsKey(videoId)) {
-                // Tạo player và prepare sẵn
-                ExoPlayer preloadPlayer = createPlayer(context, videoId);
-                String url = getVideoUrl(video);
-                MediaItem item = MediaItem.fromUri(Uri.parse(url));
-                preloadPlayer.setMediaItem(item);
-                preloadPlayer.prepare();
-                // Không play, chỉ prepare
-            }
-        }
-    }
-
-    private ExoPlayer createPlayer(Context context, String videoId) {
-        // Kiểm tra cache trước
-        ExoPlayer cachedPlayer = playerCache.get(videoId);
-        if (cachedPlayer != null) {
-            return cachedPlayer;
-        }
-
-        // Tạo player mới
-        ExoPlayer newPlayer = new ExoPlayer.Builder(context)
-                .setSeekBackIncrementMs(5000)
-                .setSeekForwardIncrementMs(10000)
-                .build();
-
-        newPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
-
-        // Cache player (giới hạn số lượng)
-        if (playerCache.size() >= MAX_CACHED_PLAYERS) {
-            // Remove oldest player
-            String oldestKey = playerCache.keySet().iterator().next();
-            ExoPlayer oldPlayer = playerCache.remove(oldestKey);
-            if (oldPlayer != null && oldPlayer != currentPlayer) {
-                oldPlayer.release();
-            }
-        }
-
-        playerCache.put(videoId, newPlayer);
-        return newPlayer;
-    }
-
-    /**
-     * Optimize memory bằng cách release player của các video xa hiện tại
-     */
-    public void optimizeMemory(int currentPosition) {
-        // Clean up các player quá xa khỏi vị trí hiện tại
-        List<String> keysToRemove = new ArrayList<>();
-
-        for (int i = 0; i < videos.size(); i++) {
-            if (Math.abs(i - currentPosition) > MAX_CACHED_PLAYERS) {
-                String videoId = videos.get(i).getId();
-                if (videoId != null && playerCache.containsKey(videoId)) {
-                    keysToRemove.add(videoId);
-                }
-            }
-        }
-
-        for (String key : keysToRemove) {
-            ExoPlayer player = playerCache.remove(key);
-            if (player != null && player != currentPlayer) {
-                player.release();
-            }
-        }
-    }
-
-    /**
-     * Release tất cả resources khi không cần thiết
-     */
-    public void onDestroy() {
-        releaseAllPlayers();
-        temporaryPositions.clear();
-    }
-
-    /**
-     * Tự động dọn dẹp dữ liệu tạm thời để tiết kiệm memory
-     */
-    public void autoCleanupTemporaryData() {
-        long currentTime = System.currentTimeMillis();
-
-        // Dọn dẹp vị trí tạm thời của các video đã xem lâu
-        List<String> expiredPositions = new ArrayList<>();
-        for (Map.Entry<String, Long> entry : lastViewTime.entrySet()) {
-            if (currentTime - entry.getValue() > SESSION_TIMEOUT) {
-                expiredPositions.add(entry.getKey());
-            }
-        }
-
-        for (String videoId : expiredPositions) {
-            temporaryPositions.remove(videoId);
-            lastViewTime.remove(videoId);
-            viewedVideos.remove(videoId);
-        }
-
-        // Giới hạn số lượng vị trí được cache
-        if (temporaryPositions.size() > MAX_POSITION_CACHE) {
-            // Xóa các video cũ nhất
-            List<Map.Entry<String, Long>> sortedEntries = new ArrayList<>();
-            for (Map.Entry<String, Long> entry : lastViewTime.entrySet()) {
-                sortedEntries.add(entry);
-            }
-
-            // Sắp xếp theo thời gian xem (cũ nhất trước)
-            sortedEntries.sort(Map.Entry.comparingByValue());
-
-            // Xóa các entry cũ nhất
-            int toRemove = temporaryPositions.size() - MAX_POSITION_CACHE;
-            for (int i = 0; i < toRemove && i < sortedEntries.size(); i++) {
-                String videoId = sortedEntries.get(i).getKey();
-                temporaryPositions.remove(videoId);
-                lastViewTime.remove(videoId);
-                viewedVideos.remove(videoId);
-            }
-        }
-
-        android.util.Log.d("VideoAdapter", "Auto cleanup completed. Cached positions: " +
-                          temporaryPositions.size() + "/" + MAX_POSITION_CACHE);
-    }
-
-    /**
-     * Xóa toàn bộ dữ liệu tạm thời (có thể gọi khi user thoát app)
-     */
-    public void clearAllTemporaryData() {
-        temporaryPositions.clear();
-        viewedVideos.clear();
-        lastViewTime.clear();
-        android.util.Log.d("VideoAdapter", "All temporary data cleared");
-    }
-
-    /**
-     * Lấy thông tin về memory usage hiện tại
-     */
-    public String getMemoryUsageInfo() {
-        return String.format(Locale.getDefault(),
-                "Cached Players: %d/%d | Temporary Positions: %d/%d | Viewed Videos: %d",
-                playerCache.size(), MAX_CACHED_PLAYERS,
-                temporaryPositions.size(), MAX_POSITION_CACHE,
-                viewedVideos.size());
     }
 }
