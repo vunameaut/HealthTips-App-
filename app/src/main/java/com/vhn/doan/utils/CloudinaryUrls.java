@@ -28,6 +28,16 @@ public class CloudinaryUrls {
     }
 
     /**
+     * Tạo URL cho thumbnail của video (alias cho poster)
+     * @param id Public ID của video
+     * @param v Version của video
+     * @return URL đầy đủ cho thumbnail image
+     */
+    public static String videoThumbnail(String id, long v) {
+        return poster(id, v);
+    }
+
+    /**
      * Tạo URL cho HLS streaming
      * @param id Public ID của video
      * @param v Version của video

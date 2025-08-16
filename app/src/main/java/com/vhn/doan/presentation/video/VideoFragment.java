@@ -117,7 +117,8 @@ public class VideoFragment extends BaseFragment implements VideoView {
                         int position = layoutManager.getPosition(centerView);
                         if (position != currentVisiblePosition) {
                             currentVisiblePosition = position;
-                            presenter.playVideoAt(position);
+                            // Sử dụng API mới của VideoAdapter
+                            videoAdapter.playVideoAt(position, recyclerView);
                             presenter.incrementViewCount(position);
                         }
                     }
@@ -130,7 +131,7 @@ public class VideoFragment extends BaseFragment implements VideoView {
         videoAdapter.setOnVideoInteractionListener(new VideoAdapter.OnVideoInteractionListener() {
             @Override
             public void onVideoClick(ShortVideo video, int position) {
-                // Toggle play/pause
+                // Toggle play/pause thông qua presenter
                 presenter.togglePlayPause();
             }
 
@@ -153,7 +154,8 @@ public class VideoFragment extends BaseFragment implements VideoView {
 
             @Override
             public void onVideoVisible(int position) {
-                videoAdapter.setCurrentPlayingPosition(position);
+                // Cập nhật position hiện tại
+                currentVisiblePosition = position;
             }
 
             @Override
@@ -191,10 +193,10 @@ public class VideoFragment extends BaseFragment implements VideoView {
 
         videoAdapter.updateVideos(videos);
 
-        // Auto play first video
+        // Auto play first video sử dụng API mới
         if (!videos.isEmpty()) {
             currentVisiblePosition = 0;
-            videoAdapter.setCurrentPlayingPosition(0);
+            videoAdapter.playVideoAt(0, recyclerView);
         }
     }
 
@@ -229,7 +231,8 @@ public class VideoFragment extends BaseFragment implements VideoView {
 
     @Override
     public void playVideoAtPosition(int position) {
-        videoAdapter.setCurrentPlayingPosition(position);
+        // Sử dụng API mới của VideoAdapter
+        videoAdapter.playVideoAt(position, recyclerView);
 
         // Scroll to position if needed
         if (Math.abs(currentVisiblePosition - position) > 1) {
@@ -294,9 +297,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
     @Override
     public void onResume() {
         super.onResume();
-        // Resume current video if any
-        if (currentVisiblePosition >= 0) {
-            videoAdapter.resumeVideoAt(currentVisiblePosition);
+        // Resume current video n��u có sử dụng API mới
+        if (currentVisiblePosition >= 0 && recyclerView != null) {
+            videoAdapter.playVideoAt(currentVisiblePosition, recyclerView);
         }
 
         // Giữ màn hình sáng khi fragment hiển thị
@@ -308,12 +311,21 @@ public class VideoFragment extends BaseFragment implements VideoView {
     @Override
     public void onPause() {
         super.onPause();
-        // Pause all videos when fragment is not visible
+        // Pause all videos when fragment is not visible - theo hướng dẫn API mới
         videoAdapter.pauseAllVideos();
 
         // Cho phép màn hình tắt khi fragment không còn hiển thị
         if (getActivity() != null) {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Release all players khi hủy view - theo hướng dẫn API mới
+        if (videoAdapter != null) {
+            videoAdapter.releaseAllPlayers();
         }
     }
 
