@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -18,7 +19,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.FirebaseVideoRepositoryImpl;
-import com.vhn.doan.data.repository.TestVideoRepository;
 import com.vhn.doan.presentation.base.BaseFragment;
 import com.vhn.doan.presentation.video.adapter.VideoAdapter;
 import com.vhn.doan.utils.SharedPreferencesHelper;
@@ -53,9 +53,8 @@ public class VideoFragment extends BaseFragment implements VideoView {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Sử dụng TestVideoRepository tạm thời để debug màn hình đen
-        // Sau khi fix xong sẽ chuyển lại FirebaseVideoRepositoryImpl
-        presenter = new VideoPresenter(new TestVideoRepository());
+        // Sử dụng FirebaseVideoRepositoryImpl để lấy dữ liệu thực từ Firebase
+        presenter = new VideoPresenter(new FirebaseVideoRepositoryImpl());
         presenter.attachView(this);
 
         // Khởi tạo adapter
@@ -299,6 +298,11 @@ public class VideoFragment extends BaseFragment implements VideoView {
         if (currentVisiblePosition >= 0) {
             videoAdapter.resumeVideoAt(currentVisiblePosition);
         }
+
+        // Giữ màn hình sáng khi fragment hiển thị
+        if (getActivity() != null) {
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 
     @Override
@@ -306,6 +310,11 @@ public class VideoFragment extends BaseFragment implements VideoView {
         super.onPause();
         // Pause all videos when fragment is not visible
         videoAdapter.pauseAllVideos();
+
+        // Cho phép màn hình tắt khi fragment không còn hiển thị
+        if (getActivity() != null) {
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 
     @Override
