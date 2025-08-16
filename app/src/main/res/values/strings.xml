@@ -48,6 +48,21 @@
     <string name="no_liked_videos">Chưa có video nào được thích</string>
     <string name="no_liked_videos_subtitle">Hãy thích những video yêu thích để xem lại sau</string>
 
+    <!-- Các chuỗi cho short video item -->
+    <string name="video_title_placeholder">Video Title</string>
+    <string name="video_caption_placeholder">Video caption goes here...</string>
+    <string name="see_more">Xem thêm</string>
+    <string name="view_count_placeholder">1.2K lượt xem</string>
+    <string name="upload_date_placeholder">2 ngày trước</string>
+    <string name="like_count_placeholder">123</string>
+    <string name="comment_action">Bình luận</string>
+    <string name="share_action">Chia sẻ</string>
+    <string name="like_button_description">Nút thích</string>
+    <string name="comment_button_description">Nút bình luận</string>
+    <string name="share_button_description">Nút chia sẻ</string>
+    <string name="play_pause_video">Phát/Tạm dừng video</string>
+    <string name="see_less">Thu gọn</string>
+
     <!-- Thông báo lỗi và thành công -->
     <string name="error_login">Đăng nhập thất bại</string>
     <string name="error_register">Đăng ký thất bại</string>
@@ -96,7 +111,7 @@
     <string name="delete_reminder">Xóa nhắc nhở</string>
     <string name="no_reminders">Chưa có nhắc nhở nào</string>
 
-    <!-- Chuỗi cho loại lặp lại -->
+    <!-- Chuỗi cho loại lặp l���i -->
     <string name="repeat_none">Không lặp</string>
     <string name="repeat_daily">Hàng ngày</string>
     <string name="repeat_weekly">Hàng tuần</string>
@@ -137,7 +152,7 @@
     <string name="back">Quay lại</string>
 
     <!-- Các chuỗi cho màn hình chi tiết danh mục -->
-    <string name="empty_tips_description">Chưa có mẹo nào trong danh m���c này</string>
+    <string name="empty_tips_description">Chưa có mẹo nào trong danh mục này</string>
     <string name="empty_tips_title">Danh sách trống</string>
     <string name="empty_tips_message">Danh mục này hiện không có mẹo sức khỏe nào</string>
 
