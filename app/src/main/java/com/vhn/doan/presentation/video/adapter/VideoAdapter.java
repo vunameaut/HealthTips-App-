@@ -3,7 +3,9 @@ package com.vhn.doan.presentation.video.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -11,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.exoplayer2.ExoPlayer;
@@ -41,10 +44,14 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     // ================== Cấu hình hành vi ==================
     private static final boolean REPLAY_ON_REVISIT = true; // lướt quay lại -> phát từ đầu
     private static final int PRELOAD_AHEAD = 2;            // số item preload trước/sau
+    private static final int MAX_CAPTION_LENGTH = 100;     // Độ dài tối đa caption trước khi cắt
 
     // ================== Dữ liệu / listener ==================
     private final List<ShortVideo> videos = new ArrayList<>();
     private OnVideoInteractionListener listener;
+
+    // Map để theo dõi trạng thái like của từng video
+    private final Map<Integer, Boolean> likeStatusMap = new HashMap<>();
 
     public interface OnVideoInteractionListener {
         void onVideoClick(ShortVideo video, int position);
@@ -62,6 +69,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public void updateVideos(List<ShortVideo> newVideos) {
         releaseAllPlayers();
         videos.clear();
+        likeStatusMap.clear(); // Reset like status map
         if (newVideos != null) videos.addAll(newVideos);
         currentPlayingPosition = RecyclerView.NO_POSITION;
         notifyDataSetChanged();
@@ -72,6 +80,51 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             videos.set(position, video);
             notifyItemChanged(position, "payload_metadata");
         }
+    }
+
+    /**
+     * Cập nhật trạng thái like cho video tại vị trí cụ thể
+     */
+    public void updateVideoLikeStatus(int position, boolean isLiked) {
+        if (position >= 0 && position < videos.size()) {
+            likeStatusMap.put(position, isLiked);
+
+            // Tìm ViewHolder và cập nhật UI
+            RecyclerView recyclerView = getCurrentRecyclerView();
+            if (recyclerView != null) {
+                VideoViewHolder holder = (VideoViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+                if (holder != null) {
+                    holder.updateLikeIcon(isLiked);
+                    holder.confirmLikeOperation(isLiked);
+                }
+            }
+        }
+    }
+
+    /**
+     * Revert UI cho video khi like operation thất bại
+     */
+    public void revertLikeUI(int position) {
+        if (position >= 0 && position < videos.size()) {
+            RecyclerView recyclerView = getCurrentRecyclerView();
+            if (recyclerView != null) {
+                VideoViewHolder holder = (VideoViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+                if (holder != null) {
+                    holder.revertLikeUI(videos.get(position));
+                }
+            }
+        }
+    }
+
+    // Helper để get current RecyclerView
+    private RecyclerView currentRecyclerView;
+
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.currentRecyclerView = recyclerView;
+    }
+
+    private RecyclerView getCurrentRecyclerView() {
+        return currentRecyclerView;
     }
 
     // ================== Player chính + preload ==================
@@ -265,7 +318,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     /**
-     * Gọi khi cần tạm dừng (ví dụ Fragment onPause hoặc khi user chạm tạm dừng).
+     * G�����i khi cần tạm dừng (ví dụ Fragment onPause hoặc khi user chạm tạm dừng).
      */
     public void pauseAllVideos() {
         if (currentPlayer != null) {
@@ -340,6 +393,15 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
         // Actions
         private final LinearLayout likeButton, shareButton, commentButton;
+        private final ImageView likeIcon;
+
+        // Double-tap animation
+        private final ImageView doubleTapHeart;
+        private GestureDetector gestureDetector;
+
+        // State tracking cho optimistic UI
+        private boolean isLikedLocally = false;
+        private boolean isLikeOperationPending = false;
 
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -361,34 +423,150 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             likeButton = itemView.findViewById(R.id.btn_like);
             shareButton = itemView.findViewById(R.id.btn_share);
             commentButton = itemView.findViewById(R.id.btn_comment);
+            likeIcon = itemView.findViewById(R.id.iv_like_icon);
+            doubleTapHeart = itemView.findViewById(R.id.iv_double_tap_heart);
 
-            // Tap để pause/play
+            setupDoubleTapGesture();
+
+            // Tap để pause/play hoặc double-tap để like
             View videoTapArea = itemView.findViewById(R.id.video_tap_area);
             if (videoTapArea != null) {
-                videoTapArea.setOnClickListener(v -> togglePlayPause());
+                videoTapArea.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
             } else {
-                playerView.setOnClickListener(v -> togglePlayPause());
+                playerView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
             }
 
             // Buttons
             likeButton.setOnClickListener(v -> {
                 int p = getBindingAdapterPosition();
-                if (p != RecyclerView.NO_POSITION && listener != null) {
-                    listener.onLikeClick(videos.get(p), p);
+                if (p != RecyclerView.NO_POSITION && !isLikeOperationPending) {
+                    handleLikeClick(videos.get(p), p);
                 }
             });
+
             shareButton.setOnClickListener(v -> {
                 int p = getBindingAdapterPosition();
                 if (p != RecyclerView.NO_POSITION && listener != null) {
                     listener.onShareClick(videos.get(p), p);
                 }
             });
+
             commentButton.setOnClickListener(v -> {
                 int p = getBindingAdapterPosition();
                 if (p != RecyclerView.NO_POSITION && listener != null) {
                     listener.onCommentClick(videos.get(p), p);
                 }
             });
+        }
+
+        private void setupDoubleTapGesture() {
+            gestureDetector = new GestureDetector(itemView.getContext(), new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    // Single tap = pause/play
+                    togglePlayPause();
+                    return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    // Double tap = like v���i animation
+                    int p = getBindingAdapterPosition();
+                    if (p != RecyclerView.NO_POSITION && !isLikeOperationPending) {
+                        handleDoubleTapLike(videos.get(p), p, e.getX(), e.getY());
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean onDown(MotionEvent e) {
+                    return true;
+                }
+            });
+        }
+
+        private void handleLikeClick(ShortVideo video, int position) {
+            if (listener != null) {
+                // Optimistic UI update
+                updateLikeUIOptimistically(!isLikedLocally, video);
+
+                // Call listener
+                listener.onLikeClick(video, position);
+            }
+        }
+
+        private void handleDoubleTapLike(ShortVideo video, int position, float x, float y) {
+            // Nếu chưa like thì like, nếu đã like thì không làm gì
+            if (!isLikedLocally && listener != null) {
+                // Show heart animation
+                showDoubleTapHeartAnimation(x, y);
+
+                // Optimistic UI update
+                updateLikeUIOptimistically(true, video);
+
+                // Call listener
+                listener.onLikeClick(video, position);
+            }
+        }
+
+        private void showDoubleTapHeartAnimation(float x, float y) {
+            if (doubleTapHeart == null) return;
+
+            // Position heart at tap location
+            doubleTapHeart.setX(x - doubleTapHeart.getWidth() / 2f);
+            doubleTapHeart.setY(y - doubleTapHeart.getHeight() / 2f);
+
+            doubleTapHeart.setVisibility(View.VISIBLE);
+            doubleTapHeart.setScaleX(0f);
+            doubleTapHeart.setScaleY(0f);
+            doubleTapHeart.setAlpha(1f);
+
+            // Animation: scale up và fade out
+            doubleTapHeart.animate()
+                .scaleX(1.2f)
+                .scaleY(1.2f)
+                .alpha(0f)
+                .setDuration(800)
+                .withEndAction(() -> doubleTapHeart.setVisibility(View.GONE))
+                .start();
+        }
+
+        private void updateLikeUIOptimistically(boolean liked, ShortVideo video) {
+            isLikedLocally = liked;
+            isLikeOperationPending = true;
+
+            // Update icon
+            updateLikeIcon(liked);
+
+            // Update count optimistically
+            long currentCount = video.getLikeCount();
+            long newCount = liked ? currentCount + 1 : Math.max(0, currentCount - 1);
+            likeCountTextView.setText(formatCount(newCount));
+        }
+
+        public void updateLikeIcon(boolean liked) {
+            if (likeIcon != null) {
+                likeIcon.setImageResource(liked ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
+                likeIcon.setColorFilter(liked ?
+                    ContextCompat.getColor(itemView.getContext(), R.color.like_color_active) :
+                    ContextCompat.getColor(itemView.getContext(), R.color.like_color_inactive));
+            }
+        }
+
+        public void revertLikeUI(ShortVideo video) {
+            // Revert optimistic changes nếu operation thất bại
+            isLikeOperationPending = false;
+
+            // Revert icon
+            updateLikeIcon(isLikedLocally);
+
+            // Revert count
+            likeCountTextView.setText(formatCount(video.getLikeCount()));
+        }
+
+        public void confirmLikeOperation(boolean newLikedState) {
+            isLikedLocally = newLikedState;
+            isLikeOperationPending = false;
         }
 
         void bindMetadata(ShortVideo video) {
@@ -400,33 +578,53 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                 captionTextView.setVisibility(View.GONE);
                 if (seeMore != null) seeMore.setVisibility(View.GONE);
             } else {
+                String caption = video.getCaption().trim();
                 captionTextView.setVisibility(View.VISIBLE);
-                captionTextView.setText(video.getCaption());
-                captionTextView.setMaxLines(2);
-                captionTextView.post(() -> {
+
+                if (caption.length() > MAX_CAPTION_LENGTH) {
+                    String shortCaption = caption.substring(0, MAX_CAPTION_LENGTH) + "...";
+                    captionTextView.setText(shortCaption);
                     if (seeMore != null) {
-                        if (captionTextView.getLineCount() > 2) {
-                            seeMore.setVisibility(View.VISIBLE);
-                            seeMore.setText(R.string.see_more);
-                            seeMore.setOnClickListener(v -> {
-                                if (captionTextView.getMaxLines() == Integer.MAX_VALUE) {
-                                    captionTextView.setMaxLines(2);
-                                    seeMore.setText(R.string.see_more);
-                                } else {
-                                    captionTextView.setMaxLines(Integer.MAX_VALUE);
-                                    seeMore.setText(R.string.see_less);
-                                }
+                        seeMore.setVisibility(View.VISIBLE);
+                        seeMore.setText("Xem thêm");
+                        seeMore.setOnClickListener(v -> {
+                            captionTextView.setText(caption);
+                            seeMore.setText("Thu gọn");
+                            seeMore.setOnClickListener(v2 -> {
+                                captionTextView.setText(shortCaption);
+                                seeMore.setText("Xem thêm");
+                                seeMore.setOnClickListener(v3 -> {
+                                    captionTextView.setText(caption);
+                                    seeMore.setText("Thu gọn");
+                                });
                             });
-                        } else {
-                            seeMore.setVisibility(View.GONE);
-                        }
+                        });
                     }
-                });
+                } else {
+                    captionTextView.setText(caption);
+                    if (seeMore != null) seeMore.setVisibility(View.GONE);
+                }
             }
 
+            // Counts
             viewCountTextView.setText(formatCount(video.getViewCount()) + " lượt xem");
             likeCountTextView.setText(formatCount(video.getLikeCount()));
-            uploadDateTextView.setText(formatDate(video.getUploadDate()));
+
+            // Upload date
+            uploadDateTextView.setText(formatUploadDate(video.getUploadDate()));
+
+            // Cập nhật trạng thái like từ Map thay vì mặc định
+            int position = getBindingAdapterPosition();
+            Boolean isLikedFromMap = likeStatusMap.get(position);
+            if (isLikedFromMap != null) {
+                isLikedLocally = isLikedFromMap;
+                updateLikeIcon(isLikedFromMap);
+            } else {
+                // Mặc định chưa like nếu chưa có thông tin
+                isLikedLocally = false;
+                updateLikeIcon(false);
+            }
+            isLikeOperationPending = false;
         }
 
         private void togglePlayPause() {
@@ -466,6 +664,38 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             if (timestamp <= 0) return "";
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             return sdf.format(new Date(timestamp));
+        }
+
+        private String formatUploadDate(long timestamp) {
+            if (timestamp <= 0) return "";
+
+            long now = System.currentTimeMillis();
+            long diff = now - timestamp;
+
+            // Tính toán thời gian
+            long seconds = diff / 1000;
+            long minutes = seconds / 60;
+            long hours = minutes / 60;
+            long days = hours / 24;
+            long weeks = days / 7;
+            long months = days / 30;
+            long years = days / 365;
+
+            if (years > 0) {
+                return years + " năm trước";
+            } else if (months > 0) {
+                return months + " tháng trước";
+            } else if (weeks > 0) {
+                return weeks + " tuần trước";
+            } else if (days > 0) {
+                return days + " ngày trước";
+            } else if (hours > 0) {
+                return hours + " giờ trước";
+            } else if (minutes > 0) {
+                return minutes + " phút trước";
+            } else {
+                return "Vừa xong";
+            }
         }
     }
 

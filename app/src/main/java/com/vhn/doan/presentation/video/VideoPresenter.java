@@ -160,37 +160,141 @@ public class VideoPresenter extends BasePresenter<VideoView> {
      */
     public void toggleLike(int position) {
         if (!isViewAttached() || currentVideos == null ||
+            position < 0 || position >= currentVideos.size() || currentUserId == null) {
+            return;
+        }
+
+        ShortVideo video = currentVideos.get(position);
+
+        // Kiểm tra trạng thái like hiện tại trước
+        videoRepository.isVideoLiked(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
+            @Override
+            public void onSuccess(boolean isLiked) {
+                if (!isViewAttached()) return;
+
+                if (isLiked) {
+                    // Unlike video
+                    unlikeVideo(video, position);
+                } else {
+                    // Like video
+                    likeVideo(video, position);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (!isViewAttached()) return;
+                view.showError("Không thể kiểm tra trạng thái like: " + errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Like video
+     */
+    private void likeVideo(ShortVideo video, int position) {
+        videoRepository.likeVideo(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
+            @Override
+            public void onSuccess(boolean result) {
+                if (!isViewAttached()) return;
+
+                // Cập nhật local data
+                video.setLikeCount(video.getLikeCount() + 1);
+                view.updateVideoLikeStatus(position, true);
+                view.updateVideoInfo(video, position);
+                view.showMessage("Đã thích video");
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (!isViewAttached()) return;
+                view.revertVideoLikeUI(position);
+                view.showError("Không thể thích video: " + errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Unlike video
+     */
+    private void unlikeVideo(ShortVideo video, int position) {
+        videoRepository.unlikeVideo(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
+            @Override
+            public void onSuccess(boolean result) {
+                if (!isViewAttached()) return;
+
+                // Cập nhật local data
+                video.setLikeCount(Math.max(0, video.getLikeCount() - 1));
+                view.updateVideoLikeStatus(position, false);
+                view.updateVideoInfo(video, position);
+                view.showMessage("Đã bỏ thích video");
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (!isViewAttached()) return;
+                view.revertVideoLikeUI(position);
+                view.showError("Không thể bỏ thích video: " + errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Kiểm tra và cập nhật trạng thái like cho tất cả video đang hiển thị
+     */
+    public void checkLikeStatusForVisibleVideos() {
+        if (!isViewAttached() || currentVideos == null || currentUserId == null) return;
+
+        for (int i = 0; i < currentVideos.size(); i++) {
+            final int position = i;
+            ShortVideo video = currentVideos.get(i);
+
+            videoRepository.isVideoLiked(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
+                @Override
+                public void onSuccess(boolean isLiked) {
+                    if (!isViewAttached()) return;
+                    view.updateVideoLikeStatus(position, isLiked);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    // Bỏ qua lỗi cho việc kiểm tra trạng thái like
+                }
+            });
+        }
+    }
+
+    /**
+     * Xử lý khi user click vào comment
+     */
+    public void onCommentClick(int position) {
+        if (!isViewAttached() || currentVideos == null ||
             position < 0 || position >= currentVideos.size()) {
             return;
         }
 
         ShortVideo video = currentVideos.get(position);
-
-        // Tạm thời tăng/giảm like count locally
-        // TODO: Implement actual like/unlike logic với Firebase
-        long newLikeCount = video.getLikeCount() + 1; // hoặc -1 nếu unlike
-        video.setLikeCount(newLikeCount);
-
-        view.updateVideoInfo(video, position);
+        view.showCommentBottomSheet(video.getId());
     }
 
     /**
-     * Cập nhật view count cho video
-     * @param position Vị trí video
+     * Xử lý khi user click share
      */
-    public void incrementViewCount(int position) {
-        if (currentVideos == null || position < 0 || position >= currentVideos.size()) {
+    public void onShareClick(int position) {
+        if (!isViewAttached() || currentVideos == null ||
+            position < 0 || position >= currentVideos.size()) {
             return;
         }
 
         ShortVideo video = currentVideos.get(position);
-        video.setViewCount(video.getViewCount() + 1);
+        view.shareVideo(video);
+    }
 
-        if (isViewAttached()) {
-            view.updateVideoInfo(video, position);
-        }
-
-        // TODO: Implement actual view count update với Firebase
+    /**
+     * Set user ID hiện tại
+     */
+    public void setCurrentUserId(String userId) {
+        this.currentUserId = userId;
     }
 
     /**
@@ -219,6 +323,26 @@ public class VideoPresenter extends BasePresenter<VideoView> {
      */
     public int getVideoCount() {
         return currentVideos != null ? currentVideos.size() : 0;
+    }
+
+    /**
+     * Cập nhật view count cho video khi user xem
+     * @param position Vị trí video trong danh sách
+     */
+    public void incrementViewCount(int position) {
+        if (!isViewAttached() || currentVideos == null ||
+            position < 0 || position >= currentVideos.size()) {
+            return;
+        }
+
+        ShortVideo video = currentVideos.get(position);
+
+        // Cập nhật view count locally trước
+        video.setViewCount(video.getViewCount() + 1);
+        view.updateVideoInfo(video, position);
+
+        // TODO: Implement actual view count update với Firebase
+        // Có thể implement sau khi có Firebase Functions để đảm bảo view count chính xác
     }
 
     /**
