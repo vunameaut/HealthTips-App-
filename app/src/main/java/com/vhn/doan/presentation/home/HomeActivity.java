@@ -16,6 +16,7 @@ import com.vhn.doan.presentation.auth.LoginActivity;
 import com.vhn.doan.presentation.chat.ChatListFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
+import com.vhn.doan.presentation.video.VideoFragment;
 import com.vhn.doan.services.AuthManager;
 import com.vhn.doan.services.ReminderManager;
 import com.vhn.doan.utils.UserSessionManager;
@@ -114,9 +115,8 @@ public class HomeActivity extends AppCompatActivity {
                     // Kích hoạt ReminderFragment
                     fragment = ReminderFragment.newInstance();
                 } else if (itemId == R.id.nav_videos) {
-                    // Chức năng video sẽ được triển khai lại
-                    // Tạm thời giữ nguyên HomeFragment
-                    fragment = HomeFragment.newInstance();
+                    // Kích hoạt VideoFragment - chức năng video ngắn
+                    fragment = VideoFragment.newInstance();
                 } else if (itemId == R.id.nav_profile) {
                     // Sử dụng ProfileFragment - chức năng yêu thích đã được tích hợp vào đây
                     fragment = ProfileFragment.newInstance();

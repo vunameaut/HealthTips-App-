@@ -18,23 +18,61 @@ android {
         multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Cấu hình hỗ trợ 16KB page size cho native libraries
+        ndk {
+            // Đảm bảo alignment cho tất cả các architectures
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
+    }
+
+    // Cấu hình packaging để hỗ trợ 16KB page size alignment (Updated for AGP 8.1+)
+    packaging {
+        jniLibs {
+            // Sử dụng cấu hình mới cho 16KB page size alignment
+            useLegacyPackaging = false
+        }
+
+        // Loại bỏ các file không cần thiết để giảm kích thước APK
+        resources {
+            excludes += listOf(
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "/META-INF/DEPENDENCIES",
+                "/META-INF/LICENSE",
+                "/META-INF/LICENSE.txt",
+                "/META-INF/NOTICE",
+                "/META-INF/NOTICE.txt"
+            )
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // Tối ưu hóa cho production build
+            isDebuggable = false
+            isJniDebuggable = false
+            renderscriptOptimLevel = 3
+        }
+
+        debug {
+            isMinifyEnabled = false
+            isDebuggable = true
         }
     }
-    compileOptions {
-        // Cấu hình Java 8+
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
 
-        // Cho phép sử dụng các tính năng Java 8
+    compileOptions {
+        // Nâng cấp Java toolchain lên Java 11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+
+        // Cho phép sử dụng các tính năng Java 8+
         isCoreLibraryDesugaringEnabled = true
     }
 }
@@ -99,4 +137,8 @@ dependencies {
 
     // ExoPlayer cho video playback (tùy chọn thay thế VideoView)
     implementation("com.google.android.exoplayer:exoplayer:2.19.1")
+    implementation("com.google.android.exoplayer:exoplayer-ui:2.19.1")
+
+    // Thêm Cloudinary Android SDK
+    implementation("com.cloudinary:cloudinary-android:2.8.0")
 }

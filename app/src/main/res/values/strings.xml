@@ -26,6 +26,7 @@
     <string name="see_all">Xem tất cả</string>
     <string name="search">Tìm kiếm</string>
     <string name="offline_mode">Đang ở chế độ ngoại tuyến</string>
+    <string name="home">Trang chủ</string>
 
     <!-- Các chuỗi cho bottom navigation -->
     <string name="nav_home">Trang chủ</string>
@@ -175,4 +176,5 @@
     <!-- Chuỗi bổ sung -->
     <string name="settings_under_development">Chức năng cài đặt đang phát triển</string>
     <string name="video_thumbnail">Ảnh đại diện video</string>
+    <string name="video_poster_description">Poster của video</string>
 </resources>

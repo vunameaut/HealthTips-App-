@@ -34,7 +34,25 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
     * Giao diện được xây dựng bằng **XML**.
     * Tuân thủ nghiêm ngặt **Material Design 3** để đảm bảo tính nhất quán và trải nghiệm người dùng hiện đại.
 
-6.  **Quy ước đặt tên:**
+6.  **Kiểm tra Resources để tránh lỗi Duplicate:**
+    * **Trước khi tạo hoặc đề xuất bất kỳ resource mới nào (string, color, drawable, dimen, style, etc.), Copilot PHẢI kiểm tra kỹ lưỡng các file resource hiện có trong dự án để tránh lỗi "Duplicate resources".**
+    * **Quy trình kiểm tra bắt buộc:**
+        * **Kiểm tra strings.xml:** Trước khi thêm string mới, phải kiểm tra tất cả các file `res/values*/strings.xml` để đảm bảo tên string chưa tồn tại.
+        * **Kiểm tra colors.xml:** Trước khi thêm màu mới, phải kiểm tra tất cả các file `res/values*/colors.xml` để đảm bảo tên màu chưa tồn tại.
+        * **Kiểm tra styles.xml:** Trước khi thêm style mới, phải kiểm tra file `res/values*/styles.xml` để tránh trùng lặp.
+        * **Kiểm tra drawables:** Kiểm tra thư mục `res/drawable*` để tránh trùng tên file drawable.
+        * **Kiểm tra dimensions:** Kiểm tra file `res/values*/dimens.xml` để tránh trùng lặp dimension.
+    * **Hành động khi phát hiện trùng lặp:**
+        * **Nếu resource đã tồn tại và có cùng giá trị:** Sử dụng lại resource hiện có thay vì tạo mới.
+        * **Nếu resource đã tồn tại nhưng có giá trị khác:** Đặt tên mới có ý nghĩa và mô tả rõ ràng (ví dụ: `button_text_primary` thay vì `button_text` nếu đã có).
+        * **Luôn ưu tiên việc tái sử dụng resource hiện có** để duy trì tính nhất quán trong thiết kế.
+    * **Quy ước đặt tên resource:**
+        * **String:** Sử dụng format `[component]_[purpose]_[detail]` (ví dụ: `home_button_save`, `dialog_message_error`).
+        * **Color:** Sử dụng format `[theme]_[component]_[state]` (ví dụ: `primary_button_normal`, `dark_background_surface`).
+        * **Drawable:** Sử dụng format `[type]_[component]_[state]` (ví dụ: `ic_home_selected`, `bg_button_pressed`).
+        * **Tránh đặt tên chung chung** như `text`, `color`, `background` mà hãy cụ thể hóa mục đích sử dụng.
+
+7.  **Quy ước đặt tên:**
     * Luôn tuân thủ quy ước đặt tên rõ ràng và nhất quán:
         * Adapter: `[Tên]Adapter.java` (ví dụ: `HealthTipAdapter.java`).
         * Presenter: `[Tên]Presenter.java` (ví dụ: `HomePresenter.java`, `LoginPresenter.java`).
@@ -44,14 +62,14 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
         * Model: `[Tên]Model.java` hoặc chỉ `[Tên].java` (ví dụ: `HealthTip.java`).
         * Repository: `[Tên]Repository.java`.
 
-7.  **Kế thừa Presenter và View:**
+8.  **Kế thừa Presenter và View:**
     * Tất cả các Presenter phải kế thừa từ một lớp `BasePresenter` chung.
     * Tất cả các View interfaces (hoặc các lớp Activity/Fragment implement View interface) phải implement một interface `BaseView` chung.
 
-8.  **Tuân thủ thiết kế:**
+9.  **Tuân thủ thiết kế:**
     * Luôn sinh code tuân thủ chặt chẽ **file thiết kế phân tích đã được cung cấp**, bao gồm cả việc chia module và chức năng đã định rõ.
 
-9.  **Phong cách và Giao diện người dùng:**
+10. **Phong cách và Giao diện người dùng:**
     * **Ứng dụng sẽ hỗ trợ hai chế độ giao diện:** Chế độ tối (Dark Mode) và Chế độ sáng (Light Mode).
     * **Chế độ tối (Dark Mode - Lấy cảm hứng từ `cu_black.png`):**
         * **Gam màu chủ đạo:**
@@ -77,7 +95,7 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
             * **Điểm nhấn/Highlight:** Các màu cam/vàng từ bóng đèn trên logo `cu_night.png` (ví dụ: `#FFC107` hoặc `#FFEB3B`) có thể được sử dụng để làm nổi bật các yếu tố quan trọng hoặc trạng thái.
     * **Hiệu ứng chung:** Ưu tiên sử dụng gradient cho các nút để tạo chiều sâu và điểm nhấn trong cả hai chế độ. Đảm bảo tính nhất quán về hình dạng, khoảng cách và kiểu chữ giữa hai chế độ để trải nghiệm người dùng không bị gián đoạn.
 
-10. **Tránh trùng lặp File và Chức năng:**
+11. **Tránh trùng lặp File và Chức năng:**
     * **Trước khi đề xuất hoặc tạo bất kỳ file mới nào (Activity, Fragment, Presenter, Model, Service, v.v.) hoặc triển khai một chức năng mới, Copilot phải kiểm tra kỹ lưỡng toàn bộ cấu trúc dự án hiện có.**
     * **Nếu phát hiện đã tồn tại một file hoặc một phần code thực hiện chức năng tương tự hoặc cùng tên trong dự án (dựa trên tên file, quy ước đặt tên, hoặc logic đã có), Copilot phải thông báo và KHÔNG tạo ra bản sao.**
     * **Thay vào đó, Copilot sẽ:**
@@ -86,14 +104,14 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
         * **Khi tiếp tục một chức năng đã được bắt đầu ở bước trước, Copilot phải tiếp tục làm việc trên các file đã được tạo ra cho chức năng đó, không tạo lại chúng ở thư mục khác.**
     * **Luôn ưu tiên việc tái sử dụng và mở rộng code hiện có.**
 
-11. **Chi tiết Phân tích Dự án:**
+12. **Chi tiết Phân tích Dự án:**
     * **Để có cái nhìn toàn diện và chi tiết về cấu trúc dự án, các thành phần công nghệ, mô hình dữ liệu, quy tắc bảo mật, và lộ trình phát triển, Copilot HÃY THAM KHẢO file `Project_Analysis_Details.md` được cung cấp trong cùng thư mục dự án.**
     * **File này chứa thông tin chi tiết về:**
         * Tổng quan dự án (SDK, Architecture, Database, Authentication, v.v.).
         * Cấu trúc thư mục chi tiết.
         * Định nghĩa các Data Models (User, HealthTip, Category, Reminder, ChatMessage, Enums).
         * Cấu hình Firebase (FirebaseManager, Firestore Collections Structure).
-        * Chi tiết triển khai kiến trúc MVP (Base Classes, Repository Pattern).
+        * Chi tiết triển khai ki��n trúc MVP (Base Classes, Repository Pattern).
         * Triển khai đa ngôn ngữ (LocaleHelper, cấu trúc resource, ví dụ strings.xml).
         * Các Activity và Fragment chính.
         * Hệ thống thông báo (FCMService, ReminderService).
@@ -107,7 +125,7 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
         * Các quy tắc bảo mật Firebase và ProGuard.
         * Monitoring & Analytics (Firebase Analytics Events).
 
-12. **Hướng dẫn theo ngữ cảnh Chức năng:**
+13. **Hướng dẫn theo ngữ cảnh Chức năng:**
     * **Copilot PHẢI chủ động đọc và phân tích file `Project_Analysis_Details.md` dựa trên chức năng hoặc nhiệm vụ mà người dùng đang thực hiện.**
     * **Khi người dùng yêu cầu thực hiện một tác vụ hoặc đang làm việc trong một file cụ thể, Copilot cần:**
         * **Xác định chức năng liên quan:** Ví dụ, nếu người dùng đang chỉnh sửa `HomeFragment.java` hoặc yêu cầu "tải dữ liệu trang chủ", Copilot phải hiểu rằng đây là một phần của "Home Fragment với MVP" và "Phase 1 (MVP)".
@@ -132,6 +150,7 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
 * **Phản hồi UI:** Đảm bảo có phản hồi phù hợp cho người dùng khi thực hiện các thao tác (ví dụ: loading states, thông báo lỗi/thành công).
 * **Bảo mật:** Lưu ý các vấn đề bảo mật cơ bản khi làm việc với dữ liệu người dùng và Firebase.
 * **Hiệu suất:** Cân nhắc hiệu suất, đặc biệt là khi làm việc với dữ liệu lớn hoặc các thao tác UI phức tạp.
+* **Kiểm tra Resources:** Luôn kiểm tra sự tồn tại của resources trước khi tạo mới để tránh lỗi duplicate.
 
 ---
 
@@ -154,3 +173,4 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
 * Test UI layout với các ngôn ngữ có text dài (German) và ngắn (Chinese).
 * Implement proper RTL support cho các ngôn ngữ như Arabic (nếu cần).
 * Use appropriate fonts cho các ngôn ngữ khác nhau.
+* **Kiểm tra tất cả file strings.xml** (bao gồm cả các thư mục values-xx cho đa ngôn ngữ) trước khi thêm string mới để tránh duplicate resources.

@@ -13,6 +13,7 @@ public class SharedPreferencesHelper {
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
+    private static final String KEY_USER_COUNTRY = "user_country";
 
     private final SharedPreferences sharedPreferences;
 
@@ -91,5 +92,49 @@ public class SharedPreferencesHelper {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
+    }
+
+    // Static methods for convenience (used by VideoFragment and other components)
+
+    /**
+     * Static method để lấy user ID
+     */
+    public static String getUserId(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_USER_ID, null);
+    }
+
+    /**
+     * Static method để lấy user country
+     */
+    public static String getUserCountry(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_USER_COUNTRY, "VN"); // Default to Vietnam
+    }
+
+    /**
+     * Static method để set user country
+     */
+    public static void setUserCountry(Context context, String country) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_USER_COUNTRY, country);
+        editor.apply();
+    }
+
+    /**
+     * Lưu user country
+     */
+    public void setUserCountry(String country) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_USER_COUNTRY, country);
+        editor.apply();
+    }
+
+    /**
+     * Lấy user country
+     */
+    public String getUserCountry() {
+        return sharedPreferences.getString(KEY_USER_COUNTRY, "VN");
     }
 }
