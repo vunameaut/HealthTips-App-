@@ -13,7 +13,7 @@ public interface VideoView extends BaseView {
 
     /**
      * Hiển thị danh sách video feed
-     * @param videos Danh sách video đã được sắp xếp
+     * @param videos Danh sách video đã đư���c sắp xếp
      */
     void showVideoFeed(List<ShortVideo> videos);
 
@@ -52,12 +52,43 @@ public interface VideoView extends BaseView {
     void updateVideoInfo(ShortVideo video, int position);
 
     /**
-     * Hiển thị thông báo không có video
+     * Cập nhật trạng thái like của video
+     * @param position Vị trí video trong danh sách
+     * @param isLiked Trạng thái like mới
+     */
+    void updateVideoLikeStatus(int position, boolean isLiked);
+
+    /**
+     * Revert UI khi like operation thất bại
+     * @param position Vị trí video trong danh sách
+     */
+    void revertVideoLikeUI(int position);
+
+    /**
+     * Hiển thị bottom sheet comment cho video
+     * @param videoId ID của video
+     */
+    void showCommentBottomSheet(String videoId);
+
+    /**
+     * Chia sẻ video
+     * @param video Video cần chia sẻ
+     */
+    void shareVideo(ShortVideo video);
+
+    /**
+     * Hiển thị thông báo ngắn
+     * @param message Nội dung thông báo
+     */
+    void showMessage(String message);
+
+    /**
+     * Hiển thị trạng thái empty khi không có video
      */
     void showEmptyState();
 
     /**
-     * Ẩn thông báo không có video
+     * Ẩn trạng thái empty
      */
     void hideEmptyState();
 

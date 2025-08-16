@@ -20,6 +20,12 @@ public class Constants {
     public static final String USER_HISTORY_REF = "user_history";
     public static final String REMINDERS_NODE = "reminders"; // Node lưu trữ các reminder
 
+    // Constants cho Video Structure - cần thiết cho likes và comments
+    public static final String VIDEO_LIKES_REF = "likes";
+    public static final String VIDEO_COMMENTS_REF = "comments";
+    public static final String COMMENT_LIKES_REF = "likes";
+    public static final String COMMENT_REPLIES_REF = "replies";
+
     // Đường dẫn cho Firebase Firestore và Storage
     public static final String USERS_PATH = "users";
     public static final String PROFILE_IMAGES_PATH = "profile_images";

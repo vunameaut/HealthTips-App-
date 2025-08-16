@@ -57,6 +57,17 @@
         android:indeterminateTint="@android:color/white"
         android:visibility="gone" />
 
+    <!-- Double-tap Heart Animation -->
+    <ImageView
+        android:id="@+id/iv_double_tap_heart"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_favorite"
+        android:tint="@color/like_color_active"
+        android:visibility="gone"
+        android:contentDescription="@string/double_tap_heart_animation" />
+
     <!-- Snackbar Anchor (để hiển thị thông báo) -->
     <View
         android:id="@+id/snackbar_anchor"
@@ -192,10 +203,11 @@
             android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
+                android:id="@+id/iv_like_icon"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_favorite_border"
-                app:tint="@android:color/white"
+                app:tint="@color/like_color_inactive"
                 android:contentDescription="@string/like_button_description" />
 
             <TextView

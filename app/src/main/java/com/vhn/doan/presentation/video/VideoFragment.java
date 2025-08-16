@@ -90,6 +90,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
 
         setupRecyclerView();
 
+        // Set RecyclerView reference cho adapter
+        videoAdapter.setRecyclerView(recyclerView);
+
         // Load video feed
         loadVideoFeed();
     }
@@ -131,36 +134,36 @@ public class VideoFragment extends BaseFragment implements VideoView {
         videoAdapter.setOnVideoInteractionListener(new VideoAdapter.OnVideoInteractionListener() {
             @Override
             public void onVideoClick(ShortVideo video, int position) {
-                // Toggle play/pause thông qua presenter
-                presenter.togglePlayPause();
+                // Có thể mở video detail hoặc pause/play
             }
 
             @Override
             public void onLikeClick(ShortVideo video, int position) {
+                // Gọi presenter để xử lý like/unlike
                 presenter.toggleLike(position);
-                // TODO: Animate like button
             }
 
             @Override
             public void onShareClick(ShortVideo video, int position) {
-                shareVideo(video);
+                // Gọi presenter để xử lý share
+                presenter.onShareClick(position);
             }
 
             @Override
             public void onCommentClick(ShortVideo video, int position) {
-                // TODO: Open comment sheet
-                showComingSoon();
+                // Gọi presenter để xử lý comment
+                presenter.onCommentClick(position);
             }
 
             @Override
             public void onVideoVisible(int position) {
-                // Cập nhật position hiện tại
                 currentVisiblePosition = position;
+                // Có thể thêm logic khi video visible
             }
 
             @Override
             public void onVideoInvisible(int position) {
-                // Video không còn visible
+                // Có thể thêm logic khi video invisible
             }
         });
     }
@@ -269,9 +272,45 @@ public class VideoFragment extends BaseFragment implements VideoView {
         presenter.refreshVideoFeed();
     }
 
+    @Override
+    public void updateVideoLikeStatus(int position, boolean isLiked) {
+        if (videoAdapter != null) {
+            videoAdapter.updateVideoLikeStatus(position, isLiked);
+        }
+    }
+
+    @Override
+    public void revertVideoLikeUI(int position) {
+        if (videoAdapter != null) {
+            videoAdapter.revertLikeUI(position);
+        }
+    }
+
+    @Override
+    public void showCommentBottomSheet(String videoId) {
+        if (videoId != null && !videoId.isEmpty()) {
+            CommentBottomSheetFragment commentFragment = CommentBottomSheetFragment.newInstance(videoId);
+            commentFragment.show(getChildFragmentManager(), "CommentBottomSheet");
+        } else {
+            showMessage("Không thể mở bình luận: Video ID không hợp lệ");
+        }
+    }
+
+    @Override
+    public void shareVideo(ShortVideo video) {
+        shareVideoInternal(video);
+    }
+
+    @Override
+    public void showMessage(String message) {
+        if (getView() != null && getActivity() != null && isAdded()) {
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     // Helper Methods
 
-    private void shareVideo(ShortVideo video) {
+    private void shareVideoInternal(ShortVideo video) {
         try {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
@@ -297,7 +336,17 @@ public class VideoFragment extends BaseFragment implements VideoView {
     @Override
     public void onResume() {
         super.onResume();
-        // Resume current video n��u có sử dụng API mới
+
+        // Set user ID cho presenter
+        String userId = SharedPreferencesHelper.getUserId(getContext());
+        if (presenter != null && userId != null) {
+            presenter.setCurrentUserId(userId);
+
+            // Kiểm tra trạng thái like cho tất cả video hiện tại
+            presenter.checkLikeStatusForVisibleVideos();
+        }
+
+        // Resume current video nếu có
         if (currentVisiblePosition >= 0 && recyclerView != null) {
             videoAdapter.playVideoAt(currentVisiblePosition, recyclerView);
         }

@@ -52,6 +52,8 @@
     <color name="favorite_color">#E91E63</color>         <!-- Màu hồng cho trái tim yêu thích -->
     <color name="favorite_outline">#757575</color>       <!-- Màu xám cho trái tim chưa yêu thích -->
     <color name="icon_color">#757575</color>             <!-- Màu icon mặc định -->
+    <color name="favorite_active">#F44336</color>        <!-- Đỏ cho đã yêu thích -->
+    <color name="favorite_inactive">#9E9E9E</color>      <!-- Xám cho chưa yêu thích -->
 
     <!-- Màu cho Linear Progress Indicator -->
     <color name="progress_indicator_color">#4CAF50</color>   <!-- Màu xanh cho progress indicator -->
@@ -101,6 +103,19 @@
     <!-- Thêm primary_color_variant mới -->
     <color name="primary_color_variant">#303F9F</color>
 
+    <!-- Màu cho chức năng like video -->
+    <color name="like_color_active">#E91E63</color>      <!-- Hồng/đỏ cho đã like -->
+    <color name="like_color_inactive">#9E9E9E</color>    <!-- Xám cho chưa like -->
 
+    <!-- Màu cho video controls -->
+    <color name="video_overlay_background">#80000000</color>  <!-- Nền overlay bán trong suốt -->
+    <color name="video_loading_background">#FF1A1A1D</color>  <!-- Nền loading video -->
 
+    <!-- Màu cho bottom sheet comment -->
+    <color name="bottom_sheet_background">#2A2A2D</color>     <!-- Nền bottom sheet đậm hơn -->
+    <color name="comment_background">#333336</color>          <!-- Nền comment item -->
+
+    <!-- Màu cho status bar và navigation bar -->
+    <color name="status_bar_color">@color/background_dark</color>
+    <color name="navigation_bar_color">@color/background_dark</color>
 </resources>
