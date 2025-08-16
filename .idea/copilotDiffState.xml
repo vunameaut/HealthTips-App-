@@ -11,6 +11,14 @@
             </PendingDiffInfo>
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/vhn/doan/data/ShortVideo.kt">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/src/main/java/com/vhn/doan/data/ShortVideo.kt" />
+              <option name="updatedContent" value="package com.vhn.doan.data&#10;&#10;/**&#10; * Data class đại diện cho một video ngắn trong ứng dụng&#10; * &#10; * @param id ID duy nhất của video&#10; * @param title Tiêu đề của video&#10; * @param caption Chú thích/mô tả của video&#10; * @param uploadDate Ngày tải lên (timestamp)&#10; * @param categoryId ID danh mục của video&#10; * @param tags Map các tag với trạng thái boolean&#10; * @param viewCount Số lượt xem&#10; * @param likeCount Số lượt thích&#10; * @param userId ID người dùng tạo video&#10; * @param cldPublicId Public ID trên Cloudinary&#10; * @param cldVersion Version của video trên Cloudinary&#10; * @param status Trạng thái của video (ACTIVE, INACTIVE, PENDING, etc.)&#10; */&#10;data class ShortVideo(&#10;    val id: String = &quot;&quot;,&#10;    val title: String = &quot;&quot;,&#10;    val caption: String = &quot;&quot;,&#10;    val uploadDate: Long = 0L,&#10;    val categoryId: String = &quot;&quot;,&#10;    val tags: Map&lt;String, Boolean&gt; = emptyMap(),&#10;    val viewCount: Long = 0L,&#10;    val likeCount: Long = 0L,&#10;    val userId: String = &quot;&quot;,&#10;    val cldPublicId: String = &quot;&quot;,&#10;    val cldVersion: Long = 0L,&#10;    val status: String = &quot;ACTIVE&quot;&#10;) {&#10;    /**&#10;     * Constructor không tham số cho Firebase&#10;     */&#10;    constructor() : this(&#10;        id = &quot;&quot;,&#10;        title = &quot;&quot;,&#10;        caption = &quot;&quot;,&#10;        uploadDate = 0L,&#10;        categoryId = &quot;&quot;,&#10;        tags = emptyMap(),&#10;        viewCount = 0L,&#10;        likeCount = 0L,&#10;        userId = &quot;&quot;,&#10;        cldPublicId = &quot;&quot;,&#10;        cldVersion = 0L,&#10;        status = &quot;ACTIVE&quot;&#10;    )&#10;&#10;    /**&#10;     * Kiểm tra xem video có hợp lệ không&#10;     */&#10;    fun isValid(): Boolean {&#10;        return id.isNotEmpty() &amp;&amp; &#10;               title.isNotEmpty() &amp;&amp; &#10;               userId.isNotEmpty() &amp;&amp; &#10;               cldPublicId.isNotEmpty() &amp;&amp;&#10;               cldVersion &gt; 0&#10;    }&#10;&#10;    /**&#10;     * Các trạng thái có thể có của video&#10;     */&#10;    companion object {&#10;        const val STATUS_ACTIVE = &quot;ACTIVE&quot;&#10;        const val STATUS_INACTIVE = &quot;INACTIVE&quot;&#10;        const val STATUS_PENDING = &quot;PENDING&quot;&#10;        const val STATUS_DELETED = &quot;DELETED&quot;&#10;    }&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/app/src/main/java/com/vhn/doan/data/model/ShortVideoModel.java">
           <value>
             <PendingDiffInfo>
@@ -40,14 +48,6 @@
           <value>
             <PendingDiffInfo>
               <option name="filePath" value="$PROJECT_DIR$/app/src/main/java/com/vhn/doan/data/repository/HealthTipVideoRepository.java" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
-        <entry key="$PROJECT_DIR$/app/src/main/java/com/vhn/doan/data/repository/VideoRepository.java">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/app/src/main/java/com/vhn/doan/data/repository/VideoRepository.java" />
-              <option name="updatedContent" value="package com.vhn.doan.data.repository;&#10;&#10;import com.vhn.doan.data.Video;&#10;import java.util.List;&#10;import java.util.Map;&#10;&#10;public interface VideoRepository {&#10;    &#10;    /**&#10;     * Lấy danh sách video được đề xuất cho người dùng dựa trên preferences và topics&#10;     */&#10;    void getRecommendedVideos(String userId, RepositoryCallback&lt;List&lt;Video&gt;&gt; callback);&#10;    &#10;    /**&#10;     * Lấy video trending cho người dùng mới&#10;     */&#10;    void getTrendingVideos(String region, RepositoryCallback&lt;List&lt;Video&gt;&gt; callback);&#10;    &#10;    /**&#10;     * Lấy danh sách video theo category&#10;     */&#10;    void getVideosByCategory(String categoryId, RepositoryCallback&lt;List&lt;Video&gt;&gt; callback);&#10;    &#10;    /**&#10;     * Lấy danh sách video theo tags&#10;     */&#10;    void getVideosByTags(List&lt;String&gt; tags, RepositoryCallback&lt;List&lt;Video&gt;&gt; callback);&#10;    &#10;    /**&#10;     * Lấy chi tiết một video&#10;     */&#10;    void getVideoById(String videoId, RepositoryCallback&lt;Video&gt; callback);&#10;    &#10;    /**&#10;     * Tăng số lượt xem cho video&#10;     */&#10;    void incrementViewCount(String videoId, RepositoryCallback&lt;Void&gt; callback);&#10;    &#10;    /**&#10;     * Thích/bỏ thích video&#10;     */&#10;    void toggleLikeVideo(String videoId, String userId, boolean isLiked, RepositoryCallback&lt;Void&gt; callback);&#10;    &#10;    /**&#10;     * Kiểm tra người dùng đã thích video chưa&#10;     */&#10;    void isVideoLiked(String videoId, String userId, RepositoryCallback&lt;Boolean&gt; callback);&#10;    &#10;    /**&#10;     * Lưu lịch sử xem video của người dùng&#10;     */&#10;    void saveVideoView(String videoId, String userId, RepositoryCallback&lt;Void&gt; callback);&#10;    &#10;    /**&#10;     * Lấy user preferences để đề xuất video&#10;     */&#10;    void getUserPreferences(String userId, RepositoryCallback&lt;Map&lt;String, Double&gt;&gt; callback);&#10;    &#10;    /**&#10;     * Lấy user topics từ AI interactions để đề xuất video&#10;     */&#10;    void getUserTopics(String userId, RepositoryCallback&lt;Map&lt;String, Long&gt;&gt; callback);&#10;    &#10;    /**&#10;     * Cập nhật user preferences dựa trên hành vi xem video&#10;     */&#10;    void updateUserPreferences(String userId, String tag, double score, RepositoryCallback&lt;Void&gt; callback);&#10;}" />
             </PendingDiffInfo>
           </value>
         </entry>
@@ -294,14 +294,6 @@
             <PendingDiffInfo>
               <option name="filePath" value="$PROJECT_DIR$/app/src/main/res/drawable/ic_more_vert.xml" />
               <option name="updatedContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&#10;    android:width=&quot;24dp&quot;&#10;    android:height=&quot;24dp&quot;&#10;    android:viewportWidth=&quot;24&quot;&#10;    android:viewportHeight=&quot;24&quot;&#10;    android:tint=&quot;?attr/colorOnSurface&quot;&gt;&#10;    &lt;path&#10;        android:fillColor=&quot;@android:color/white&quot;&#10;        android:pathData=&quot;M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2zM13,17h-2v-6h2v6zM13,9h-2L11,7h2v2z&quot;/&gt;&#10;&lt;/vector&gt;" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
-        <entry key="$PROJECT_DIR$/app/src/main/res/drawable/ic_play_circle.xml">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/app/src/main/res/drawable/ic_play_circle.xml" />
-              <option name="updatedContent" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&#10;    android:width=&quot;24dp&quot;&#10;    android:height=&quot;24dp&quot;&#10;    android:viewportWidth=&quot;24&quot;&#10;    android:viewportHeight=&quot;24&quot;&gt;&#10;    &lt;path&#10;        android:fillColor=&quot;@android:color/white&quot;&#10;        android:pathData=&quot;M8,5v14l11,-7z&quot;/&gt;&#10;&lt;/vector&gt;" />
             </PendingDiffInfo>
           </value>
         </entry>
