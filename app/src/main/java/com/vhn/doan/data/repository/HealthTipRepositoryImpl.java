@@ -322,6 +322,94 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     }
 
     @Override
+    public void getRecommendedHealthTips(int limit, final HealthTipCallback callback) {
+        // Logic đề xuất: Lấy ngẫu nhiên các bài viết từ nhiều danh mục khác nhau
+        // Kết hợp từ các bài viết mới, được xem nhiều và được thích nhiều
+        healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<HealthTip> allHealthTips = new ArrayList<>();
+
+                // Lấy tất cả bài viết
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                    if (healthTip != null) {
+                        healthTip.setId(snapshot.getKey());
+                        allHealthTips.add(healthTip);
+                    }
+                }
+
+                if (allHealthTips.isEmpty()) {
+                    callback.onSuccess(new ArrayList<>());
+                    return;
+                }
+
+                // Thuật toán đề xuất đơn giản:
+                // 1. Ưu tiên các bài viết có điểm số cao (dựa trên lượt xem + lượt thích)
+                // 2. Đảm bảo đa dạng danh mục
+                // 3. Trộn ngẫu nhiên để tạo sự mới mẻ
+
+                List<HealthTip> recommendedTips = new ArrayList<>();
+
+                // Tính điểm và sắp xếp
+                for (HealthTip tip : allHealthTips) {
+                    int viewCount = tip.getViewCount() != null ? tip.getViewCount() : 0;
+                    int likeCount = tip.getLikeCount() != null ? tip.getLikeCount() : 0;
+                    // Điểm = lượt xem + (lượt thích * 2) để ưu tiên bài được thích
+                    tip.setRecommendationScore(viewCount + (likeCount * 2));
+                }
+
+                // Sắp xếp theo điểm đề xuất giảm dần
+                allHealthTips.sort((tip1, tip2) -> {
+                    int score1 = tip1.getRecommendationScore() != null ? tip1.getRecommendationScore() : 0;
+                    int score2 = tip2.getRecommendationScore() != null ? tip2.getRecommendationScore() : 0;
+                    return Integer.compare(score2, score1);
+                });
+
+                // Lấy các bài viết top và đảm bảo đa dạng danh mục
+                Map<String, Integer> categoryCount = new HashMap<>();
+                int maxPerCategory = Math.max(1, limit / 3); // Tối đa limit/3 bài viết per danh mục
+
+                for (HealthTip tip : allHealthTips) {
+                    if (recommendedTips.size() >= limit) break;
+
+                    String categoryId = tip.getCategoryId() != null ? tip.getCategoryId() : "unknown";
+                    int currentCount = categoryCount.getOrDefault(categoryId, 0);
+
+                    // Thêm bài viết nếu chưa đạt giới hạn danh mục hoặc vẫn còn slot
+                    if (currentCount < maxPerCategory || recommendedTips.size() < limit - 2) {
+                        recommendedTips.add(tip);
+                        categoryCount.put(categoryId, currentCount + 1);
+                    }
+                }
+
+                // Nếu chưa đủ số lượng, thêm các bài viết còn lại
+                if (recommendedTips.size() < limit) {
+                    for (HealthTip tip : allHealthTips) {
+                        if (recommendedTips.size() >= limit) break;
+                        if (!recommendedTips.contains(tip)) {
+                            recommendedTips.add(tip);
+                        }
+                    }
+                }
+
+                // Giới hạn số lượng kết quả
+                if (recommendedTips.size() > limit) {
+                    recommendedTips = recommendedTips.subList(0, limit);
+                }
+
+                // Load category names trước khi trả về callback
+                loadCategoryNamesForHealthTips(recommendedTips, callback);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError(databaseError.getMessage());
+            }
+        });
+    }
+
+    @Override
     public void searchHealthTips(String query, HealthTipCallback callback) {
         if (query == null || query.trim().isEmpty()) {
             callback.onError("Từ khóa tìm kiếm không hợp lệ");
@@ -341,9 +429,9 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
                         // Tìm kiếm trong tiêu đề và nội dung
                         boolean titleMatch = healthTip.getTitle() != null &&
-                                           healthTip.getTitle().toLowerCase().contains(searchQuery);
+                                healthTip.getTitle().toLowerCase().contains(searchQuery);
                         boolean contentMatch = healthTip.getContent() != null &&
-                                             healthTip.getContent().toLowerCase().contains(searchQuery);
+                                healthTip.getContent().toLowerCase().contains(searchQuery);
 
                         if (titleMatch || contentMatch) {
                             searchResults.add(healthTip);

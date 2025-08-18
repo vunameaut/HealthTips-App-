@@ -11,12 +11,13 @@ public class HealthTip {
     private String content;
     private String categoryId;
     private String categoryName; // Thêm field cho tên category
-    private int viewCount;
-    private int likeCount;
+    private Integer viewCount;
+    private Integer likeCount;
     private String imageUrl;
     private long createdAt;
     private boolean isFavorite;
     private boolean isLiked; // Thêm field cho trạng thái like
+    private Integer recommendationScore; // Thêm field cho điểm đề xuất
 
     /**
      * Constructor rỗng cho Firebase
@@ -105,19 +106,19 @@ public class HealthTip {
         this.categoryName = categoryName;
     }
 
-    public int getViewCount() {
+    public Integer getViewCount() {
         return viewCount;
     }
 
-    public void setViewCount(int viewCount) {
+    public void setViewCount(Integer viewCount) {
         this.viewCount = viewCount;
     }
 
-    public int getLikeCount() {
+    public Integer getLikeCount() {
         return likeCount;
     }
 
-    public void setLikeCount(int likeCount) {
+    public void setLikeCount(Integer likeCount) {
         this.likeCount = likeCount;
     }
 
@@ -151,6 +152,14 @@ public class HealthTip {
 
     public void setLiked(boolean liked) {
         isLiked = liked;
+    }
+
+    public Integer getRecommendationScore() {
+        return recommendationScore;
+    }
+
+    public void setRecommendationScore(Integer recommendationScore) {
+        this.recommendationScore = recommendationScore;
     }
 
     /**

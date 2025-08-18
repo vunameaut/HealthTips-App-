@@ -27,12 +27,14 @@ public class AllHealthTipsActivity extends AppCompatActivity implements HealthTi
     public static final String MODE_LATEST = "latest";
     public static final String MODE_MOST_VIEWED = "most_viewed";
     public static final String MODE_MOST_LIKED = "most_liked";
+    public static final String MODE_RECOMMENDED = "recommended";
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private LinearLayout emptyLayout;
     private HealthTipAdapter adapter;
     private HealthTipRepository repository;
+    private androidx.appcompat.widget.Toolbar toolbar;
 
     public static Intent createIntent(Context context, String mode) {
         Intent intent = new Intent(context, AllHealthTipsActivity.class);
@@ -45,17 +47,87 @@ public class AllHealthTipsActivity extends AppCompatActivity implements HealthTi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_health_tips);
 
+        // Thiết lập toolbar
+        setupToolbar();
+
         recyclerView = findViewById(R.id.recyclerViewHealthTips);
         progressBar = findViewById(R.id.progressBarLoading);
         emptyLayout = findViewById(R.id.layoutEmpty);
 
+        // Thiết lập RecyclerView
         adapter = new HealthTipAdapter(this, new java.util.ArrayList<>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
         repository = new HealthTipRepositoryImpl();
 
-        loadData(getIntent().getStringExtra(EXTRA_MODE));
+        // Lấy mode từ Intent và thiết lập tiêu đề
+        String mode = getIntent().getStringExtra(EXTRA_MODE);
+        setupTitle(mode);
+
+        // Tải dữ liệu
+        loadData(mode);
+    }
+
+    /**
+     * Thiết lập toolbar với nút quay lại
+     */
+    private void setupToolbar() {
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Hiển thị nút quay lại
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+    }
+
+    /**
+     * Thiết lập tiêu đề động dựa trên chế độ hiển thị
+     */
+    private void setupTitle(String mode) {
+        String title = getString(R.string.app_name); // Mặc định
+
+        if (mode != null) {
+            switch (mode) {
+                case MODE_RECOMMENDED:
+                    title = getString(R.string.all_recommended_tips);
+                    break;
+                case MODE_LATEST:
+                    title = getString(R.string.all_latest_tips);
+                    break;
+                case MODE_MOST_VIEWED:
+                    title = getString(R.string.all_most_viewed_tips);
+                    break;
+                case MODE_MOST_LIKED:
+                    title = getString(R.string.all_most_liked_tips);
+                    break;
+            }
+        }
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(title);
+        }
+    }
+
+    /**
+     * Xử lý sự kiện khi người dùng nhấn nút quay lại
+     */
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    /**
+     * Xử lý nút back của thiết bị
+     */
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        // Thêm animation trượt khi quay lại
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
     private void loadData(String mode) {
@@ -83,6 +155,8 @@ public class AllHealthTipsActivity extends AppCompatActivity implements HealthTi
             repository.getMostViewedHealthTips(50, callback);
         } else if (MODE_MOST_LIKED.equals(mode)) {
             repository.getMostLikedHealthTips(50, callback);
+        } else if (MODE_RECOMMENDED.equals(mode)) {
+            repository.getRecommendedHealthTips(50, callback);
         } else {
             repository.getLatestHealthTips(50, callback);
         }

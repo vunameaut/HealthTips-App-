@@ -147,6 +147,14 @@ public interface HealthTipRepository {
     void getMostLikedHealthTips(int limit, HealthTipCallback callback);
 
     /**
+     * Lấy danh sách mẹo sức khỏe được đề xuất cho người dùng
+     * Logic đề xuất dựa trên các bài viết phổ biến từ nhiều danh mục khác nhau
+     * @param limit số lượng mẹo sức khỏe cần lấy
+     * @param callback callback để nhận kết quả
+     */
+    void getRecommendedHealthTips(int limit, HealthTipCallback callback);
+
+    /**
      * Thêm một mẹo sức khỏe mới
      * @param healthTip đối tượng mẹo sức khỏe cần thêm
      * @param callback callback để nhận kết quả

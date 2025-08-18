@@ -58,9 +58,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layoutHeader">
 
-            <!-- Tiêu đề Danh Mục -->
+            <!-- Tiêu đề Đề xuất cho bạn -->
             <LinearLayout
-                android:id="@+id/layoutCategoriesHeader"
+                android:id="@+id/layoutRecommendedHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -68,6 +68,52 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/textViewRecommendedTipsTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/recommended_for_you"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textViewSeeAllRecommended"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/see_all"
+                    android:textColor="@color/primary_button_end"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- RecyclerView Đề xuất cho bạn -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewRecommendedTips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layoutRecommendedHeader"
+                tools:itemCount="5"
+                tools:listitem="@layout/item_health_tip" />
+
+            <!-- Tiêu đề Danh Mục -->
+            <LinearLayout
+                android:id="@+id/layoutCategoriesHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/recyclerViewRecommendedTips">
 
                 <TextView
                     android:id="@+id/textViewCategoriesTitle"

@@ -20,6 +20,7 @@
 
     <!-- Các chuỗi cho màn hình trang chủ -->
     <string name="categories">Danh mục</string>
+    <string name="recommended_for_you">Đề xuất cho bạn</string>
     <string name="latest_tips">Mẹo mới nhất</string>
     <string name="most_viewed">Xem nhiều nhất</string>
     <string name="most_liked">Yêu thích nhất</string>
@@ -27,6 +28,14 @@
     <string name="search">Tìm kiếm</string>
     <string name="offline_mode">Đang ở chế độ ngoại tuyến</string>
     <string name="home">Trang chủ</string>
+
+    <!-- Các chuỗi cho màn hình xem tất cả mẹo sức khỏe -->
+    <string name="all_recommended_tips">Tất cả đề xuất cho bạn</string>
+    <string name="all_latest_tips">Tất cả mẹo mới nhất</string>
+    <string name="all_most_viewed_tips">Tất cả mẹo xem nhiều nhất</string>
+    <string name="all_most_liked_tips">Tất cả mẹo yêu thích nhất</string>
+    <string name="no_health_tips_found">Không tìm thấy mẹo sức khỏe</string>
+    <string name="no_health_tips_description">Hiện chưa có mẹo sức khỏe nào trong danh mục này</string>
 
     <!-- Các chuỗi cho bottom navigation -->
     <string name="nav_home">Trang chủ</string>

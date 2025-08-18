@@ -150,6 +150,23 @@ public class HomePresenter {
             }
         });
 
+        // Tải mẹo đề xuất cho người dùng
+        healthTipRepository.getRecommendedHealthTips(HEALTH_TIP_LIMIT, new HealthTipRepository.HealthTipCallback() {
+            @Override
+            public void onSuccess(java.util.List<HealthTip> healthTips) {
+                if (view != null) {
+                    view.showRecommendedHealthTips(healthTips);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (view != null) {
+                    view.showError("Không thể tải mẹo đề xuất: " + errorMessage);
+                }
+            }
+        });
+
         // Tải mẹo được thích nhiều nhất
         healthTipRepository.getMostLikedHealthTips(HEALTH_TIP_LIMIT, new HealthTipRepository.HealthTipCallback() {
             @Override

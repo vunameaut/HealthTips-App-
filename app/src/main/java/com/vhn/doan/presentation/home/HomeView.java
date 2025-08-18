@@ -18,6 +18,12 @@ public interface HomeView {
     void showCategories(List<Category> categories);
 
     /**
+     * Hiển thị danh sách mẹo sức khỏe được đề xuất cho người dùng
+     * @param healthTips Danh sách mẹo sức khỏe được đề xuất
+     */
+    void showRecommendedHealthTips(List<HealthTip> healthTips);
+
+    /**
      * Hiển thị danh sách mẹo sức khỏe mới nhất
      * @param healthTips Danh sách mẹo sức khỏe mới nhất
      */

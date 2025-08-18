@@ -2,6 +2,8 @@ package com.vhn.doan.presentation.home;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -27,6 +30,7 @@ import com.vhn.doan.data.repository.HealthTipRepository;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
 import com.vhn.doan.presentation.home.adapter.CategoryAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipAdapter;
+import com.vhn.doan.presentation.home.adapter.InfiniteHealthTipAdapter;
 import com.vhn.doan.presentation.home.adapter.CategorySkeletonAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipSkeletonAdapter;
 import com.vhn.doan.presentation.category.CategoryFragment;
@@ -43,6 +47,7 @@ public class HomeFragment extends Fragment implements HomeView {
 
     // UI components
     private RecyclerView recyclerViewCategories;
+    private RecyclerView recyclerViewRecommendedTips;
     private RecyclerView recyclerViewLatestTips;
     private RecyclerView recyclerViewMostViewedTips;
     private RecyclerView recyclerViewMostLikedTips;
@@ -50,18 +55,21 @@ public class HomeFragment extends Fragment implements HomeView {
     private LinearLayout layoutOfflineMode;
     private ImageButton buttonSearch;
     private TextView textViewSeeAllCategories;
+    private TextView textViewSeeAllRecommended;
     private TextView textViewSeeAllLatestTips;
     private TextView textViewSeeAllMostViewed;
     private TextView textViewSeeAllMostLiked;
 
     // Adapters - Real data
     private CategoryAdapter categoryAdapter;
+    private InfiniteHealthTipAdapter recommendedTipsAdapter; // Sử dụng InfiniteHealthTipAdapter cho đề xuất
     private HealthTipAdapter latestTipsAdapter;
     private HealthTipAdapter mostViewedTipsAdapter;
     private HealthTipAdapter mostLikedTipsAdapter;
 
     // Skeleton Adapters
     private CategorySkeletonAdapter categorySkeletonAdapter;
+    private HealthTipSkeletonAdapter recommendedTipsSkeletonAdapter;
     private HealthTipSkeletonAdapter latestTipsSkeletonAdapter;
     private HealthTipSkeletonAdapter mostViewedTipsSkeletonAdapter;
     private HealthTipSkeletonAdapter mostLikedTipsSkeletonAdapter;
@@ -71,9 +79,18 @@ public class HomeFragment extends Fragment implements HomeView {
 
     // Loading state flags
     private boolean isCategoriesLoaded = false;
+    private boolean isRecommendedTipsLoaded = false;
     private boolean isLatestTipsLoaded = false;
     private boolean isMostViewedTipsLoaded = false;
     private boolean isMostLikedTipsLoaded = false;
+
+    // Auto-scroll animation cho phần đề xuất
+    private Handler autoScrollHandler;
+    private Runnable autoScrollRunnable;
+    private int currentRecommendedPosition = 0;
+    private boolean isAutoScrolling = false;
+    private static final long AUTO_SCROLL_DELAY = 4000; // 4 giây
+    private static final int INFINITE_SCROLL_MULTIPLIER = 1000; // Để tạo hiệu ứng vô hạn
 
     public HomeFragment() {
         // Constructor mặc định
@@ -123,6 +140,9 @@ public class HomeFragment extends Fragment implements HomeView {
         // Thiết lập các sự kiện click
         setupClickListeners();
 
+        // Thiết lập touch listener cho auto-scroll animation
+        setupRecommendedTouchListener();
+
         // Gắn presenter với view và bắt đầu tải dữ liệu
         presenter.attachView(this);
     }
@@ -143,11 +163,13 @@ public class HomeFragment extends Fragment implements HomeView {
      */
     private void showAllTitlesAndSeeAll() {
         if (textViewCategoriesTitle != null) textViewCategoriesTitle.setVisibility(View.VISIBLE);
+        if (textViewRecommendedTipsTitle != null) textViewRecommendedTipsTitle.setVisibility(View.VISIBLE);
         if (textViewLatestTipsTitle != null) textViewLatestTipsTitle.setVisibility(View.VISIBLE);
         if (textViewMostViewedTitle != null) textViewMostViewedTitle.setVisibility(View.VISIBLE);
         if (textViewMostLikedTitle != null) textViewMostLikedTitle.setVisibility(View.VISIBLE);
 
         if (textViewSeeAllCategories != null) textViewSeeAllCategories.setVisibility(View.VISIBLE);
+        if (textViewSeeAllRecommended != null) textViewSeeAllRecommended.setVisibility(View.VISIBLE);
         if (textViewSeeAllLatestTips != null) textViewSeeAllLatestTips.setVisibility(View.VISIBLE);
         if (textViewSeeAllMostViewed != null) textViewSeeAllMostViewed.setVisibility(View.VISIBLE);
         if (textViewSeeAllMostLiked != null) textViewSeeAllMostLiked.setVisibility(View.VISIBLE);
@@ -160,6 +182,10 @@ public class HomeFragment extends Fragment implements HomeView {
         // Skeleton cho Categories (4 items)
         categorySkeletonAdapter = new CategorySkeletonAdapter(requireContext(), 4);
         recyclerViewCategories.setAdapter(categorySkeletonAdapter);
+
+        // Skeleton cho Recommended Tips (3 items)
+        recommendedTipsSkeletonAdapter = new HealthTipSkeletonAdapter(requireContext(), 3);
+        recyclerViewRecommendedTips.setAdapter(recommendedTipsSkeletonAdapter);
 
         // Skeleton cho Latest Tips (3 items)
         latestTipsSkeletonAdapter = new HealthTipSkeletonAdapter(requireContext(), 3);
@@ -200,6 +226,7 @@ public class HomeFragment extends Fragment implements HomeView {
     private void initViews(View view) {
         // RecyclerViews
         recyclerViewCategories = view.findViewById(R.id.recyclerViewCategories);
+        recyclerViewRecommendedTips = view.findViewById(R.id.recyclerViewRecommendedTips);
         recyclerViewLatestTips = view.findViewById(R.id.recyclerViewLatestTips);
         recyclerViewMostViewedTips = view.findViewById(R.id.recyclerViewMostViewedTips);
         recyclerViewMostLikedTips = view.findViewById(R.id.recyclerViewMostLikedTips);
@@ -211,6 +238,7 @@ public class HomeFragment extends Fragment implements HomeView {
 
         // Buttons "Xem tất cả"
         textViewSeeAllCategories = view.findViewById(R.id.textViewSeeAllCategories);
+        textViewSeeAllRecommended = view.findViewById(R.id.textViewSeeAllRecommended);
         textViewSeeAllLatestTips = view.findViewById(R.id.textViewSeeAllLatestTips);
         textViewSeeAllMostViewed = view.findViewById(R.id.textViewSeeAllMostViewed);
         textViewSeeAllMostLiked = view.findViewById(R.id.textViewSeeAllMostLiked);
@@ -221,6 +249,7 @@ public class HomeFragment extends Fragment implements HomeView {
 
     // UI components cho tiêu đề sections
     private TextView textViewCategoriesTitle;
+    private TextView textViewRecommendedTipsTitle;
     private TextView textViewLatestTipsTitle;
     private TextView textViewMostViewedTitle;
     private TextView textViewMostLikedTitle;
@@ -231,6 +260,7 @@ public class HomeFragment extends Fragment implements HomeView {
     private void initSectionTitles(View view) {
         // Tìm các TextView tiêu đề trong layout
         textViewCategoriesTitle = view.findViewById(R.id.textViewCategoriesTitle);
+        textViewRecommendedTipsTitle = view.findViewById(R.id.textViewRecommendedTipsTitle);
         textViewLatestTipsTitle = view.findViewById(R.id.textViewLatestTipsTitle);
         textViewMostViewedTitle = view.findViewById(R.id.textViewMostViewedTitle);
         textViewMostLikedTitle = view.findViewById(R.id.textViewMostLikedTitle);
@@ -255,6 +285,11 @@ public class HomeFragment extends Fragment implements HomeView {
         LinearLayoutManager categoriesLayoutManager = new LinearLayoutManager(
                 requireContext(), RecyclerView.HORIZONTAL, false);
         recyclerViewCategories.setLayoutManager(categoriesLayoutManager);
+
+        // Setup Layout Manager cho Recommended Tips
+        LinearLayoutManager recommendedTipsLayoutManager = new LinearLayoutManager(
+                requireContext(), RecyclerView.HORIZONTAL, false);
+        recyclerViewRecommendedTips.setLayoutManager(recommendedTipsLayoutManager);
 
         // Setup Layout Manager cho Latest Tips
         LinearLayoutManager latestTipsLayoutManager = new LinearLayoutManager(
@@ -284,6 +319,22 @@ public class HomeFragment extends Fragment implements HomeView {
                     @Override
                     public void onCategoryClick(Category category) {
                         presenter.onCategorySelected(category);
+                    }
+                });
+
+        // Khởi tạo Recommended Tips Adapter
+        recommendedTipsAdapter = new InfiniteHealthTipAdapter(
+                requireContext(),
+                new ArrayList<>(),
+                new InfiniteHealthTipAdapter.HealthTipClickListener() {
+                    @Override
+                    public void onHealthTipClick(HealthTip healthTip) {
+                        presenter.onHealthTipSelected(healthTip);
+                    }
+
+                    @Override
+                    public void onFavoriteClick(HealthTip healthTip, boolean isFavorite) {
+                        handleFavoriteClick(healthTip, isFavorite);
                     }
                 });
 
@@ -357,6 +408,11 @@ public class HomeFragment extends Fragment implements HomeView {
                     .commit();
         });
 
+        // Xem tất cả mẹo được đề xuất
+        textViewSeeAllRecommended.setOnClickListener(v -> {
+            startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_RECOMMENDED));
+        });
+
         // Xem tất cả mẹo mới nhất
         textViewSeeAllLatestTips.setOnClickListener(v -> {
             startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_LATEST));
@@ -381,18 +437,35 @@ public class HomeFragment extends Fragment implements HomeView {
         // Lắng nghe thay đổi realtime từ Firebase
         presenter.listenToCategories();
         presenter.listenToLatestHealthTips();
+
+        // Tiếp tục auto-scroll nếu đã có dữ liệu
+        if (isRecommendedTipsLoaded && recommendedTipsAdapter != null &&
+            recommendedTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
+            startAutoScrollForRecommended();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         presenter.stop(); // Dừng lắng nghe khi Fragment không được hiển thị
+
+        // Tạm dừng auto-scroll khi Fragment không visible
+        stopAutoScrollForRecommended();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         presenter.detachView(); // Tách View khỏi Presenter
+
+        // Dọn dẹp auto-scroll resources
+        stopAutoScrollForRecommended();
+        if (autoScrollHandler != null) {
+            autoScrollHandler.removeCallbacksAndMessages(null);
+            autoScrollHandler = null;
+        }
+        autoScrollRunnable = null;
     }
 
     // Triển khai các phương thức của HomeView với skeleton loading
@@ -404,6 +477,26 @@ public class HomeFragment extends Fragment implements HomeView {
             isCategoriesLoaded = true;
         }
         categoryAdapter.updateCategories(categories);
+    }
+
+    @Override
+    public void showRecommendedHealthTips(List<HealthTip> healthTips) {
+        // Thay thế skeleton adapter bằng real adapter với data
+        if (!isRecommendedTipsLoaded) {
+            recyclerViewRecommendedTips.setAdapter(recommendedTipsAdapter);
+            isRecommendedTipsLoaded = true;
+
+            // Đặt vị trí bắt đầu ở giữa để tạo hiệu ứng vòng tròn
+            recyclerViewRecommendedTips.post(() -> {
+                int startPosition = recommendedTipsAdapter.getStartPosition();
+                recyclerViewRecommendedTips.scrollToPosition(startPosition);
+                currentRecommendedPosition = startPosition;
+            });
+        }
+        recommendedTipsAdapter.updateHealthTips(healthTips);
+
+        // Bắt đầu auto-scroll animation khi có dữ liệu
+        startAutoScrollForRecommended();
     }
 
     @Override
@@ -450,6 +543,8 @@ public class HomeFragment extends Fragment implements HomeView {
      */
     @Deprecated
     private boolean hasCategories() { return false; }
+    @Deprecated
+    private boolean hasRecommendedTips() { return false; }
     @Deprecated
     private boolean hasLatestTips() { return false; }
     @Deprecated
@@ -551,6 +646,11 @@ public class HomeFragment extends Fragment implements HomeView {
      * @param isFavorite Trạng thái yêu thích mới
      */
     private void syncFavoriteStatusAcrossAdapters(String healthTipId, boolean isFavorite) {
+        // Đồng bộ cho adapter Recommended Tips
+        if (recommendedTipsAdapter != null) {
+            recommendedTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
+        }
+
         // Đồng bộ cho adapter Latest Tips
         if (latestTipsAdapter != null) {
             latestTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
@@ -580,6 +680,106 @@ public class HomeFragment extends Fragment implements HomeView {
             if (bottomNav != null) {
                 bottomNav.setSelectedItemId(R.id.nav_profile);
             }
+        }
+    }
+
+    /**
+     * Bắt đầu animation tự động trượt cho phần đề xuất
+     */
+    private void startAutoScrollForRecommended() {
+        if (isAutoScrolling) {
+            return; // Đã đang chạy auto-scroll
+        }
+
+        // Khởi tạo Handler nếu chưa có
+        if (autoScrollHandler == null) {
+            autoScrollHandler = new Handler(Looper.getMainLooper());
+        }
+
+        // Tạo Runnable cho auto-scroll
+        autoScrollRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (recommendedTipsAdapter != null &&
+                    recommendedTipsAdapter.getItemCount() > 0 &&
+                    recyclerViewRecommendedTips != null &&
+                    isAdded()) {
+
+                    // Tính toán vị trí tiếp theo
+                    int itemCount = recommendedTipsAdapter.getItemCount();
+                    currentRecommendedPosition = (currentRecommendedPosition + 1) % itemCount;
+
+                    // Tạo smooth scroller với tốc độ vừa phải
+                    RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(requireContext()) {
+                        @Override
+                        protected int getHorizontalSnapPreference() {
+                            return LinearSmoothScroller.SNAP_TO_START;
+                        }
+
+                        @Override
+                        protected float calculateSpeedPerPixel(android.util.DisplayMetrics displayMetrics) {
+                            // Tốc độ vừa phải: 150ms per inch (mặc định là 25ms)
+                            return 150f / displayMetrics.densityDpi;
+                        }
+                    };
+
+                    // Scroll đến vị trí tiếp theo
+                    smoothScroller.setTargetPosition(currentRecommendedPosition);
+                    RecyclerView.LayoutManager layoutManager = recyclerViewRecommendedTips.getLayoutManager();
+                    if (layoutManager != null) {
+                        layoutManager.startSmoothScroll(smoothScroller);
+                    }
+
+                    // Lên lịch cho lần scroll tiếp theo
+                    if (isAutoScrolling && autoScrollHandler != null) {
+                        autoScrollHandler.postDelayed(this, AUTO_SCROLL_DELAY);
+                    }
+                }
+            }
+        };
+
+        // Bắt đầu auto-scroll
+        isAutoScrolling = true;
+        autoScrollHandler.postDelayed(autoScrollRunnable, AUTO_SCROLL_DELAY);
+    }
+
+    /**
+     * Dừng animation tự động trượt
+     */
+    private void stopAutoScrollForRecommended() {
+        isAutoScrolling = false;
+        if (autoScrollHandler != null && autoScrollRunnable != null) {
+            autoScrollHandler.removeCallbacks(autoScrollRunnable);
+        }
+    }
+
+    /**
+     * Thiết lập touch listener để tạm dừng auto-scroll khi người dùng tương tác
+     */
+    private void setupRecommendedTouchListener() {
+        if (recyclerViewRecommendedTips != null) {
+            recyclerViewRecommendedTips.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
+                @Override
+                public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull android.view.MotionEvent e) {
+                    // Tạm dừng auto-scroll khi người dùng chạm vào
+                    if (e.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                        stopAutoScrollForRecommended();
+
+                        // Tiếp tục auto-scroll sau 6 giây không tương tác
+                        if (autoScrollHandler != null) {
+                            autoScrollHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!isAutoScrolling && isAdded()) {
+                                        startAutoScrollForRecommended();
+                                    }
+                                }
+                            }, 6000); // 6 giây
+                        }
+                    }
+                    return false;
+                }
+            });
         }
     }
 }
