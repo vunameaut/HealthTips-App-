@@ -406,9 +406,9 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
         }
 
         DatabaseReference commentsRef = videosRef.child(videoId).child("comments");
-        Query query = commentsRef.orderByChild("parentId").equalTo(null);
 
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Thay vì query, lấy tất cả comments và filter sau
+        commentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<VideoComment> comments = new ArrayList<>();
@@ -418,7 +418,13 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                         VideoComment comment = commentSnapshot.getValue(VideoComment.class);
                         if (comment != null) {
                             comment.setId(commentSnapshot.getKey());
-                            comments.add(comment);
+
+                            // Chỉ lấy comments gốc (không có parentId hoặc parentId = null/empty)
+                            if (comment.getParentId() == null || comment.getParentId().isEmpty()) {
+                                comments.add(comment);
+                                android.util.Log.d("VideoRepository", "Found root comment: " + comment.getId() +
+                                    " with replyCount: " + comment.getReplyCount());
+                            }
                         }
                     } catch (Exception e) {
                         // Log và bỏ qua comment lỗi
@@ -435,6 +441,7 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                     return 0;
                 });
 
+                android.util.Log.d("VideoRepository", "Loaded " + comments.size() + " root comments for video " + videoId);
                 callback.onSuccess(comments);
             }
 
@@ -456,9 +463,9 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
         }
 
         DatabaseReference commentsRef = videosRef.child(videoId).child("comments");
-        Query query = commentsRef.orderByChild("parentId").equalTo(parentCommentId);
 
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Lấy tất cả comments và filter những cái có parentId khớp
+        commentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<VideoComment> replies = new ArrayList<>();
@@ -468,7 +475,13 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                         VideoComment reply = replySnapshot.getValue(VideoComment.class);
                         if (reply != null) {
                             reply.setId(replySnapshot.getKey());
-                            replies.add(reply);
+
+                            // Chỉ lấy replies có parentId khớp
+                            if (parentCommentId.equals(reply.getParentId())) {
+                                replies.add(reply);
+                                android.util.Log.d("VideoRepository", "Found reply: " + reply.getId() +
+                                    " for parent: " + parentCommentId);
+                            }
                         }
                     } catch (Exception e) {
                         android.util.Log.w("VideoRepository",
@@ -484,6 +497,7 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                     return 0;
                 });
 
+                android.util.Log.d("VideoRepository", "Loaded " + replies.size() + " replies for comment " + parentCommentId);
                 callback.onSuccess(replies);
             }
 
@@ -713,6 +727,46 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
         }
 
         activeListeners.clear();
+    }
+
+    @Override
+    public void incrementViewCount(String videoId, BooleanCallback callback) {
+        if (videoId == null || videoId.isEmpty()) {
+            if (callback != null) {
+                callback.onError("Video ID không hợp lệ");
+            }
+            return;
+        }
+
+        DatabaseReference videoRef = videosRef.child(videoId);
+
+        // Cập nhật view count bằng cách tăng giá trị hiện tại lên 1
+        videoRef.child("viewCount").runTransaction(new com.google.firebase.database.Transaction.Handler() {
+            @Override
+            public com.google.firebase.database.Transaction.Result doTransaction(com.google.firebase.database.MutableData mutableData) {
+                Integer currentViewCount = mutableData.getValue(Integer.class);
+                if (currentViewCount == null) {
+                    mutableData.setValue(1);
+                } else {
+                    mutableData.setValue(currentViewCount + 1);
+                }
+                return com.google.firebase.database.Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(com.google.firebase.database.DatabaseError databaseError,
+                                 boolean committed,
+                                 com.google.firebase.database.DataSnapshot dataSnapshot) {
+                if (callback != null) {
+                    if (databaseError == null && committed) {
+                        callback.onSuccess(true);
+                    } else {
+                        callback.onError("Không thể cập nhật view count: " +
+                            (databaseError != null ? databaseError.getMessage() : "Transaction không thành công"));
+                    }
+                }
+            }
+        });
     }
 
     // ==================== HELPER METHODS ====================

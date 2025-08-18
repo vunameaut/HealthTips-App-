@@ -87,6 +87,13 @@ public interface VideoRepository {
      */
     void getVideoById(String videoId, SingleVideoCallback callback);
 
+    /**
+     * Tăng view count cho video
+     * @param videoId ID của video
+     * @param callback Callback để nhận kết quả
+     */
+    void incrementViewCount(String videoId, BooleanCallback callback);
+
     // ==================== LIKE OPERATIONS ====================
 
     /**

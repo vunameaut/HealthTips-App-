@@ -160,7 +160,13 @@ public class VideoPresenter extends BasePresenter<VideoView> {
      */
     public void toggleLike(int position) {
         if (!isViewAttached() || currentVideos == null ||
-            position < 0 || position >= currentVideos.size() || currentUserId == null) {
+            position < 0 || position >= currentVideos.size()) {
+            return;
+        }
+
+        // Kiểm tra người dùng đã đăng nhập chưa
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            view.showError("Vui lòng đăng nhập để thích video");
             return;
         }
 
@@ -240,36 +246,17 @@ public class VideoPresenter extends BasePresenter<VideoView> {
     }
 
     /**
-     * Kiểm tra và cập nhật trạng thái like cho tất cả video đang hiển thị
-     */
-    public void checkLikeStatusForVisibleVideos() {
-        if (!isViewAttached() || currentVideos == null || currentUserId == null) return;
-
-        for (int i = 0; i < currentVideos.size(); i++) {
-            final int position = i;
-            ShortVideo video = currentVideos.get(i);
-
-            videoRepository.isVideoLiked(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
-                @Override
-                public void onSuccess(boolean isLiked) {
-                    if (!isViewAttached()) return;
-                    view.updateVideoLikeStatus(position, isLiked);
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    // Bỏ qua lỗi cho việc kiểm tra trạng thái like
-                }
-            });
-        }
-    }
-
-    /**
      * Xử lý khi user click vào comment
      */
     public void onCommentClick(int position) {
         if (!isViewAttached() || currentVideos == null ||
             position < 0 || position >= currentVideos.size()) {
+            return;
+        }
+
+        // Kiểm tra người dùng đã đăng nhập chưa
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            view.showError("Vui lòng đăng nhập để bình luận");
             return;
         }
 
@@ -295,6 +282,34 @@ public class VideoPresenter extends BasePresenter<VideoView> {
      */
     public void setCurrentUserId(String userId) {
         this.currentUserId = userId;
+    }
+
+    /**
+     * Kiểm tra và cập nhật trạng thái like cho tất cả video đang hiển thị
+     */
+    public void checkLikeStatusForVisibleVideos() {
+        if (!isViewAttached() || currentVideos == null ||
+            currentUserId == null || currentUserId.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < currentVideos.size(); i++) {
+            final int position = i;
+            ShortVideo video = currentVideos.get(i);
+
+            videoRepository.isVideoLiked(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
+                @Override
+                public void onSuccess(boolean isLiked) {
+                    if (!isViewAttached()) return;
+                    view.updateVideoLikeStatus(position, isLiked);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    // Bỏ qua lỗi cho việc kiểm tra trạng thái like
+                }
+            });
+        }
     }
 
     /**
@@ -341,8 +356,18 @@ public class VideoPresenter extends BasePresenter<VideoView> {
         video.setViewCount(video.getViewCount() + 1);
         view.updateVideoInfo(video, position);
 
-        // TODO: Implement actual view count update với Firebase
-        // Có thể implement sau khi có Firebase Functions để đảm bảo view count chính xác
+        // Cập nhật view count lên Firebase
+        videoRepository.incrementViewCount(video.getId(), new VideoRepository.BooleanCallback() {
+            @Override
+            public void onSuccess(boolean result) {
+                // View count đã được cập nhật thành công
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Bỏ qua lỗi view count, không ảnh hưởng đến trải nghiệm người dùng
+            }
+        });
     }
 
     /**

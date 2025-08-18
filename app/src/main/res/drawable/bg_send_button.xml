@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Trạng thái được kích hoạt -->
+    <item android:state_enabled="true">
+        <shape android:shape="oval">
+            <solid android:color="?attr/colorPrimary" />
+        </shape>
+    </item>
+
+    <!-- Trạng thái bị vô hiệu hóa -->
+    <item android:state_enabled="false">
+        <shape android:shape="oval">
+            <solid android:color="?attr/colorSurfaceVariant" />
+        </shape>
+    </item>
+
+</selector>
+

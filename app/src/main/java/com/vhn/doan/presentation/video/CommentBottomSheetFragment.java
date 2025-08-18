@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.video;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -17,6 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.vhn.doan.R;
 import com.vhn.doan.data.VideoComment;
@@ -29,6 +33,7 @@ import java.util.List;
 
 /**
  * Bottom Sheet Fragment hiển thị danh sách bình luận của video
+ * Được cấu hình để mở rộng hoàn toàn ngay từ đầu
  */
 public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
 
@@ -54,6 +59,68 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
         args.putString(ARG_VIDEO_ID, videoId);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
+
+        dialog.setOnShowListener(dialogInterface -> {
+            BottomSheetDialog bottomSheetDialog = (BottomSheetDialog) dialogInterface;
+            FrameLayout bottomSheet = bottomSheetDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+
+            if (bottomSheet != null) {
+                BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
+
+                // Thiết lập chiều cao mở rộng là 85% màn hình
+                ViewGroup.LayoutParams layoutParams = bottomSheet.getLayoutParams();
+                layoutParams.height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
+                bottomSheet.setLayoutParams(layoutParams);
+
+                // Mở rộng bottom sheet ngay từ đầu
+                behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+                // Cho phép kéo để đóng như TikTok
+                behavior.setHideable(true);
+                behavior.setSkipCollapsed(false);
+
+                // Thiết lập peek height thấp để có thể đóng được
+                behavior.setPeekHeight(0);
+
+                // Thiết lập callback để xử lý trạng thái
+                behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                        // Cho phép đóng khi kéo xuống
+                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                            dismiss();
+                        }
+                        // Nếu đang collapsed và người dùng kéo tiếp, cho phép hide
+                        if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                            // Tự động chuyển về hidden sau một khoảng thời gian ngắn nếu người dùng không tương tác
+                            bottomSheet.postDelayed(() -> {
+                                if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                                    behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                                }
+                            }, 300);
+                        }
+                    }
+
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                        // Thêm hiệu ứng fade out khi kéo xuống
+                        if (slideOffset < 0.5f) {
+                            bottomSheet.setAlpha(slideOffset * 2f);
+                        } else {
+                            bottomSheet.setAlpha(1f);
+                        }
+                    }
+                });
+            }
+        });
+
+        return dialog;
     }
 
     @Override
@@ -112,6 +179,16 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
             public void onShowReplies(VideoComment comment, int position) {
                 handleShowReplies(comment);
             }
+
+            @Override
+            public void onLikeReply(VideoComment reply, String parentCommentId) {
+                handleLikeReply(reply, parentCommentId);
+            }
+
+            @Override
+            public void onShowMoreReplies(String parentCommentId) {
+                handleShowMoreReplies(parentCommentId);
+            }
         });
     }
 
@@ -157,6 +234,8 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
                     showEmptyState();
                 } else {
                     showComments(comments);
+                    // Load replies cho từng comment
+                    loadRepliesForComments(comments);
                 }
             }
 
@@ -164,6 +243,46 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
             public void onError(String errorMessage) {
                 if (getActivity() == null || !isAdded()) return;
                 showError("Không thể tải bình luận: " + errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Load replies cho tất cả comments
+     */
+    private void loadRepliesForComments(List<VideoComment> comments) {
+        for (VideoComment comment : comments) {
+            if (comment.getReplyCount() > 0) {
+                loadRepliesForComment(comment);
+            }
+        }
+    }
+
+    /**
+     * Load replies cho một comment cụ thể
+     */
+    private void loadRepliesForComment(VideoComment comment) {
+        videoRepository.getCommentReplies(videoId, comment.getId(), new VideoRepository.CommentsCallback() {
+            @Override
+            public void onSuccess(List<VideoComment> replies) {
+                if (getActivity() == null || !isAdded()) return;
+
+                if (!replies.isEmpty()) {
+                    // Cập nhật replies trong adapter
+                    commentAdapter.updateReplies(comment.getId(), replies);
+
+                    // Đảm bảo comment được mở rộng để hiển thị replies
+                    commentAdapter.forceExpandReplies(comment.getId());
+
+                    android.util.Log.d("CommentBottomSheet", "Loaded " + replies.size() +
+                        " replies for comment " + comment.getId());
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Không hiển thị lỗi cho việc load replies để tránh spam
+                android.util.Log.w("CommentBottomSheet", "Không thể load replies cho comment " + comment.getId() + ": " + errorMessage);
             }
         });
     }
@@ -287,13 +406,128 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void handleReplyComment(VideoComment comment) {
-        // TODO: Implement reply functionality
-        showSuccess("Tính năng trả lời đang được phát triển");
+        ReplyBottomSheetFragment replyFragment = ReplyBottomSheetFragment.newInstance(videoId, comment);
+        replyFragment.setOnReplyAddedListener(new ReplyBottomSheetFragment.OnReplyAddedListener() {
+            @Override
+            public void onReplyAdded(VideoComment reply, String parentCommentId) {
+                // Thêm reply vào adapter
+                commentAdapter.addReply(reply, parentCommentId);
+
+                // Tự động mở rộng replies để hiển thị reply mới
+                commentAdapter.toggleRepliesVisibility(parentCommentId);
+
+                showSuccess("Đã thêm câu trả lời");
+            }
+        });
+
+        replyFragment.show(getChildFragmentManager(), "ReplyBottomSheet");
     }
 
     private void handleShowReplies(VideoComment comment) {
-        // TODO: Implement show replies functionality
-        showSuccess("Tính năng xem trả lời đang được phát triển");
+        // Tải replies từ Firebase nếu chưa có
+        videoRepository.getCommentReplies(videoId, comment.getId(), new VideoRepository.CommentsCallback() {
+            @Override
+            public void onSuccess(List<VideoComment> replies) {
+                if (getActivity() == null || !isAdded()) return;
+
+                // Cập nhật replies trong adapter
+                commentAdapter.updateReplies(comment.getId(), replies);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (getActivity() == null || !isAdded()) return;
+                showError("Không thể tải câu trả lời: " + errorMessage);
+            }
+        });
+    }
+
+    private void handleLikeReply(VideoComment reply, String parentCommentId) {
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            showError("Vui lòng đăng nhập để thích câu trả lời");
+            return;
+        }
+
+        // Kiểm tra trạng thái like hiện tại của reply
+        videoRepository.isCommentLiked(videoId, reply.getId(), currentUserId,
+            new VideoRepository.BooleanCallback() {
+                @Override
+                public void onSuccess(boolean isLiked) {
+                    if (getActivity() == null || !isAdded()) return;
+
+                    if (isLiked) {
+                        // Unlike reply
+                        videoRepository.unlikeComment(videoId, reply.getId(), currentUserId,
+                            new VideoRepository.BooleanCallback() {
+                                @Override
+                                public void onSuccess(boolean result) {
+                                    if (getActivity() == null || !isAdded()) return;
+
+                                    reply.setLikeCount(Math.max(0, reply.getLikeCount() - 1));
+                                    // Cập nhật lại replies list
+                                    refreshReplies(parentCommentId);
+                                    showSuccess("Đã bỏ thích câu trả lời");
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    if (getActivity() == null || !isAdded()) return;
+                                    showError("Không thể bỏ thích: " + errorMessage);
+                                }
+                            });
+                    } else {
+                        // Like reply
+                        videoRepository.likeComment(videoId, reply.getId(), currentUserId,
+                            new VideoRepository.BooleanCallback() {
+                                @Override
+                                public void onSuccess(boolean result) {
+                                    if (getActivity() == null || !isAdded()) return;
+
+                                    reply.setLikeCount(reply.getLikeCount() + 1);
+                                    // Cập nhật lại replies list
+                                    refreshReplies(parentCommentId);
+                                    showSuccess("Đã thích câu trả lời");
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    if (getActivity() == null || !isAdded()) return;
+                                    showError("Không thể thích: " + errorMessage);
+                                }
+                            });
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (getActivity() == null || !isAdded()) return;
+                    showError("Không thể kiểm tra trạng thái thích: " + errorMessage);
+                }
+            });
+    }
+
+    private void refreshReplies(String parentCommentId) {
+        // Tải lại replies để cập nhật số liệu chính xác
+        videoRepository.getCommentReplies(videoId, parentCommentId, new VideoRepository.CommentsCallback() {
+            @Override
+            public void onSuccess(List<VideoComment> replies) {
+                if (getActivity() == null || !isAdded()) return;
+                commentAdapter.updateReplies(parentCommentId, replies);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Bỏ qua lỗi refresh
+            }
+        });
+    }
+
+    /**
+     * Xử lý khi người dùng nhấn "Xem thêm replies"
+     */
+    private void handleShowMoreReplies(String parentCommentId) {
+        // Toggle trạng thái hiển thị tất cả replies
+        commentAdapter.toggleShowAllReplies(parentCommentId);
     }
 
     private void showComments(List<VideoComment> comments) {

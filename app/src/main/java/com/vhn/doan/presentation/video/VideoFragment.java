@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.FirebaseVideoRepositoryImpl;
@@ -42,6 +44,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
     private PagerSnapHelper snapHelper;
     private int currentVisiblePosition = 0;
 
+    // Firebase Authentication
+    private FirebaseAuth firebaseAuth;
+
     /**
      * Factory method để tạo instance mới
      */
@@ -52,6 +57,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Khởi tạo Firebase Auth
+        firebaseAuth = FirebaseAuth.getInstance();
 
         // Sử dụng FirebaseVideoRepositoryImpl để lấy dữ liệu thực từ Firebase
         presenter = new VideoPresenter(new FirebaseVideoRepositoryImpl());
@@ -175,8 +183,8 @@ public class VideoFragment extends BaseFragment implements VideoView {
     }
 
     private void loadVideoFeed() {
-        // Lấy user ID và country từ SharedPreferences
-        String userId = SharedPreferencesHelper.getUserId(getContext());
+        // Lấy user ID từ Firebase Auth trước, sau đó từ SharedPreferences
+        String userId = getCurrentUserId();
         String country = SharedPreferencesHelper.getUserCountry(getContext());
 
         // Default country nếu chưa có
@@ -185,6 +193,24 @@ public class VideoFragment extends BaseFragment implements VideoView {
         }
 
         presenter.loadVideoFeed(userId, country);
+    }
+
+    /**
+     * Lấy User ID hiện tại từ Firebase Auth hoặc SharedPreferences
+     */
+    private String getCurrentUserId() {
+        // Ưu tiên lấy từ Firebase Auth
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+            String uid = currentUser.getUid();
+            // Đồng bộ với SharedPreferences
+            SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
+            helper.setCurrentUserId(uid);
+            return uid;
+        }
+
+        // Fallback về SharedPreferences
+        return SharedPreferencesHelper.getUserId(getContext());
     }
 
     // VideoView Interface Implementation

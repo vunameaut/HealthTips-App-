@@ -1,37 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:background="@color/comment_background">
+    android:padding="12dp">
 
+    <!-- Main comment container -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="top">
+        android:orientation="horizontal">
 
-        <!-- User Avatar -->
+        <!-- User avatar -->
         <ImageView
             android:id="@+id/iv_user_avatar"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="12dp"
             android:src="@drawable/ic_user_placeholder"
-            android:background="@drawable/bg_circle_avatar"
-            android:scaleType="centerCrop"
-            android:contentDescription="Avatar người dùng" />
+            android:background="@drawable/circle_background"
+            android:contentDescription="@string/user_avatar" />
 
-        <!-- Comment Content -->
+        <!-- Comment content -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="12dp"
             android:orientation="vertical">
 
-            <!-- User Name and Time -->
+            <!-- User name and time -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -42,94 +41,94 @@
                     android:id="@+id/tv_user_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tên người dùng"
-                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
                     android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="Người dùng" />
 
                 <TextView
                     android:id="@+id/tv_comment_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="2 giờ trước"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="2 giờ trước" />
 
             </LinearLayout>
 
-            <!-- Comment Text -->
+            <!-- Comment text -->
             <TextView
                 android:id="@+id/tv_comment_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Nội dung bình luận ở đây..."
-                android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                android:lineSpacingExtra="2dp" />
+                android:textColor="?attr/colorOnSurface"
+                android:lineSpacingExtra="2dp"
+                tools:text="Đây là nội dung bình luận của người dùng" />
 
-            <!-- Action Buttons -->
+            <!-- Action buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:orientation="horizontal"
-                android:gravity="start|center_vertical">
+                android:gravity="center_vertical">
 
-                <!-- Like Button -->
+                <!-- Like button -->
                 <LinearLayout
                     android:id="@+id/btn_like_comment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
+                    android:padding="4dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp">
+                    android:layout_marginEnd="16dp">
 
                     <ImageView
                         android:id="@+id/iv_like_comment"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_heart_outline"
-                        android:tint="@color/like_color_inactive"
-                        android:contentDescription="Like bình luận" />
+                        app:tint="?attr/colorOnSurfaceVariant" />
 
                     <TextView
                         android:id="@+id/tv_like_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
-                        android:text="0"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        tools:text="5" />
 
                 </LinearLayout>
 
-                <!-- Reply Button -->
+                <!-- Reply button -->
                 <TextView
                     android:id="@+id/btn_reply_comment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Trả lời"
-                    android:textColor="@color/text_secondary"
+                    android:text="@string/reply"
                     android:textSize="12sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:padding="4dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp" />
+                    android:layout_marginEnd="16dp" />
 
-                <!-- Reply Count (if has replies) -->
+                <!-- Show replies button -->
                 <TextView
                     android:id="@+id/tv_reply_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Xem 3 câu trả lời"
-                    android:textColor="@color/primary_color"
                     android:textSize="12sp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:textColor="?attr/colorPrimary"
                     android:padding="4dp"
-                    android:visibility="gone" />
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:visibility="gone"
+                    tools:text="Xem 3 câu trả lời"
+                    tools:visibility="visible" />
 
             </LinearLayout>
 
@@ -137,14 +136,17 @@
 
     </LinearLayout>
 
-    <!-- Replies RecyclerView (for showing replies) -->
+    <!-- Replies container -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_replies"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="44dp"
+        android:layout_marginStart="48dp"
         android:layout_marginTop="8dp"
+        android:nestedScrollingEnabled="false"
         android:visibility="gone"
-        android:nestedScrollingEnabled="false" />
+        tools:visibility="visible"
+        tools:itemCount="2"
+        tools:listitem="@layout/item_reply" />
 
 </LinearLayout>
