@@ -12,10 +12,15 @@ import com.vhn.doan.data.HealthTip;
 import com.vhn.doan.data.Category;
 import com.vhn.doan.utils.Constants;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Triển khai HealthTipRepository sử dụng Firebase Realtime Database
@@ -592,5 +597,160 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 callback.onError("Lỗi khi tải danh sách yêu thích: " + databaseError.getMessage());
             }
         });
+    }
+
+    @Override
+    public void getDailyRecommendedHealthTips(String date, int limit, final HealthTipCallback callback) {
+        if (date == null || date.isEmpty()) {
+            callback.onError("Ngày không hợp lệ");
+            return;
+        }
+
+        // Lấy tất cả bài viết trước, sau đó áp dụng thuật toán đề xuất dựa trên ngày
+        healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<HealthTip> allHealthTips = new ArrayList<>();
+
+                // Lấy tất cả bài viết
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                    if (healthTip != null) {
+                        healthTip.setId(snapshot.getKey());
+                        allHealthTips.add(healthTip);
+                    }
+                }
+
+                if (allHealthTips.isEmpty()) {
+                    callback.onSuccess(new ArrayList<>());
+                    return;
+                }
+
+                // Tạo seed từ ngày để đảm bảo tính nhất quán
+                // Cùng một ngày sẽ luôn có cùng một bộ bài viết được đề xuất
+                long seed = date.hashCode();
+                Random random = new Random(seed);
+
+                // Tạo danh sách đề xuất dựa trên thuật toán
+                List<HealthTip> dailyRecommended = generateDailyRecommendations(allHealthTips, limit, random);
+
+                // Load category names trước khi trả về callback
+                loadCategoryNamesForHealthTips(dailyRecommended, callback);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError("Lỗi khi tải dữ liệu: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void getTodayRecommendedHealthTips(int limit, HealthTipCallback callback) {
+        // Lấy ngày hiện tại theo định dạng yyyy-MM-dd
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String today = sdf.format(new Date());
+
+        // Gọi phương thức getDailyRecommendedHealthTips với ngày hôm nay
+        getDailyRecommendedHealthTips(today, limit, callback);
+    }
+
+    /**
+     * Tạo danh sách bài viết đề xuất cho một ngày cụ thể
+     * Sử dụng thuật toán seed để đảm bảo tính nhất quán
+     */
+    private List<HealthTip> generateDailyRecommendations(List<HealthTip> allHealthTips, int limit, Random random) {
+        if (allHealthTips.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Tạo bản sao để không ảnh hưởng đến danh sách gốc
+        List<HealthTip> availableTips = new ArrayList<>(allHealthTips);
+        List<HealthTip> recommendedTips = new ArrayList<>();
+
+        // Thuật toán đề xuất:
+        // 1. Chia bài viết thành các nhóm theo điểm số (cao, trung bình, thấp)
+        // 2. Chọn ngẫu nhiên từ mỗi nhóm để đảm bảo đa dạng
+        // 3. Ưu tiên bài viết có điểm cao nhưng vẫn có sự ngẫu nhiên
+
+        // Tính điểm cho từng bài viết
+        for (HealthTip tip : availableTips) {
+            int viewCount = tip.getViewCount() != null ? tip.getViewCount() : 0;
+            int likeCount = tip.getLikeCount() != null ? tip.getLikeCount() : 0;
+            long ageInDays = (System.currentTimeMillis() - tip.getCreatedAt()) / (1000 * 60 * 60 * 24);
+
+            // Điểm = (lượt xem + lượt thích * 2) / (tuổi bài viết + 1)
+            // Điều này ưu tiên bài viết mới và có tương tác cao
+            double score = (viewCount + likeCount * 2.0) / (ageInDays + 1);
+            tip.setRecommendationScore((int) (score * 100)); // Nhân 100 để dễ so sánh
+        }
+
+        // Sắp xếp theo điểm
+        availableTips.sort((tip1, tip2) -> {
+            int score1 = tip1.getRecommendationScore() != null ? tip1.getRecommendationScore() : 0;
+            int score2 = tip2.getRecommendationScore() != null ? tip2.getRecommendationScore() : 0;
+            return Integer.compare(score2, score1);
+        });
+
+        // Chia thành 3 nhóm: Top 30%, Middle 40%, Bottom 30%
+        int totalCount = availableTips.size();
+        int topCount = Math.max(1, (int) (totalCount * 0.3));
+        int middleCount = Math.max(1, (int) (totalCount * 0.4));
+
+        List<HealthTip> topTips = availableTips.subList(0, Math.min(topCount, totalCount));
+        List<HealthTip> middleTips = availableTips.subList(Math.min(topCount, totalCount),
+                Math.min(topCount + middleCount, totalCount));
+        List<HealthTip> bottomTips = availableTips.subList(Math.min(topCount + middleCount, totalCount), totalCount);
+
+        // Chọn bài viết từ mỗi nhóm với tỷ lệ: 50% top, 30% middle, 20% bottom
+        int topLimit = Math.max(1, (int) (limit * 0.5));
+        int middleLimit = Math.max(1, (int) (limit * 0.3));
+        int bottomLimit = limit - topLimit - middleLimit;
+
+        // Thêm bài viết từ nhóm top
+        addRandomTipsFromGroup(topTips, topLimit, recommendedTips, random);
+
+        // Thêm bài viết từ nhóm middle
+        addRandomTipsFromGroup(middleTips, middleLimit, recommendedTips, random);
+
+        // Thêm bài viết từ nhóm bottom
+        addRandomTipsFromGroup(bottomTips, bottomLimit, recommendedTips, random);
+
+        // Nếu chưa đủ số lượng, thêm ngẫu nhiên từ các bài viết còn lại
+        while (recommendedTips.size() < limit && recommendedTips.size() < totalCount) {
+            for (HealthTip tip : availableTips) {
+                if (recommendedTips.size() >= limit) break;
+                if (!recommendedTips.contains(tip)) {
+                    recommendedTips.add(tip);
+                }
+            }
+        }
+
+        // Trộn ngẫu nhiên danh sách cuối cùng để tạo sự đa dạng trong hiển thị
+        Collections.shuffle(recommendedTips, random);
+
+        return recommendedTips;
+    }
+
+    /**
+     * Thêm ngẫu nhiên các bài viết từ một nhóm vào danh sách đề xuất
+     */
+    private void addRandomTipsFromGroup(List<HealthTip> sourceTips, int maxCount,
+                                       List<HealthTip> targetTips, Random random) {
+        if (sourceTips.isEmpty() || maxCount <= 0) return;
+
+        List<HealthTip> availableTips = new ArrayList<>();
+        for (HealthTip tip : sourceTips) {
+            if (!targetTips.contains(tip)) {
+                availableTips.add(tip);
+            }
+        }
+
+        Collections.shuffle(availableTips, random);
+
+        int addCount = Math.min(maxCount, availableTips.size());
+        for (int i = 0; i < addCount; i++) {
+            targetTips.add(availableTips.get(i));
+        }
     }
 }

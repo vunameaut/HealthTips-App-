@@ -155,6 +155,22 @@ public interface HealthTipRepository {
     void getRecommendedHealthTips(int limit, HealthTipCallback callback);
 
     /**
+     * Lấy danh sách mẹo sức khỏe được đề xuất cho ngày cụ thể
+     * Logic đề xuất dựa trên thuật toán seed theo ngày để đảm bảo tính nhất quán
+     * @param date ngày để lấy đề xuất (format: yyyy-MM-dd)
+     * @param limit số lượng mẹo sức khỏe cần lấy
+     * @param callback callback để nhận kết quả
+     */
+    void getDailyRecommendedHealthTips(String date, int limit, HealthTipCallback callback);
+
+    /**
+     * Lấy danh sách mẹo sức khỏe được đề xuất cho ngày hiện tại
+     * @param limit số lượng mẹo sức khỏe cần lấy
+     * @param callback callback để nhận kết quả
+     */
+    void getTodayRecommendedHealthTips(int limit, HealthTipCallback callback);
+
+    /**
      * Thêm một mẹo sức khỏe mới
      * @param healthTip đối tượng mẹo sức khỏe cần thêm
      * @param callback callback để nhận kết quả

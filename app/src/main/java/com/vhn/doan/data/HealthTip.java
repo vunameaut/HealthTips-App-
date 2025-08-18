@@ -64,7 +64,8 @@ public class HealthTip {
         this.isLiked = false;
     }
 
-    // Getters and Setters
+    // Getters và Setters
+
     public String getId() {
         return id;
     }
@@ -97,7 +98,6 @@ public class HealthTip {
         this.categoryId = categoryId;
     }
 
-    // Thêm getter/setter cho categoryName
     public String getCategoryName() {
         return categoryName;
     }
@@ -163,17 +163,16 @@ public class HealthTip {
     }
 
     /**
-     * Lấy nội dung tóm tắt của mẹo sức khỏe (100 ký tự đầu)
-     * @return nội dung tóm tắt
+     * Lấy tóm tắt nội dung (200 ký tự đầu)
      */
     public String getSummary() {
         if (content == null || content.trim().isEmpty()) {
-            return "Nội dung đang được cập nhật...";
+            return "Nội dung đang được cập nhật";
         }
-        if (content.length() <= 100) {
+        if (content.length() <= 200) {
             return content;
         }
-        return content.substring(0, 100) + "...";
+        return content.substring(0, 200) + "...";
     }
 
     /**

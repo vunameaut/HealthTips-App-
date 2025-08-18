@@ -22,6 +22,11 @@
     <color name="primary_dark">#2E7D32</color>           <!-- Màu chính đậm -->
     <color name="secondary_color">#FF9800</color>        <!-- Màu phụ - cam -->
 
+    <!-- Màu xám -->
+    <color name="gray_light">#F5F5F5</color>             <!-- Xám nhạt cho background -->
+    <color name="gray_medium">#9E9E9E</color>            <!-- Xám trung bình -->
+    <color name="gray_dark">#424242</color>              <!-- Xám đậm -->
+
     <!-- Màu cho nút chính -->
     <color name="primary_button_start">#2E7D32</color>   <!-- Xanh lá đậm -->
     <color name="primary_button_end">#C0CA33</color>     <!-- Vàng chanh -->

@@ -119,11 +119,11 @@ public class InfiniteHealthTipAdapter extends RecyclerView.Adapter<InfiniteHealt
         private TextView textViewViewCount;
         private TextView textViewLikeCount;
         private TextView textViewCreatedAt;
-        private ImageView buttonFavorite; // Đổi từ ImageButton sang ImageView
+        private ImageView buttonFavorite;
 
         public HealthTipViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Sử dụng đúng ID từ layout item_health_tip.xml
+            // Sử dụng các ID chính xác từ layout item_health_tip.xml
             imageViewThumbnail = itemView.findViewById(R.id.imageViewHealthTip);
             textViewTitle = itemView.findViewById(R.id.textViewHealthTipTitle);
             textViewSummary = itemView.findViewById(R.id.textViewHealthTipSummary);
@@ -160,44 +160,43 @@ public class InfiniteHealthTipAdapter extends RecyclerView.Adapter<InfiniteHealt
             if (textViewCreatedAt != null) {
                 long createdAt = healthTip.getCreatedAt();
                 if (createdAt > 0) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                    textViewCreatedAt.setText(dateFormat.format(new Date(createdAt)));
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                    String dateString = sdf.format(new Date(createdAt));
+                    textViewCreatedAt.setText(dateString);
                 } else {
-                    textViewCreatedAt.setText("Chưa rõ ngày");
+                    textViewCreatedAt.setText("");
                 }
             }
 
-            // Load hình ảnh thumbnail
+            // Hiển thị hình ảnh thumbnail
             if (imageViewThumbnail != null) {
                 if (healthTip.getImageUrl() != null && !healthTip.getImageUrl().isEmpty()) {
                     Glide.with(itemView.getContext())
                             .load(healthTip.getImageUrl())
                             .placeholder(R.drawable.ic_placeholder_image)
                             .error(R.drawable.ic_error_image)
-                            .centerCrop()
                             .into(imageViewThumbnail);
                 } else {
                     imageViewThumbnail.setImageResource(R.drawable.ic_placeholder_image);
                 }
             }
 
-            // Thiết lập trạng thái nút yêu thích
+            // Xử lý nút yêu thích
             if (buttonFavorite != null) {
-                buttonFavorite.setImageResource(healthTip.isFavorite() ?
-                    R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
+                // Cập nhật trạng thái hiển thị
+                boolean isFavorite = healthTip.isFavorite();
+                buttonFavorite.setImageResource(isFavorite ?
+                    R.drawable.ic_favorite : R.drawable.ic_favorite_border);
 
+                // Xử lý sự kiện click
                 buttonFavorite.setOnClickListener(v -> {
                     if (clickListener != null) {
-                        boolean newFavoriteState = !healthTip.isFavorite();
-                        healthTip.setFavorite(newFavoriteState);
-                        buttonFavorite.setImageResource(newFavoriteState ?
-                            R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
-                        clickListener.onFavoriteClick(healthTip, newFavoriteState);
+                        clickListener.onFavoriteClick(healthTip, !isFavorite);
                     }
                 });
             }
 
-            // Thiết lập sự kiện click cho toàn bộ item
+            // Xử lý click vào toàn bộ item
             itemView.setOnClickListener(v -> {
                 if (clickListener != null) {
                     clickListener.onHealthTipClick(healthTip);

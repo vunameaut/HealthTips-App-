@@ -148,17 +148,34 @@ public class AllHealthTipsActivity extends AppCompatActivity implements HealthTi
             public void onError(String errorMessage) {
                 progressBar.setVisibility(android.view.View.GONE);
                 emptyLayout.setVisibility(android.view.View.VISIBLE);
+                // Hiển thị thông báo lỗi
+                android.widget.Toast.makeText(AllHealthTipsActivity.this,
+                    "Lỗi khi tải dữ liệu: " + errorMessage,
+                    android.widget.Toast.LENGTH_SHORT).show();
             }
         };
 
-        if (MODE_MOST_VIEWED.equals(mode)) {
-            repository.getMostViewedHealthTips(50, callback);
-        } else if (MODE_MOST_LIKED.equals(mode)) {
-            repository.getMostLikedHealthTips(50, callback);
-        } else if (MODE_RECOMMENDED.equals(mode)) {
-            repository.getRecommendedHealthTips(50, callback);
+        if (mode != null) {
+            switch (mode) {
+                case MODE_RECOMMENDED:
+                    // Chỉ hiển thị 10 bài viết đề xuất phù hợp cho hôm nay
+                    repository.getTodayRecommendedHealthTips(10, callback);
+                    break;
+                case MODE_LATEST:
+                    repository.getLatestHealthTips(50, callback);
+                    break;
+                case MODE_MOST_VIEWED:
+                    repository.getMostViewedHealthTips(50, callback);
+                    break;
+                case MODE_MOST_LIKED:
+                    repository.getMostLikedHealthTips(50, callback);
+                    break;
+                default:
+                    repository.getAllHealthTips(callback);
+                    break;
+            }
         } else {
-            repository.getLatestHealthTips(50, callback);
+            repository.getAllHealthTips(callback);
         }
     }
 

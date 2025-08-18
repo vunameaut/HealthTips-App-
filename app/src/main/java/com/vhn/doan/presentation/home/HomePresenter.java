@@ -150,8 +150,8 @@ public class HomePresenter {
             }
         });
 
-        // Tải mẹo đề xuất cho người dùng
-        healthTipRepository.getRecommendedHealthTips(HEALTH_TIP_LIMIT, new HealthTipRepository.HealthTipCallback() {
+        // Tải mẹo đề xuất cho người dùng (chỉ 10 bài phù hợp cho hôm nay)
+        healthTipRepository.getTodayRecommendedHealthTips(HEALTH_TIP_LIMIT, new HealthTipRepository.HealthTipCallback() {
             @Override
             public void onSuccess(java.util.List<HealthTip> healthTips) {
                 if (view != null) {
