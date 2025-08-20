@@ -13,27 +13,51 @@
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-    <!-- Loading State -->
+    <!-- Loading State - TikTok Style Horizontal Progress Bar -->
     <LinearLayout
         android:id="@+id/loading_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center"
         android:visibility="gone">
 
-        <ProgressBar
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:indeterminateTint="@android:color/white" />
+        <!-- Main content area (để video có thể hiển thị phía sau) -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Bottom loading area với text -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Đang tải video..."
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp" />
+            android:orientation="vertical"
+            android:paddingBottom="32dp">
+
+            <!-- Loading text -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Đang tải video..."
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2" />
+
+            <!-- Horizontal Progress Bar -->
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginHorizontal="16dp"
+                android:progressDrawable="@drawable/horizontal_loading_bar"
+                android:indeterminate="true"
+                style="?android:attr/progressBarStyleHorizontal" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
