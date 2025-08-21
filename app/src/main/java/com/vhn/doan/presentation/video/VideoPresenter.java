@@ -3,6 +3,7 @@ package com.vhn.doan.presentation.video;
 import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.VideoRepository;
 import com.vhn.doan.presentation.base.BasePresenter;
+import com.vhn.doan.utils.EventBus;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class VideoPresenter extends BasePresenter<VideoView> {
 
     private final VideoRepository videoRepository;
+    private final EventBus eventBus;
     private List<ShortVideo> currentVideos;
     private int currentPosition = 0;
     private String currentUserId;
@@ -24,6 +26,7 @@ public class VideoPresenter extends BasePresenter<VideoView> {
      */
     public VideoPresenter(VideoRepository videoRepository) {
         this.videoRepository = videoRepository;
+        this.eventBus = EventBus.getInstance();
     }
 
     @Override
@@ -209,6 +212,9 @@ public class VideoPresenter extends BasePresenter<VideoView> {
                 view.updateVideoLikeStatus(position, true);
                 view.updateVideoInfo(video, position);
                 view.showMessage("Đã thích video");
+
+                // Gửi sự kiện đồng bộ trạng thái like cho toàn ứng dụng
+                eventBus.updateVideoLikeStatus(video.getId(), true);
             }
 
             @Override
@@ -234,6 +240,9 @@ public class VideoPresenter extends BasePresenter<VideoView> {
                 view.updateVideoLikeStatus(position, false);
                 view.updateVideoInfo(video, position);
                 view.showMessage("Đã bỏ thích video");
+
+                // Gửi sự kiện đồng bộ trạng thái unlike cho toàn ứng dụng
+                eventBus.updateVideoLikeStatus(video.getId(), false);
             }
 
             @Override
@@ -297,11 +306,23 @@ public class VideoPresenter extends BasePresenter<VideoView> {
             final int position = i;
             ShortVideo video = currentVideos.get(i);
 
+            // Kiểm tra trạng thái like từ EventBus trước
+            boolean cachedLikeStatus = eventBus.isVideoLiked(video.getId());
+            if (cachedLikeStatus) {
+                // Nếu đã có thông tin trong EventBus, cập nhật UI ngay lập tức
+                view.updateVideoLikeStatus(position, true);
+                continue;
+            }
+
+            // Nếu không có thông tin trong EventBus, kiểm tra từ repository
             videoRepository.isVideoLiked(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
                 @Override
                 public void onSuccess(boolean isLiked) {
                     if (!isViewAttached()) return;
                     view.updateVideoLikeStatus(position, isLiked);
+
+                    // Cập nhật trạng thái vào EventBus
+                    eventBus.updateVideoLikeStatus(video.getId(), isLiked);
                 }
 
                 @Override

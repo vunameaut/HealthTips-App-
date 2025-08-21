@@ -47,6 +47,10 @@ public class ShortVideo {
     @PropertyName("status")
     private String status;
 
+    // Thuộc tính để theo dõi trạng thái like của video hiện tại
+    // Không đánh dấu bằng PropertyName vì đây là trạng thái local, không lưu trữ trên Firebase
+    private boolean liked = false;
+
     // Constructor mặc định
     public ShortVideo() {
     }
@@ -175,6 +179,22 @@ public class ShortVideo {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    /**
+     * Kiểm tra trạng thái like hiện tại của video
+     * @return true nếu video được like, false nếu chưa
+     */
+    public boolean isLiked() {
+        return liked;
+    }
+
+    /**
+     * Thiết lập trạng thái like cho video
+     * @param liked trạng thái like mới
+     */
+    public void setLiked(boolean liked) {
+        this.liked = liked;
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,6 +53,7 @@ public class VideoActivity extends AppCompatActivity {
         setupFullscreen();
         setupActionBar();
         setupVideoFragment();
+        setupBackButton();
     }
 
     private void setupFullscreen() {
@@ -83,6 +85,11 @@ public class VideoActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+    private void setupBackButton() {
+        ImageButton btnBackVideo = findViewById(R.id.btn_back_video);
+        btnBackVideo.setOnClickListener(v -> onBackPressed());
+    }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -100,10 +107,9 @@ public class VideoActivity extends AppCompatActivity {
         if (videoFragment != null) {
             // VideoFragment sẽ tự động pause video trong onPause()
         }
-        super.onBackPressed();
 
-        // Add slide down animation khi exit
-        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
+        // Kết thúc activity hiện tại để quay lại màn hình trước đó
+        finish();
     }
 
     @Override

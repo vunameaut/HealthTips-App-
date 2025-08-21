@@ -8,14 +8,17 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
+import com.vhn.doan.utils.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Fragment hiển thị kết quả tìm kiếm video
@@ -29,12 +32,24 @@ public class VideoSearchResultsFragment extends Fragment {
     // Interface lắng nghe sự kiện click vào video
     private VideoItemClickListener listener;
 
+    // EventBus để đồng bộ trạng thái like giữa các màn hình
+    private EventBus eventBus;
+    private Observer<Map<String, Boolean>> videoLikeObserver;
+
     public static VideoSearchResultsFragment newInstance() {
         return new VideoSearchResultsFragment();
     }
 
     public void setVideoItemClickListener(VideoItemClickListener listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Khởi tạo EventBus
+        eventBus = EventBus.getInstance();
     }
 
     @Override
@@ -53,15 +68,58 @@ public class VideoSearchResultsFragment extends Fragment {
         // Thiết lập RecyclerView
         rvVideoResults.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new VideoSearchResultAdapter(getContext(), videoResults);
+
         adapter.setOnVideoClickListener(position -> {
             if (listener != null && position < videoResults.size()) {
                 listener.onVideoClicked(videoResults.get(position));
             }
         });
+
+        // Thêm listener cho sự kiện like/unlike video
+        adapter.setOnVideoInteractionListener(new VideoSearchResultAdapter.OnVideoInteractionListener() {
+            @Override
+            public void onLikeClicked(ShortVideo video, int position, boolean isLiked) {
+                // Cập nhật trạng thái like lên EventBus để đồng bộ với các màn hình khác
+                eventBus.updateVideoLikeStatus(video.getId(), isLiked);
+            }
+        });
+
         rvVideoResults.setAdapter(adapter);
+
+        // Đăng ký lắng nghe sự kiện thay đổi trạng thái like từ EventBus
+        registerLikeStatusObserver();
 
         // Hiển thị trạng thái ban đầu
         updateUI();
+    }
+
+    /**
+     * Đăng ký lắng nghe sự kiện thay đổi trạng thái like từ EventBus
+     */
+    private void registerLikeStatusObserver() {
+        if (videoLikeObserver != null) {
+            return; // Tránh đăng ký nhiều lần
+        }
+
+        videoLikeObserver = likeStatusMap -> {
+            if (adapter == null || likeStatusMap == null || likeStatusMap.isEmpty() || videoResults.isEmpty()) {
+                return;
+            }
+
+            // Cập nhật trạng thái like cho các video trong adapter
+            for (int i = 0; i < videoResults.size(); i++) {
+                ShortVideo video = videoResults.get(i);
+                Boolean isLiked = likeStatusMap.get(video.getId());
+                if (isLiked != null) {
+                    int position = i;
+                    // Cập nhật UI trạng thái like
+                    adapter.updateVideoLikeStatus(position, isLiked);
+                }
+            }
+        };
+
+        // Đăng ký lắng nghe sự kiện từ EventBus
+        eventBus.getVideoLikeStatusLiveData().observe(getViewLifecycleOwner(), videoLikeObserver);
     }
 
     /**
@@ -74,6 +132,31 @@ public class VideoSearchResultsFragment extends Fragment {
             videoResults.addAll(results);
         }
         updateUI();
+
+        // Đồng bộ trạng thái like cho các video vừa tải về
+        syncVideoLikeStatus();
+    }
+
+    /**
+     * Đồng bộ trạng thái like của video từ EventBus
+     */
+    private void syncVideoLikeStatus() {
+        if (videoResults.isEmpty() || adapter == null) {
+            return;
+        }
+
+        Map<String, Boolean> likeStatusMap = eventBus.getVideoLikeStatusLiveData().getValue();
+        if (likeStatusMap == null || likeStatusMap.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < videoResults.size(); i++) {
+            ShortVideo video = videoResults.get(i);
+            Boolean isLiked = likeStatusMap.get(video.getId());
+            if (isLiked != null) {
+                adapter.updateVideoLikeStatus(i, isLiked);
+            }
+        }
     }
 
     /**

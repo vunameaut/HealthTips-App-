@@ -83,6 +83,15 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     /**
+     * Bí danh của updateVideoLikeStatus() để tương thích với code đang sử dụng
+     * @param position Vị trí của video cần cập nhật trạng thái
+     * @param isLiked Trạng thái like mới (true: đã like, false: chưa like)
+     */
+    public void updateLikeStatus(int position, boolean isLiked) {
+        updateVideoLikeStatus(position, isLiked);
+    }
+
+    /**
      * Cập nhật trạng thái like cho video tại vị trí cụ thể
      */
     public void updateVideoLikeStatus(int position, boolean isLiked) {
@@ -705,5 +714,13 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             return CloudinaryUrls.mp4(v.getCldPublicId(), v.getCldVersion());
         }
         return "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    }
+
+    /**
+     * Lấy danh sách videos hiện tại
+     * @return Danh sách videos
+     */
+    public List<ShortVideo> getVideos() {
+        return videos;
     }
 }

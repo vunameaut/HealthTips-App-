@@ -124,7 +124,7 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
 
     private void setupEvents() {
         // Sự kiện nút quay lại
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> handleBackAction());
 
         // Sự kiện nút tìm kiếm
         btnSearch.setOnClickListener(v -> {
@@ -306,6 +306,12 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
     public void showHealthTipResults(List<HealthTip> healthTips) {
         if (healthTipFragment != null) {
             healthTipFragment.updateResults(healthTips);
+
+            // Chuyển đổi sang màn hình kết quả tìm kiếm
+            searchViewFlipper.setDisplayedChild(VIEW_SEARCH_RESULTS);
+
+            // Chọn tab bài viết
+            viewPagerSearch.setCurrentItem(0);
         }
     }
 
@@ -313,6 +319,11 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
     public void showVideoResults(List<ShortVideo> videos) {
         if (videoFragment != null) {
             videoFragment.updateResults(videos);
+
+            // Chuyển đổi sang màn hình kết quả tìm kiếm nếu chưa chuyển
+            if (searchViewFlipper.getDisplayedChild() != VIEW_SEARCH_RESULTS) {
+                searchViewFlipper.setDisplayedChild(VIEW_SEARCH_RESULTS);
+            }
         }
     }
 
@@ -343,6 +354,28 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
                 viewPagerSearch.setCurrentItem(1); // Chuyển đến tab video
             }
         }
+    }
+
+    /**
+     * Xử lý hành động quay lại
+     * - Nếu đang ở màn hình kết quả tìm kiếm: quay về màn hình lịch sử tìm kiếm
+     * - Nếu đang ở màn hình lịch sử tìm kiếm: kết thúc activity
+     */
+    private void handleBackAction() {
+        // Nếu đang hiển thị kết quả tìm kiếm
+        if (searchViewFlipper.getDisplayedChild() == VIEW_SEARCH_RESULTS) {
+            // Quay về màn hình lịch sử tìm kiếm
+            searchViewFlipper.setDisplayedChild(VIEW_SEARCH_HISTORY);
+            return;
+        }
+
+        // Ngược lại, kết thúc activity
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        handleBackAction();
     }
 
     @Override

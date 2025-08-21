@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -27,12 +28,20 @@ public class VideoSearchResultAdapter extends RecyclerView.Adapter<VideoSearchRe
     private final Context mContext;
     private final List<ShortVideo> mVideos;
     private OnVideoClickListener mListener;
+    private OnVideoInteractionListener mInteractionListener;
 
     /**
      * Interface lắng nghe sự kiện click vào video
      */
     public interface OnVideoClickListener {
         void onVideoClick(int position);
+    }
+
+    /**
+     * Interface lắng nghe các tương tác khác với video (like, share, comment)
+     */
+    public interface OnVideoInteractionListener {
+        void onLikeClicked(ShortVideo video, int position, boolean isLiked);
     }
 
     public VideoSearchResultAdapter(Context context, List<ShortVideo> videos) {
@@ -42,6 +51,10 @@ public class VideoSearchResultAdapter extends RecyclerView.Adapter<VideoSearchRe
 
     public void setOnVideoClickListener(OnVideoClickListener listener) {
         mListener = listener;
+    }
+
+    public void setOnVideoInteractionListener(OnVideoInteractionListener listener) {
+        mInteractionListener = listener;
     }
 
     @NonNull
@@ -67,6 +80,9 @@ public class VideoSearchResultAdapter extends RecyclerView.Adapter<VideoSearchRe
         String uploadDate = formatUploadDate(video.getUploadDate());
         holder.tvUploadDate.setText(uploadDate);
 
+        // Thiết lập trạng thái like cho video
+        updateVideoLikeStatus(position, video.isLiked());
+
         // Tải thumbnail của video
         if (video.getThumbnailUrl() != null && !video.getThumbnailUrl().isEmpty()) {
             // Nếu có thumbnail URL trực tiếp
@@ -89,6 +105,72 @@ public class VideoSearchResultAdapter extends RecyclerView.Adapter<VideoSearchRe
             // Hiển thị placeholder nếu không có ảnh
             holder.ivVideoThumbnail.setImageResource(R.drawable.ic_video_placeholder);
         }
+
+        // Thiết lập lắng nghe sự kiện cho nút like nếu có
+        if (holder.ivLikeButton != null) {
+            holder.ivLikeButton.setOnClickListener(v -> {
+                boolean newLikeState = !video.isLiked();
+                video.setLiked(newLikeState);
+                updateVideoLikeStatus(position, newLikeState);
+                if (mInteractionListener != null) {
+                    mInteractionListener.onLikeClicked(video, position, newLikeState);
+                }
+            });
+        }
+    }
+
+    /**
+     * Cập nhật trạng thái like cho video ở vị trí position
+     */
+    public void updateVideoLikeStatus(int position, boolean isLiked) {
+        if (position < 0 || position >= mVideos.size()) {
+            return;
+        }
+
+        ShortVideo video = mVideos.get(position);
+        video.setLiked(isLiked);
+
+        // Tìm ViewHolder hiện tại để cập nhật UI nếu có
+        VideoViewHolder holder = (VideoViewHolder) getRecyclerView().findViewHolderForAdapterPosition(position);
+        if (holder != null && holder.ivLikeButton != null) {
+            updateLikeButtonUI(holder.ivLikeButton, isLiked);
+        }
+    }
+
+    /**
+     * Cập nhật UI của nút like
+     */
+    private void updateLikeButtonUI(ImageView likeButton, boolean isLiked) {
+        if (likeButton == null) return;
+
+        if (isLiked) {
+            likeButton.setImageResource(R.drawable.ic_heart_filled);
+            likeButton.setColorFilter(ContextCompat.getColor(mContext, R.color.like_color_active));
+        } else {
+            likeButton.setImageResource(R.drawable.ic_heart_outline);
+            likeButton.setColorFilter(ContextCompat.getColor(mContext, R.color.like_color_inactive));
+        }
+    }
+
+    /**
+     * Lấy RecyclerView chứa adapter này
+     */
+    private RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    private RecyclerView mRecyclerView;
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        mRecyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        mRecyclerView = null;
     }
 
     @Override
@@ -150,6 +232,7 @@ public class VideoSearchResultAdapter extends RecyclerView.Adapter<VideoSearchRe
     static class VideoViewHolder extends RecyclerView.ViewHolder {
         ImageView ivVideoThumbnail;
         ImageView ivPlayButton;
+        ImageView ivLikeButton;
         TextView tvVideoTitle;
         TextView tvVideoCaption;
         TextView tvViewCount;
@@ -160,6 +243,7 @@ public class VideoSearchResultAdapter extends RecyclerView.Adapter<VideoSearchRe
 
             ivVideoThumbnail = itemView.findViewById(R.id.iv_video_thumbnail);
             ivPlayButton = itemView.findViewById(R.id.iv_play_button);
+            ivLikeButton = itemView.findViewById(R.id.iv_like_button);
             tvVideoTitle = itemView.findViewById(R.id.tv_video_title);
             tvVideoCaption = itemView.findViewById(R.id.tv_video_caption);
             tvViewCount = itemView.findViewById(R.id.tv_view_count);

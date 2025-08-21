@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,9 +24,11 @@ import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.FirebaseVideoRepositoryImpl;
 import com.vhn.doan.presentation.base.BaseFragment;
 import com.vhn.doan.presentation.video.adapter.VideoAdapter;
+import com.vhn.doan.utils.EventBus;
 import com.vhn.doan.utils.SharedPreferencesHelper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * VideoFragment hiển thị feed video short theo kiểu TikTok/Instagram Reels
@@ -47,6 +50,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
     // Firebase Authentication
     private FirebaseAuth firebaseAuth;
 
+    private Observer<Map<String, Boolean>> videoLikeObserver;
+    private EventBus eventBus;
+
     /**
      * Factory method để tạo instance mới
      */
@@ -60,6 +66,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
 
         // Khởi tạo Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance();
+
+        // Khởi tạo EventBus
+        eventBus = EventBus.getInstance();
 
         // Sử dụng FirebaseVideoRepositoryImpl để lấy dữ liệu thực từ Firebase
         presenter = new VideoPresenter(new FirebaseVideoRepositoryImpl());
@@ -100,6 +109,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
 
         // Set RecyclerView reference cho adapter
         videoAdapter.setRecyclerView(recyclerView);
+
+        // Đăng ký lắng nghe sự kiện thay đổi trạng thái like từ EventBus
+        registerLikeStatusObserver();
 
         // Load video feed
         loadVideoFeed();
@@ -213,6 +225,45 @@ public class VideoFragment extends BaseFragment implements VideoView {
         return SharedPreferencesHelper.getUserId(getContext());
     }
 
+    /**
+     * Đăng ký lắng nghe sự kiện thay đổi trạng thái like từ EventBus
+     */
+    private void registerLikeStatusObserver() {
+        if (videoLikeObserver != null) {
+            return; // Tránh đăng ký nhiều lần
+        }
+
+        videoLikeObserver = likeStatusMap -> {
+            if (videoAdapter == null || likeStatusMap == null || likeStatusMap.isEmpty()) {
+                return;
+            }
+
+            List<ShortVideo> videos = videoAdapter.getVideos();
+            if (videos == null || videos.isEmpty()) {
+                return;
+            }
+
+            // Cập nhật trạng thái like cho các video trong adapter
+            for (int i = 0; i < videos.size(); i++) {
+                ShortVideo video = videos.get(i);
+                Boolean isLiked = likeStatusMap.get(video.getId());
+                if (isLiked != null) {
+                    int position = i;
+                    updateVideoLikeStatus(position, isLiked);
+                }
+            }
+        };
+
+        // Đăng ký lắng nghe sự kiện từ EventBus
+        eventBus.getVideoLikeStatusLiveData().observe(getViewLifecycleOwner(), videoLikeObserver);
+    }
+
+    @Override
+    public void onDestroy() {
+        // EventBus observer sẽ tự động được hủy đăng ký nhờ getViewLifecycleOwner()
+        super.onDestroy();
+    }
+
     // VideoView Interface Implementation
 
     @Override
@@ -298,10 +349,13 @@ public class VideoFragment extends BaseFragment implements VideoView {
         presenter.refreshVideoFeed();
     }
 
+    /**
+     * Cập nhật trạng thái like của video
+     */
     @Override
     public void updateVideoLikeStatus(int position, boolean isLiked) {
         if (videoAdapter != null) {
-            videoAdapter.updateVideoLikeStatus(position, isLiked);
+            videoAdapter.updateLikeStatus(position, isLiked);
         }
     }
 
@@ -404,13 +458,6 @@ public class VideoFragment extends BaseFragment implements VideoView {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (presenter != null) {
-            presenter.detachView();
-        }
-    }
 
     // Public Methods for Navigation
 

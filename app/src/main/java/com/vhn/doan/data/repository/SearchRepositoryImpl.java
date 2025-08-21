@@ -30,40 +30,115 @@ public class SearchRepositoryImpl implements SearchRepository {
 
     @Override
     public void searchHealthTips(String keyword, RepositoryCallback<List<HealthTip>> callback) {
-        // Chuyển keyword về lowercase để tìm kiếm không phân biệt hoa thường
-        keyword = keyword.toLowerCase();
-        final String searchKeyword = keyword;
+        if (keyword == null || keyword.isEmpty()) {
+            callback.onSuccess(new ArrayList<>());
+            return;
+        }
 
-        // Tìm kiếm trong tất cả bài viết
-        Query query = mDatabase.child("healthTips");
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Chuyển keyword về lowercase để tìm kiếm không phân biệt hoa thường
+        final String searchKeyword = keyword.toLowerCase().trim();
+
+        System.out.println("===== TÌM KIẾM BÀI VIẾT =====");
+        System.out.println("Từ khóa tìm kiếm: " + searchKeyword);
+
+        // LƯU Ý: Sử dụng node "health_tips" đúng với cấu trúc Firebase (thay vì "healthTips")
+        DatabaseReference healthTipsRef = mDatabase.child("health_tips");
+        System.out.println("Đang truy cập node Firebase: " + healthTipsRef.toString());
+
+        healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<HealthTip> results = new ArrayList<>();
+                System.out.println("Tổng số bài viết trong cơ sở dữ liệu: " + dataSnapshot.getChildrenCount());
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HealthTip healthTip = snapshot.getValue(HealthTip.class);
-                    if (healthTip != null) {
-                        // Tìm kiếm trong title, content hoặc categoryName
-                        boolean matchesTitle = healthTip.getTitle() != null &&
-                                healthTip.getTitle().toLowerCase().contains(searchKeyword);
-                        boolean matchesContent = healthTip.getContent() != null &&
-                                healthTip.getContent().toLowerCase().contains(searchKeyword);
-                        boolean matchesCategory = healthTip.getCategoryName() != null &&
-                                healthTip.getCategoryName().toLowerCase().contains(searchKeyword);
+                    try {
+                        System.out.println("Đang xử lý snapshot key: " + snapshot.getKey());
 
-                        if (matchesTitle || matchesContent || matchesCategory) {
-                            results.add(healthTip);
+                        HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                        if (healthTip != null) {
+                            // Đảm bảo ID được set từ key của Firebase
+                            String healthTipId = snapshot.getKey();
+                            healthTip.setId(healthTipId);
+                            System.out.println("Bài viết có ID: " + healthTipId + ", title: " + healthTip.getTitle());
+
+                            // Xử lý dữ liệu null và validate dữ liệu
+                            if (healthTip.getTitle() == null) healthTip.setTitle("");
+                            if (healthTip.getContent() == null) healthTip.setContent("");
+                            if (healthTip.getCategoryName() == null) healthTip.setCategoryName("");
+
+                            String title = healthTip.getTitle().toLowerCase();
+                            String content = healthTip.getContent().toLowerCase();
+                            String categoryName = healthTip.getCategoryName().toLowerCase();
+
+                            // Tìm kiếm trong title, content hoặc categoryName
+                            boolean matchesTitle = !title.isEmpty() && title.contains(searchKeyword);
+                            boolean matchesContent = !content.isEmpty() && content.contains(searchKeyword);
+                            boolean matchesCategory = !categoryName.isEmpty() && categoryName.contains(searchKeyword);
+
+                            if (matchesTitle || matchesContent || matchesCategory) {
+                                System.out.println("Tìm thấy bài viết phù hợp: " + title);
+
+                                // Tải thông tin category name nếu cần
+                                loadCategoryNameForHealthTip(healthTip);
+
+                                results.add(healthTip);
+                            }
+                        } else {
+                            System.out.println("Không thể parse bài viết từ snapshot (null)");
                         }
+                    } catch (Exception e) {
+                        System.out.println("Lỗi khi phân tích bài viết: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
+                System.out.println("Tổng số kết quả tìm kiếm: " + results.size());
                 callback.onSuccess(results);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.println("Lỗi khi tìm kiếm bài viết: " + databaseError.getMessage());
                 callback.onError(databaseError.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Helper method để load category name cho bài viết
+     */
+    private void loadCategoryNameForHealthTip(HealthTip healthTip) {
+        if (healthTip.getCategoryId() == null || healthTip.getCategoryId().isEmpty()) {
+            healthTip.setCategoryName("Chưa phân loại");
+            return;
+        }
+
+        // Nếu đã có categoryName thì không cần load lại
+        if (healthTip.getCategoryName() != null && !healthTip.getCategoryName().isEmpty()) {
+            return;
+        }
+
+        // Tải category name bất đồng bộ - không cần đợi kết quả ngay lập tức
+        // vì kết quả tìm kiếm sẽ được hiển thị trước
+        mDatabase.child("categories").child(healthTip.getCategoryId()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists() && dataSnapshot.hasChild("name")) {
+                    String categoryName = dataSnapshot.child("name").getValue(String.class);
+                    if (categoryName != null && !categoryName.isEmpty()) {
+                        healthTip.setCategoryName(categoryName);
+                    } else {
+                        healthTip.setCategoryName("Chưa phân loại");
+                    }
+                } else {
+                    healthTip.setCategoryName("Chưa phân loại");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                healthTip.setCategoryName("Chưa phân loại");
             }
         });
     }

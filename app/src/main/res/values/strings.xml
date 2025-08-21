@@ -233,4 +233,5 @@
     <string name="search_loading">Đang tìm kiếm...</string>
     <string name="search_filter">Bộ lọc</string>
     <string name="clear">Xóa</string>
+    <string name="like_video">Thích video</string>
 </resources>

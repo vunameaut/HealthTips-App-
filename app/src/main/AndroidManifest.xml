@@ -77,6 +77,11 @@
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
 
+        <!-- VideoActivity: thêm mới để tránh ActivityNotFoundException -->
+        <activity
+            android:name=".presentation.video.VideoActivity"
+            android:exported="false" />
+
         <!-- Debug Activity -->
         <activity
             android:name=".presentation.debug.ReminderTestActivity"

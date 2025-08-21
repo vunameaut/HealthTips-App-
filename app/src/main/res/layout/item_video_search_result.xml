@@ -73,7 +73,7 @@
                 android:textSize="12sp"
                 tools:text="Video hướng dẫn chi tiết các bài tập giảm cân hiệu quả tại nhà" />
 
-            <!-- Thông tin lượt xem và thời gian đăng -->
+            <!-- Thông tin lượt xem, thời gian đăng và nút like -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -106,6 +106,21 @@
                     app:drawableTint="?attr/colorOnSurfaceVariant"
                     tools:ignore="SmallSp"
                     tools:text="2 ngày trước" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <!-- Nút like -->
+                <ImageView
+                    android:id="@+id/iv_like_button"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical|end"
+                    android:contentDescription="@string/like_video"
+                    android:src="@drawable/ic_heart_outline"
+                    app:tint="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
