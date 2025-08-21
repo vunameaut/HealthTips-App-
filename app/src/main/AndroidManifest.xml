@@ -71,12 +71,11 @@
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
 
-        <!-- Video Player Activity cho danh sách video đã like -->
+        <!-- SearchActivity -->
         <activity
-            android:name=".presentation.profile.LikedVideoPlayerActivity"
+            android:name=".presentation.search.SearchActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.VideoPlayer" />
+            android:windowSoftInputMode="adjustPan" />
 
         <!-- Debug Activity -->
         <activity

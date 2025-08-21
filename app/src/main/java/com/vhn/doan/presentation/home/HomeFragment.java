@@ -1,6 +1,7 @@
 package com.vhn.doan.presentation.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -28,13 +29,15 @@ import com.vhn.doan.data.repository.CategoryRepository;
 import com.vhn.doan.data.repository.CategoryRepositoryImpl;
 import com.vhn.doan.data.repository.HealthTipRepository;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
+import com.vhn.doan.presentation.search.SearchActivity;
+import com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity;
+import com.vhn.doan.utils.Constants;
 import com.vhn.doan.presentation.home.adapter.CategoryAdapter;
-import com.vhn.doan.presentation.home.adapter.HealthTipAdapter;
 import com.vhn.doan.presentation.home.adapter.InfiniteHealthTipAdapter;
+import com.vhn.doan.presentation.home.adapter.HealthTipAdapter;
 import com.vhn.doan.presentation.home.adapter.CategorySkeletonAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipSkeletonAdapter;
 import com.vhn.doan.presentation.category.CategoryFragment;
-import com.vhn.doan.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -395,7 +398,9 @@ public class HomeFragment extends Fragment implements HomeView {
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.searchHealthTips("");
+                // Chuyển đến SearchActivity
+                Intent intent = new Intent(requireContext(), SearchActivity.class);
+                startActivity(intent);
             }
         });
 
