@@ -304,33 +304,47 @@ public class VideoPresenter extends BasePresenter<VideoView> {
 
         for (int i = 0; i < currentVideos.size(); i++) {
             final int position = i;
-            ShortVideo video = currentVideos.get(i);
+            final ShortVideo video = currentVideos.get(position);
 
-            // Kiểm tra trạng thái like từ EventBus trước
-            boolean cachedLikeStatus = eventBus.isVideoLiked(video.getId());
-            if (cachedLikeStatus) {
-                // Nếu đã có thông tin trong EventBus, cập nhật UI ngay lập tức
-                view.updateVideoLikeStatus(position, true);
-                continue;
-            }
-
-            // Nếu không có thông tin trong EventBus, kiểm tra từ repository
             videoRepository.isVideoLiked(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
                 @Override
                 public void onSuccess(boolean isLiked) {
                     if (!isViewAttached()) return;
                     view.updateVideoLikeStatus(position, isLiked);
-
-                    // Cập nhật trạng thái vào EventBus
-                    eventBus.updateVideoLikeStatus(video.getId(), isLiked);
                 }
 
                 @Override
                 public void onError(String errorMessage) {
-                    // Bỏ qua lỗi cho việc kiểm tra trạng thái like
+                    // Xử lý lỗi nếu cần
                 }
             });
         }
+    }
+
+    /**
+     * Kiểm tra và cập nhật trạng thái like cho một video cụ thể
+     * @param position Vị trí của video trong danh sách
+     */
+    public void checkLikeStatusForVideo(int position) {
+        if (!isViewAttached() || currentVideos == null ||
+            currentUserId == null || currentUserId.isEmpty() ||
+            position < 0 || position >= currentVideos.size()) {
+            return;
+        }
+
+        ShortVideo video = currentVideos.get(position);
+        videoRepository.isVideoLiked(video.getId(), currentUserId, new VideoRepository.BooleanCallback() {
+            @Override
+            public void onSuccess(boolean isLiked) {
+                if (!isViewAttached()) return;
+                view.updateVideoLikeStatus(position, isLiked);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Xử lý lỗi nếu cần
+            }
+        });
     }
 
     /**

@@ -69,7 +69,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public void updateVideos(List<ShortVideo> newVideos) {
         releaseAllPlayers();
         videos.clear();
-        likeStatusMap.clear(); // Reset like status map
+        // Không xóa likeStatusMap nữa để giữ lại trạng thái like
+        // likeStatusMap.clear();
         if (newVideos != null) videos.addAll(newVideos);
         currentPlayingPosition = RecyclerView.NO_POSITION;
         notifyDataSetChanged();
@@ -241,6 +242,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             int state = currentPlayer.getPlaybackState();
             holder.showLoading(state == Player.STATE_BUFFERING);
             holder.showPoster(state != Player.STATE_READY);
+
+            // Chủ động yêu cầu kiểm tra trạng thái like khi video hiển thị
+            if (listener != null && video != null) {
+                listener.onVideoVisible(position);
+            }
         } else {
             holder.playerView.setPlayer(null);
             holder.showLoading(false);
@@ -279,6 +285,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
         ensureCurrentPlayer(recyclerView.getContext());
         String url = getVideoUrl(videos.get(position));
+
+        // Thông báo ngay lập tức khi video trở nên visible để cập nhật trạng thái like
+        if (listener != null) {
+            listener.onVideoVisible(position);
+        }
 
         // 1) Nếu đã có player preload cho vị trí này -> handover sang player chính
         ExoPlayer pre = preloadedPlayers.remove(position);

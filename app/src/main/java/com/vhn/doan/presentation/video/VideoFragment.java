@@ -143,6 +143,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
                             // Sử dụng API mới của VideoAdapter
                             videoAdapter.playVideoAt(position, recyclerView);
                             presenter.incrementViewCount(position);
+
+                            // Kiểm tra và cập nhật trạng thái like của video hiện tại
+                            presenter.checkLikeStatusForVideo(position);
                         }
                     }
                 }
@@ -178,7 +181,8 @@ public class VideoFragment extends BaseFragment implements VideoView {
             @Override
             public void onVideoVisible(int position) {
                 currentVisiblePosition = position;
-                // Có thể thêm logic khi video visible
+                // Kiểm tra trạng thái like của video khi nó trở nên visible
+                presenter.checkLikeStatusForVideo(position);
             }
 
             @Override

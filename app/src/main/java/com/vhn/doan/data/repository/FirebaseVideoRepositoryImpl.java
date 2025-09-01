@@ -35,6 +35,9 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
     // Map để quản lý các listener realtime
     private final Map<String, ValueEventListener> activeListeners = new HashMap<>();
 
+    // Cache để lưu trạng thái like của các video
+    private final Map<String, Boolean> likeStatusCache = new HashMap<>();
+
     /**
      * Constructor mặc định
      */
@@ -327,6 +330,8 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
 
         likeRef.setValue(likeData).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                // Cập nhật trạng thái like vào cache
+                cacheLikeStatus(videoId, userId, true);
                 callback.onSuccess(true);
             } else {
                 callback.onError("Không thể like video: " +
@@ -343,6 +348,8 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
 
         likeRef.removeValue().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                // Xóa trạng thái like khỏi cache
+                clearLikeStatusCache(videoId, userId);
                 callback.onSuccess(false);
             } else {
                 callback.onError("Không thể unlike video: " +
@@ -355,12 +362,22 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
     public void isVideoLiked(String videoId, String userId, BooleanCallback callback) {
         if (!validateParams(videoId, userId, callback)) return;
 
+        // Kiểm tra trạng thái like trong cache trước
+        Boolean cachedStatus = getCachedLikeStatus(videoId, userId);
+        if (cachedStatus != null) {
+            callback.onSuccess(cachedStatus);
+            return;
+        }
+
         DatabaseReference likeRef = videosRef.child(videoId).child(Constants.VIDEO_LIKES_REF).child(userId);
 
         likeRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                callback.onSuccess(dataSnapshot.exists());
+                boolean isLiked = dataSnapshot.exists();
+                // Lưu trạng thái like vào cache
+                cacheLikeStatus(videoId, userId, isLiked);
+                callback.onSuccess(isLiked);
             }
 
             @Override
@@ -807,5 +824,44 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
         }
 
         return true;
+    }
+
+    /**
+     * Tạo key cho cache trạng thái like
+     */
+    private String getLikeStatusCacheKey(String videoId, String userId) {
+        return videoId + "_" + userId;
+    }
+
+    /**
+     * Lưu trạng thái like vào cache
+     */
+    private void cacheLikeStatus(String videoId, String userId, boolean isLiked) {
+        if (videoId != null && userId != null && !videoId.isEmpty() && !userId.isEmpty()) {
+            String cacheKey = getLikeStatusCacheKey(videoId, userId);
+            likeStatusCache.put(cacheKey, isLiked);
+        }
+    }
+
+    /**
+     * Lấy trạng thái like từ cache
+     * @return Boolean trạng thái like hoặc null nếu không có trong cache
+     */
+    private Boolean getCachedLikeStatus(String videoId, String userId) {
+        if (videoId == null || userId == null || videoId.isEmpty() || userId.isEmpty()) {
+            return null;
+        }
+        String cacheKey = getLikeStatusCacheKey(videoId, userId);
+        return likeStatusCache.get(cacheKey);
+    }
+
+    /**
+     * Xóa trạng thái like khỏi cache
+     */
+    private void clearLikeStatusCache(String videoId, String userId) {
+        if (videoId != null && userId != null && !videoId.isEmpty() && !userId.isEmpty()) {
+            String cacheKey = getLikeStatusCacheKey(videoId, userId);
+            likeStatusCache.remove(cacheKey);
+        }
     }
 }
