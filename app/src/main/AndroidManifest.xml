@@ -82,6 +82,12 @@
             android:name=".presentation.video.VideoActivity"
             android:exported="false" />
 
+        <!-- SingleVideoPlayerActivity: Phát video đơn lẻ từ search results -->
+        <activity
+            android:name=".presentation.video.SingleVideoPlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VideoPlayer" />
+
         <!-- Debug Activity -->
         <activity
             android:name=".presentation.debug.ReminderTestActivity"

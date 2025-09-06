@@ -35,7 +35,7 @@
     <string name="all_most_viewed_tips">Tất cả mẹo xem nhiều nhất</string>
     <string name="all_most_liked_tips">Tất cả mẹo yêu thích nhất</string>
     <string name="no_health_tips_found">Không tìm thấy mẹo sức khỏe</string>
-    <string name="no_health_tips_description">Hiện chưa có mẹo sức khỏe nào trong danh mục này</string>
+    <string name="no_health_tips_description">Hi���n chưa có mẹo sức khỏe nào trong danh mục này</string>
 
     <!-- Các chuỗi cho bottom navigation -->
     <string name="nav_home">Trang chủ</string>
@@ -148,7 +148,7 @@
     <string name="categories_subtitle">Khám phá các chủ đề sức khỏe phong phú</string>
     <string name="empty_categories_title">Không tìm thấy danh mục</string>
     <string name="empty_categories_message">Hiện không có danh mục nào để hiển thị</string>
-    <string name="empty_categories_description">Các danh mục sẽ xuất hiện ở đây</string>
+    <string name="empty_categories_description">Các danh mục sẽ xuất hiện �� đây</string>
 
     <!-- Các chuỗi chung -->
     <string name="ok">OK</string>
@@ -199,39 +199,47 @@
 
     <!-- Chuỗi bổ sung -->
     <string name="settings_under_development">Chức năng cài đặt đang phát triển</string>
-    <string name="video_thumbnail">Ảnh đại diện video</string>
-    <string name="video_poster_description">Poster của video</string>
+    <string name="comment">Bình luận</string>
+    <string name="like_video">Thích video</string>
+    <string name="share_video_action">Chia sẻ video</string>
 
-    <!-- Các chuỗi cho bottom sheet comments -->
+    <!-- Strings cho Search Activity -->
+    <string name="search_hint">Tìm kiếm mẹo sức khỏe, video...</string>
+    <string name="clear">Xóa</string>
+
+    <!-- Strings cho Comments Bottom Sheet -->
     <string name="comments_title">Bình luận</string>
     <string name="close_comments">Đóng bình luận</string>
+    <string name="empty_comments_title">Chưa có bình luận</string>
+    <string name="empty_comments_message">Hãy là người đầu tiên bình luận!</string>
     <string name="comment_input_hint">Viết bình luận...</string>
-    <string name="send_comment">Gửi bình luận</string>
-    <string name="empty_comments_title">Chưa có bình luận nào</string>
-    <string name="empty_comments_message">Hãy là người đầu tiên bình luận về video này</string>
+    <string name="send_comment">Gửi</string>
 
-    <!-- Các chuỗi cho reply comments -->
+    <!-- Strings cho Reply Bottom Sheet -->
     <string name="reply_comment_title">Trả lời bình luận</string>
     <string name="close_reply">Đóng trả lời</string>
-    <string name="reply_input_hint">Viết câu trả lời...</string>
-    <string name="send_reply">Gửi trả lời</string>
-    <string name="replying_to">Đang trả lời:</string>
-    <string name="user_avatar">Avatar người dùng</string>
+    <string name="replying_to">Đang trả lời</string>
+    <string name="reply_input_hint">Viết trả lời...</string>
+    <string name="send_reply">Trả lời</string>
 
-    <!-- Các chuỗi cho màn hình tìm kiếm -->
-    <string name="search_hint">Tìm kiếm mẹo sức khỏe, video...</string>
+    <!-- Strings cho Search Results -->
+    <string name="no_search_results">Không tìm thấy kết quả</string>
+
+    <!-- Strings cho User Interface -->
+    <string name="user_avatar">Ảnh đại diện người dùng</string>
+
+    <!-- Strings cho Search History -->
     <string name="search_history">Lịch sử tìm kiếm</string>
-    <string name="clear_all_history">Xóa tất cả</string>
-    <string name="no_search_history">Chưa có lịch sử tìm kiếm</string>
-    <string name="see_more_history">Xem thêm</string>
-    <string name="see_less_history">Thu gọn</string>
+    <string name="delete_search_history">Xóa lịch sử tìm kiếm</string>
+
+    <!-- Strings cho Video -->
+    <string name="video_poster_description">Poster video</string>
+    <string name="video_thumbnail">Thumbnail video</string>
+    <string name="clear_all_history">Xóa tất cả lịch sử</string>
+    <string name="see_more_history">Xem thêm lịch sử</string>
+    <string name="see_less_history">Thu gọn lịch sử</string>
+    <string name="no_search_history">Không có lịch sử tìm kiếm</string>
     <string name="search_articles_tab">Bài viết</string>
     <string name="search_videos_tab">Video</string>
-    <string name="no_search_results">Không có kết quả tìm kiếm</string>
-    <string name="no_search_results_description">Không tìm thấy kết quả nào phù hợp với từ khóa của bạn</string>
-    <string name="delete_search_history">Xóa lịch sử tìm kiếm</string>
-    <string name="search_loading">Đang tìm kiếm...</string>
-    <string name="search_filter">Bộ lọc</string>
-    <string name="clear">Xóa</string>
-    <string name="like_video">Thích video</string>
+
 </resources>

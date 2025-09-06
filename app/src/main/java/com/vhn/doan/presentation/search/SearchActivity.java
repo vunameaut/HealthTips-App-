@@ -26,6 +26,7 @@ import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.SearchRepository;
 import com.vhn.doan.data.repository.SearchRepositoryImpl;
 import com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity;
+import com.vhn.doan.presentation.video.SingleVideoPlayerActivity;
 import com.vhn.doan.presentation.video.VideoActivity;
 import com.vhn.doan.utils.FirebaseAuthHelper;
 
@@ -207,9 +208,8 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
 
         // Thiết lập sự kiện click vào video
         videoFragment.setVideoItemClickListener(video -> {
-            // Mở màn hình xem video khi người dùng click vào một video
-            Intent intent = new Intent(SearchActivity.this, VideoActivity.class);
-            intent.putExtra("videoId", video.getId());
+            // Mở màn hình phát video đơn lẻ khi người dùng click vào một video từ search results
+            Intent intent = SingleVideoPlayerActivity.createIntent(SearchActivity.this, video.getId());
             startActivity(intent);
         });
 
