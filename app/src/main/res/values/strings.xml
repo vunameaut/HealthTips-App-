@@ -49,8 +49,22 @@
     <string name="related_tips">Mẹo liên quan</string>
     <string name="share">Chia sẻ</string>
     <string name="save">Lưu</string>
-    <string name="views">lượt xem</string>
-    <string name="likes">lượt thích</string>
+
+    <!-- Các chuỗi cho video search results -->
+    <string name="loading_videos">Đang tải video...</string>
+    <string name="no_video_results_title">Không tìm thấy video</string>
+    <string name="no_video_results_message">Thử tìm kiếm với từ khóa khác hoặc kiểm tra lại kết nối mạng</string>
+    <string name="try_again">Thử lại</string>
+
+    <!-- Các chuỗi cho tương tác video -->
+    <string name="like">Thích</string>
+    <string name="comment">Bình luận</string>
+    <string name="view_count_format">%s lượt xem</string>
+
+    <!-- Các chuỗi chung -->
+    <string name="error_occurred">Đã xảy ra lỗi</string>
+    <string name="network_error">Lỗi kết nối mạng</string>
+    <string name="retry">Thử lại</string>
 
     <!-- Các chuỗi cho video đã like -->
     <string name="liked_videos">Video đã thích</string>
@@ -134,7 +148,6 @@
     <string name="notification_mark_complete">Đánh dấu hoàn thành</string>
 
     <!-- Các chuỗi bổ sung cho màn hình chi tiết bài viết -->
-    <string name="like">Thích</string>
     <string name="unlike">Bỏ thích</string>
     <string name="add_to_favorite">Thêm vào yêu thích</string>
     <string name="remove_from_favorite">Xóa khỏi yêu thích</string>
@@ -147,7 +160,7 @@
     <string name="categories_title">Tất cả chủ đề sức khỏe</string>
     <string name="categories_subtitle">Khám phá các chủ đề sức khỏe phong phú</string>
     <string name="empty_categories_title">Không tìm thấy danh mục</string>
-    <string name="empty_categories_message">Hiện không có danh mục nào để hiển thị</string>
+    <string name="empty_categories_message">Hiện không có danh mục nào để hiển th��</string>
     <string name="empty_categories_description">Các danh mục sẽ xuất hiện �� đây</string>
 
     <!-- Các chuỗi chung -->
@@ -167,7 +180,6 @@
     <string name="empty_tips_message">Danh mục này hiện không có mẹo sức khỏe nào</string>
 
     <!-- Các chuỗi cho chức năng video ngắn -->
-    <string name="loading_videos">Đang tải video...</string>
     <string name="no_videos_available">Không có video nào</string>
     <string name="pull_to_refresh_videos">Kéo xuống để làm mới danh sách video</string>
     <string name="video_liked">Đã thích video</string>
@@ -199,7 +211,6 @@
 
     <!-- Chuỗi bổ sung -->
     <string name="settings_under_development">Chức năng cài đặt đang phát triển</string>
-    <string name="comment">Bình luận</string>
     <string name="like_video">Thích video</string>
     <string name="share_video_action">Chia sẻ video</string>
 

@@ -210,7 +210,7 @@
                 android:id="@+id/iv_like_icon"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_favorite_border"
+                android:src="@drawable/ic_heart_outline"
                 app:tint="@color/like_color_inactive"
                 android:contentDescription="@string/like_button_description" />
 

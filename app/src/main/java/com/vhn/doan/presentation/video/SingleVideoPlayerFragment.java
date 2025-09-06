@@ -1,11 +1,18 @@
 package com.vhn.doan.presentation.video;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
@@ -30,31 +38,42 @@ import com.vhn.doan.utils.FirebaseAuthHelper;
 
 /**
  * Fragment phát video đơn lẻ từ search results
- * Không cho phép lướt xuống các video khác
+ * Giao diện giống y hệt Video Short Fragment với đầy đủ tính năng tương tác
  */
 public class SingleVideoPlayerFragment extends Fragment {
 
     private static final String ARG_VIDEO_ID = "video_id";
+    private static final String ARG_VIDEO_OBJECT = "video_object";
 
     private String videoId;
     private ShortVideo currentVideo;
     private ExoPlayer player;
+    private boolean isPlaying = false;
 
-    // Views
+    // Views - giống y hệt Video Short Fragment
     private StyledPlayerView playerView;
+    private ImageView ivPoster;
+    private View videoTapArea;
+    private ImageView playPauseOverlay;
     private ProgressBar progressLoading;
+    private ImageView ivDoubleTapHeart;
     private TextView tvVideoTitle;
     private TextView tvVideoCaption;
-    private TextView tvLikeCount;
+    private TextView tvSeeMore;
     private TextView tvViewCount;
-    private ImageButton btnLike;
-    private ImageButton btnComment;
-    private ImageButton btnShare;
+    private TextView tvUploadDate;
+    private LinearLayout btnLike;
+    private ImageView ivLikeIcon;
+    private TextView tvLikeCount;
+    private LinearLayout btnComment;
+    private LinearLayout btnShare;
 
     // Dependencies
     private VideoRepository videoRepository;
     private FirebaseAuthHelper authHelper;
     private EventBus eventBus;
+    private GestureDetector gestureDetector;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public static SingleVideoPlayerFragment newInstance(String videoId) {
         SingleVideoPlayerFragment fragment = new SingleVideoPlayerFragment();
@@ -64,17 +83,33 @@ public class SingleVideoPlayerFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Factory method mới nhận video object đầy đủ để đảm bảo trạng thái like được hiển thị chính xác
+     */
+    public static SingleVideoPlayerFragment newInstance(String videoId, ShortVideo videoObject) {
+        SingleVideoPlayerFragment fragment = new SingleVideoPlayerFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_VIDEO_ID, videoId);
+        args.putSerializable(ARG_VIDEO_OBJECT, videoObject);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             videoId = getArguments().getString(ARG_VIDEO_ID);
+            currentVideo = (ShortVideo) getArguments().getSerializable(ARG_VIDEO_OBJECT);
         }
 
         // Khởi tạo dependencies
         videoRepository = new FirebaseVideoRepositoryImpl();
         authHelper = new FirebaseAuthHelper();
         eventBus = EventBus.getInstance();
+
+        // Khởi tạo gesture detector cho double tap
+        gestureDetector = new GestureDetector(getContext(), new DoubleTapGestureListener());
     }
 
     @Override
@@ -89,6 +124,7 @@ public class SingleVideoPlayerFragment extends Fragment {
 
         initViews(view);
         setupPlayer();
+        setupTouchListeners();
 
         if (videoId != null) {
             loadVideoData();
@@ -96,13 +132,25 @@ public class SingleVideoPlayerFragment extends Fragment {
     }
 
     private void initViews(View view) {
+        // Khởi tạo tất cả views giống y hệt Video Short Fragment
         playerView = view.findViewById(R.id.player_view);
+        ivPoster = view.findViewById(R.id.iv_poster);
+        videoTapArea = view.findViewById(R.id.video_tap_area);
+        playPauseOverlay = view.findViewById(R.id.play_pause_overlay);
         progressLoading = view.findViewById(R.id.progress_loading);
+        ivDoubleTapHeart = view.findViewById(R.id.iv_double_tap_heart);
+
+        // Video info views
         tvVideoTitle = view.findViewById(R.id.tv_video_title);
         tvVideoCaption = view.findViewById(R.id.tv_video_caption);
-        tvLikeCount = view.findViewById(R.id.tv_like_count);
+        tvSeeMore = view.findViewById(R.id.tv_see_more);
         tvViewCount = view.findViewById(R.id.tv_view_count);
+        tvUploadDate = view.findViewById(R.id.tv_upload_date);
+
+        // Action button views
         btnLike = view.findViewById(R.id.btn_like);
+        ivLikeIcon = view.findViewById(R.id.iv_like_icon);
+        tvLikeCount = view.findViewById(R.id.tv_like_count);
         btnComment = view.findViewById(R.id.btn_comment);
         btnShare = view.findViewById(R.id.btn_share);
 
@@ -110,38 +158,79 @@ public class SingleVideoPlayerFragment extends Fragment {
     }
 
     private void setupClickListeners() {
+        // Like button click
         if (btnLike != null) {
             btnLike.setOnClickListener(v -> toggleLike());
         }
 
+        // Comment button click
         if (btnComment != null) {
             btnComment.setOnClickListener(v -> {
-                // TODO: Mở màn hình comment
-                Toast.makeText(getContext(), "Tính năng bình luận đang được phát triển", Toast.LENGTH_SHORT).show();
+                if (currentVideo != null && currentVideo.getId() != null) {
+                    // Mở CommentBottomSheetFragment
+                    CommentBottomSheetFragment commentFragment = CommentBottomSheetFragment.newInstance(currentVideo.getId());
+                    commentFragment.show(getChildFragmentManager(), "CommentBottomSheet");
+                } else {
+                    Toast.makeText(getContext(), "Không thể mở bình luận: Video ID không hợp lệ", Toast.LENGTH_SHORT).show();
+                }
             });
         }
 
+        // Share button click
         if (btnShare != null) {
             btnShare.setOnClickListener(v -> shareVideo());
+        }
+
+        // See more caption click
+        if (tvSeeMore != null) {
+            tvSeeMore.setOnClickListener(v -> toggleCaptionExpansion());
+        }
+    }
+
+    private void setupTouchListeners() {
+        // Tap area cho play/pause và double tap
+        if (videoTapArea != null) {
+            videoTapArea.setOnTouchListener((v, event) -> {
+                gestureDetector.onTouchEvent(event);
+                return true;
+            });
         }
     }
 
     private void setupPlayer() {
         if (getContext() != null) {
             player = new ExoPlayer.Builder(getContext()).build();
+
+            // Thiết lập repeat mode để video phát lại tự động
+            player.setRepeatMode(Player.REPEAT_MODE_ONE);
+
             playerView.setPlayer(player);
 
             // Thiết lập listener cho player
             player.addListener(new Player.Listener() {
                 @Override
                 public void onPlaybackStateChanged(int playbackState) {
-                    if (playbackState == Player.STATE_BUFFERING) {
-                        showLoading(true);
-                    } else if (playbackState == Player.STATE_READY) {
-                        showLoading(false);
-                        // Tăng view count khi video sẵn sàng phát
-                        incrementViewCount();
+                    switch (playbackState) {
+                        case Player.STATE_BUFFERING:
+                            showLoading(true);
+                            break;
+                        case Player.STATE_READY:
+                            showLoading(false);
+                            hidePoster();
+                            // Tăng view count khi video sẵn sàng phát
+                            incrementViewCount();
+                            break;
+                        case Player.STATE_ENDED:
+                            // Video kết thúc, nhưng sẽ tự động lặp lại do REPEAT_MODE_ONE
+                            // Không cần hiển thị play button vì sẽ tự động phát lại
+                            break;
                     }
+                }
+
+                @Override
+                public void onIsPlayingChanged(boolean isPlaying) {
+                    SingleVideoPlayerFragment.this.isPlaying = isPlaying;
+                    updatePlayPauseOverlay();
                 }
 
                 @Override
@@ -181,8 +270,108 @@ public class SingleVideoPlayerFragment extends Fragment {
         });
     }
 
+    private void togglePlayPause() {
+        if (player == null) return;
+
+        if (isPlaying) {
+            player.setPlayWhenReady(false);
+            showPlayPauseOverlay(true);
+            // Ẩn overlay sau 1 giây
+            handler.postDelayed(() -> showPlayPauseOverlay(false), 1000);
+        } else {
+            player.setPlayWhenReady(true);
+            showPlayPauseOverlay(true);
+            // Ẩn overlay sau 1 giây
+            handler.postDelayed(() -> showPlayPauseOverlay(false), 1000);
+        }
+    }
+
+    private void setupPosterImage() {
+        if (currentVideo == null || ivPoster == null) return;
+
+        // Hiển thị poster từ thumbnail hoặc Cloudinary
+        String thumbnailUrl = null;
+        if (currentVideo.getThumbnailUrl() != null && !currentVideo.getThumbnailUrl().isEmpty()) {
+            thumbnailUrl = currentVideo.getThumbnailUrl();
+        } else if (currentVideo.getCldPublicId() != null && !currentVideo.getCldPublicId().isEmpty()) {
+            thumbnailUrl = CloudinaryUrls.poster(currentVideo.getCldPublicId(), currentVideo.getCldVersion());
+        }
+
+        if (thumbnailUrl != null && getContext() != null) {
+            ivPoster.setVisibility(View.VISIBLE);
+            Glide.with(getContext())
+                    .load(thumbnailUrl)
+                    .placeholder(R.drawable.ic_video_placeholder)
+                    .error(R.drawable.ic_video_error)
+                    .centerCrop()
+                    .into(ivPoster);
+        }
+    }
+
+    private void formatAndDisplayUploadDate() {
+        if (currentVideo == null || tvUploadDate == null) return;
+
+        String formattedDate = formatUploadDate(currentVideo.getUploadDate());
+        tvUploadDate.setText(formattedDate);
+    }
+
+    private String formatUploadDate(long uploadTimestamp) {
+        long currentTime = System.currentTimeMillis();
+        long diffTime = currentTime - uploadTimestamp;
+
+        long seconds = diffTime / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+        long months = days / 30;
+        long years = days / 365;
+
+        if (years > 0) {
+            return years + " năm trước";
+        } else if (months > 0) {
+            return months + " tháng trước";
+        } else if (days > 0) {
+            return days + " ngày tr��ớc";
+        } else if (hours > 0) {
+            return hours + " giờ trước";
+        } else if (minutes > 0) {
+            return minutes + " phút trước";
+        } else {
+            return "Vừa xong";
+        }
+    }
+
+    private String formatViewCount(long viewCount) {
+        if (viewCount < 1000) {
+            return viewCount + " lượt xem";
+        } else if (viewCount < 1000000) {
+            float k = viewCount / 1000f;
+            return String.format("%.1fK lượt xem", k);
+        } else {
+            float m = viewCount / 1000000f;
+            return String.format("%.1fM lượt xem", m);
+        }
+    }
+
+    private void checkCaptionLength() {
+        if (currentVideo == null || tvVideoCaption == null || tvSeeMore == null) return;
+
+        // Kiểm tra xem caption có dài hơn 2 dòng không
+        tvVideoCaption.post(() -> {
+            if (tvVideoCaption.getLineCount() > 2) {
+                tvSeeMore.setVisibility(View.VISIBLE);
+            } else {
+                tvSeeMore.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    // Cập nhật lại method displayVideoInfo để sử d��ng các helper methods mới
     private void displayVideoInfo() {
         if (currentVideo == null) return;
+
+        // Hiển thị poster image
+        setupPosterImage();
 
         // Hiển thị thông tin video
         if (tvVideoTitle != null) {
@@ -191,10 +380,63 @@ public class SingleVideoPlayerFragment extends Fragment {
 
         if (tvVideoCaption != null) {
             tvVideoCaption.setText(currentVideo.getCaption());
+            tvVideoCaption.setMaxLines(2);
+            checkCaptionLength();
         }
 
-        updateLikeButton();
+        // Format và hiển thị view count
+        if (tvViewCount != null) {
+            tvViewCount.setText(formatViewCount(currentVideo.getViewCount()));
+        }
+
+        // Format và hiển thị upload date
+        formatAndDisplayUploadDate();
+
+        // Kiểm tra trạng thái like thực từ Firebase trước khi hiển thị
+        checkAndUpdateLikeStatus();
+
         updateCounts();
+    }
+
+    /**
+     * Kiểm tra và cập nhật trạng thái like thực từ Firebase
+     */
+    private void checkAndUpdateLikeStatus() {
+        if (currentVideo == null || authHelper == null) return;
+
+        String userId = authHelper.getCurrentUserId();
+        if (userId == null || userId.isEmpty()) {
+            // Người dùng chưa đăng nhập, hiển thị trạng thái mặc định
+            currentVideo.setLiked(false);
+            updateLikeButton();
+            return;
+        }
+
+        // Kiểm tra trạng thái like thực từ Firebase
+        videoRepository.isVideoLiked(currentVideo.getId(), userId, new VideoRepository.BooleanCallback() {
+            @Override
+            public void onSuccess(boolean isLiked) {
+                if (getActivity() != null && isAdded()) {
+                    getActivity().runOnUiThread(() -> {
+                        currentVideo.setLiked(isLiked);
+                        updateLikeButton();
+
+                        // Cập nhật EventBus với trạng thái thực
+                        eventBus.updateVideoLikeStatus(currentVideo.getId(), isLiked);
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (getActivity() != null && isAdded()) {
+                    getActivity().runOnUiThread(() -> {
+                        // Nếu có lỗi khi kiểm tra, sử dụng trạng thái hiện tại
+                        updateLikeButton();
+                    });
+                }
+            }
+        });
     }
 
     private void playVideo() {
@@ -287,27 +529,173 @@ public class SingleVideoPlayerFragment extends Fragment {
         }
     }
 
-    private void updateLikeButton() {
-        if (btnLike == null || currentVideo == null) return;
+    private class DoubleTapGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            // Xử lý single tap - toggle play/pause
+            togglePlayPause();
+            return true;
+        }
 
-        if (currentVideo.isLiked()) {
-            btnLike.setImageResource(R.drawable.ic_heart_filled);
-            btnLike.setColorFilter(ContextCompat.getColor(requireContext(), R.color.like_color_active));
-        } else {
-            btnLike.setImageResource(R.drawable.ic_heart_outline);
-            btnLike.setColorFilter(ContextCompat.getColor(requireContext(), R.color.like_color_inactive));
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            // Xử lý double tap - like video
+            if (currentVideo != null) {
+                toggleLike();
+                performDoubleTapAnimation();
+            }
+            return true;
         }
     }
 
+    // Cập nhật lại method updateLikeButton để sử dụng đúng resources
+    private void updateLikeButton() {
+        if (ivLikeIcon == null || currentVideo == null) return;
+
+        if (currentVideo.isLiked()) {
+            ivLikeIcon.setImageResource(R.drawable.ic_heart_filled);
+            ivLikeIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.like_color_active));
+        } else {
+            ivLikeIcon.setImageResource(R.drawable.ic_heart_outline);
+            ivLikeIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.like_color_inactive));
+        }
+    }
+
+    // Cập nhật lại method updateCounts để format số đẹp hơn
     private void updateCounts() {
         if (currentVideo == null) return;
 
         if (tvLikeCount != null) {
-            tvLikeCount.setText(String.valueOf(currentVideo.getLikeCount()));
+            long likeCount = currentVideo.getLikeCount();
+            if (likeCount < 1000) {
+                tvLikeCount.setText(String.valueOf(likeCount));
+            } else if (likeCount < 1000000) {
+                float k = likeCount / 1000f;
+                tvLikeCount.setText(String.format("%.1fK", k));
+            } else {
+                float m = likeCount / 1000000f;
+                tvLikeCount.setText(String.format("%.1fM", m));
+            }
         }
 
         if (tvViewCount != null) {
-            tvViewCount.setText(String.valueOf(currentVideo.getViewCount()));
+            tvViewCount.setText(formatViewCount(currentVideo.getViewCount()));
+        }
+    }
+
+    private void performDoubleTapAnimation() {
+        if (ivDoubleTapHeart == null) return;
+
+        // Hiển thị icon heart fill trong 300ms rồi biến mất
+        ivDoubleTapHeart.setVisibility(View.VISIBLE);
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(ivDoubleTapHeart, "scaleX", 1f, 1.2f, 1f);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(ivDoubleTapHeart, "scaleY", 1f, 1.2f, 1f);
+        scaleX.setDuration(300);
+        scaleY.setDuration(300);
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(scaleX, scaleY);
+        animatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                ivDoubleTapHeart.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                ivDoubleTapHeart.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                ivDoubleTapHeart.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+        animatorSet.start();
+    }
+
+    private void showLoading(boolean show) {
+        if (progressLoading != null) {
+            progressLoading.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void hidePoster() {
+        if (ivPoster != null) {
+            ivPoster.setVisibility(View.GONE);
+        }
+    }
+
+    private void showPlayPauseOverlay(boolean show) {
+        if (playPauseOverlay != null) {
+            playPauseOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void updatePlayPauseOverlay() {
+        if (playPauseOverlay == null) return;
+
+        if (isPlaying) {
+            playPauseOverlay.setImageResource(R.drawable.ic_pause_circle_filled);
+        } else {
+            playPauseOverlay.setImageResource(R.drawable.ic_play_circle_filled);
+        }
+    }
+
+    private void toggleCaptionExpansion() {
+        if (tvVideoCaption == null || currentVideo == null) return;
+
+        boolean isExpanded = tvVideoCaption.getMaxLines() == Integer.MAX_VALUE;
+
+        if (isExpanded) {
+            // Thu gọn caption
+            tvVideoCaption.setMaxLines(3);
+            tvSeeMore.setText("Xem thêm");
+        } else {
+            // Mở rộng caption
+            tvVideoCaption.setMaxLines(Integer.MAX_VALUE);
+            tvSeeMore.setText("Thu gọn");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        resumeVideo();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        pauseVideo();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        releasePlayer();
+    }
+
+    public void pauseVideo() {
+        if (player != null) {
+            player.setPlayWhenReady(false);
+        }
+    }
+
+    public void resumeVideo() {
+        if (player != null) {
+            player.setPlayWhenReady(true);
+        }
+    }
+
+    public void releasePlayer() {
+        if (player != null) {
+            player.release();
+            player = null;
         }
     }
 
@@ -336,50 +724,27 @@ public class SingleVideoPlayerFragment extends Fragment {
     private void shareVideo() {
         if (currentVideo == null) return;
 
-        // TODO: Implement share functionality
-        Toast.makeText(getContext(), "Tính năng chia sẻ đang được phát triển", Toast.LENGTH_SHORT).show();
-    }
+        try {
+            String shareText = "Xem video này: " + currentVideo.getTitle();
+            if (currentVideo.getCaption() != null && !currentVideo.getCaption().isEmpty()) {
+                shareText += "\n" + currentVideo.getCaption();
+            }
 
-    private void showLoading(boolean show) {
-        if (progressLoading != null) {
-            progressLoading.setVisibility(show ? View.VISIBLE : View.GONE);
+            // Tạo Intent chia sẻ
+            android.content.Intent shareIntent = new android.content.Intent(android.content.Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareText);
+            shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Video từ HealthTips");
+
+            // Hiển thị chooser
+            android.content.Intent chooser = android.content.Intent.createChooser(shareIntent, "Chia sẻ video");
+            if (chooser.resolveActivity(requireContext().getPackageManager()) != null) {
+                startActivity(chooser);
+            } else {
+                Toast.makeText(getContext(), "Không tìm thấy ứng dụng để chia sẻ", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Lỗi khi chia sẻ video", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void pauseVideo() {
-        if (player != null) {
-            player.setPlayWhenReady(false);
-        }
-    }
-
-    public void resumeVideo() {
-        if (player != null) {
-            player.setPlayWhenReady(true);
-        }
-    }
-
-    public void releasePlayer() {
-        if (player != null) {
-            player.release();
-            player = null;
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        resumeVideo();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        pauseVideo();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        releasePlayer();
     }
 }

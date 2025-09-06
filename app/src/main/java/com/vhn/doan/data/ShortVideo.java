@@ -1,13 +1,14 @@
 package com.vhn.doan.data;
 
 import com.google.firebase.database.PropertyName;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * POJO class đại diện cho Short Video trong ứng dụng
  * Sử dụng PropertyName annotations để đảm bảo tương thích với Firebase
  */
-public class ShortVideo {
+public class ShortVideo implements Serializable {
     @PropertyName("id")
     private String id;
 
@@ -47,6 +48,9 @@ public class ShortVideo {
     @PropertyName("status")
     private String status;
 
+    @PropertyName("commentCount")
+    private long commentCount = 0;
+
     // Thuộc tính để theo dõi trạng thái like của video hiện tại
     // Không đánh dấu bằng PropertyName vì đây là trạng thái local, không lưu trữ trên Firebase
     private boolean liked = false;
@@ -73,6 +77,28 @@ public class ShortVideo {
         this.cldVersion = cldVersion;
         this.thumbnailUrl = thumbnailUrl;
         this.status = status;
+        this.commentCount = 0; // Mặc định 0 comment
+    }
+
+    // Constructor mở rộng với commentCount
+    public ShortVideo(String id, String title, String caption, long uploadDate,
+                     String categoryId, Map<String, Boolean> tags, long viewCount,
+                     long likeCount, String userId, String cldPublicId,
+                     long cldVersion, String thumbnailUrl, String status, long commentCount) {
+        this.id = id;
+        this.title = title;
+        this.caption = caption;
+        this.uploadDate = uploadDate;
+        this.categoryId = categoryId;
+        this.tags = tags;
+        this.viewCount = viewCount;
+        this.likeCount = likeCount;
+        this.userId = userId;
+        this.cldPublicId = cldPublicId;
+        this.cldVersion = cldVersion;
+        this.thumbnailUrl = thumbnailUrl;
+        this.status = status;
+        this.commentCount = commentCount;
     }
 
     // Getters
@@ -126,6 +152,14 @@ public class ShortVideo {
 
     public String getStatus() {
         return status;
+    }
+
+    /**
+     * Lấy số lượng bình luận của video
+     * @return số lượng bình luận
+     */
+    public long getCommentCount() {
+        return commentCount;
     }
 
     // Setters
@@ -182,6 +216,14 @@ public class ShortVideo {
     }
 
     /**
+     * Thiết lập số lượng bình luận cho video
+     * @param commentCount số lượng bình luận mới
+     */
+    public void setCommentCount(long commentCount) {
+        this.commentCount = commentCount;
+    }
+
+    /**
      * Kiểm tra trạng thái like hiện tại của video
      * @return true nếu video được like, false nếu chưa
      */
@@ -195,6 +237,27 @@ public class ShortVideo {
      */
     public void setLiked(boolean liked) {
         this.liked = liked;
+    }
+
+
+    /**
+     * Lấy URL video để chia sẻ
+     * @return URL của video
+     */
+    public String getVideoUrl() {
+        // Tạo URL video từ Cloudinary public ID nếu có
+        if (cldPublicId != null && !cldPublicId.isEmpty()) {
+            return "https://res.cloudinary.com/your-cloud-name/video/upload/" + cldPublicId;
+        }
+        return null;
+    }
+
+    /**
+     * Lấy upload date dưới dạng Date object
+     * @return Date object từ timestamp
+     */
+    public java.util.Date getUploadDateAsDate() {
+        return new java.util.Date(uploadDate);
     }
 
     @Override

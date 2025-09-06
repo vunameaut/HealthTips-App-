@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.vhn.doan.R;
+import com.vhn.doan.data.ShortVideo;
 
 /**
  * Activity phát video đơn lẻ từ search results
@@ -20,15 +21,29 @@ import com.vhn.doan.R;
 public class SingleVideoPlayerActivity extends AppCompatActivity {
 
     private static final String EXTRA_VIDEO_ID = "extra_video_id";
+    private static final String EXTRA_VIDEO_OBJECT = "extra_video_object";
 
     private SingleVideoPlayerFragment videoPlayerFragment;
 
     /**
-     * Intent factory method để start SingleVideoPlayerActivity
+     * Intent factory method để start SingleVideoPlayerActivity với video ID
+     * @deprecated Sử dụng createIntent(Context, ShortVideo) để đảm bảo trạng thái like được truyền
      */
+    @Deprecated
     public static Intent createIntent(Context context, String videoId) {
         Intent intent = new Intent(context, SingleVideoPlayerActivity.class);
         intent.putExtra(EXTRA_VIDEO_ID, videoId);
+        return intent;
+    }
+
+    /**
+     * Intent factory method để start SingleVideoPlayerActivity với video object đầy đủ
+     * Đảm bảo trạng thái like được truyền chính xác
+     */
+    public static Intent createIntent(Context context, ShortVideo video) {
+        Intent intent = new Intent(context, SingleVideoPlayerActivity.class);
+        intent.putExtra(EXTRA_VIDEO_ID, video.getId());
+        intent.putExtra(EXTRA_VIDEO_OBJECT, video);
         return intent;
     }
 
@@ -66,8 +81,16 @@ public class SingleVideoPlayerActivity extends AppCompatActivity {
 
     private void setupVideoPlayerFragment() {
         String videoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
+        ShortVideo videoObject = (ShortVideo) getIntent().getSerializableExtra(EXTRA_VIDEO_OBJECT);
+
         if (videoId != null) {
-            videoPlayerFragment = SingleVideoPlayerFragment.newInstance(videoId);
+            // Nếu có video object đầy đủ, truyền nó vào fragment
+            if (videoObject != null) {
+                videoPlayerFragment = SingleVideoPlayerFragment.newInstance(videoId, videoObject);
+            } else {
+                // Fallback về method cũ nếu chỉ có videoId
+                videoPlayerFragment = SingleVideoPlayerFragment.newInstance(videoId);
+            }
 
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, videoPlayerFragment);

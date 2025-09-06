@@ -158,6 +158,23 @@ public class VideoPresenter extends BasePresenter<VideoView> {
     }
 
     /**
+     * Cập nhật danh sách video hiện tại (dùng cho search results)
+     * @param videos Danh sách video mới
+     */
+    public void updateVideoList(List<ShortVideo> videos) {
+        this.currentVideos = videos;
+        this.currentPosition = 0;
+    }
+
+    /**
+     * Lấy danh sách video hiện tại
+     * @return Danh sách video hiện tại
+     */
+    public List<ShortVideo> getCurrentVideos() {
+        return currentVideos;
+    }
+
+    /**
      * Xử lý khi user like/unlike video
      * @param position Vị trí video trong danh sách
      */

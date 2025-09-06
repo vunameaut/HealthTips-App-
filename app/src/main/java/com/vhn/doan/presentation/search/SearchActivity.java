@@ -208,8 +208,8 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
 
         // Thiết lập sự kiện click vào video
         videoFragment.setVideoItemClickListener(video -> {
-            // Mở màn hình phát video đơn lẻ khi người dùng click vào một video từ search results
-            Intent intent = SingleVideoPlayerActivity.createIntent(SearchActivity.this, video.getId());
+            // Mở màn hình phát video đơn lẻ với toàn bộ video object để đảm bảo trạng thái like được truyền
+            Intent intent = SingleVideoPlayerActivity.createIntent(SearchActivity.this, video);
             startActivity(intent);
         });
 
