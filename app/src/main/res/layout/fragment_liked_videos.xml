@@ -1,36 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="16dp">
+    android:background="?android:attr/colorBackground">
 
-    <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/ic_video_library"
-        android:layout_marginBottom="16dp"
-        android:alpha="0.6" />
+    <!-- SwipeRefreshLayout chứa RecyclerView -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textViewMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Chức năng video sẽ được triển khai lại trong phiên bản tiếp theo"
-        android:textSize="16sp"
-        android:textAlignment="center"
-        android:textColor="?attr/colorOnSurface"
-        android:alpha="0.7" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_liked_videos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="4dp"
+            android:clipToPadding="false"
+            android:scrollbars="vertical" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tính năng xem video đã yêu thích sẽ quay lại sớm"
-        android:textSize="14sp"
-        android:textAlignment="center"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:layout_marginTop="8dp"
-        android:alpha="0.6" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-</LinearLayout>
+    <!-- Loading Layout -->
+    <LinearLayout
+        android:id="@+id/loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:indeterminateTint="@color/colorPrimary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Đang tải video đã thích..."
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <!-- Empty State Layout -->
+    <LinearLayout
+        android:id="@+id/empty_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <!-- Empty state icon -->
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_favorite_border"
+            android:tint="?android:attr/textColorSecondary"
+            android:alpha="0.6" />
+
+        <!-- Empty state message -->
+        <TextView
+            android:id="@+id/txt_empty_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Chưa có video nào được thích"
+            android:textAlignment="center"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Hãy khám phá và thích những video yêu thích của bạn!"
+            android:textAlignment="center"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.2" />
+
+    </LinearLayout>
+
+</FrameLayout>

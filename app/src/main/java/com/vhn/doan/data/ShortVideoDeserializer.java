@@ -34,11 +34,17 @@ public class ShortVideoDeserializer {
             video.setCldPublicId(getStringValue(snapshot, "cldPublicId", ""));
             video.setStatus(getStringValue(snapshot, "status", "ready"));
 
+            // Parse thumbnail fields từ Firebase
+            video.setThumbnailUrl(getStringValue(snapshot, "thumbnailUrl", ""));
+            video.setThumb(getStringValue(snapshot, "thumb", "")); // Thêm parse field thumb
+
             // Xử lý Long fields (có thể là Number hoặc String)
             video.setUploadDate(getLongValue(snapshot, "uploadDate", System.currentTimeMillis()));
             video.setViewCount(getLongValue(snapshot, "viewCount", 0L));
             video.setLikeCount(getLongValue(snapshot, "likeCount", 0L));
             video.setCldVersion(getLongValue(snapshot, "cldVersion", 1L));
+            video.setDuration(getLongValue(snapshot, "duration", 0L)); // Thêm parse duration
+            video.setCommentCount(getLongValue(snapshot, "commentCount", 0L)); // Thêm parse commentCount
 
             // Xử lý Tags Map
             video.setTags(getTagsMap(snapshot, "tags"));

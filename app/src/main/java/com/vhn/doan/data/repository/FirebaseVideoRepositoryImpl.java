@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Triển khai VideoRepository sử dụng Firebase Realtime Database
  * Đọc dữ liệu t�� /videos, /users/{uid}/preferences, /trendingVideos/{country}
- * Sắp xếp theo: tags khớp preferences → uploadDate mới → viewCount → likeCount
+ * Sắp xếp theo: tags khớp preferences → uploadDate mới �� viewCount → likeCount
  */
 public class FirebaseVideoRepositoryImpl implements VideoRepository {
 
@@ -436,7 +436,7 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                         if (comment != null) {
                             comment.setId(commentSnapshot.getKey());
 
-                            // Chỉ lấy comments gốc (không có parentId hoặc parentId = null/empty)
+                            // Chỉ lấy comments gốc (không c�� parentId hoặc parentId = null/empty)
                             if (comment.getParentId() == null || comment.getParentId().isEmpty()) {
                                 comments.add(comment);
                                 android.util.Log.d("VideoRepository", "Found root comment: " + comment.getId() +
@@ -863,5 +863,141 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
             String cacheKey = getLikeStatusCacheKey(videoId, userId);
             likeStatusCache.remove(cacheKey);
         }
+    }
+
+    @Override
+    public void getLikedVideos(String userId, VideoCallback callback) {
+        android.util.Log.d("FirebaseVideoRepo", "getLikedVideos được gọi với userId: " + userId);
+
+        if (callback == null || userId == null || userId.isEmpty()) {
+            android.util.Log.e("FirebaseVideoRepo", "Tham số không hợp lệ - callback: " + (callback != null) + ", userId: " + userId);
+            if (callback != null) {
+                callback.onError("User ID không hợp lệ");
+            }
+            return;
+        }
+
+        android.util.Log.d("FirebaseVideoRepo", "Bắt đầu query Firebase cho videos có status=ready");
+
+        // Lấy danh sách video ID mà user đã like từ /videos/{videoId}/likes/{userId}
+        videosRef.orderByChild("status").equalTo("ready")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        android.util.Log.d("FirebaseVideoRepo", "Firebase query trả về " + dataSnapshot.getChildrenCount() + " videos");
+
+                        List<ShortVideo> likedVideos = new ArrayList<>();
+
+                        // Tạo map để lưu trữ dữ liệu video theo ID
+                        Map<String, DataSnapshot> videoDataMap = new HashMap<>();
+                        List<String> videoIds = new ArrayList<>();
+
+                        // Collect all video data and IDs
+                        for (DataSnapshot videoSnapshot : dataSnapshot.getChildren()) {
+                            String videoId = videoSnapshot.getKey();
+                            if (videoId != null) {
+                                videoIds.add(videoId);
+                                videoDataMap.put(videoId, videoSnapshot);
+                                android.util.Log.d("FirebaseVideoRepo", "Tìm thấy video: " + videoId);
+                            }
+                        }
+
+                        android.util.Log.d("FirebaseVideoRepo", "Tổng cộng " + videoIds.size() + " videos để kiểm tra like status");
+
+                        if (videoIds.isEmpty()) {
+                            android.util.Log.d("FirebaseVideoRepo", "Không có video nào trong database");
+                            callback.onSuccess(likedVideos);
+                            return;
+                        }
+
+                        final CountDownLatch latch = new CountDownLatch(videoIds.size());
+
+                        // Check each video if user has liked it
+                        for (String videoId : videoIds) {
+                            android.util.Log.d("FirebaseVideoRepo", "Kiểm tra like status cho video: " + videoId);
+
+                            DatabaseReference likeRef = videosRef.child(videoId)
+                                    .child(Constants.VIDEO_LIKES_REF).child(userId);
+
+                            likeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot likeSnapshot) {
+                                    android.util.Log.d("FirebaseVideoRepo", "Like check cho video " + videoId + " - exists: " + likeSnapshot.exists());
+
+                                    if (likeSnapshot.exists()) {
+                                        android.util.Log.d("FirebaseVideoRepo", "User đã like video: " + videoId);
+                                        // User has liked this video, get video details từ map
+                                        DataSnapshot videoData = videoDataMap.get(videoId);
+                                        if (videoData != null) {
+                                            try {
+                                                ShortVideo video = ShortVideoDeserializer.fromDataSnapshot(videoData);
+                                                if (video != null) {
+                                                    video.setIsLiked(true); // Mark as liked
+                                                    synchronized (likedVideos) {
+                                                        likedVideos.add(video);
+                                                        android.util.Log.d("FirebaseVideoRepo", "Đã thêm liked video: " + video.getTitle() + " (ID: " + videoId + ")");
+                                                    }
+                                                } else {
+                                                    android.util.Log.w("FirebaseVideoRepo", "ShortVideoDeserializer trả về null cho video: " + videoId);
+                                                }
+                                            } catch (Exception e) {
+                                                android.util.Log.w("FirebaseVideoRepo",
+                                                    "Không thể parse liked video: " + videoId, e);
+                                            }
+                                        } else {
+                                            android.util.Log.w("FirebaseVideoRepo", "Không tìm thấy videoData trong map cho videoId: " + videoId);
+                                        }
+                                    }
+                                    latch.countDown();
+                                    android.util.Log.d("FirebaseVideoRepo", "Còn lại " + latch.getCount() + " video cần kiểm tra");
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    android.util.Log.w("FirebaseVideoRepo",
+                                        "Lỗi khi kiểm tra like status cho video: " + videoId, databaseError.toException());
+                                    latch.countDown();
+                                }
+                            });
+                        }
+
+                        // Wait for all checks to complete then sort by upload date
+                        new Thread(() -> {
+                            try {
+                                android.util.Log.d("FirebaseVideoRepo", "Đang chờ tất cả like checks hoàn thành...");
+
+                                if (latch.await(15, TimeUnit.SECONDS)) {
+                                    android.util.Log.d("FirebaseVideoRepo", "Tất cả checks hoàn thành. Tìm thấy " + likedVideos.size() + " liked videos");
+
+                                    // Sort by upload date (most recent first)
+                                    synchronized (likedVideos) {
+                                        Collections.sort(likedVideos, (v1, v2) ->
+                                            Long.compare(v2.getUploadDate(), v1.getUploadDate()));
+                                    }
+
+                                    android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+                                    mainHandler.post(() -> {
+                                        android.util.Log.d("FirebaseVideoRepo", "Trả về kết quả với " + likedVideos.size() + " liked videos");
+                                        callback.onSuccess(new ArrayList<>(likedVideos));
+                                    });
+                                } else {
+                                    android.util.Log.e("FirebaseVideoRepo", "Timeout khi chờ like checks");
+                                    android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+                                    mainHandler.post(() -> callback.onError("Timeout khi tải video đã like"));
+                                }
+                            } catch (InterruptedException e) {
+                                android.util.Log.e("FirebaseVideoRepo", "Thread bị interrupt", e);
+                                android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+                                mainHandler.post(() -> callback.onError("Lỗi khi tải video đã like: " + e.getMessage()));
+                            }
+                        }).start();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        android.util.Log.e("FirebaseVideoRepo", "Firebase query bị cancelled", databaseError.toException());
+                        callback.onError("Lỗi Firebase: " + databaseError.getMessage());
+                    }
+                });
     }
 }

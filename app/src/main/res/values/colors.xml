@@ -4,128 +4,102 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Màu nền -->
-    <color name="background_dark">#1A1A1D</color>
-    <color name="background_dark_alt">#212124</color>
-    <color name="background_color">#1A1A1D</color>       <!-- Alias cho background_dark -->
-    <color name="background_light">#FFFFFF</color>
-
-    <!-- Màu text -->
-    <color name="text_primary">#FFFFFF</color>           <!-- Màu chữ chính - trắng cho dark theme -->
-    <color name="text_secondary">#B0BEC5</color>         <!-- Màu chữ phụ - xám nhạt -->
-    <color name="text_primary_light">#212124</color>
-    <color name="text_secondary_light">#424242</color>
-
-    <!-- Màu chính của ứng dụng -->
-    <color name="primary_color">#4CAF50</color>          <!-- Màu chính - xanh lá -->
-    <color name="primary_light">#81C784</color>          <!-- Màu chính nhạt -->
-    <color name="primary_dark">#2E7D32</color>           <!-- Màu chính đậm -->
-    <color name="secondary_color">#FF9800</color>        <!-- Màu phụ - cam -->
-
-    <!-- Màu xám -->
-    <color name="gray_light">#F5F5F5</color>             <!-- Xám nhạt cho background -->
-    <color name="gray_medium">#9E9E9E</color>            <!-- Xám trung bình -->
-    <color name="gray_dark">#424242</color>              <!-- Xám đậm -->
-
-    <!-- Màu cho nút chính -->
-    <color name="primary_button_start">#2E7D32</color>   <!-- Xanh lá đậm -->
-    <color name="primary_button_end">#C0CA33</color>     <!-- Vàng chanh -->
-    <color name="primary_button_text">#FFFFFF</color>    <!-- Trắng -->
-
-    <!-- Màu cho nút phụ -->
-    <color name="secondary_button_start">#F57C00</color> <!-- Cam tươi -->
-    <color name="secondary_button_end">#D32F2F</color>   <!-- Đỏ gạch -->
-    <color name="secondary_button_text">#FFFFFF</color>  <!-- Trắng -->
-
-    <!-- Màu điểm nhấn -->
-    <color name="accent">#00BFFF</color>                 <!-- Xanh dương sáng -->
-    <color name="accent_color">#FF9800</color>           <!-- M��u nhấn cam -->
-
-    <!-- Màu đường viền/phân cách -->
-    <color name="divider">#424242</color>                <!-- Xám cho đường phân cách -->
-    <color name="divider_color">#424242</color>          <!-- Alias cho divider -->
-
-    <!-- Màu thông báo -->
-    <color name="success">#4CAF50</color>
-    <color name="error">#F44336</color>
-    <color name="warning">#FF9800</color>
-    <color name="warning_color">#FF9800</color>          <!-- Màu cảnh báo - cam -->
-
-    <!-- Màu cho trạng thái like -->
-    <color name="like_active_color">#E91E63</color>       <!-- Màu hồng khi đã like -->
-    <color name="like_inactive_color">#9E9E9E</color>     <!-- Màu xám khi chưa like -->
-
-    <!-- Màu cho các icon và trạng thái -->
-    <color name="red_heart">#F44336</color>              <!-- Màu đỏ cho icon tim khi được like -->
-
-    <!-- Màu cho chức năng yêu thích -->
-    <color name="favorite_color">#E91E63</color>         <!-- Màu hồng cho trái tim yêu thích -->
-    <color name="favorite_outline">#757575</color>       <!-- Màu xám cho trái tim chưa yêu thích -->
-    <color name="icon_color">#757575</color>             <!-- Màu icon mặc định -->
-    <color name="favorite_active">#F44336</color>        <!-- Đỏ cho đã yêu thích -->
-    <color name="favorite_inactive">#9E9E9E</color>      <!-- Xám cho chưa yêu thích -->
-
-    <!-- Màu cho Linear Progress Indicator -->
-    <color name="progress_indicator_color">#4CAF50</color>   <!-- Màu xanh cho progress indicator -->
-    <color name="progress_track_color">#333333</color>      <!-- Màu track cho progress indicator -->
-
-    <!-- Màu bổ sung -->
-    <color name="disabled">#757575</color>               <!-- Màu xám cho trạng thái disabled -->
-    <color name="progress_color">#4CAF50</color>         <!-- Màu xanh cho progress bar -->
-    <color name="gray_600">#757575</color>               <!-- Màu xám cho các thành phần khác -->
-
     <!-- Theme Colors -->
     <color name="colorPrimary">#4CAF50</color>
     <color name="colorPrimaryDark">#2E7D32</color>
     <color name="colorAccent">#FF9800</color>
 
-    <!-- Màu cho Material Design 3 - Dark Theme -->
-    <color name="md_theme_dark_primary">#4CAF50</color>
-    <color name="md_theme_dark_onPrimary">#FFFFFF</color>
-    <color name="md_theme_dark_surface">#1A1A1D</color>
-    <color name="md_theme_dark_onSurface">#FFFFFF</color>
+    <!-- Background Colors -->
+    <color name="backgroundColor">#FFFFFF</color>
+    <color name="backgroundSecondary">#F5F5F5</color>
+    <color name="background_dark">#1A1A1D</color>
+    <color name="background_dark_alt">#212124</color>
+    <color name="background_light">#FFFFFF</color>
 
-    <!-- Màu cho Reminder Status -->
-    <color name="status_active">#4CAF50</color>          <!-- Xanh lá - nhắc nhở đang hoạt động -->
-    <color name="status_due">#FF5722</color>             <!-- Đỏ cam - nhắc nhở đã đến giờ -->
-    <color name="status_inactive">#757575</color>        <!-- Xám - nhắc nhở đã tắt -->
+    <!-- Text Colors -->
+    <color name="textColorPrimary">#212124</color>
+    <color name="textColorSecondary">#424242</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0BEC5</color>
+    <color name="text_primary_light">#212124</color>
+    <color name="text_secondary_light">#424242</color>
 
-    <!-- Màu cho Reminder Background -->
-    <color name="bg_reminder_due">#FFEBEE</color>
-    <color name="bg_reminder_normal">#F1F8E9</color>
+    <!-- Grey Colors -->
+    <color name="grey_50">#FAFAFA</color>
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_200">#EEEEEE</color>
+    <color name="grey_300">#E0E0E0</color>
+    <color name="grey_400">#BDBDBD</color>
+    <color name="grey_500">#9E9E9E</color>
+    <color name="grey_600">#757575</color>
+    <color name="grey_700">#616161</color>
+    <color name="grey_800">#424242</color>
+    <color name="grey_900">#212121</color>
 
-    <!-- Màu chính cho Short Video Fragment -->
-    <color name="primary_green">#4CAF50</color>
-    <color name="accent_orange">#FF9800</color>
+    <!-- Like Button Colors -->
+    <color name="like_color_active">#E91E63</color>
+    <color name="like_color_inactive">#757575</color>
 
-    <!-- Màu cho cuộc trò chuyện được ghim -->
-    <color name="pinned_conversation_background">#2D2D30</color>
-    <color name="pinned_conversation_stroke">#4CAF50</color>
+    <!-- Primary Colors -->
+    <color name="primary_color">#4CAF50</color>
+    <color name="primary_light">#81C784</color>
+    <color name="primary_dark">#2E7D32</color>
+    <color name="secondary_color">#FF9800</color>
 
-    <!-- Màu cho nút like trong video -->
-    <color name="color_like">#E91E63</color>
+    <!-- Button Colors -->
+    <color name="primary_button_start">#2E7D32</color>
+    <color name="primary_button_end">#C0CA33</color>
+    <color name="primary_button_text">#FFFFFF</color>
+    <color name="secondary_button_start">#F57C00</color>
+    <color name="secondary_button_end">#D32F2F</color>
+    <color name="secondary_button_text">#FFFFFF</color>
 
-    <!-- Màu cho favorite -->
-    <color name="color_favorite">#E91E63</color>
-    <color name="color_favorite_outline">#757575</color>
+    <!-- Status Colors -->
+    <color name="success">#4CAF50</color>
+    <color name="error">#F44336</color>
+    <color name="warning">#FF9800</color>
+    <color name="disabled">#757575</color>
 
+    <!-- Accent Colors -->
+    <color name="accent">#00BFFF</color>
+    <color name="accent_color">#FF9800</color>
 
-    <!-- Thêm primary_color_variant mới -->
-    <color name="primary_color_variant">#303F9F</color>
+    <!-- Divider Colors -->
+    <color name="divider">#424242</color>
+    <color name="divider_color">#424242</color>
 
-    <!-- Màu cho chức năng like video -->
-    <color name="like_color_active">#E91E63</color>      <!-- Hồng/đỏ cho đã like -->
-    <color name="like_color_inactive">#9E9E9E</color>    <!-- Xám cho chưa like -->
+    <!-- Icon Colors -->
+    <color name="icon_color">#757575</color>
+    <color name="favorite_color">#E91E63</color>
+    <color name="favorite_outline">#757575</color>
+    <color name="favorite_active">#F44336</color>
+    <color name="favorite_inactive">#9E9E9E</color>
 
-    <!-- Màu cho video controls -->
-    <color name="video_overlay_background">#80000000</color>  <!-- Nền overlay bán trong suốt -->
-    <color name="video_loading_background">#FF1A1A1D</color>  <!-- Nền loading video -->
+    <!-- Video Colors -->
+    <color name="video_overlay_background">#80000000</color>
+    <color name="video_loading_background">#FF1A1A1D</color>
+    <color name="bottom_sheet_background">#2A2A2D</color>
+    <color name="comment_background">#333336</color>
 
-    <!-- Màu cho bottom sheet comment -->
-    <color name="bottom_sheet_background">#2A2A2D</color>     <!-- Nền bottom sheet đậm hơn -->
-    <color name="comment_background">#333336</color>          <!-- Nền comment item -->
-
-    <!-- Màu cho status bar và navigation bar -->
+    <!-- Status Bar Colors -->
     <color name="status_bar_color">@color/background_dark</color>
     <color name="navigation_bar_color">@color/background_dark</color>
+
+    <!-- Progress Colors -->
+    <color name="progress_color">#4CAF50</color>
+    <color name="progress_indicator_color">#4CAF50</color>
+    <color name="progress_track_color">#333333</color>
+
+    <!-- Các màu bổ sung bị thiếu -->
+    <color name="background_color">#1A1A1D</color>
+    <color name="warning_color">#FF9800</color>
+    <color name="status_due">#FF5722</color>
+    <color name="status_active">#4CAF50</color>
+    <color name="status_inactive">#757575</color>
+    <color name="md_theme_dark_onPrimary">#FFFFFF</color>
+    <color name="pinned_conversation_background">#2D2D30</color>
+    <color name="pinned_conversation_stroke">#4CAF50</color>
+    <color name="like_active_color">#E91E63</color>
+    <color name="like_inactive_color">#757575</color>
+    <color name="red_heart">#F44336</color>
 </resources>

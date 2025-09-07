@@ -36,6 +36,8 @@ import com.vhn.doan.utils.CloudinaryUrls;
 import com.vhn.doan.utils.EventBus;
 import com.vhn.doan.utils.FirebaseAuthHelper;
 
+import java.util.List;
+
 /**
  * Fragment phát video đơn lẻ từ search results
  * Giao diện giống y hệt Video Short Fragment với đầy đủ tính năng tương tác
@@ -44,9 +46,13 @@ public class SingleVideoPlayerFragment extends Fragment {
 
     private static final String ARG_VIDEO_ID = "video_id";
     private static final String ARG_VIDEO_OBJECT = "video_object";
+    private static final String ARG_VIDEO_LIST = "video_list";
+    private static final String ARG_START_POSITION = "start_position";
 
     private String videoId;
     private ShortVideo currentVideo;
+    private List<ShortVideo> videoList;
+    private int currentPosition = 0;
     private ExoPlayer player;
     private boolean isPlaying = false;
 
@@ -73,6 +79,7 @@ public class SingleVideoPlayerFragment extends Fragment {
     private FirebaseAuthHelper authHelper;
     private EventBus eventBus;
     private GestureDetector gestureDetector;
+    private GestureDetector swipeGestureDetector; // Thêm gesture detector cho swipe
     private Handler handler = new Handler(Looper.getMainLooper());
 
     public static SingleVideoPlayerFragment newInstance(String videoId) {
@@ -95,12 +102,39 @@ public class SingleVideoPlayerFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Factory method cho danh sách video từ LikedVideosFragment
+     * Hỗ trợ swipe để chuyển video như TikTok
+     */
+    public static SingleVideoPlayerFragment newInstance(List<ShortVideo> videos, int startPosition) {
+        SingleVideoPlayerFragment fragment = new SingleVideoPlayerFragment();
+        Bundle args = new Bundle();
+
+        if (videos != null && !videos.isEmpty() && startPosition >= 0 && startPosition < videos.size()) {
+            // Lưu danh sách video và vị trí bắt đầu
+            args.putSerializable(ARG_VIDEO_LIST, new java.util.ArrayList<>(videos));
+            args.putInt(ARG_START_POSITION, startPosition);
+
+            // Lưu video hiện tại để hiển thị ngay lập tức
+            ShortVideo currentVideo = videos.get(startPosition);
+            args.putString(ARG_VIDEO_ID, currentVideo.getId());
+            args.putSerializable(ARG_VIDEO_OBJECT, currentVideo);
+        }
+
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             videoId = getArguments().getString(ARG_VIDEO_ID);
             currentVideo = (ShortVideo) getArguments().getSerializable(ARG_VIDEO_OBJECT);
+
+            // Xử lý danh sách video từ LikedVideosFragment
+            videoList = (List<ShortVideo>) getArguments().getSerializable(ARG_VIDEO_LIST);
+            currentPosition = getArguments().getInt(ARG_START_POSITION, 0);
         }
 
         // Khởi tạo dependencies
@@ -110,6 +144,8 @@ public class SingleVideoPlayerFragment extends Fragment {
 
         // Khởi tạo gesture detector cho double tap
         gestureDetector = new GestureDetector(getContext(), new DoubleTapGestureListener());
+        // Khởi tạo gesture detector cho swipe
+        swipeGestureDetector = new GestureDetector(getContext(), new SwipeGestureListener());
     }
 
     @Override
@@ -192,6 +228,7 @@ public class SingleVideoPlayerFragment extends Fragment {
         if (videoTapArea != null) {
             videoTapArea.setOnTouchListener((v, event) -> {
                 gestureDetector.onTouchEvent(event);
+                swipeGestureDetector.onTouchEvent(event); // Xử lý swipe gesture
                 return true;
             });
         }
@@ -548,6 +585,29 @@ public class SingleVideoPlayerFragment extends Fragment {
         }
     }
 
+    private class SwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            // Xử lý swipe giữa các video
+            if (e1 == null || e2 == null) return false;
+
+            float diffX = e2.getX() - e1.getX();
+            float diffY = e2.getY() - e1.getY();
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                // Swipe ngang
+                if (diffX > 100) {
+                    // Swipe sang phải
+                    onSwipeRight();
+                } else if (diffX < -100) {
+                    // Swipe sang trái
+                    onSwipeLeft();
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+
     // Cập nhật lại method updateLikeButton để sử dụng đúng resources
     private void updateLikeButton() {
         if (ivLikeIcon == null || currentVideo == null) return;
@@ -746,5 +806,33 @@ public class SingleVideoPlayerFragment extends Fragment {
         } catch (Exception e) {
             Toast.makeText(getContext(), "Lỗi khi chia sẻ video", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void onSwipeLeft() {
+        if (videoList == null || videoList.isEmpty()) return;
+
+        // Tìm vị trí video tiếp theo
+        currentPosition = (currentPosition + 1) % videoList.size();
+        ShortVideo nextVideo = videoList.get(currentPosition);
+
+        // Chuyển sang video tiếp theo
+        videoId = nextVideo.getId();
+        currentVideo = nextVideo;
+        displayVideoInfo();
+        playVideo();
+    }
+
+    private void onSwipeRight() {
+        if (videoList == null || videoList.isEmpty()) return;
+
+        // Tìm vị trí video trước đó
+        currentPosition = (currentPosition - 1 + videoList.size()) % videoList.size();
+        ShortVideo prevVideo = videoList.get(currentPosition);
+
+        // Chuyển sang video trước đó
+        videoId = prevVideo.getId();
+        currentVideo = prevVideo;
+        displayVideoInfo();
+        playVideo();
     }
 }

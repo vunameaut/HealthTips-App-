@@ -88,6 +88,12 @@
             android:exported="false"
             android:theme="@style/Theme.VideoPlayer" />
 
+        <!-- LikedVideosPlayerActivity: Phát video đã like với khả năng lướt -->
+        <activity
+            android:name=".presentation.profile.LikedVideosPlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VideoPlayer" />
+
         <!-- Debug Activity -->
         <activity
             android:name=".presentation.debug.ReminderTestActivity"

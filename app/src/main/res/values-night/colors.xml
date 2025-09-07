@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Grey Colors cho Dark Mode -->
+    <color name="grey_50">#121212</color>
+    <color name="grey_100">#1E1E1E</color>
+    <color name="grey_200">#2D2D2D</color>
+    <color name="grey_300">#404040</color>
+    <color name="grey_400">#5F5F5F</color>
+    <color name="grey_500">#9E9E9E</color>
+    <color name="grey_600">#757575</color>
+    <color name="grey_700">#616161</color>
+    <color name="grey_800">#424242</color>
+    <color name="grey_900">#212121</color>
+
+    <!-- Background Colors cho Dark Mode -->
+    <color name="backgroundColor">#1A1A1D</color>
+    <color name="backgroundSecondary">#212124</color>
+
+    <!-- Text Colors cho Dark Mode -->
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="textColorSecondary">#B0BEC5</color>
+
+    <!-- Like Button Colors -->
+    <color name="like_color_active">#E91E63</color>
+    <color name="like_color_inactive">#9E9E9E</color>
+
     <!-- Màu bị thiếu từ lỗi build - Night Mode -->
     <color name="disabled">#9E9E9E</color>               <!-- Màu xám sáng hơn cho night mode -->
     <color name="error_color">#FF5252</color>            <!-- Màu đỏ sáng hơn cho night mode -->
@@ -7,5 +31,11 @@
 
     <!-- Màu icon cho night mode -->
     <color name="icon_color">#E0E0E0</color>             <!-- Màu icon sáng hơn cho night mode -->
-</resources>
 
+    <!-- Các màu bổ sung bị thiếu cho Night Mode -->
+    <color name="background_color">#1A1A1D</color>
+    <color name="warning_color">#FFB74D</color>          <!-- Màu warning sáng hơn cho night mode -->
+    <color name="status_due">#FF8A65</color>             <!-- Màu status due sáng hơn cho night mode -->
+    <color name="status_active">#66BB6A</color>          <!-- Màu status active sáng hơn cho night mode -->
+    <color name="md_theme_dark_onPrimary">#000000</color><!-- Màu text trên primary cho dark theme -->
+</resources>

@@ -121,6 +121,13 @@ public interface VideoRepository {
     void isVideoLiked(String videoId, String userId, BooleanCallback callback);
 
     /**
+     * Lấy danh sách video đã like của user
+     * @param userId ID của người dùng
+     * @param callback Callback để nhận kết quả
+     */
+    void getLikedVideos(String userId, VideoCallback callback);
+
+    /**
      * Lắng nghe realtime thay đổi like status của video
      * @param videoId ID của video
      * @param userId ID của người dùng

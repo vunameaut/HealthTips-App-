@@ -63,6 +63,9 @@ public class VideoActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
 
+        // Ngăn màn hình sleep khi phát video
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         // Ẩn action bar title
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -122,6 +125,13 @@ public class VideoActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         // VideoFragment sẽ tự động handle pause video
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Xóa flag keep screen on khi activity bị destroy
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     /**

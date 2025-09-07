@@ -65,6 +65,9 @@ public class SingleVideoPlayerActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
 
+        // Ngăn màn hình sleep khi phát video
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         // Ẩn action bar title
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -137,6 +140,9 @@ public class SingleVideoPlayerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Xóa flag keep screen on khi activity bị destroy
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         // Giải phóng resources khi destroy
         if (videoPlayerFragment != null) {
             videoPlayerFragment.releasePlayer();
