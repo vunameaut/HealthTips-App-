@@ -59,4 +59,5 @@
         <item name="cornerSizeTopLeft">16dp</item>
     </style>
 
+    <!-- Các style Typography đã được di chuyển sang typography.xml -->
 </resources>

@@ -118,6 +118,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textViewCategory" />
 
+            <!-- Thay đổi từ TextView sang RecyclerView để hiển thị nội dung -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewContent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:nestedScrollingEnabled="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider"
+                tools:itemCount="5"
+                tools:listitem="@layout/item_content_block_text" />
+
+            <!-- Giữ lại TextView nội dung cũ để tương thích ngược -->
             <TextView
                 android:id="@+id/textViewContent"
                 android:layout_width="0dp"
@@ -125,10 +139,39 @@
                 android:layout_marginTop="16dp"
                 android:lineSpacingMultiplier="1.2"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/divider"
                 tools:text="Nội dung chi tiết bài viết sức khỏe. Phần này sẽ chứa toàn bộ nội dung của mẹo sức khỏe được định dạng phù hợp." />
+
+            <!-- Thêm các thông tin tác giả và thời gian xuất bản nếu có -->
+            <TextView
+                android:id="@+id/textViewAuthor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:drawablePadding="4dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                android:textStyle="italic"
+                app:drawableStartCompat="@drawable/ic_person"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recyclerViewContent"
+                tools:text="Tác giả: Dr. Nguyen Van A"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/textViewPublishedDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawablePadding="4dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                app:drawableStartCompat="@drawable/ic_calendar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewAuthor"
+                tools:text="Ngày xuất bản: 17/09/2025"
+                android:visibility="gone" />
 
             <!-- Action buttons section -->
             <LinearLayout
@@ -140,7 +183,7 @@
                 android:gravity="center"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textViewContent">
+                app:layout_constraintTop_toBottomOf="@id/textViewPublishedDate">
 
                 <Button
                     android:id="@+id/buttonLike"
@@ -170,11 +213,22 @@
 
             </LinearLayout>
 
+            <!-- Hiển thị tags nếu có -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupTags"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layoutActionButtons"
+                android:visibility="gone" />
+
             <!-- Bottom spacing -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="24dp"
-                app:layout_constraintTop_toBottomOf="@id/layoutActionButtons" />
+                app:layout_constraintTop_toBottomOf="@id/chipGroupTags" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

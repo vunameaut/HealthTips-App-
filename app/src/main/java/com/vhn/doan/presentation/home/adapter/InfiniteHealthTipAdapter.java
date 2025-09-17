@@ -8,11 +8,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.vhn.doan.R;
 import com.vhn.doan.data.HealthTip;
+import com.vhn.doan.data.ContentBlock;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -141,7 +143,42 @@ public class InfiniteHealthTipAdapter extends RecyclerView.Adapter<InfiniteHealt
 
             // Hiển thị tóm tắt nội dung
             if (textViewSummary != null) {
-                textViewSummary.setText(healthTip.getSummary());
+                if (healthTip.getExcerpt() != null && !healthTip.getExcerpt().isEmpty()) {
+                    // Sử dụng excerpt nếu có
+                    textViewSummary.setText(healthTip.getExcerpt());
+                } else {
+                    // Tạo tóm tắt từ nội dung - sử dụng ContentBlocks thay vì content trực tiếp
+                    List<ContentBlock> contentBlocks = healthTip.getContentBlockObjects();
+                    if (contentBlocks != null && !contentBlocks.isEmpty()) {
+                        // Tạo tóm tắt từ các block loại text và heading
+                        StringBuilder summaryBuilder = new StringBuilder();
+                        for (ContentBlock block : contentBlocks) {
+                            if ("text".equals(block.getType()) || "heading".equals(block.getType())) {
+                                if (block.getValue() != null && !block.getValue().isEmpty()) {
+                                    summaryBuilder.append(block.getValue()).append(" ");
+                                    // Nếu đã đủ dài, dừng việc thu thập nội dung
+                                    if (summaryBuilder.length() > 200) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        String summaryText = summaryBuilder.toString().trim();
+                        if (!summaryText.isEmpty()) {
+                            // Giới hạn độ dài tóm tắt
+                            int maxLength = 150;
+                            String summary = summaryText.length() > maxLength ?
+                                summaryText.substring(0, maxLength).trim() + "..." :
+                                summaryText;
+                            textViewSummary.setText(summary);
+                        } else {
+                            textViewSummary.setText("Xem chi tiết...");
+                        }
+                    } else {
+                        textViewSummary.setText("Xem chi tiết...");
+                    }
+                }
             }
 
             // Hiển thị số lượt xem
@@ -175,6 +212,7 @@ public class InfiniteHealthTipAdapter extends RecyclerView.Adapter<InfiniteHealt
                             .load(healthTip.getImageUrl())
                             .placeholder(R.drawable.ic_placeholder_image)
                             .error(R.drawable.ic_error_image)
+                            .centerCrop()
                             .into(imageViewThumbnail);
                 } else {
                     imageViewThumbnail.setImageResource(R.drawable.ic_placeholder_image);
@@ -188,15 +226,30 @@ public class InfiniteHealthTipAdapter extends RecyclerView.Adapter<InfiniteHealt
                 buttonFavorite.setImageResource(isFavorite ?
                     R.drawable.ic_favorite : R.drawable.ic_favorite_border);
 
+                // Cập nhật màu sắc theo trạng thái yêu thích
+                buttonFavorite.setColorFilter(
+                    ContextCompat.getColor(itemView.getContext(),
+                    isFavorite ? R.color.favorite_active : R.color.favorite_inactive),
+                    android.graphics.PorterDuff.Mode.SRC_IN);
+
                 // Xử lý sự kiện click
                 buttonFavorite.setOnClickListener(v -> {
                     if (clickListener != null) {
-                        clickListener.onFavoriteClick(healthTip, !isFavorite);
+                        // Thêm hiệu ứng animation khi click
+                        v.animate()
+                            .scaleX(0.8f)
+                            .scaleY(0.8f)
+                            .setDuration(100)
+                            .withEndAction(() -> {
+                                v.animate().scaleX(1f).scaleY(1f).setDuration(100).start();
+                                clickListener.onFavoriteClick(healthTip, !isFavorite);
+                            })
+                            .start();
                     }
                 });
             }
 
-            // Xử lý click vào toàn bộ item
+            // Xử lý click vào toàn bộ item với hiệu ứng ripple
             itemView.setOnClickListener(v -> {
                 if (clickListener != null) {
                     clickListener.onHealthTipClick(healthTip);

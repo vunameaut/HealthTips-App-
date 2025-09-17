@@ -3,6 +3,7 @@ package com.vhn.doan.presentation.healthtip.detail;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -14,18 +15,29 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.vhn.doan.R;
+import com.vhn.doan.data.ContentBlock;
 import com.vhn.doan.data.HealthTip;
 import com.vhn.doan.data.repository.HealthTipRepository;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Activity hiển thị chi tiết một bài viết mẹo sức khỏe
  * Tuân theo kiến trúc MVP (Model-View-Presenter)
+ * Hỗ trợ hiển thị nội dung theo định dạng ContentBlock
  */
 public class HealthTipDetailActivity extends AppCompatActivity implements HealthTipDetailView {
 
@@ -35,7 +47,9 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     private ImageView imageViewDetail;
     private TextView textViewTitle;
     private TextView textViewCategory;
-    private TextView textViewContent;
+    private TextView textViewContent; // Giữ lại để tương thích ngược
+    private RecyclerView recyclerViewContent; // Thêm RecyclerView cho nội dung mới
+    private ContentBlockAdapter contentAdapter; // Adapter cho ContentBlock
     private TextView textViewViewCount;
     private TextView textViewLikeCount;
     private FloatingActionButton fabFavorite;
@@ -43,6 +57,9 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     private Button buttonShare;
     private ProgressBar progressBar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    private TextView textViewAuthor;
+    private TextView textViewPublishedDate;
+    private ChipGroup chipGroupTags;
 
     // Presenter
     private HealthTipDetailPresenter presenter;
@@ -83,6 +100,12 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         presenter = new HealthTipDetailPresenterImpl(repository);
         presenter.attachView(this);
 
+        // Khởi tạo adapter cho ContentBlock
+        contentAdapter = new ContentBlockAdapter();
+        recyclerViewContent.setAdapter(contentAdapter);
+        recyclerViewContent.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewContent.setNestedScrollingEnabled(false); // Tránh xung đột scroll
+
         // Thiết lập listeners
         setupListeners();
 
@@ -115,6 +138,12 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         buttonShare = findViewById(R.id.buttonShare);
         progressBar = findViewById(R.id.progressBar);
 
+        // Khởi tạo các view mới
+        recyclerViewContent = findViewById(R.id.recyclerViewContent);
+        textViewAuthor = findViewById(R.id.textViewAuthor);
+        textViewPublishedDate = findViewById(R.id.textViewPublishedDate);
+        chipGroupTags = findViewById(R.id.chipGroupTags);
+
         // Ẩn tất cả nội dung cho đến khi dữ liệu được tải
         hideContentViews();
     }
@@ -127,12 +156,16 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         if (textViewTitle != null) textViewTitle.setVisibility(View.GONE);
         if (textViewCategory != null) textViewCategory.setVisibility(View.GONE);
         if (textViewContent != null) textViewContent.setVisibility(View.GONE);
+        if (recyclerViewContent != null) recyclerViewContent.setVisibility(View.GONE);
         if (textViewViewCount != null) textViewViewCount.setVisibility(View.GONE);
         if (textViewLikeCount != null) textViewLikeCount.setVisibility(View.GONE);
         if (fabFavorite != null) fabFavorite.setVisibility(View.GONE);
         if (buttonLike != null) buttonLike.setVisibility(View.GONE);
         if (buttonShare != null) buttonShare.setVisibility(View.GONE);
         if (imageViewDetail != null) imageViewDetail.setVisibility(View.GONE);
+        if (textViewAuthor != null) textViewAuthor.setVisibility(View.GONE);
+        if (textViewPublishedDate != null) textViewPublishedDate.setVisibility(View.GONE);
+        if (chipGroupTags != null) chipGroupTags.setVisibility(View.GONE);
 
         // Hiển thị loading
         showLoading(true);
@@ -152,7 +185,7 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
             textViewCategory,
             textViewViewCount,
             textViewLikeCount,
-            textViewContent,
+            recyclerViewContent, // Sử dụng RecyclerView thay vì TextView
             buttonLike,
             buttonShare,
             fabFavorite
@@ -161,11 +194,10 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         // Animate từng view với delay nhỏ để tạo hiệu ứng cascade
         for (int i = 0; i < viewsToAnimate.length; i++) {
             final View view = viewsToAnimate[i];
-            if (view != null) {
+            if (view != null && view.getVisibility() == View.VISIBLE) {
                 // Đặt vị trí ban đầu (ẩn và offset)
                 view.setAlpha(0f);
                 view.setTranslationY(50f);
-                view.setVisibility(View.VISIBLE);
 
                 // Animate với delay
                 view.animate()
@@ -207,11 +239,10 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     public void displayHealthTipDetails(HealthTip healthTip) {
         // Hiển thị thông tin chi tiết
         textViewTitle.setText(healthTip.getTitle());
-        textViewContent.setText(healthTip.getContent());
         textViewViewCount.setText(String.valueOf(healthTip.getViewCount()));
         textViewLikeCount.setText(String.valueOf(healthTip.getLikeCount()));
 
-        // Set category text - đây là phần bị thiếu
+        // Set category text
         if (healthTip.getCategoryName() != null && !healthTip.getCategoryName().isEmpty()) {
             textViewCategory.setText(healthTip.getCategoryName());
             textViewCategory.setVisibility(View.VISIBLE);
@@ -225,14 +256,39 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
         // Tải hình ảnh
         if (healthTip.getImageUrl() != null && !healthTip.getImageUrl().isEmpty()) {
+            imageViewDetail.setVisibility(View.VISIBLE);
             Glide.with(this)
                     .load(healthTip.getImageUrl())
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.error_image)
                     .into(imageViewDetail);
         } else {
-            imageViewDetail.setImageResource(R.drawable.placeholder_image);
+            imageViewDetail.setVisibility(View.GONE);
         }
+
+        // Hiển thị nội dung
+        displayContent(healthTip);
+
+        // Hiển thị thông tin tác giả nếu có
+        if (healthTip.getAuthor() != null && !healthTip.getAuthor().isEmpty()) {
+            textViewAuthor.setText("Tác giả: " + healthTip.getAuthor());
+            textViewAuthor.setVisibility(View.VISIBLE);
+        } else {
+            textViewAuthor.setVisibility(View.GONE);
+        }
+
+        // Hiển thị ngày xuất bản nếu có
+        if (healthTip.getPublishedAt() != null && healthTip.getPublishedAt() > 0) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String formattedDate = sdf.format(new Date(healthTip.getPublishedAt()));
+            textViewPublishedDate.setText("Ngày xuất bản: " + formattedDate);
+            textViewPublishedDate.setVisibility(View.VISIBLE);
+        } else {
+            textViewPublishedDate.setVisibility(View.GONE);
+        }
+
+        // Hiển thị tags nếu có
+        displayTags(healthTip.getTags());
 
         // Cập nhật trạng thái favorite và like
         isFavorite = healthTip.isFavorite();
@@ -242,6 +298,62 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
         // Hiển thị nội dung với animation
         showContentViewsWithAnimation();
+    }
+
+    /**
+     * Hiển thị nội dung bài viết dựa trên định dạng
+     * Hỗ trợ cả định dạng cũ (String) và mới (ContentBlock)
+     */
+    private void displayContent(HealthTip healthTip) {
+        List<ContentBlock> contentBlocks = healthTip.getContentBlockObjects();
+
+        if (contentBlocks != null && !contentBlocks.isEmpty()) {
+            // Sử dụng định dạng mới (ContentBlock)
+            contentAdapter.setContentBlocks(contentBlocks);
+            recyclerViewContent.setVisibility(View.VISIBLE);
+            textViewContent.setVisibility(View.GONE);
+        } else {
+            // Sử dụng định dạng cũ (String)
+            String content = healthTip.getContent();
+            if (content != null && !content.isEmpty()) {
+                textViewContent.setText(content);
+                textViewContent.setVisibility(View.VISIBLE);
+                recyclerViewContent.setVisibility(View.GONE);
+            } else {
+                textViewContent.setText("Nội dung đang được cập nhật");
+                textViewContent.setVisibility(View.VISIBLE);
+                recyclerViewContent.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    /**
+     * Hiển thị tags dưới dạng Chip trong ChipGroup
+     */
+    private void displayTags(List<String> tags) {
+        if (tags != null && !tags.isEmpty()) {
+            chipGroupTags.removeAllViews();
+
+            for (String tag : tags) {
+                Chip chip = new Chip(this);
+                chip.setText(tag);
+                chip.setClickable(true);
+                chip.setCheckable(false);
+                chip.setChipBackgroundColorResource(R.color.chip_background);
+                chip.setTextColor(getResources().getColor(R.color.chip_text));
+
+                chip.setOnClickListener(v -> {
+                    // Xử lý khi click vào tag (ví dụ: mở màn hình search với tag này)
+                    showMessage("Tìm kiếm bài viết với tag: " + tag);
+                });
+
+                chipGroupTags.addView(chip);
+            }
+
+            chipGroupTags.setVisibility(View.VISIBLE);
+        } else {
+            chipGroupTags.setVisibility(View.GONE);
+        }
     }
 
     /**

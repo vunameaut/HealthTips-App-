@@ -115,30 +115,107 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<HealthTip> healthTips = new ArrayList<>();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HealthTip healthTip = snapshot.getValue(HealthTip.class);
-                    if (healthTip != null) {
-                        // Đảm bảo ID được set từ key của Firebase
-                        String healthTipId = snapshot.getKey();
-                        healthTip.setId(healthTipId);
+                    try {
+                        HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                        if (healthTip != null) {
+                            // Đảm bảo ID được set từ key của Firebase
+                            String healthTipId = snapshot.getKey();
+                            healthTip.setId(healthTipId);
 
-                        // Validate và set default values nếu cần
-                        if (healthTip.getTitle() == null || healthTip.getTitle().trim().isEmpty()) {
-                            healthTip.setTitle("Mẹo sức khỏe không tên");
-                        }
-                        if (healthTip.getContent() == null || healthTip.getContent().trim().isEmpty()) {
-                            healthTip.setContent("Nội dung đang được cập nhật");
-                        }
-                        if (healthTip.getCreatedAt() <= 0) {
-                            healthTip.setCreatedAt(System.currentTimeMillis());
-                        }
-                        if (healthTip.getViewCount() < 0) {
-                            healthTip.setViewCount(0);
-                        }
-                        if (healthTip.getLikeCount() < 0) {
-                            healthTip.setLikeCount(0);
-                        }
+                            // Validate và set default values nếu cần
+                            if (healthTip.getTitle() == null || healthTip.getTitle().trim().isEmpty()) {
+                                healthTip.setTitle("Mẹo sức khỏe không tên");
+                            }
 
-                        healthTips.add(healthTip);
+                            // Kiểm tra nội dung và đảm bảo tương thích ngược
+                            if (healthTip.getContent() == null) {
+                                // Xử lý trường hợp không có nội dung
+                                healthTip.setContent("Nội dung đang được cập nhật");
+                            } else if (healthTip.getContent().trim().isEmpty()) {
+                                // Nếu nội dung trống
+                                healthTip.setContent("Nội dung đang được cập nhật");
+                            }
+
+                            if (healthTip.getCreatedAt() <= 0) {
+                                healthTip.setCreatedAt(System.currentTimeMillis());
+                            }
+                            if (healthTip.getViewCount() < 0) {
+                                healthTip.setViewCount(0);
+                            }
+                            if (healthTip.getLikeCount() < 0) {
+                                healthTip.setLikeCount(0);
+                            }
+
+                            healthTips.add(healthTip);
+                        }
+                    } catch (Exception e) {
+                        // Xử lý lỗi chuyển đổi
+                        try {
+                            // Truy xuất dữ liệu thủ công từ snapshot để xử lý định dạng mới
+                            String id = snapshot.getKey();
+                            String title = snapshot.child("title").getValue(String.class);
+
+                            // Xử lý nội dung
+                            String content = snapshot.child("content").getValue(String.class);
+
+                            // Xử lý contentBlocks nếu có
+                            List<Map<String, Object>> contentBlocksData = null;
+                            DataSnapshot contentBlocksSnapshot = snapshot.child("contentBlocks");
+                            if (contentBlocksSnapshot.exists()) {
+                                contentBlocksData = new ArrayList<>();
+                                for (DataSnapshot blockSnapshot : contentBlocksSnapshot.getChildren()) {
+                                    Map<String, Object> blockMap = (Map<String, Object>) blockSnapshot.getValue();
+                                    if (blockMap != null) {
+                                        contentBlocksData.add(blockMap);
+                                    }
+                                }
+                            }
+
+                            String categoryId = snapshot.child("categoryId").getValue(String.class);
+                            Integer viewCount = snapshot.child("viewCount").getValue(Integer.class);
+                            Integer likeCount = snapshot.child("likeCount").getValue(Integer.class);
+                            String imageUrl = snapshot.child("imageUrl").getValue(String.class);
+                            Long createdAt = snapshot.child("createdAt").getValue(Long.class);
+
+                            // Tạo đối tượng HealthTip mới
+                            HealthTip healthTip = new HealthTip();
+                            healthTip.setId(id);
+                            healthTip.setTitle(title != null ? title : "Mẹo sức khỏe không tên");
+                            healthTip.setContent(content != null ? content : "");
+                            if (contentBlocksData != null) {
+                                healthTip.setContentBlocks(contentBlocksData);
+                            }
+                            healthTip.setCategoryId(categoryId);
+                            healthTip.setViewCount(viewCount != null ? viewCount : 0);
+                            healthTip.setLikeCount(likeCount != null ? likeCount : 0);
+                            healthTip.setImageUrl(imageUrl);
+                            healthTip.setCreatedAt(createdAt != null ? createdAt : System.currentTimeMillis());
+
+                            // Thêm các trường bổ sung
+                            healthTip.setExcerpt(snapshot.child("excerpt").getValue(String.class));
+                            healthTip.setStatus(snapshot.child("status").getValue(String.class));
+                            healthTip.setAuthor(snapshot.child("author").getValue(String.class));
+                            healthTip.setPublishedAt(snapshot.child("publishedAt").getValue(Long.class));
+                            healthTip.setUpdatedAt(snapshot.child("updatedAt").getValue(Long.class));
+
+                            // Xử lý tags nếu có
+                            DataSnapshot tagsSnapshot = snapshot.child("tags");
+                            if (tagsSnapshot.exists()) {
+                                List<String> tags = new ArrayList<>();
+                                for (DataSnapshot tagSnapshot : tagsSnapshot.getChildren()) {
+                                    String tag = tagSnapshot.getValue(String.class);
+                                    if (tag != null) {
+                                        tags.add(tag);
+                                    }
+                                }
+                                healthTip.setTags(tags);
+                            }
+
+                            healthTips.add(healthTip);
+                        } catch (Exception innerEx) {
+                            // Bỏ qua bài viết này nếu không thể xử lý
+                            System.out.println("Không thể xử lý bài viết: " + snapshot.getKey() + " - Lỗi: " + innerEx.getMessage());
+                        }
                     }
                 }
                 // Load category names cho tất cả health tips
