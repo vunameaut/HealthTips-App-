@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/textViewContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:textColor="@color/text_primary"
+        android:lineSpacingExtra="6dp"
+        android:justificationMode="inter_word"
+        android:textIsSelectable="true"
+        tools:text="Đây là một đoạn văn bản trong bài viết sức khỏe. Nội dung này sẽ hiển thị với khoảng cách hợp lý và dễ đọc." />
+
+</LinearLayout>

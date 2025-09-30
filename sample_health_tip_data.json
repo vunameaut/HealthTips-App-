@@ -1,0 +1,200 @@
+{
+  "id": "-O_SAMPLE_HEALTH_TIP_001",
+  "title": "10 Bí Quyết Ăn Uống Lành Mạnh Cho Cơ Thể Khỏe Mạnh",
+  "categoryId": "cat_nutrition",
+  "categoryName": "Dinh Dưỡng",
+  "excerpt": "Khám phá những nguyên tắc vàng trong dinh dưỡng để xây dựng một lối sống lành mạnh và bền vững cho cơ thể.",
+  "author": "Dr. Nguyễn Thị Minh Châu",
+  "status": "published",
+  "isFeature": true,
+  "isPinned": false,
+  "viewCount": 2847,
+  "likeCount": 156,
+  "imageUrl": "https://res.cloudinary.com/dazo6ypwt/image/upload/c_fill,w_800,h_450,q_80,f_auto/v1727683200/healthy_tip_image/nutrition/healthy-eating-main.jpg",
+  "tags": [
+    "dinh dưỡng",
+    "ăn uống lành mạnh",
+    "sức khỏe",
+    "chế độ ăn",
+    "vitamin",
+    "khoáng chất"
+  ],
+  "createdAt": 1727683200000,
+  "publishedAt": 1727683200000,
+  "updatedAt": 1727769600000,
+  "scheduledAt": null,
+  "slug": "10-bi-quyet-an-uong-lanh-manh-cho-co-the-khoe-manh",
+  "seoTitle": "10 Bí Quyết Ăn Uống Lành Mạnh - Hướng Dẫn Chi Tiết",
+  "seoDescription": "Tìm hiểu 10 bí quyết ăn uống lành mạnh được chuyên gia dinh dưỡng khuyên dùng. Cách xây dựng chế độ ăn cân bằng, bổ sung vitamin và khoáng chất hiệu quả.",
+  "recommendationScore": 95,
+  "isFavorite": false,
+  "isLiked": false,
+  "contentBlocks": [
+    {
+      "id": "intro_block_1",
+      "type": "text",
+      "value": "Trong cuộc sống hiện đại, việc duy trì một chế độ ăn uống lành mạnh đóng vai trò then chốt trong việc bảo vệ sức khỏe và nâng cao chất lượng cuộc sống. Hãy cùng khám phá 10 bí quyết ăn uống được các chuyên gia dinh dưỡng khuyên dùng.",
+      "metadata": null
+    },
+    {
+      "id": "heading_1",
+      "type": "heading",
+      "value": "1. Ăn đủ 5 màu sắc mỗi ngày",
+      "metadata": {
+        "level": 2,
+        "style": "bold"
+      }
+    },
+    {
+      "id": "content_1",
+      "type": "text",
+      "value": "Mỗi màu sắc của thực phẩm tự nhiên đại diện cho một nhóm chất dinh dưỡng khác nhau. Màu đỏ (cà chua, ớt đỏ) chứa lycopene, màu cam (cà rốt, cam) giàu beta-carotene, màu xanh lá (rau bina, bông cải xanh) có nhiều folate và iron.",
+      "metadata": null
+    },
+    {
+      "id": "image_1",
+      "type": "image",
+      "value": "https://res.cloudinary.com/dazo6ypwt/image/upload/c_fill,w_600,h_400,q_80,f_auto/v1727683200/healthy_tip_image/nutrition/colorful-vegetables.jpg",
+      "metadata": {
+        "caption": "Rau củ quả đa dạng màu sắc cung cấp nhiều chất dinh dưỡng khác nhau",
+        "alt": "Các loại rau củ quả có màu sắc đa dạng"
+      }
+    },
+    {
+      "id": "heading_2",
+      "type": "heading",
+      "value": "2. Uống đủ nước mỗi ngày",
+      "metadata": {
+        "level": 2,
+        "style": "bold"
+      }
+    },
+    {
+      "id": "content_2",
+      "type": "text",
+      "value": "Cơ thể người trưởng thành cần khoảng 2-2.5 lít nước mỗi ngày. Nước giúp vận chuyển chất dinh dưỡng, loại bỏ độc tố và duy trì nhiệt độ cơ thể ổn định.",
+      "metadata": null
+    },
+    {
+      "id": "quote_1",
+      "type": "quote",
+      "value": "Nước là nguồn sống. Hãy uống đủ nước để cơ thể hoạt động hiệu quả và da luôn căng mọng.",
+      "metadata": {
+        "author": "Dr. Nguyễn Thị Minh Châu",
+        "source": "Hội Dinh Dưỡng Việt Nam"
+      }
+    },
+    {
+      "id": "heading_3",
+      "type": "heading",
+      "value": "3. Ăn ngũ cốc nguyên hạt",
+      "metadata": {
+        "level": 2,
+        "style": "bold"
+      }
+    },
+    {
+      "id": "content_3",
+      "type": "text",
+      "value": "Thay thế gạo trắng, bánh mì trắng bằng gạo lứt, yến mạch, quinoa. Ngũ cốc nguyên hạt giàu chất xơ, vitamin B và các khoáng chất quan trọng.",
+      "metadata": null
+    },
+    {
+      "id": "image_2",
+      "type": "image",
+      "value": "https://res.cloudinary.com/dazo6ypwt/image/upload/c_fill,w_600,h_400,q_80,f_auto/v1727683200/healthy_tip_image/nutrition/whole-grains.jpg",
+      "metadata": {
+        "caption": "Các loại ngũ cốc nguyên hạt tốt cho sức khỏe",
+        "alt": "Yến mạch, gạo lứt, quinoa và các loại hạt nguyên chất"
+      }
+    },
+    {
+      "id": "heading_4",
+      "type": "heading",
+      "value": "4. Bổ sung protein chất lượng cao",
+      "metadata": {
+        "level": 2,
+        "style": "bold"
+      }
+    },
+    {
+      "id": "content_4",
+      "type": "text",
+      "value": "Protein là thành phần xây dựng cơ bắp và phục hồi tế bào. Ưu tiên các nguồn protein từ cá, thịt nạc, trứng, đậu hũ, các loại đậu và hạt.",
+      "metadata": null
+    },
+    {
+      "id": "heading_5",
+      "type": "heading",
+      "value": "5. Hạn chế đường và muối",
+      "metadata": {
+        "level": 2,
+        "style": "bold"
+      }
+    },
+    {
+      "id": "content_5",
+      "type": "text",
+      "value": "WHO khuyến nghị không nên tiêu thụ quá 6 thìa cà phê đường và 1 thìa cà phê muối mỗi ngày. Đọc nhãn thực phẩm để kiểm soát lượng đường và natri ẩn.",
+      "metadata": null
+    },
+    {
+      "id": "image_3",
+      "type": "image",
+      "value": "https://res.cloudinary.com/dazo6ypwt/image/upload/c_fill,w_600,h_400,q_80,f_auto/v1727683200/healthy_tip_image/nutrition/reduce-sugar-salt.jpg",
+      "metadata": {
+        "caption": "Hạn chế đường và muối trong chế độ ăn hàng ngày",
+        "alt": "Hình ảnh minh họa việc giảm đường và muối"
+      }
+    },
+    {
+      "id": "heading_6",
+      "type": "heading",
+      "value": "6. Ăn đều đặn và đúng giờ",
+      "metadata": {
+        "level": 2,
+        "style": "bold"
+      }
+    },
+    {
+      "id": "content_6",
+      "type": "text",
+      "value": "Duy trì 3 bữa chính và 2 bữa phụ trong ngày. Ăn đều đặn giúp ổn định đường huyết và tăng cường quá trình trao đổi chất.",
+      "metadata": null
+    },
+    {
+      "id": "quote_2",
+      "type": "quote",
+      "value": "Cơ thể như một cỗ máy, cần được 'tiếp nhiên liệu' đều đặn để hoạt động hiệu quả nhất.",
+      "metadata": {
+        "author": "Chuyên gia dinh dưỡng",
+        "source": null
+      }
+    },
+    {
+      "id": "heading_7",
+      "type": "heading",
+      "value": "Kết luận",
+      "metadata": {
+        "level": 2,
+        "style": "bold"
+      }
+    },
+    {
+      "id": "conclusion",
+      "type": "text",
+      "value": "Việc duy trì chế độ ăn uống lành mạnh không chỉ giúp bảo vệ sức khỏe mà còn nâng cao chất lượng cuộc sống. Hãy bắt đầu từ những thay đổi nhỏ và dần hình thành thói quen tích cực. Nhớ rằng, sự kiên trì là chìa khóa thành công trong hành trình chăm sóc sức khỏe.",
+      "metadata": null
+    },
+    {
+      "id": "image_4",
+      "type": "image",
+      "value": "https://res.cloudinary.com/dazo6ypwt/image/upload/c_fill,w_600,h_400,q_80,f_auto/v1727683200/healthy_tip_image/nutrition/healthy-lifestyle.jpg",
+      "metadata": {
+        "caption": "Lối sống lành mạnh bắt đầu từ chế độ ăn uống cân bằng",
+        "alt": "Gia đình hạnh phúc cùng thưởng thức bữa ăn lành mạnh"
+      }
+    }
+  ]
+}
+

@@ -50,6 +50,15 @@
     <string name="share">Chia sẻ</string>
     <string name="save">Lưu</string>
 
+    <!-- Thêm strings cho chế độ preview và giao diện mới -->
+    <string name="preview_mode_title">Xem trước</string>
+    <string name="test_interface_title">Test Giao Diện Mới</string>
+    <string name="content_image_description">Hình ảnh minh họa nội dung</string>
+    <string name="author_prefix">Tác giả:</string>
+    <string name="content_loading">Đang tải nội dung...</string>
+    <string name="content_error">Không thể tải nội dung</string>
+    <string name="health_tip_image">Hình ảnh bài viết sức khỏe</string>
+
     <!-- Các chuỗi cho video search results -->
     <string name="loading_videos">Đang tải video...</string>
     <string name="no_video_results_title">Không tìm thấy video</string>
@@ -151,7 +160,6 @@
     <string name="unlike">Bỏ thích</string>
     <string name="add_to_favorite">Thêm vào yêu thích</string>
     <string name="remove_from_favorite">Xóa khỏi yêu thích</string>
-    <string name="health_tip_image">Hình ảnh mẹo sức khỏe</string>
     <string name="share_tip">Chia sẻ mẹo sức khỏe</string>
     <string name="added_to_favorites">Đã thêm vào danh sách yêu thích</string>
     <string name="removed_from_favorites">Đã xóa khỏi danh sách yêu thích</string>

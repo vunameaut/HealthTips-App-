@@ -22,18 +22,6 @@
             app:navigationIconTint="@color/text_primary"
             app:popupTheme="@style/ThemeOverlay.MaterialComponents.Dark" />
 
-        <!-- Thêm Reading Progress Indicator -->
-        <ProgressBar
-            android:id="@+id/progressBarReading"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:layout_gravity="bottom"
-            android:max="100"
-            android:progress="0"
-            android:progressTint="@color/accent"
-            android:visibility="gone" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Main Content ScrollView -->
@@ -49,7 +37,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
-            android:paddingBottom="150dp">
+            android:paddingBottom="120dp">
 
             <!-- 1. TIÊU ĐỀ BÀI VIẾT -->
             <TextView
@@ -165,19 +153,7 @@
                 android:layout_marginBottom="24dp"
                 android:nestedScrollingEnabled="false"
                 tools:itemCount="8"
-                tools:listitem="@layout/item_new_content_text" />
-
-            <!-- Giữ lại TextView content cũ để tương thích ngược -->
-            <TextView
-                android:id="@+id/textViewContent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:visibility="gone"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                android:textColor="@color/text_primary"
-                android:lineSpacingExtra="4dp"
-                tools:text="Nội dung bài viết cũ" />
+                tools:listitem="@layout/item_content_block_text" />
 
             <!-- 6. THỐNG KÊ VÀ HÀNH ĐỘNG -->
             <LinearLayout
@@ -224,7 +200,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="60dp"
+                android:layout_marginBottom="40dp"
                 android:orientation="horizontal"
                 android:gravity="center">
 
@@ -257,57 +233,6 @@
                     app:drawableTint="@color/text_primary" />
 
             </LinearLayout>
-
-            <!-- Tags section -->
-            <TextView
-                android:id="@+id/textViewTagsLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tags:"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                android:textColor="@color/text_secondary"
-                android:layout_marginBottom="8dp"
-                android:visibility="gone" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupTags"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:visibility="gone"
-                app:chipSpacingHorizontal="8dp"
-                app:chipSpacingVertical="4dp" />
-
-            <!-- Updated date -->
-            <TextView
-                android:id="@+id/textViewUpdatedDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                android:textColor="@color/text_secondary"
-                android:textStyle="italic"
-                android:visibility="gone"
-                tools:text="Cập nhật: 01/10/2025" />
-
-            <!-- Excerpt section -->
-            <TextView
-                android:id="@+id/textViewExcerpt"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                android:textColor="@color/text_secondary"
-                android:lineSpacingExtra="2dp"
-                tools:text="Excerpt của bài viết" />
-
-            <!-- Image detail (ẩn vì đã chuyển sang content block) -->
-            <ImageView
-                android:id="@+id/imageViewDetail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:contentDescription="@string/health_tip_image"
-                tools:src="@drawable/placeholder_image" />
 
         </LinearLayout>
 

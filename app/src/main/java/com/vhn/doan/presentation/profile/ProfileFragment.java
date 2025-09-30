@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -154,16 +155,16 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         bottomSheetDialog.setContentView(bottomSheetView);
 
         // Khởi tạo các view trong BottomSheetDialog
-        TextView txtSetting = bottomSheetView.findViewById(R.id.txt_setting);
-        TextView txtLogout = bottomSheetView.findViewById(R.id.txt_logout);
+        LinearLayout layoutSettings = bottomSheetView.findViewById(R.id.layout_settings);
+        LinearLayout layoutLogout = bottomSheetView.findViewById(R.id.layout_logout);
 
         // Thiết lập sự kiện click cho các tùy chọn
-        txtSetting.setOnClickListener(v -> {
+        layoutSettings.setOnClickListener(v -> {
             openSettings();
             bottomSheetDialog.dismiss();
         });
 
-        txtLogout.setOnClickListener(v -> {
+        layoutLogout.setOnClickListener(v -> {
             showLogoutConfirmDialog();
             bottomSheetDialog.dismiss();
         });

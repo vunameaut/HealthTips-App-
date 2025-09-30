@@ -63,6 +63,7 @@
     <!-- Accent Colors -->
     <color name="accent">#00BFFF</color>
     <color name="accent_color">#FF9800</color>
+    <color name="gold">#FFD700</color>
 
     <!-- Divider Colors -->
     <color name="divider">#424242</color>
