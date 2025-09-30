@@ -16,7 +16,7 @@ public class SearchHistory {
     private String keyword;
 
     @PropertyName("timestamp")
-    private long timestamp;
+    private Long timestamp; // Thay đổi từ long thành Long để tương thích với Firebase
 
     /**
      * Constructor rỗng cho Firebase
@@ -63,11 +63,59 @@ public class SearchHistory {
         this.keyword = keyword;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public Long getTimestamp() {
+        return timestamp != null ? timestamp : System.currentTimeMillis();
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    /**
+     * Setter an toàn để xử lý conversion từ Object sang Long
+     * Khắc phục lỗi Firebase DatabaseException với conversion
+     */
+    public void setTimestamp(Object timestamp) {
+        if (timestamp == null) {
+            this.timestamp = System.currentTimeMillis();
+        } else if (timestamp instanceof Long) {
+            this.timestamp = (Long) timestamp;
+        } else if (timestamp instanceof Integer) {
+            this.timestamp = ((Integer) timestamp).longValue();
+        } else if (timestamp instanceof String) {
+            try {
+                this.timestamp = Long.parseLong((String) timestamp);
+            } catch (NumberFormatException e) {
+                this.timestamp = System.currentTimeMillis();
+            }
+        } else {
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "SearchHistory{" +
+                "id='" + id + '\'' +
+                ", userId='" + userId + '\'' +
+                ", keyword='" + keyword + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SearchHistory that = (SearchHistory) o;
+
+        if (!id.equals(that.id)) return false;
+        if (!userId.equals(that.userId)) return false;
+        return keyword.equals(that.keyword);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + userId.hashCode();
+        result = 31 * result + keyword.hashCode();
+        return result;
     }
 }

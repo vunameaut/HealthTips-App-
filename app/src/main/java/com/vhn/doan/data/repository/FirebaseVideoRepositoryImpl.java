@@ -932,7 +932,7 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                                             try {
                                                 ShortVideo video = ShortVideoDeserializer.fromDataSnapshot(videoData);
                                                 if (video != null) {
-                                                    video.setIsLiked(true); // Mark as liked
+                                                    video.setLiked(true);
                                                     synchronized (likedVideos) {
                                                         likedVideos.add(video);
                                                         android.util.Log.d("FirebaseVideoRepo", "Đã thêm liked video: " + video.getTitle() + " (ID: " + videoId + ")");

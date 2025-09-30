@@ -49,6 +49,7 @@
     <string name="related_tips">Mẹo liên quan</string>
     <string name="share">Chia sẻ</string>
     <string name="save">Lưu</string>
+    <string name="play_video">Phát video</string>
 
     <!-- Thêm strings cho chế độ preview và giao diện mới -->
     <string name="preview_mode_title">Xem trước</string>

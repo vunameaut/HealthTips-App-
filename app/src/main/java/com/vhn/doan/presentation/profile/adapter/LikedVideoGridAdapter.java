@@ -101,86 +101,123 @@ public class LikedVideoGridAdapter extends RecyclerView.Adapter<LikedVideoGridAd
 
         public VideoGridViewHolder(@NonNull View itemView) {
             super(itemView);
-            thumbnailImageView = itemView.findViewById(R.id.img_video_thumbnail);
-            durationTextView = itemView.findViewById(R.id.txt_video_duration);
-            viewCountTextView = itemView.findViewById(R.id.txt_view_count);
+            thumbnailImageView = itemView.findViewById(R.id.imageViewThumbnail);
+            durationTextView = itemView.findViewById(R.id.textViewDuration);
+            viewCountTextView = itemView.findViewById(R.id.textViewViewCount);
+        }
+
+        public void bind(ShortVideo video, int position) {
+            android.util.Log.d("LikedVideoGridAdapter", "Bắt đầu bind cho video: " + video.getId());
+
+            // Hiển thị thumbnail
+            loadThumbnail(video);
+
+            // Hiển thị duration nếu có
+            if (durationTextView != null && video.getDuration() != null && video.getDuration() > 0) {
+                String durationText = formatDuration(video.getDuration());
+                durationTextView.setText(durationText);
+                durationTextView.setVisibility(View.VISIBLE);
+            } else if (durationTextView != null) {
+                durationTextView.setVisibility(View.GONE);
+            }
+
+            // Hiển thị view count
+            if (viewCountTextView != null) {
+                String viewCountText = formatViewCount(video.getViewCount());
+                viewCountTextView.setText(viewCountText);
+                viewCountTextView.setVisibility(View.VISIBLE);
+            }
 
             // Set click listener
             itemView.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && onVideoClickListener != null) {
-                    onVideoClickListener.onVideoClick(position, likedVideos.get(position));
+                if (onVideoClickListener != null) {
+                    android.util.Log.d("LikedVideoGridAdapter", "Video clicked at position: " + position);
+                    onVideoClickListener.onVideoClick(position, video);
                 }
             });
         }
 
-        public void bind(ShortVideo video, int position) {
-            android.util.Log.d("VideoGridViewHolder", "bind được gọi cho position " + position + " với video: " + video.getTitle());
+        private void loadThumbnail(ShortVideo video) {
+            if (thumbnailImageView == null) {
+                android.util.Log.w("LikedVideoGridAdapter", "thumbnailImageView is null");
+                return;
+            }
 
-            // Kiểm tra các view có tồn tại không
-            android.util.Log.d("VideoGridViewHolder", "View states - thumbnail: " + (thumbnailImageView != null) +
-                ", duration: " + (durationTextView != null) + ", viewCount: " + (viewCountTextView != null));
+            String thumbnailUrl = getThumbnailUrl(video);
+            android.util.Log.d("LikedVideoGridAdapter", "Loading thumbnail URL: " + thumbnailUrl + " cho video: " + video.getId());
 
-            // Load thumbnail với Glide
-            if (video.getThumbnailUrl() != null && !video.getThumbnailUrl().isEmpty()) {
-                android.util.Log.d("VideoGridViewHolder", "Loading thumbnail: " + video.getThumbnailUrl());
+            if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
                 Glide.with(context)
-                        .load(video.getThumbnailUrl())
-                        .transform(new CenterCrop(), new RoundedCorners(12))
-                        .placeholder(R.drawable.placeholder_video_thumbnail)
-                        .error(R.drawable.placeholder_video_thumbnail)
+                        .load(thumbnailUrl)
+                        .apply(new com.bumptech.glide.request.RequestOptions()
+                                .transform(new CenterCrop(), new RoundedCorners(12))
+                                .placeholder(R.drawable.video_placeholder)
+                                .error(R.drawable.video_error_placeholder))
                         .into(thumbnailImageView);
+                android.util.Log.d("LikedVideoGridAdapter", "Glide load thumbnail thành công cho video: " + video.getId());
             } else {
-                android.util.Log.d("VideoGridViewHolder", "Không có thumbnail URL, sử dụng placeholder");
-                // Fallback placeholder
-                thumbnailImageView.setImageResource(R.drawable.placeholder_video_thumbnail);
+                android.util.Log.w("LikedVideoGridAdapter", "Thumbnail URL null hoặc empty cho video: " + video.getId());
+                thumbnailImageView.setImageResource(R.drawable.video_placeholder);
             }
-
-            // Hiển thị thời lượng video
-            if (video.getDuration() > 0) {
-                String duration = formatDuration(video.getDuration());
-                android.util.Log.d("VideoGridViewHolder", "Setting duration: " + duration);
-                durationTextView.setText(duration);
-                durationTextView.setVisibility(View.VISIBLE);
-            } else {
-                android.util.Log.d("VideoGridViewHolder", "Duration = 0, ẩn duration text");
-                durationTextView.setVisibility(View.GONE);
-            }
-
-            // Hiển thị số lượt xem
-            if (video.getViewCount() > 0) {
-                String viewCount = formatViewCount(video.getViewCount());
-                android.util.Log.d("VideoGridViewHolder", "Setting view count: " + viewCount);
-                viewCountTextView.setText(viewCount);
-                viewCountTextView.setVisibility(View.VISIBLE);
-            } else {
-                android.util.Log.d("VideoGridViewHolder", "ViewCount = 0, ẩn view count text");
-                viewCountTextView.setVisibility(View.GONE);
-            }
-
-            android.util.Log.d("VideoGridViewHolder", "Hoàn thành bind cho position " + position);
         }
-    }
 
-    /**
-     * Format thời lượng video thành định dạng MM:SS
-     */
-    private String formatDuration(long durationInSeconds) {
-        long minutes = durationInSeconds / 60;
-        long seconds = durationInSeconds % 60;
-        return String.format("%02d:%02d", minutes, seconds);
-    }
+        private String getThumbnailUrl(ShortVideo video) {
+            // Thử các cách lấy thumbnail URL theo thứ tự ưu tiên
 
-    /**
-     * Format số lượt xem thành định dạng ngắn gọn
-     */
-    private String formatViewCount(long viewCount) {
-        if (viewCount >= 1000000) {
-            return String.format("%.1fM", viewCount / 1000000.0);
-        } else if (viewCount >= 1000) {
-            return String.format("%.1fK", viewCount / 1000.0);
-        } else {
-            return String.valueOf(viewCount);
+            // 1. Từ thumbnailUrl field
+            String thumbnailUrl = video.getThumbnailUrl();
+            if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+                android.util.Log.d("LikedVideoGridAdapter", "Sử dụng thumbnailUrl field: " + thumbnailUrl);
+                return thumbnailUrl;
+            }
+
+            // 2. Từ thumb field (có thể là URL ngắn gọn)
+            String thumb = video.getThumb();
+            if (thumb != null && !thumb.isEmpty()) {
+                android.util.Log.d("LikedVideoGridAdapter", "Sử dụng thumb field: " + thumb);
+                return thumb;
+            }
+
+            // 3. Tạo thumbnail từ Cloudinary nếu có cldPublicId
+            String cldPublicId = video.getCldPublicId();
+            if (cldPublicId != null && !cldPublicId.isEmpty()) {
+                String generatedThumbnail = video.getThumbnailUrlFromCloudinary();
+                android.util.Log.d("LikedVideoGridAdapter", "Tạo thumbnail từ Cloudinary: " + generatedThumbnail);
+                return generatedThumbnail;
+            }
+
+            android.util.Log.w("LikedVideoGridAdapter", "Không tìm thấy thumbnail cho video: " + video.getId());
+            return null;
+        }
+
+        private String formatDuration(Long duration) {
+            if (duration == null || duration <= 0) {
+                return "";
+            }
+
+            long seconds = duration;
+            long minutes = seconds / 60;
+            seconds = seconds % 60;
+
+            if (minutes > 0) {
+                return String.format("%d:%02d", minutes, seconds);
+            } else {
+                return String.format("0:%02d", seconds);
+            }
+        }
+
+        private String formatViewCount(Long viewCount) {
+            if (viewCount == null || viewCount <= 0) {
+                return "0";
+            }
+
+            if (viewCount < 1000) {
+                return String.valueOf(viewCount);
+            } else if (viewCount < 1000000) {
+                return String.format("%.1fK", viewCount / 1000.0);
+            } else {
+                return String.format("%.1fM", viewCount / 1000000.0);
+            }
         }
     }
 }

@@ -81,6 +81,7 @@
     <color name="video_loading_background">#FF1A1A1D</color>
     <color name="bottom_sheet_background">#2A2A2D</color>
     <color name="comment_background">#333336</color>
+    <color name="video_background">#1A1A1A</color>
 
     <!-- Status Bar Colors -->
     <color name="status_bar_color">@color/background_dark</color>
