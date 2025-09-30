@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -158,10 +159,37 @@ public class FavoritePostsFragment extends BaseFragment implements FavoriteView 
         }
     }
 
-    // Triển khai các phương thức của FavoriteView
+    // Implement FavoriteView interface methods
 
     @Override
-    public void showFavoriteHealthTips(List<HealthTip> favoriteHealthTips) {
+    public void displayFavoriteHealthTips(List<HealthTip> favoriteHealthTips) {
+        if (adapter == null) {
+            setupRecyclerView();
+        }
+
+        if (favoriteHealthTips != null && !favoriteHealthTips.isEmpty()) {
+            adapter.updateFavoriteList(favoriteHealthTips);
+            hideEmptyState();
+        } else {
+            showEmptyState();
+        }
+    }
+
+    @Override
+    public void showEmptyState() {
+        if (recyclerView != null) {
+            recyclerView.setVisibility(View.GONE);
+        }
+
+        if (emptyStateLayout != null) {
+            emptyStateLayout.setVisibility(View.VISIBLE);
+            if (emptyStateMessage != null) {
+                emptyStateMessage.setText("Bạn chưa có bài viết yêu thích nào");
+            }
+        }
+    }
+
+    private void hideEmptyState() {
         if (recyclerView != null) {
             recyclerView.setVisibility(View.VISIBLE);
         }
@@ -169,87 +197,57 @@ public class FavoritePostsFragment extends BaseFragment implements FavoriteView 
         if (emptyStateLayout != null) {
             emptyStateLayout.setVisibility(View.GONE);
         }
-
-        // Cập nhật adapter với danh sách mới
-        if (adapter == null) {
-            setupRecyclerView(); // Khởi tạo adapter nếu chưa có
-        }
-
-        adapter.updateData(favoriteHealthTips);
     }
 
     @Override
-    public void showEmptyFavorites() {
-        if (recyclerView != null) {
-            recyclerView.setVisibility(View.GONE);
+    public void navigateToHealthTipDetail(String healthTipId) {
+        // Điều hướng đến màn hình chi tiết bài viết
+        if (getActivity() != null && healthTipId != null) {
+            Intent intent = com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity.createIntent(getActivity(), healthTipId);
+            startActivity(intent);
         }
+    }
 
-        if (emptyStateLayout != null) {
-            emptyStateLayout.setVisibility(View.VISIBLE);
-
-            if (emptyStateMessage != null) {
-                emptyStateMessage.setText("Bạn chưa có bài viết yêu thích nào");
+    @Override
+    public void updateFavoriteCount(int count) {
+        // Cập nhật số lượng yêu thích nếu cần (có thể hiển thị trong title bar)
+        if (getActivity() != null && getActivity() instanceof androidx.appcompat.app.AppCompatActivity) {
+            androidx.appcompat.app.ActionBar actionBar = ((androidx.appcompat.app.AppCompatActivity) getActivity()).getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle("Yêu thích (" + count + ")");
             }
         }
     }
 
     @Override
-    public void navigateToHealthTipDetail(HealthTip healthTip) {
-        if (healthTip != null && healthTip.getId() != null) {
-            // Tạo Intent để chuyển đến HealthTipDetailActivity
-            android.content.Intent intent = com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity.createIntent(
-                    requireContext(),
-                    healthTip.getId()
-            );
-            startActivity(intent);
-        } else {
-            showError("Không thể mở chi tiết mẹo sức khỏe do thiếu thông tin");
+    public void showMessage(String message) {
+        if (getView() != null) {
+            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();
         }
     }
 
     @Override
-    public void showRemoveFavoriteSuccess(String message) {
-        showMessage(message);
-    }
-
-    @Override
-    public void showRemoveFavoriteError(String message) {
-        showError(message);
-    }
-
-    @Override
-    public void showLoading() {
+    public void showLoading(boolean loading) {
         if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         }
 
         if (swipeRefreshLayout != null) {
-            swipeRefreshLayout.setRefreshing(true);
+            swipeRefreshLayout.setRefreshing(loading);
         }
     }
 
     @Override
     public void hideLoading() {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.GONE);
-        }
-
-        if (swipeRefreshLayout != null) {
-            swipeRefreshLayout.setRefreshing(false);
-        }
-    }
-
-    @Override
-    public void showMessage(String message) {
-        if (isAdded() && getContext() != null) {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-        }
+        showLoading(false);
     }
 
     @Override
     public void showError(String errorMessage) {
-        if (isAdded() && getView() != null) {
+        if (getView() != null) {
             Snackbar.make(getView(), errorMessage, Snackbar.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
         }
     }
 }

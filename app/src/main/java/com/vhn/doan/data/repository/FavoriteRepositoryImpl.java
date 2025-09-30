@@ -99,21 +99,17 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
             return;
         }
 
-        // Lấy danh sách favorite IDs từ Firebase theo cấu trúc mới
-        DatabaseReference userFavoritesRef = database.getReference(Constants.FAVORITES_REF).child(userId);
+        DatabaseReference userFavoritesRef = database.getReference(Constants.FAVORITES_REF)
+                .child(userId);
 
         userFavoritesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()) {
-                    // Người dùng chưa có favorite nào
-                    callback.onSuccess(new ArrayList<>());
-                    return;
-                }
-
                 List<String> favoriteIds = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String healthTipId = snapshot.getKey();
+
+                // Lấy danh sách ID các bài viết yêu thích
+                for (DataSnapshot favoriteSnapshot : dataSnapshot.getChildren()) {
+                    String healthTipId = favoriteSnapshot.getKey();
                     if (healthTipId != null) {
                         favoriteIds.add(healthTipId);
                     }
@@ -124,65 +120,49 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
                     return;
                 }
 
-                // Lấy chi tiết health tips từ các IDs
-                loadHealthTipsFromIds(favoriteIds, callback);
+                // Lấy chi tiết từng bài viết yêu thích
+                List<HealthTip> favoriteHealthTips = new ArrayList<>();
+                final int[] completedRequests = {0};
+
+                for (String healthTipId : favoriteIds) {
+                    healthTipRepository.getHealthTipDetail(healthTipId, new HealthTipRepository.SingleHealthTipCallback() {
+                        @Override
+                        public void onSuccess(HealthTip healthTip) {
+                            if (healthTip != null) {
+                                healthTip.setFavorite(true); // Đánh dấu là yêu thích
+                                favoriteHealthTips.add(healthTip);
+                            }
+                            completedRequests[0]++;
+
+                            if (completedRequests[0] == favoriteIds.size()) {
+                                callback.onSuccess(favoriteHealthTips);
+                            }
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            completedRequests[0]++;
+
+                            if (completedRequests[0] == favoriteIds.size()) {
+                                callback.onSuccess(favoriteHealthTips);
+                            }
+                        }
+                    });
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                callback.onError("Lỗi khi tải danh sách yêu thích: " + databaseError.getMessage());
+                callback.onError("Lỗi khi lấy danh sách yêu thích: " + databaseError.getMessage());
             }
         });
     }
 
-    /**
-     * Helper method để load health tips từ danh sách IDs
-     */
-    private void loadHealthTipsFromIds(List<String> healthTipIds, FavoriteListCallback callback) {
-        List<HealthTip> favoriteHealthTips = new ArrayList<>();
-        final int[] completedCount = {0};
-        final int totalCount = healthTipIds.size();
-
-        for (String healthTipId : healthTipIds) {
-            healthTipRepository.getHealthTipDetail(healthTipId, new HealthTipRepository.SingleHealthTipCallback() {
-                @Override
-                public void onSuccess(HealthTip healthTip) {
-                    if (healthTip != null) {
-                        favoriteHealthTips.add(healthTip);
-                    }
-                    completedCount[0]++;
-                    if (completedCount[0] >= totalCount) {
-                        callback.onSuccess(favoriteHealthTips);
-                    }
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    completedCount[0]++;
-                    if (completedCount[0] >= totalCount) {
-                        callback.onSuccess(favoriteHealthTips);
-                    }
-                }
-            });
-        }
-    }
-
     @Override
-    public void getFavoriteHealthTipIds(String userId, FavoriteListCallback callback) {
-        if (userId == null || userId.trim().isEmpty()) {
-            callback.onError("ID người dùng không hợp lệ");
-            return;
-        }
-
-        // Sử dụng method getFavoriteHealthTips đã được cải thiện
-        getFavoriteHealthTips(userId, callback);
-    }
-
-    @Override
-    public void isFavorite(String userId, String healthTipId, FavoriteCheckCallback callback) {
+    public void checkFavoriteStatus(String userId, String healthTipId, FavoriteCheckCallback callback) {
         if (userId == null || userId.trim().isEmpty() ||
             healthTipId == null || healthTipId.trim().isEmpty()) {
-            callback.onResult(false);
+            callback.onError("Thông tin không hợp lệ");
             return;
         }
 
@@ -193,13 +173,70 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
         favoriteRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                callback.onResult(dataSnapshot.exists());
+                boolean isFavorite = dataSnapshot.exists();
+                callback.onResult(isFavorite);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                callback.onResult(false);
+                callback.onError("Lỗi khi kiểm tra trạng thái yêu thích: " + databaseError.getMessage());
             }
         });
+    }
+
+    @Override
+    public void checkFavoriteStatus(String userId, String healthTipId, FavoriteStatusCallback callback) {
+        if (userId == null || userId.trim().isEmpty() ||
+            healthTipId == null || healthTipId.trim().isEmpty()) {
+            callback.onError("Thông tin không hợp lệ");
+            return;
+        }
+
+        DatabaseReference favoriteRef = database.getReference(Constants.FAVORITES_REF)
+                .child(userId)
+                .child(healthTipId);
+
+        favoriteRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                boolean isFavorite = dataSnapshot.exists();
+                callback.onResult(isFavorite);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                callback.onError("Lỗi khi kiểm tra trạng thái yêu thích: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void getFavoriteCount(String userId, FavoriteCountCallback callback) {
+        if (userId == null || userId.trim().isEmpty()) {
+            callback.onError("ID người dùng không hợp lệ");
+            return;
+        }
+
+        DatabaseReference userFavoritesRef = database.getReference(Constants.FAVORITES_REF)
+                .child(userId);
+
+        userFavoritesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                int count = (int) dataSnapshot.getChildrenCount();
+                callback.onSuccess(count);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                callback.onError("Lỗi khi đếm số lượng yêu thích: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void getFavoriteHealthTipIds(String userId, FavoriteListCallback callback) {
+        // Sử dụng lại logic của getFavoriteHealthTips
+        getFavoriteHealthTips(userId, callback);
     }
 }

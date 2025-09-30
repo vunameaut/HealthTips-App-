@@ -25,8 +25,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ContentBlock;
 import com.vhn.doan.data.HealthTip;
+import com.vhn.doan.data.repository.FavoriteRepository;
+import com.vhn.doan.data.repository.FavoriteRepositoryImpl;
 import com.vhn.doan.data.repository.HealthTipRepository;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
+import com.vhn.doan.utils.UserSessionManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -95,7 +98,9 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
         // Khởi tạo presenter
         HealthTipRepository repository = new HealthTipRepositoryImpl();
-        presenter = new HealthTipDetailPresenterImpl(repository);
+        FavoriteRepository favoriteRepository = new FavoriteRepositoryImpl();
+        UserSessionManager userSessionManager = new UserSessionManager(this);
+        presenter = new HealthTipDetailPresenterImpl(repository, favoriteRepository, userSessionManager);
         presenter.attachView(this);
 
         // Khởi tạo adapter cho ContentBlock
@@ -356,8 +361,9 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
                 chip.setTextColor(getResources().getColor(R.color.chip_text));
 
                 chip.setOnClickListener(v -> {
-                    // Xử lý khi click vào tag (ví dụ: mở màn hình search với tag này)
-                    showMessage("Tìm kiếm bài viết với tag: " + tag);
+                    // Mở màn hình search với tag này
+                    Intent searchIntent = com.vhn.doan.presentation.search.SearchActivity.createIntentWithTag(HealthTipDetailActivity.this, tag);
+                    startActivity(searchIntent);
                 });
 
                 chipGroupTags.addView(chip);

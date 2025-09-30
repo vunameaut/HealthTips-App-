@@ -58,67 +58,75 @@ public class GridFavoriteAdapter extends RecyclerView.Adapter<GridFavoriteAdapte
 
     @Override
     public int getItemCount() {
-        return healthTips.size();
+        return healthTips != null ? healthTips.size() : 0;
     }
 
     /**
-     * Cập nhật danh sách dữ liệu
-     * @param newData danh sách mẹo sức khỏe mới
+     * Cập nhật danh sách yêu thích
      */
-    public void updateData(List<HealthTip> newData) {
-        this.healthTips = newData;
+    public void updateFavoriteList(List<HealthTip> newHealthTips) {
+        this.healthTips = newHealthTips;
         notifyDataSetChanged();
     }
 
     /**
-     * ViewHolder cho grid item
+     * ViewHolder cho từng item trong grid
      */
-    static class GridViewHolder extends RecyclerView.ViewHolder {
+    public static class GridViewHolder extends RecyclerView.ViewHolder {
         private final CardView cardView;
         private final ImageView imageView;
-        private final TextView titleView;
-        private final ImageView btnRemoveFavorite;
+        private final TextView titleTextView;
+        private final ImageView removeButton;
 
         public GridViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = itemView.findViewById(R.id.cardView);
             imageView = itemView.findViewById(R.id.imageView);
-            titleView = itemView.findViewById(R.id.titleView);
-            btnRemoveFavorite = itemView.findViewById(R.id.btnRemoveFavorite);
+            titleTextView = itemView.findViewById(R.id.textViewTitle);
+            removeButton = itemView.findViewById(R.id.imageViewRemove);
         }
 
-        void bind(final HealthTip healthTip, final OnFavoriteItemClickListener listener) {
+        public void bind(HealthTip healthTip, OnFavoriteItemClickListener listener) {
             // Thiết lập tiêu đề
-            titleView.setText(healthTip.getTitle());
-
-            // Tải hình ảnh nếu có
-            if (healthTip.getImageUrl() != null && !healthTip.getImageUrl().isEmpty()) {
-                RequestOptions requestOptions = new RequestOptions()
-                        .transforms(new CenterCrop(), new RoundedCorners(8));
-
-                Glide.with(itemView.getContext())
-                        .load(healthTip.getImageUrl())
-                        .apply(requestOptions)
-                        .placeholder(R.drawable.placeholder_image)
-                        .error(R.drawable.error_image)
-                        .into(imageView);
-            } else {
-                // Nếu không có hình, hiển thị placeholder
-                imageView.setImageResource(R.drawable.placeholder_image);
+            if (titleTextView != null) {
+                titleTextView.setText(healthTip.getTitle());
             }
 
-            // Thiết lập sự kiện click
-            cardView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onItemClick(healthTip);
-                }
-            });
+            // Tải hình ảnh
+            if (imageView != null) {
+                String imageUrl = healthTip.getImageUrl();
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    RequestOptions requestOptions = new RequestOptions()
+                            .transform(new CenterCrop(), new RoundedCorners(16));
 
-            btnRemoveFavorite.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onRemoveFavorite(healthTip);
+                    Glide.with(itemView.getContext())
+                            .load(imageUrl)
+                            .apply(requestOptions)
+                            .placeholder(R.drawable.placeholder_image)
+                            .error(R.drawable.error_image)
+                            .into(imageView);
+                } else {
+                    imageView.setImageResource(R.drawable.placeholder_image);
                 }
-            });
+            }
+
+            // Thiết lập sự kiện click cho item
+            if (cardView != null) {
+                cardView.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onItemClick(healthTip);
+                    }
+                });
+            }
+
+            // Thiết lập sự kiện click cho nút xóa
+            if (removeButton != null) {
+                removeButton.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onRemoveFavorite(healthTip);
+                    }
+                });
+            }
         }
     }
 }

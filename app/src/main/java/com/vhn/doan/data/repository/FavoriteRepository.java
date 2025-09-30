@@ -36,6 +36,14 @@ public interface FavoriteRepository {
     }
 
     /**
+     * Callback interface kiểm tra trạng thái yêu thích (tên mới)
+     */
+    interface FavoriteStatusCallback {
+        void onResult(boolean isFavorite);
+        void onError(String errorMessage);
+    }
+
+    /**
      * Thêm mẹo sức khỏe vào danh sách yêu thích
      * @param userId ID người dùng
      * @param healthTipId ID mẹo sức khỏe
@@ -59,19 +67,20 @@ public interface FavoriteRepository {
     void getFavoriteHealthTips(String userId, FavoriteListCallback callback);
 
     /**
-     * Kiểm tra xem mẹo sức khỏe có được yêu thích hay không
+     * Kiểm tra xem một mẹo sức khỏe có được yêu thích bởi người dùng hay không
      * @param userId ID người dùng
      * @param healthTipId ID mẹo sức khỏe
-     * @param callback Callback trả về kết quả kiểm tra
+     * @param callback Callback trả về trạng thái yêu thích
      */
-    void isFavorite(String userId, String healthTipId, FavoriteCheckCallback callback);
+    void checkFavoriteStatus(String userId, String healthTipId, FavoriteCheckCallback callback);
 
     /**
-     * Lấy danh sách ID các mẹo sức khỏe yêu thích của người dùng
+     * Kiểm tra xem một mẹo sức khỏe có được yêu thích bởi người dùng hay không (phương thức mới)
      * @param userId ID người dùng
-     * @param callback Callback trả về danh sách ID
+     * @param healthTipId ID mẹo sức khỏe
+     * @param callback Callback trả về trạng thái yêu thích
      */
-    void getFavoriteHealthTipIds(String userId, FavoriteListCallback callback);
+    void checkFavoriteStatus(String userId, String healthTipId, FavoriteStatusCallback callback);
 
     /**
      * Xóa tất cả yêu thích của người dùng
@@ -79,4 +88,26 @@ public interface FavoriteRepository {
      * @param callback Callback xử lý kết quả
      */
     void clearAllFavorites(String userId, FavoriteActionCallback callback);
+
+    /**
+     * Lấy số lượng mẹo sức khỏe yêu thích của người dùng
+     * @param userId ID người dùng
+     * @param callback Callback trả về số lượng
+     */
+    void getFavoriteCount(String userId, FavoriteCountCallback callback);
+
+    /**
+     * Lấy danh sách ID các mẹo sức khỏe yêu thích của người dùng
+     * @param userId ID người dùng
+     * @param callback Callback trả về danh sách ID yêu thích
+     */
+    void getFavoriteHealthTipIds(String userId, FavoriteListCallback callback);
+
+    /**
+     * Callback interface cho số lượng yêu thích
+     */
+    interface FavoriteCountCallback {
+        void onSuccess(int count);
+        void onError(String error);
+    }
 }

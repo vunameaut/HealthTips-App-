@@ -59,11 +59,10 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
             public void onSuccess(List<HealthTip> favoriteHealthTips) {
                 if (getView() != null) {
                     getView().hideLoading();
-
                     if (favoriteHealthTips != null && !favoriteHealthTips.isEmpty()) {
-                        getView().showFavoriteHealthTips(favoriteHealthTips);
+                        getView().displayFavoriteHealthTips(favoriteHealthTips);
                     } else {
-                        getView().showEmptyFavorites();
+                        getView().showEmptyState();
                     }
                 }
             }
@@ -72,50 +71,46 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
             public void onError(String error) {
                 if (getView() != null) {
                     getView().hideLoading();
-                    getView().showError("Không thể tải danh sách yêu thích: " + error);
+                    getView().showError("Lỗi khi tải danh sách yêu thích: " + error);
                 }
             }
         });
     }
 
     /**
-     * Làm mới danh sách bài viết yêu thích
+     * Refresh lại danh sách yêu thích
      */
     public void refreshFavorites() {
         loadFavoriteHealthTips();
     }
 
     /**
-     * Xử lý khi người dùng chọn một bài viết
-     * @param healthTip bài viết được chọn
+     * Xử lý khi người dùng click vào một bài viết yêu thích
      */
-    public void onHealthTipSelected(HealthTip healthTip) {
+    public void onHealthTipClicked(HealthTip healthTip) {
         if (getView() != null && healthTip != null) {
-            getView().navigateToHealthTipDetail(healthTip);
+            getView().navigateToHealthTipDetail(healthTip.getId());
         }
     }
 
     /**
-     * Xóa bài viết khỏi danh sách yêu thích
-     * @param healthTip bài viết cần xóa
+     * Xử lý khi người dùng xóa bài viết khỏi danh sách yêu thích
      */
-    public void removeFromFavorites(HealthTip healthTip) {
-        if (healthTip == null) return;
-
+    public void onRemoveFavorite(String healthTipId) {
         String userId = userSessionManager.getCurrentUserId();
-        if (userId == null) {
+        if (userId == null || healthTipId == null) {
             if (getView() != null) {
-                getView().showRemoveFavoriteError("Vui lòng đăng nhập để thực hiện thao tác này");
+                getView().showError("Không thể thực hiện thao tác");
             }
             return;
         }
 
-        favoriteRepository.removeFromFavorites(userId, healthTip.getId(), new FavoriteRepository.FavoriteActionCallback() {
+        favoriteRepository.removeFromFavorites(userId, healthTipId, new FavoriteRepository.FavoriteActionCallback() {
             @Override
             public void onSuccess() {
                 if (getView() != null) {
-                    getView().showRemoveFavoriteSuccess("Đã xóa khỏi danh sách yêu thích");
-                    // Tải lại danh sách sau khi xóa
+                    getView().showMessage("Đã xóa khỏi danh sách yêu thích");
+                    // Refresh lại danh sách
                     loadFavoriteHealthTips();
                 }
             }
@@ -123,9 +118,85 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
             @Override
             public void onError(String error) {
                 if (getView() != null) {
-                    getView().showRemoveFavoriteError("Không thể xóa khỏi danh sách yêu thích: " + error);
+                    getView().showError("Lỗi khi xóa khỏi yêu thích: " + error);
                 }
             }
         });
+    }
+
+    /**
+     * Lấy số lượng bài viết yêu thích
+     */
+    public void getFavoriteCount() {
+        String userId = userSessionManager.getCurrentUserId();
+        if (userId == null) {
+            return;
+        }
+
+        favoriteRepository.getFavoriteCount(userId, new FavoriteRepository.FavoriteCountCallback() {
+            @Override
+            public void onSuccess(int count) {
+                if (getView() != null) {
+                    getView().updateFavoriteCount(count);
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                // Không cần hiển thị lỗi cho count
+            }
+        });
+    }
+
+    /**
+     * Xóa tất cả yêu thích
+     */
+    public void clearAllFavorites() {
+        String userId = userSessionManager.getCurrentUserId();
+        if (userId == null) {
+            if (getView() != null) {
+                getView().showError("Vui lòng đăng nhập");
+            }
+            return;
+        }
+
+        if (getView() != null) {
+            getView().showLoading();
+        }
+
+        favoriteRepository.clearAllFavorites(userId, new FavoriteRepository.FavoriteActionCallback() {
+            @Override
+            public void onSuccess() {
+                if (getView() != null) {
+                    getView().hideLoading();
+                    getView().showMessage("Đã xóa tất cả yêu thích");
+                    getView().showEmptyState();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                if (getView() != null) {
+                    getView().hideLoading();
+                    getView().showError("Lỗi khi xóa tất cả yêu thích: " + error);
+                }
+            }
+        });
+    }
+
+    /**
+     * Xử lý khi người dùng chọn một bài viết yêu thích (tên phương thức cũ)
+     */
+    public void onHealthTipSelected(HealthTip healthTip) {
+        onHealthTipClicked(healthTip);
+    }
+
+    /**
+     * Xử lý khi người dùng xóa bài viết khỏi danh sách yêu thích (tên phương thức cũ)
+     */
+    public void removeFromFavorites(HealthTip healthTip) {
+        if (healthTip != null) {
+            onRemoveFavorite(healthTip.getId());
+        }
     }
 }

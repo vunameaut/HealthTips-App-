@@ -64,6 +64,18 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
     private static final int VIEW_SEARCH_HISTORY = 0;
     private static final int VIEW_SEARCH_RESULTS = 1;
 
+    // Constants cho Intent extras
+    private static final String EXTRA_SEARCH_TAG = "extra_search_tag";
+
+    /**
+     * Tạo Intent để mở SearchActivity với tag tìm kiếm sẵn
+     */
+    public static Intent createIntentWithTag(android.content.Context context, String tag) {
+        Intent intent = new Intent(context, SearchActivity.class);
+        intent.putExtra(EXTRA_SEARCH_TAG, tag);
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +101,26 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
 
         // Tải lịch sử tìm kiếm
         mPresenter.loadSearchHistory();
+
+        // Xử lý tag từ Intent nếu có
+        handleIntentTag();
+    }
+
+    /**
+     * Xử lý tag từ Intent để tự động tìm kiếm
+     */
+    private void handleIntentTag() {
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(EXTRA_SEARCH_TAG)) {
+            String tag = intent.getStringExtra(EXTRA_SEARCH_TAG);
+            if (tag != null && !tag.isEmpty()) {
+                // Đặt tag vào ô tìm kiếm
+                etSearch.setText(tag);
+
+                // Tự động thực hiện tìm kiếm
+                performSearch(tag);
+            }
+        }
     }
 
     private void initViews() {

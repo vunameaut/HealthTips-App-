@@ -6,7 +6,9 @@ import com.vhn.doan.presentation.base.BaseView;
 import java.util.List;
 
 /**
- * Interface định nghĩa các phương thức view cho màn hình danh sách bài viết yêu thích
+ * Interface FavoriteView định nghĩa các phương thức cần thiết
+ * cho view hiển thị danh sách bài viết yêu thích
+ * Tuân theo kiến trúc MVP (Model-View-Presenter)
  */
 public interface FavoriteView extends BaseView {
 
@@ -14,28 +16,28 @@ public interface FavoriteView extends BaseView {
      * Hiển thị danh sách bài viết yêu thích
      * @param favoriteHealthTips danh sách bài viết yêu thích
      */
-    void showFavoriteHealthTips(List<HealthTip> favoriteHealthTips);
+    void displayFavoriteHealthTips(List<HealthTip> favoriteHealthTips);
 
     /**
-     * Hiển thị trạng thái khi không có bài viết yêu thích nào
+     * Hiển thị trạng thái rỗng khi không có bài viết yêu thích
      */
-    void showEmptyFavorites();
+    void showEmptyState();
 
     /**
      * Điều hướng đến màn hình chi tiết bài viết
-     * @param healthTip bài viết được chọn
+     * @param healthTipId ID của bài viết
      */
-    void navigateToHealthTipDetail(HealthTip healthTip);
+    void navigateToHealthTipDetail(String healthTipId);
 
     /**
-     * Hiển thị thông báo khi xóa khỏi danh sách yêu thích thành công
-     * @param message thông báo
+     * Cập nhật số lượng bài viết yêu thích
+     * @param count số lượng bài viết yêu thích
      */
-    void showRemoveFavoriteSuccess(String message);
+    void updateFavoriteCount(int count);
 
     /**
-     * Hiển thị thông báo lỗi khi xóa khỏi danh sách yêu thích thất bại
-     * @param message thông báo lỗi
+     * Hiển thị thông báo cho người dùng
+     * @param message nội dung thông báo
      */
-    void showRemoveFavoriteError(String message);
+    void showMessage(String message);
 }

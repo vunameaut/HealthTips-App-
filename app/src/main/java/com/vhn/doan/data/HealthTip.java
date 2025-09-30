@@ -21,7 +21,7 @@ public class HealthTip {
     private Integer viewCount;
     private Integer likeCount;
     private String imageUrl;
-    private long createdAt;
+    private Long createdAt; // Thay đổi từ long thành Long để tương thích với Firebase
     private boolean isFavorite;
     private boolean isLiked;
     private Integer recommendationScore;
@@ -249,16 +249,52 @@ public class HealthTip {
         return viewCount != null ? viewCount : 0;
     }
 
-    public void setViewCount(Integer viewCount) {
-        this.viewCount = viewCount;
+    /**
+     * Setter duy nhất để xử lý conversion từ Object sang Integer an toàn
+     * Khắc phục lỗi Firebase DatabaseException với conflicting setters
+     */
+    public void setViewCount(Object viewCount) {
+        if (viewCount == null) {
+            this.viewCount = 0;
+        } else if (viewCount instanceof Integer) {
+            this.viewCount = (Integer) viewCount;
+        } else if (viewCount instanceof Long) {
+            this.viewCount = ((Long) viewCount).intValue();
+        } else if (viewCount instanceof String) {
+            try {
+                this.viewCount = Integer.parseInt((String) viewCount);
+            } catch (NumberFormatException e) {
+                this.viewCount = 0;
+            }
+        } else {
+            this.viewCount = 0;
+        }
     }
 
     public Integer getLikeCount() {
         return likeCount != null ? likeCount : 0;
     }
 
-    public void setLikeCount(Integer likeCount) {
-        this.likeCount = likeCount;
+    /**
+     * Setter duy nhất để xử lý conversion từ Object sang Integer an toàn
+     * Khắc phục lỗi Firebase DatabaseException với conflicting setters
+     */
+    public void setLikeCount(Object likeCount) {
+        if (likeCount == null) {
+            this.likeCount = 0;
+        } else if (likeCount instanceof Integer) {
+            this.likeCount = (Integer) likeCount;
+        } else if (likeCount instanceof Long) {
+            this.likeCount = ((Long) likeCount).intValue();
+        } else if (likeCount instanceof String) {
+            try {
+                this.likeCount = Integer.parseInt((String) likeCount);
+            } catch (NumberFormatException e) {
+                this.likeCount = 0;
+            }
+        } else {
+            this.likeCount = 0;
+        }
     }
 
     public String getImageUrl() {
@@ -269,12 +305,26 @@ public class HealthTip {
         this.imageUrl = imageUrl;
     }
 
-    public long getCreatedAt() {
-        return createdAt;
+    public Long getCreatedAt() {
+        return createdAt != null ? createdAt : System.currentTimeMillis();
     }
 
-    public void setCreatedAt(long createdAt) {
-        this.createdAt = createdAt;
+    public void setCreatedAt(Object createdAt) {
+        if (createdAt == null) {
+            this.createdAt = System.currentTimeMillis();
+        } else if (createdAt instanceof Long) {
+            this.createdAt = (Long) createdAt;
+        } else if (createdAt instanceof Integer) {
+            this.createdAt = ((Integer) createdAt).longValue();
+        } else if (createdAt instanceof String) {
+            try {
+                this.createdAt = Long.parseLong((String) createdAt);
+            } catch (NumberFormatException e) {
+                this.createdAt = System.currentTimeMillis();
+            }
+        } else {
+            this.createdAt = System.currentTimeMillis();
+        }
     }
 
     public boolean isFavorite() {
@@ -297,8 +347,26 @@ public class HealthTip {
         return recommendationScore;
     }
 
-    public void setRecommendationScore(Integer recommendationScore) {
-        this.recommendationScore = recommendationScore;
+    /**
+     * Setter an toàn để xử lý conversion từ Object sang Integer
+     * Khắc phục lỗi Firebase DatabaseException với conversion
+     */
+    public void setRecommendationScore(Object recommendationScore) {
+        if (recommendationScore == null) {
+            this.recommendationScore = null;
+        } else if (recommendationScore instanceof Integer) {
+            this.recommendationScore = (Integer) recommendationScore;
+        } else if (recommendationScore instanceof Long) {
+            this.recommendationScore = ((Long) recommendationScore).intValue();
+        } else if (recommendationScore instanceof String) {
+            try {
+                this.recommendationScore = Integer.parseInt((String) recommendationScore);
+            } catch (NumberFormatException e) {
+                this.recommendationScore = null;
+            }
+        } else {
+            this.recommendationScore = null;
+        }
     }
 
     public String getExcerpt() {
@@ -337,16 +405,44 @@ public class HealthTip {
         return publishedAt;
     }
 
-    public void setPublishedAt(Long publishedAt) {
-        this.publishedAt = publishedAt;
+    public void setPublishedAt(Object publishedAt) {
+        if (publishedAt == null) {
+            this.publishedAt = null;
+        } else if (publishedAt instanceof Long) {
+            this.publishedAt = (Long) publishedAt;
+        } else if (publishedAt instanceof Integer) {
+            this.publishedAt = ((Integer) publishedAt).longValue();
+        } else if (publishedAt instanceof String) {
+            try {
+                this.publishedAt = Long.parseLong((String) publishedAt);
+            } catch (NumberFormatException e) {
+                this.publishedAt = null;
+            }
+        } else {
+            this.publishedAt = null;
+        }
     }
 
     public Long getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Long updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setUpdatedAt(Object updatedAt) {
+        if (updatedAt == null) {
+            this.updatedAt = null;
+        } else if (updatedAt instanceof Long) {
+            this.updatedAt = (Long) updatedAt;
+        } else if (updatedAt instanceof Integer) {
+            this.updatedAt = ((Integer) updatedAt).longValue();
+        } else if (updatedAt instanceof String) {
+            try {
+                this.updatedAt = Long.parseLong((String) updatedAt);
+            } catch (NumberFormatException e) {
+                this.updatedAt = null;
+            }
+        } else {
+            this.updatedAt = null;
+        }
     }
 
     public Boolean getIsFeature() {
@@ -385,8 +481,22 @@ public class HealthTip {
         return scheduledAt;
     }
 
-    public void setScheduledAt(Long scheduledAt) {
-        this.scheduledAt = scheduledAt;
+    public void setScheduledAt(Object scheduledAt) {
+        if (scheduledAt == null) {
+            this.scheduledAt = null;
+        } else if (scheduledAt instanceof Long) {
+            this.scheduledAt = (Long) scheduledAt;
+        } else if (scheduledAt instanceof Integer) {
+            this.scheduledAt = ((Integer) scheduledAt).longValue();
+        } else if (scheduledAt instanceof String) {
+            try {
+                this.scheduledAt = Long.parseLong((String) scheduledAt);
+            } catch (NumberFormatException e) {
+                this.scheduledAt = null;
+            }
+        } else {
+            this.scheduledAt = null;
+        }
     }
 
     public String getSlug() {
