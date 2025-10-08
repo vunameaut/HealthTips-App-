@@ -13,6 +13,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Quyền truy cập bộ nhớ -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <!-- Quyền truy cập ảnh cho Android 13+ (API 33+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <!-- Quyền tắt tối ưu hóa pin để hoạt động trong Doze mode -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
@@ -71,13 +76,6 @@
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
 
-        <!-- Thêm Activity cho chế độ Preview -->
-        <activity
-            android:name=".presentation.healthtip.detail.HealthTipPreviewActivity"
-            android:exported="false"
-            android:theme="@style/Theme.HealthTipDetail"
-            android:label="@string/preview_mode_title" />
-
         <!-- Activity Test cho giao diện mới -->
         <activity
             android:name=".presentation.healthtip.detail.HealthTipDetailTestActivity"
@@ -107,6 +105,11 @@
             android:name=".presentation.profile.LikedVideosPlayerActivity"
             android:exported="false"
             android:theme="@style/Theme.VideoPlayer" />
+
+        <!-- Màn hình chỉnh sửa thông tin cá nhân -->
+        <activity
+            android:name=".presentation.profile.EditProfileActivity"
+            android:exported="false" />
 
         <!-- Debug Activity -->
         <activity

@@ -62,7 +62,6 @@ public class SimpleProfileFragment extends BaseFragment {
         profileImage = view.findViewById(R.id.profile_image);
         profileName = view.findViewById(R.id.profile_name);
         profileUsername = view.findViewById(R.id.profile_username);
-        profileBio = view.findViewById(R.id.profile_bio);
 
         btnToggleTheme = view.findViewById(R.id.btn_toggle_theme);
         btnMenu = view.findViewById(R.id.btn_menu);

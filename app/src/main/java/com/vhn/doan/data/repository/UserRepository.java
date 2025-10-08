@@ -92,4 +92,22 @@ public interface UserRepository {
      * @param callback callback để nhận kết quả
      */
     void updateUserPreference(String uid, String key, Object value, UserOperationCallback callback);
+
+    /**
+     * Cập nhật ảnh đại diện của người dùng
+     * @param uid UID của người dùng
+     * @param photoUrl URL của ảnh đại diện mới
+     * @param callback callback để nhận kết quả
+     */
+    void updateUserAvatar(String uid, String photoUrl, UserOperationCallback callback);
+
+    /**
+     * Cập nhật thông tin cá nhân của người dùng
+     * @param uid UID của người dùng
+     * @param displayName Tên hiển thị mới
+     * @param bio Giới thiệu bản thân mới
+     * @param phoneNumber Số điện thoại mới
+     * @param callback callback để nhận kết quả
+     */
+    void updateUserProfile(String uid, String displayName, String bio, String phoneNumber, UserOperationCallback callback);
 }

@@ -13,6 +13,7 @@ public class User {
     private String displayName;
     private String photoUrl;
     private String phoneNumber;
+    private String bio; // Thêm field bio để lưu giới thiệu ngắn
     private long createdAt;
     private long lastLoginAt;
     private boolean isActive;
@@ -81,6 +82,14 @@ public class User {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 
     public long getCreatedAt() {

@@ -151,4 +151,69 @@ public class UserRepositoryImpl implements UserRepository {
                 .addOnSuccessListener(aVoid -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onError("Lỗi khi cập nhật tùy chọn: " + e.getMessage()));
     }
+
+    /**
+     * Cập nhật ảnh avatar của người dùng
+     * @param uid UID của người dùng
+     * @param photoUrl URL của avatar mới
+     * @param callback callback để nhận kết quả
+     */
+    @Override
+    public void updateUserAvatar(String uid, String photoUrl, UserOperationCallback callback) {
+        if (uid == null || uid.isEmpty()) {
+            callback.onError("UID không hợp lệ");
+            return;
+        }
+
+        if (photoUrl == null || photoUrl.isEmpty()) {
+            callback.onError("URL ảnh không hợp lệ");
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("photoUrl", photoUrl);
+
+        usersRef.child(uid).updateChildren(updates)
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError("Lỗi khi cập nhật ảnh đại diện: " + e.getMessage()));
+    }
+
+    /**
+     * Cập nhật thông tin cá nhân của người dùng
+     * @param uid UID của người dùng
+     * @param displayName Tên hiển thị mới
+     * @param bio Giới thiệu bản thân mới
+     * @param phoneNumber Số điện thoại mới
+     * @param callback callback để nhận kết quả
+     */
+    @Override
+    public void updateUserProfile(String uid, String displayName, String bio, String phoneNumber, UserOperationCallback callback) {
+        if (uid == null || uid.isEmpty()) {
+            callback.onError("UID không hợp lệ");
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+
+        if (displayName != null && !displayName.isEmpty()) {
+            updates.put("displayName", displayName);
+        }
+
+        if (bio != null) {
+            updates.put("bio", bio);
+        }
+
+        if (phoneNumber != null) {
+            updates.put("phoneNumber", phoneNumber);
+        }
+
+        if (updates.isEmpty()) {
+            callback.onError("Không có thông tin nào cần cập nhật");
+            return;
+        }
+
+        usersRef.child(uid).updateChildren(updates)
+                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError("Lỗi khi cập nhật thông tin cá nhân: " + e.getMessage()));
+    }
 }

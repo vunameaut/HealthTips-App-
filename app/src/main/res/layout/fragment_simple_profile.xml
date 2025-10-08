@@ -69,18 +69,33 @@
             app:layout_scrollFlags="scroll|enterAlways">
 
             <!-- Profile Header -->
-            <ImageView
-                android:id="@+id/profile_image"
+            <FrameLayout
+                android:id="@+id/profile_image_container"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginTop="8dp"
-                android:src="@drawable/default_avatar"
-                android:background="@drawable/circle_background"
-                android:padding="2dp"
-                android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/profile_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/default_avatar"
+                    android:background="@drawable/circle_background"
+                    android:padding="2dp"
+                    android:scaleType="centerCrop" />
+
+                <ProgressBar
+                    android:id="@+id/avatar_upload_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="20dp"
+                    android:visibility="gone"
+                    android:background="@drawable/circle_background_transparent"
+                    android:indeterminate="true" />
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/profile_name"
@@ -92,7 +107,7 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/profile_image" />
+                app:layout_constraintTop_toBottomOf="@+id/profile_image_container" />
 
             <TextView
                 android:id="@+id/profile_username"
@@ -106,22 +121,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/profile_name" />
 
-            <!-- Bio -->
-            <TextView
-                android:id="@+id/profile_bio"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="32dp"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="3"
-                android:text="Mô tả ngắn về bản thân. Đây là bio của người dùng, có thể hiển thị vài dòng thông tin."
-                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/profile_username" />
+            <!-- Đã xóa phần Bio theo yêu cầu -->
 
             <!-- TabLayout nằm ngay sau bio -->
         </androidx.constraintlayout.widget.ConstraintLayout>

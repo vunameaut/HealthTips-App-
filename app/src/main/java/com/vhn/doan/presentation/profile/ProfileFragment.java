@@ -1,6 +1,7 @@
 package com.vhn.doan.presentation.profile;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -21,8 +23,10 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.vhn.doan.R;
+import com.vhn.doan.data.User;
+import com.vhn.doan.data.repository.UserRepository;
+import com.vhn.doan.data.repository.UserRepositoryImpl;
 import com.vhn.doan.presentation.auth.LoginActivity;
-import android.content.Intent;
 import com.vhn.doan.presentation.profile.SettingsActivity;
 import com.vhn.doan.presentation.base.BaseFragment;
 
@@ -33,9 +37,10 @@ import com.vhn.doan.presentation.base.BaseFragment;
 public class ProfileFragment extends BaseFragment implements ProfileContract.View {
 
     private ProfileContract.Presenter presenter;
-    private TextView profileName, profileUsername, profileBio;
+    private TextView profileName, profileUsername;
     private ImageButton btnToggleTheme, btnMenu;
     private ImageView profileImage;
+    private ProgressBar avatarUploadProgress;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private FirebaseAuth firebaseAuth;
@@ -53,8 +58,10 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         super.onCreate(savedInstanceState);
         // Khởi tạo Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance();
-        // TODO: Inject presenter through Dagger 2 trong tương lai
-        // presenter = DaggerProfileComponent.create().getPresenter();
+
+        // Khởi tạo presenter với các dependency cần thiết
+        UserRepository userRepository = new UserRepositoryImpl();
+        presenter = new ProfilePresenterImpl(userRepository, firebaseAuth);
     }
 
     @Nullable
@@ -76,6 +83,10 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         // Attach presenter nếu có
         if (presenter != null) {
             presenter.attachView(this);
+            // Thiết lập context cho presenter để có thể tải ảnh lên Cloudinary
+            if (presenter instanceof ProfilePresenterImpl) {
+                ((ProfilePresenterImpl) presenter).setContext(getContext());
+            }
             presenter.loadUserProfile();
         }
     }
@@ -94,11 +105,17 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         profileImage = view.findViewById(R.id.profile_image);
         profileName = view.findViewById(R.id.profile_name);
         profileUsername = view.findViewById(R.id.profile_username);
-        profileBio = view.findViewById(R.id.profile_bio);
-
+        avatarUploadProgress = view.findViewById(R.id.avatar_upload_progress);
 
         btnToggleTheme = view.findViewById(R.id.btn_toggle_theme);
         btnMenu = view.findViewById(R.id.btn_menu);
+
+        // Thiết lập sự kiện click cho avatar để hiển thị dialog tùy chọn
+        profileImage.setOnClickListener(v -> showAvatarOptionsDialog());
+
+        // Thiết lập sự kiện cho các nút khác
+        btnToggleTheme.setOnClickListener(v -> toggleDarkMode());
+        btnMenu.setOnClickListener(v -> showMenuOptions());
 
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
@@ -192,12 +209,10 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
             profileName.setText(displayName != null ? displayName : "Người dùng");
             profileUsername.setText("@" + (email != null ? email.split("@")[0] : "user"));
-            profileBio.setText("Mô tả của người dùng chưa được cập nhật. Hãy thêm mô tả để mọi người biết thêm về bạn.");
         } else {
             // Nếu chưa đăng nhập, hiển thị thông báo
             profileName.setText("Chưa đăng nhập");
             profileUsername.setText("@guest");
-            profileBio.setText("Vui lòng đăng nhập để xem thông tin cá nhân");
         }
     }
 
@@ -249,14 +264,6 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
     }
 
     @Override
-    public void displayUserProfile(String userInfo) {
-        // Phương thức này sẽ được presenter gọi để hiển thị thông tin người dùng
-        if (profileBio != null) {
-            profileBio.setText(userInfo);
-        }
-    }
-
-    @Override
     public void showError(String message) {
         if (getContext() != null) {
             Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
@@ -290,5 +297,228 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
         // Chuyển về màn hình đăng nhập
         navigateToLogin();
+    }
+
+    /**
+     * Hiển thị dialog với các tùy chọn cho avatar
+     */
+    private void showAvatarOptionsDialog() {
+        if (getContext() == null) return;
+
+        // Sử dụng BottomSheetDialog hiển thị các tùy chọn
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext(), R.style.BottomSheetDialogTheme);
+        View bottomSheetView = getLayoutInflater().inflate(R.layout.dialog_avatar_options, null);
+        bottomSheetDialog.setContentView(bottomSheetView);
+
+        // Khởi tạo các view trong dialog
+        LinearLayout viewAvatarOption = bottomSheetView.findViewById(R.id.view_avatar_option);
+        LinearLayout changeAvatarOption = bottomSheetView.findViewById(R.id.change_avatar_option);
+        LinearLayout editProfileOption = bottomSheetView.findViewById(R.id.edit_profile_option);
+
+        // Thiết lập sự kiện click cho các tùy chọn
+        viewAvatarOption.setOnClickListener(v -> {
+            viewFullAvatar();
+            bottomSheetDialog.dismiss();
+        });
+
+        changeAvatarOption.setOnClickListener(v -> {
+            openImagePicker();
+            bottomSheetDialog.dismiss();
+        });
+
+        editProfileOption.setOnClickListener(v -> {
+            openEditProfile();
+            bottomSheetDialog.dismiss();
+        });
+
+        // Hiển thị dialog
+        bottomSheetDialog.show();
+    }
+
+    /**
+     * Mở màn hình xem avatar kích thước đầy đủ
+     */
+    private void viewFullAvatar() {
+        if (getContext() == null) return;
+
+        // Sử dụng presenter để lấy thông tin avatar hiện tại
+        if (presenter != null) {
+            presenter.getCurrentUserAvatar(new ProfileContract.AvatarCallback() {
+                @Override
+                public void onAvatarLoaded(String avatarUrl) {
+                    if (getContext() == null) return;
+
+                    if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                        // Tạo một dialog hiển thị ảnh avatar kích thước lớn
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        ImageView imageView = new ImageView(getContext());
+
+                        // Load avatar sử dụng Glide với force no-cache
+                        com.bumptech.glide.Glide.with(ProfileFragment.this)
+                                .load(avatarUrl)
+                                .skipMemoryCache(true)
+                                .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                                .placeholder(R.drawable.default_avatar)
+                                .error(R.drawable.default_avatar)
+                                .into(imageView);
+
+                        builder.setView(imageView);
+                        builder.setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss());
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    } else {
+                        Toast.makeText(getContext(), "Không có ảnh đại diện để hiển thị", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } else {
+            // Fallback nếu presenter chưa được khởi tạo
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            if (currentUser != null && currentUser.getPhotoUrl() != null) {
+                // Tạo một dialog hiển thị ảnh avatar kích thước lớn
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                ImageView imageView = new ImageView(getContext());
+
+                // Load avatar sử dụng Glide
+                com.bumptech.glide.Glide.with(this)
+                        .load(currentUser.getPhotoUrl())
+                        .placeholder(R.drawable.default_avatar)
+                        .error(R.drawable.default_avatar)
+                        .into(imageView);
+
+                builder.setView(imageView);
+                builder.setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss());
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } else {
+                Toast.makeText(getContext(), "Không có ảnh đại diện để hiển thị", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Mở màn hình chọn ảnh từ thiết bị
+     */
+    private void openImagePicker() {
+        if (getContext() == null) return;
+
+        // Kiểm tra quyền truy cập bộ nhớ
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(getContext(),
+                android.Manifest.permission.READ_MEDIA_IMAGES) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                // Yêu cầu quyền truy cập READ_MEDIA_IMAGES cho Android 13+
+                requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES}, REQUEST_STORAGE_PERMISSION);
+                return;
+            }
+        } else {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(getContext(),
+                android.Manifest.permission.READ_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                // Yêu cầu quyền truy cập READ_EXTERNAL_STORAGE cho các phiên bản Android cũ hơn
+                requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
+                return;
+            }
+        }
+
+        // Đã có quyền, mở trực tiếp gallery để chọn ảnh
+        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQUEST_PICK_IMAGE);
+    }
+
+    private static final int REQUEST_STORAGE_PERMISSION = 100;
+    private static final int REQUEST_PICK_IMAGE = 200;
+
+    /**
+     * Mở màn hình chỉnh sửa thông tin cá nhân
+     */
+    private void openEditProfile() {
+        if (getContext() == null) return;
+
+        Intent intent = new Intent(getContext(), EditProfileActivity.class);
+        startActivityForResult(intent, REQUEST_EDIT_PROFILE);
+    }
+
+    // Định nghĩa mã yêu cầu cho startActivityForResult
+    private static final int REQUEST_EDIT_PROFILE = 1001;
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_EDIT_PROFILE && resultCode == getActivity().RESULT_OK) {
+            // Nếu thông tin đã được cập nhật, làm mới dữ liệu
+            if (presenter != null) {
+                presenter.refreshUserProfile();
+            } else {
+                loadUserProfile();
+            }
+        } else if (requestCode == REQUEST_PICK_IMAGE && resultCode == getActivity().RESULT_OK && data != null) {
+            // Xử lý kết quả chọn ảnh từ gallery
+            android.net.Uri selectedImageUri = data.getData();
+            if (selectedImageUri != null) {
+                // Sử dụng presenter để cập nhật avatar mới
+                if (presenter != null) {
+                    presenter.updateUserAvatar(selectedImageUri);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void displayUserAvatar(String avatarUrl, boolean isDefault) {
+        if (getContext() == null || profileImage == null) return;
+
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.default_avatar)
+                    .error(R.drawable.default_avatar)
+                    .circleCrop()
+                    .into(profileImage);
+        } else {
+            profileImage.setImageResource(R.drawable.default_avatar);
+        }
+    }
+
+    @Override
+    public void displayUserProfile(User user) {
+        if (user == null) return;
+
+        profileName.setText(user.getDisplayName() != null ? user.getDisplayName() : "Người dùng");
+        profileUsername.setText("@" + (user.getEmail() != null ? user.getEmail().split("@")[0] : "user"));
+
+        // Hiển thị avatar
+        displayUserAvatar(user.getPhotoUrl(), false);
+    }
+
+    @Override
+    public void showAvatarUploadProgress(int progress) {
+        if (getContext() == null || avatarUploadProgress == null) return;
+
+        if (progress > 0 && progress < 100) {
+            // Hiển thị ProgressBar khi đang tải
+            avatarUploadProgress.setVisibility(View.VISIBLE);
+        } else {
+            // Ẩn ProgressBar khi tải xong hoặc lỗi
+            avatarUploadProgress.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void showProfileUpdateResult(boolean success, String message) {
+        if (getContext() == null) return;
+
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Cập nhật lại thông tin profile mỗi khi fragment được hiển thị lại
+        if (presenter != null) {
+            presenter.refreshUserProfile();
+        } else {
+            loadUserProfile();
+        }
     }
 }
