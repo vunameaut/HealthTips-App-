@@ -48,13 +48,14 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/iv_user_avatar"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="bottom"
         android:background="@drawable/circle_background_primary"
         android:src="@drawable/ic_person"
-        android:padding="8dp"
-        android:tint="@android:color/white"
+        android:padding="4dp"
+        android:scaleType="fitCenter"
         android:contentDescription="Người dùng" />
 
 </LinearLayout>

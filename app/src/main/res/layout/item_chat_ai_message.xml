@@ -8,13 +8,14 @@
     android:gravity="start">
 
     <ImageView
+        android:id="@+id/iv_ai_avatar"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="bottom"
         android:background="@drawable/circle_background_secondary"
-        android:src="@drawable/ic_smart_toy"
-        android:padding="8dp"
-        android:tint="@android:color/white"
+        android:src="@mipmap/ic_logo"
+        android:padding="4dp"
+        android:scaleType="fitCenter"
         android:contentDescription="AI Assistant" />
 
     <LinearLayout
