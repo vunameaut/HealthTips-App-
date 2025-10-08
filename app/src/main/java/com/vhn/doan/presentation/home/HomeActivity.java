@@ -137,4 +137,32 @@ public class HomeActivity extends AppCompatActivity {
         }
         return false;
     }
+
+    // Phương thức để hiển thị bottom navigation
+    public void showBottomNavigation() {
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setVisibility(android.view.View.VISIBLE);
+        }
+    }
+
+    // Phương thức để ẩn bottom navigation
+    public void hideBottomNavigation() {
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setVisibility(android.view.View.GONE);
+        }
+    }
+
+    // Kiểm tra nếu fragment được thêm vào là một trong các fragment chính, hiển thị bottom nav
+    @Override
+    public void onAttachFragment(@NonNull Fragment fragment) {
+        super.onAttachFragment(fragment);
+
+        if (fragment instanceof HomeFragment ||
+            fragment instanceof ChatListFragment ||
+            fragment instanceof ReminderFragment ||
+            fragment instanceof VideoFragment ||
+            fragment instanceof ProfileFragment) {
+            showBottomNavigation();
+        }
+    }
 }

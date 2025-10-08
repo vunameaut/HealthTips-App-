@@ -22,6 +22,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ChatMessage;
 import com.vhn.doan.data.repository.ChatRepositoryImpl;
+import com.vhn.doan.presentation.home.HomeActivity;
 
 import java.util.List;
 
@@ -88,6 +89,9 @@ public class ChatDetailFragment extends Fragment implements ChatDetailContract.V
         initPresenter();
         presenter.attachView(this);
         presenter.initialize(conversationId, conversationTitle);
+
+        // Ẩn bottom navigation khi hiển thị chi tiết chat
+        hideBottomNavigation();
     }
 
     private void initViews(View view) {
@@ -280,6 +284,24 @@ public class ChatDetailFragment extends Fragment implements ChatDetailContract.V
         if (presenter != null) {
             presenter.detachView();
         }
+
+        // Hiển thị lại bottom navigation khi thoát khỏi chi tiết chat
+        showBottomNavigation();
+
         super.onDestroyView();
+    }
+
+    // Phương thức ẩn bottom navigation
+    private void hideBottomNavigation() {
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).hideBottomNavigation();
+        }
+    }
+
+    // Phương thức hiển thị bottom navigation
+    private void showBottomNavigation() {
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).showBottomNavigation();
+        }
     }
 }

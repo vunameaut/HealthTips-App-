@@ -19,6 +19,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.vhn.doan.R;
 import com.vhn.doan.data.repository.ChatRepositoryImpl;
+import com.vhn.doan.presentation.home.HomeActivity;
 
 /**
  * Fragment để tạo cuộc trò chuyện mới với AI
@@ -62,6 +63,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         setupListeners();
         initPresenter();
         presenter.attachView(this);
+
+        // Ẩn bottom navigation khi hiển thị tạo chat mới
+        hideBottomNavigation();
     }
 
     private void initViews(View view) {
@@ -245,6 +249,24 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         if (presenter != null) {
             presenter.detachView();
         }
+
+        // Hiển thị lại bottom navigation khi thoát
+        showBottomNavigation();
+
         super.onDestroyView();
+    }
+
+    // Phương thức ẩn bottom navigation
+    private void hideBottomNavigation() {
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).hideBottomNavigation();
+        }
+    }
+
+    // Phương thức hiển thị bottom navigation
+    private void showBottomNavigation() {
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).showBottomNavigation();
+        }
     }
 }
