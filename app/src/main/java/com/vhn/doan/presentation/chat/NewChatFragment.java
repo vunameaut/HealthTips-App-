@@ -194,9 +194,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         if (getActivity() != null) {
             ChatDetailFragment chatDetailFragment = ChatDetailFragment.newInstance(conversationId, conversationTitle);
 
-            getActivity().getSupportFragmentManager()
+            getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, chatDetailFragment)
+                    .add(R.id.fragment_container, chatDetailFragment)
                     .addToBackStack(null)
                     .commit();
         }

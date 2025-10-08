@@ -248,19 +248,19 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     Glide.with(itemView.getContext())
                         .load(avatarUrl)
                         .apply(RequestOptions.circleCropTransform())
-                        .placeholder(R.drawable.ic_person)
-                        .error(R.drawable.ic_person)
+                        .placeholder(R.drawable.user_avatar_background)
+                        .error(R.drawable.user_avatar_background)
                         .into(avatarImage);
                 } else {
-                    // Sử dụng avatar mặc định trước khi tải avatar thực
-                    avatarImage.setImageResource(R.drawable.ic_person);
-
                     // Nếu chưa tải avatar, thử tải lại từ database
                     loadUserAvatar(userId);
+
+                    // Sử dụng background gradient thay vì icon mặc định
+                    avatarImage.setImageResource(android.R.color.transparent);
                 }
             } else {
-                // Không có userId, hiển thị avatar mặc định
-                avatarImage.setImageResource(R.drawable.ic_person);
+                // Không có userId, sử dụng background gradient thay vì icon
+                avatarImage.setImageResource(android.R.color.transparent);
             }
         }
     }

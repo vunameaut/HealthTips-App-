@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ChatMessage;
@@ -39,7 +40,7 @@ public class ChatDetailFragment extends Fragment implements ChatDetailContract.V
     private TextView tvConversationTitle;
     private RecyclerView rvChatMessages;
     private TextInputEditText etMessageInput;
-    private MaterialButton btnSendMessage;
+    private FloatingActionButton btnSendMessage;
     private View layoutLoading;
     private View layoutEmpty;
     private View layoutStatus;

@@ -1,38 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="8dp"
-    android:gravity="end">
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <ImageView
+        android:id="@+id/iv_user_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/message_container"
+        android:background="@drawable/user_avatar_background"
+        android:padding="2dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="Người dùng" />
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:id="@+id/message_container"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginStart="64dp"
-        android:layout_marginEnd="8dp"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@id/iv_user_avatar"
+        android:layout_marginEnd="12dp"
         android:orientation="vertical">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
+            android:layout_gravity="end"
+            app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="?attr/colorPrimary">
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardPreventCornerOverlap="false"
+            app:contentPadding="0dp">
 
-            <TextView
-                android:id="@+id/tv_user_message"
-                android:layout_width="match_parent"
+            <RelativeLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:lineSpacingExtra="2dp"
-                android:text="Đây là tin nhắn từ người dùng" />
+                android:background="@drawable/user_message_background">
 
-        </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:id="@+id/tv_user_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="4dp"
+                    android:minWidth="80dp"
+                    android:maxWidth="260dp"
+                    android:text="Đây là tin nhắn từ người dùng" />
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/tv_user_time"
@@ -40,22 +67,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="4dp"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary"
             android:text="14:30" />
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/iv_user_avatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="bottom"
-        android:background="@drawable/circle_background_primary"
-        android:src="@drawable/ic_person"
-        android:padding="4dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="Người dùng" />
-
-</LinearLayout>
+</RelativeLayout>
