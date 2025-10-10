@@ -13,6 +13,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import com.vhn.doan.BuildConfig;
 import com.vhn.doan.data.ChatMessage;
 import com.vhn.doan.data.ChatApiResponse;
 import com.vhn.doan.data.Conversation;
@@ -39,7 +40,7 @@ public class ChatRepositoryImpl implements ChatRepository {
     private static final String TAG = "ChatRepositoryImpl";
     // Thay đổi sang OpenAI API chính thức
     private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String OPENAI_KEY = "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";
+    private static final String OPENAI_KEY = BuildConfig.OPENAI_API_KEY;
 
     // Firebase paths
     private static final String CONVERSATIONS_PATH = "conversations";

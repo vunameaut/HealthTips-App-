@@ -36,6 +36,10 @@ android {
             // Thêm Firebase Auth key vào BuildConfig
             val firebaseAuthKey = localProperties.getProperty("firebase.auth.key", "")
             buildConfigField("String", "FIREBASE_AUTH_KEY", "\"$firebaseAuthKey\"")
+
+            // Thêm OpenAI API key vào BuildConfig
+            val openaiApiKey = localProperties.getProperty("openai.api.key", "")
+            buildConfigField("String", "OPENAI_API_KEY", "\"$openaiApiKey\"")
         }
 
         // Cấu hình MultiDex
