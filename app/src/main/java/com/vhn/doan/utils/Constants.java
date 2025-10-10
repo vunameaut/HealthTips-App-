@@ -1,12 +1,14 @@
 package com.vhn.doan.utils;
 
+import com.vhn.doan.BuildConfig;
+
 /**
  * Class lưu trữ các hằng số dùng chung trong ứng dụng
  */
 public class Constants {
 
     // Các key cho Firebase Authentication
-    public static final String FIREBASE_AUTH_KEY = "AIzaSyA9TsK_lVXViYuZ_LjHj4MvM1LAPJxNJqQ"; // Key mẫu, cần thay bằng key thật
+    public static final String FIREBASE_AUTH_KEY = BuildConfig.FIREBASE_AUTH_KEY;
 
     // Đường dẫn tham chiếu Firebase Realtime Database
     public static final String USERS_REF = "users";

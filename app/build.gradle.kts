@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
@@ -7,12 +10,33 @@ android {
     namespace = "com.vhn.doan"
     compileSdk = 35
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.vhn.doan"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        // Đọc API keys từ local.properties
+        val localProperties = Properties()
+        val localPropertiesFile = project.rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(FileInputStream(localPropertiesFile))
+
+            // Thêm Cloudinary API keys vào BuildConfig
+            val cloudinaryApiKey = localProperties.getProperty("cloudinary.api.key", "")
+            val cloudinaryApiSecret = localProperties.getProperty("cloudinary.api.secret", "")
+            buildConfigField("String", "CLOUDINARY_API_KEY", "\"$cloudinaryApiKey\"")
+            buildConfigField("String", "CLOUDINARY_API_SECRET", "\"$cloudinaryApiSecret\"")
+
+            // Thêm Firebase Auth key vào BuildConfig
+            val firebaseAuthKey = localProperties.getProperty("firebase.auth.key", "")
+            buildConfigField("String", "FIREBASE_AUTH_KEY", "\"$firebaseAuthKey\"")
+        }
 
         // Cấu hình MultiDex
         multiDexEnabled = true
