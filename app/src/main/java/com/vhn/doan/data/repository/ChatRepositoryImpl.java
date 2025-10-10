@@ -37,10 +37,9 @@ import okhttp3.Response;
 public class ChatRepositoryImpl implements ChatRepository {
 
     private static final String TAG = "ChatRepositoryImpl";
-    // Thay đổi sang RapidAPI ChatGPT-42
-    private static final String RAPIDAPI_URL = "https://chatgpt-42.p.rapidapi.com/chatgpt";
-    private static final String RAPIDAPI_KEY = "062f6aca45mshe36de3f71654aecp1590e4jsn0d0d26277bde";
-    private static final String RAPIDAPI_HOST = "chatgpt-42.p.rapidapi.com";
+    // Thay đổi sang OpenAI API chính thức
+    private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+    private static final String OPENAI_KEY = "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";
 
     // Firebase paths
     private static final String CONVERSATIONS_PATH = "conversations";
@@ -295,119 +294,187 @@ public class ChatRepositoryImpl implements ChatRepository {
     // ========== MESSAGE MANAGEMENT ==========
 
     @Override
-    public void sendMessageToAI(String message, RepositoryCallback<String> callback) {
+    public void sendMessageToAI(String message, String conversationId, int maxHistoryMessages, RepositoryCallback<String> callback) {
         try {
-            // Tạo JSON request body theo format của RapidAPI ChatGPT-42
-            JsonObject requestJson = new JsonObject();
+            // Nếu conversationId là null, tạo một cuộc trò chuyện mới với tin nhắn đơn lẻ
+            if (conversationId == null) {
+                Log.d(TAG, "sendMessageToAI: conversationId is null, creating standalone request without history");
+                // Tạo JSON request body cho API với một tin nhắn duy nhất
+                JsonObject requestBody = new JsonObject();
+                JsonArray messagesArray = new JsonArray();
 
-            JsonArray messagesArray = new JsonArray();
+                // Thêm system message để định nghĩa trợ lý sức khỏe
+                JsonObject systemMessage = new JsonObject();
+                systemMessage.addProperty("role", "system");
+                systemMessage.addProperty("content", getSystemPrompt());
+                messagesArray.add(systemMessage);
 
-            // System message để định hướng AI về sức khỏe
-            JsonObject systemMessage = new JsonObject();
-            systemMessage.addProperty("role", "system");
-            systemMessage.addProperty("content", "Bạn là trợ lý AI chuyên về sức khỏe. Chỉ trả lời các câu hỏi liên quan đến sức khỏe, y tế, dinh dưỡng, thể dục thể thao. Nếu người dùng hỏi ngoài lĩnh vực sức khỏe thì từ chối một cách lịch sự và đề nghị họ hỏi về sức khỏe.");
-            messagesArray.add(systemMessage);
+                // Thêm tin nhắn hiện tại
+                JsonObject userMessage = new JsonObject();
+                userMessage.addProperty("role", "user");
+                userMessage.addProperty("content", message);
+                messagesArray.add(userMessage);
 
-            // User message
-            JsonObject userMessage = new JsonObject();
-            userMessage.addProperty("role", "user");
-            userMessage.addProperty("content", message);
-            messagesArray.add(userMessage);
+                requestBody.add("messages", messagesArray);
 
-            requestJson.add("messages", messagesArray);
-            requestJson.addProperty("web_access", false);
+                // Sử dụng model mới và thêm các tham số khác
+                requestBody.addProperty("model", "gpt-4o-mini");
+                requestBody.addProperty("temperature", 0.7);
+                requestBody.addProperty("max_tokens", 2048);
 
-            String jsonString = gson.toJson(requestJson);
-            Log.d(TAG, "RapidAPI Request JSON: " + jsonString);
+                // Gửi request đến API
+                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                RequestBody body = RequestBody.create(requestBody.toString(), JSON);
 
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/json"),
-                    jsonString
-            );
-
-            Request request = new Request.Builder()
-                    .url(RAPIDAPI_URL)
+                Request request = new Request.Builder()
+                    .url(OPENAI_URL)
                     .post(body)
-                    .addHeader("Content-Type", "application/json")
-                    .addHeader("x-rapidapi-host", RAPIDAPI_HOST)
-                    .addHeader("x-rapidapi-key", RAPIDAPI_KEY)
+                    .addHeader("content-type", "application/json")
+                    .addHeader("Authorization", "Bearer " + OPENAI_KEY)
                     .build();
 
-            Log.d(TAG, "Sending request to RapidAPI: " + RAPIDAPI_URL);
-            Log.d(TAG, "RapidAPI key: " + RAPIDAPI_KEY.substring(0, 20) + "...");
+                sendOpenAIRequest(request, callback);
+                return;
+            }
 
-            httpClient.newCall(request).enqueue(new Callback() {
+            // Lấy tin nhắn trước đó để duy trì ngữ cảnh khi có conversationId
+            getChatMessages(conversationId, new RepositoryCallback<List<ChatMessage>>() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    Log.e(TAG, "Network request failed", e);
-                    mainHandler.post(() -> {
-                        callback.onError("Không thể kết nối đến máy chủ AI. Kiểm tra kết nối mạng của bạn.");
-                    });
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    String responseBody = "";
+                public void onSuccess(List<ChatMessage> chatHistory) {
                     try {
-                        if (response.body() != null) {
-                            responseBody = response.body().string();
+                        // Sắp xếp tin nhắn theo thời gian
+                        Collections.sort(chatHistory, (m1, m2) ->
+                            Long.compare(m1.getTimestamp(), m2.getTimestamp()));
+
+                        // Giới hạn số lượng tin nhắn để tránh request quá lớn
+                        List<ChatMessage> contextMessages;
+                        if (chatHistory.size() > maxHistoryMessages) {
+                            contextMessages = chatHistory.subList(
+                                chatHistory.size() - maxHistoryMessages,
+                                chatHistory.size()
+                            );
+                        } else {
+                            contextMessages = new ArrayList<>(chatHistory);
                         }
 
-                        Log.d(TAG, "RapidAPI Response Code: " + response.code());
-                        Log.d(TAG, "RapidAPI Response Headers: " + response.headers().toString());
-                        Log.d(TAG, "RapidAPI Response Body: " + responseBody);
+                        // Tạo JSON request body cho API
+                        JsonObject requestBody = new JsonObject();
 
-                        if (response.isSuccessful()) {
-                            // Parse response theo format của RapidAPI ChatGPT-42
-                            JsonObject responseJson = gson.fromJson(responseBody, JsonObject.class);
+                        // Tạo system message để định nghĩa trợ lý sức khỏe
+                        JsonArray messagesArray = new JsonArray();
 
-                            if (responseJson != null && responseJson.has("result")) {
-                                String aiMessage = responseJson.get("result").getAsString();
-                                if (aiMessage != null && !aiMessage.trim().isEmpty()) {
-                                    mainHandler.post(() -> callback.onSuccess(aiMessage.trim()));
-                                } else {
-                                    mainHandler.post(() -> callback.onError("AI trả về phản hồi trống."));
-                                }
-                            } else {
-                                // Fallback: thử parse theo format OpenAI cũ nếu có
-                                ChatApiResponse apiResponse = gson.fromJson(responseBody, ChatApiResponse.class);
-                                if (apiResponse != null &&
-                                    apiResponse.getChoices() != null &&
-                                    !apiResponse.getChoices().isEmpty() &&
-                                    apiResponse.getChoices().get(0).getMessage() != null) {
+                        JsonObject systemMessage = new JsonObject();
+                        systemMessage.addProperty("role", "system");
+                        systemMessage.addProperty("content", getSystemPrompt());
+                        messagesArray.add(systemMessage);
 
-                                    String aiMessage = apiResponse.getChoices().get(0).getMessage().getContent();
-                                    if (aiMessage != null && !aiMessage.trim().isEmpty()) {
-                                        mainHandler.post(() -> callback.onSuccess(aiMessage.trim()));
-                                    } else {
-                                        mainHandler.post(() -> callback.onError("AI trả về phản hồi trống."));
+                        // Thêm ngữ cảnh từ các tin nhắn trước đó
+                        for (ChatMessage chatMessage : contextMessages) {
+                            JsonObject messageObj = new JsonObject();
+                            messageObj.addProperty("role", chatMessage.isFromUser() ? "user" : "assistant");
+                            messageObj.addProperty("content", chatMessage.getContent());
+                            messagesArray.add(messageObj);
+                        }
+
+                        // Thêm tin nhắn hiện tại
+                        JsonObject userMessage = new JsonObject();
+                        userMessage.addProperty("role", "user");
+                        userMessage.addProperty("content", message);
+                        messagesArray.add(userMessage);
+
+                        requestBody.add("messages", messagesArray);
+
+                        // Sử dụng model mới và thêm các tham số khác
+                        requestBody.addProperty("model", "gpt-4o-mini");
+                        requestBody.addProperty("temperature", 0.7);
+                        requestBody.addProperty("max_tokens", 2048);
+
+                        // Gửi request đến API
+                        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                        RequestBody body = RequestBody.create(requestBody.toString(), JSON);
+
+                        Request request = new Request.Builder()
+                            .url(OPENAI_URL)
+                            .post(body)
+                            .addHeader("content-type", "application/json")
+                            .addHeader("Authorization", "Bearer " + OPENAI_KEY)
+                            .build();
+
+                        httpClient.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                Log.e(TAG, "API call failed", e);
+                                mainHandler.post(() -> callback.onError("Không thể kết nối tới trợ lý AI: " + e.getMessage()));
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    try {
+                                        String responseData = response.body().string();
+                                        Log.d(TAG, "API response: " + responseData);
+
+                                        ChatApiResponse chatResponse = gson.fromJson(responseData, ChatApiResponse.class);
+
+                                        if (chatResponse != null && chatResponse.getChoices() != null &&
+                                            !chatResponse.getChoices().isEmpty() &&
+                                            chatResponse.getChoices().get(0).getMessage() != null) {
+
+                                            String aiResponse = chatResponse.getChoices().get(0).getMessage().getContent();
+                                            mainHandler.post(() -> callback.onSuccess(aiResponse));
+                                        } else {
+                                            mainHandler.post(() -> callback.onError("Không thể xử lý câu trả lời từ AI"));
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error parsing response", e);
+                                        mainHandler.post(() -> callback.onError("Lỗi xử lý dữ liệu: " + e.getMessage()));
                                     }
                                 } else {
-                                    mainHandler.post(() -> callback.onError("Định dạng phản hồi từ AI không hợp lệ."));
+                                    Log.e(TAG, "API error: " + response.code() + " " + response.message());
+                                    mainHandler.post(() -> callback.onError("Lỗi từ AI API: " + response.code()));
                                 }
                             }
-                        } else {
-                            // Xử lý các lỗi HTTP cụ thể cho RapidAPI
-                            String errorMessage = parseRapidAPIErrorMessage(response.code(), responseBody);
-                            Log.e(TAG, "RapidAPI Error: " + errorMessage);
-
-                            mainHandler.post(() -> callback.onError(errorMessage));
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error parsing RapidAPI response", e);
-                        Log.e(TAG, "Response body was: " + responseBody);
-
-                        mainHandler.post(() -> {
-                            callback.onError("Lỗi xử lý phản hồi từ AI. Vui lòng thử lại.");
                         });
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error preparing request", e);
+                        callback.onError("Có lỗi xảy ra: " + e.getMessage());
                     }
                 }
-            });
 
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Error getting chat history: " + error);
+                    callback.onError("Không thể tải lịch sử trò chuyện: " + error);
+                }
+            });
         } catch (Exception e) {
-            Log.e(TAG, "Error creating RapidAPI request", e);
-            callback.onError("Lỗi tạo yêu cầu gửi đến AI.");
+            Log.e(TAG, "Error preparing request", e);
+            callback.onError("Có lỗi xảy ra: " + e.getMessage());
         }
+    }
+
+    /**
+     * Tạo system prompt để định nghĩa trợ lý sức khỏe
+     * @return System prompt
+     */
+    private String getSystemPrompt() {
+        return "Bạn là Trợ lý Sức khỏe của ứng dụng HealthTips, một ứng dụng chăm sóc sức khỏe. " +
+               "Tên của bạn là HealthTips Assistant. " +
+               "Bạn cung cấp thông tin hữu ích, chính xác và dễ hiểu về các vấn đề sức khỏe, dinh dưỡng, tập luyện, " +
+               "và lối sống lành mạnh. Bạn nên đưa ra lời khuyên dựa trên các thông tin y tế có cơ sở khoa học. " +
+               "Tuy nhiên, bạn không phải là bác sĩ và bạn phải nhắc người dùng tham khảo ý kiến chuyên gia y tế " +
+               "cho các vấn đề sức khỏe cụ thể. Bạn nên trả lời ngắn gọn, đầy đủ và bằng tiếng Việt. " +
+               "Khi được hỏi về danh tính, bạn sẽ luôn giới thiệu mình là HealthTips Assistant, " +
+               "trợ lý sức khỏe của ứng dụng HealthTips. " +
+               "Nếu được hỏi về nội dung phổ biến trong ứng dụng, bạn sẽ nhắc đến các bài viết và video về " +
+               "dinh dưỡng lành mạnh, tập thể dục tại nhà và quản lý căng thẳng là những chủ đề được quan tâm nhiều nhất.";
+    }
+
+    @Override
+    public void sendMessageToAI(String message, RepositoryCallback<String> callback) {
+        // Phương thức cũ vẫn được giữ lại để tương thích ngược
+        // Nhưng gọi đến phương thức mới với số lượng tin nhắn lịch sử mặc định là 5
+        sendMessageToAI(message, null, 5, callback);
     }
 
     /**
@@ -552,6 +619,13 @@ public class ChatRepositoryImpl implements ChatRepository {
     @Override
     public void getChatMessages(String conversationId, RepositoryCallback<List<ChatMessage>> callback) {
         try {
+            // Kiểm tra conversationId không được null
+            if (conversationId == null) {
+                Log.e(TAG, "getChatMessages: conversationId is null");
+                callback.onError("Không thể tải tin nhắn: ID cuộc trò chuyện không hợp lệ (null)");
+                return;
+            }
+
             DatabaseReference messagesRef = database.child(CHAT_MESSAGES_PATH).child(conversationId);
 
             messagesRef.orderByChild("timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -771,6 +845,163 @@ public class ChatRepositoryImpl implements ChatRepository {
             public void onError(String error) {
                 Log.e(TAG, "Error clearing messages for conversation: " + conversationId + ", error: " + error);
                 callback.onError("Lỗi xóa tin nhắn cuộc trò chuyện: " + error);
+            }
+        });
+    }
+
+    /**
+     * Gửi request đến OpenAI API và xử lý phản hồi
+     *
+     * @param request Request để gửi đến API
+     * @param callback Callback để xử lý phản hồi
+     */
+    private void sendOpenAIRequest(Request request, RepositoryCallback<String> callback) {
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e(TAG, "API call failed", e);
+                mainHandler.post(() -> callback.onError("Không thể kết nối tới trợ lý AI: " + e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String responseData = response.body().string();
+                        Log.d(TAG, "API response: " + responseData);
+
+                        ChatApiResponse chatResponse = gson.fromJson(responseData, ChatApiResponse.class);
+
+                        if (chatResponse != null && chatResponse.getChoices() != null &&
+                            !chatResponse.getChoices().isEmpty() &&
+                            chatResponse.getChoices().get(0).getMessage() != null) {
+
+                            String aiResponse = chatResponse.getChoices().get(0).getMessage().getContent();
+                            mainHandler.post(() -> callback.onSuccess(aiResponse));
+                        } else {
+                            mainHandler.post(() -> callback.onError("Không thể xử lý câu trả lời từ AI"));
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing response", e);
+                        mainHandler.post(() -> callback.onError("Lỗi xử lý dữ liệu: " + e.getMessage()));
+                    }
+                } else {
+                    Log.e(TAG, "API error: " + response.code() + " " + response.message());
+                    mainHandler.post(() -> callback.onError("Lỗi từ AI API: " + response.code()));
+                }
+            }
+        });
+    }
+
+    /**
+     * Lấy dữ liệu từ khóa ưa thích của người dùng từ Firebase
+     *
+     * @param userId ID người dùng
+     * @param callback Callback để nhận danh sách từ khóa
+     */
+    @Override
+    public void getUserPreferences(String userId, RepositoryCallback<List<String>> callback) {
+        if (userId == null || userId.isEmpty()) {
+            callback.onError("User ID không hợp lệ");
+            return;
+        }
+
+        DatabaseReference userPreferencesRef = database.child("userPreferences")
+                                                      .child(userId)
+                                                      .child("keywords");
+
+        userPreferencesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<String> keywords = new ArrayList<>();
+
+                // Kiểm tra xem dataSnapshot có tồn tại và có con không
+                if (dataSnapshot.exists()) {
+                    // Thử lấy dữ liệu theo cấu trúc Map<String, Boolean>
+                    for (DataSnapshot keywordSnapshot : dataSnapshot.getChildren()) {
+                        String keyword = keywordSnapshot.getKey();
+                        Object value = keywordSnapshot.getValue();
+
+                        // Nếu value là Boolean và là true thì thêm keyword vào danh sách
+                        if (value instanceof Boolean && (Boolean) value) {
+                            keywords.add(keyword);
+                        }
+                        // Nếu value là String thì thêm trực tiếp vào danh sách
+                        else if (value instanceof String) {
+                            keywords.add((String) value);
+                        }
+                    }
+
+                    // Nếu không có từ khóa nào được tìm thấy, thử lấy dữ liệu theo cấu trúc list
+                    if (keywords.isEmpty()) {
+                        for (DataSnapshot keywordSnapshot : dataSnapshot.getChildren()) {
+                            Object value = keywordSnapshot.getValue();
+                            if (value instanceof String) {
+                                keywords.add((String) value);
+                            }
+                        }
+                    }
+
+                    // Kiểm tra dữ liệu lịch sử tìm kiếm và chủ đề chat
+                    DatabaseReference searchHistoryRef = database.child("searchHistory")
+                                                                .child(userId);
+
+                    searchHistoryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot historySnapshot) {
+                            if (historySnapshot.exists()) {
+                                for (DataSnapshot historyItem : historySnapshot.getChildren()) {
+                                    Object query = historyItem.child("query").getValue();
+                                    if (query instanceof String && !keywords.contains(query)) {
+                                        keywords.add((String) query);
+                                    }
+                                }
+                            }
+
+                            // Kiểm tra chủ đề chat
+                            DatabaseReference userTopicsRef = database.child(USER_TOPICS_PATH)
+                                                                     .child(userId);
+
+                            userTopicsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot topicsSnapshot) {
+                                    if (topicsSnapshot.exists()) {
+                                        for (DataSnapshot topicSnapshot : topicsSnapshot.getChildren()) {
+                                            Object topic = topicSnapshot.getValue();
+                                            if (topic instanceof String && !keywords.contains(topic)) {
+                                                keywords.add((String) topic);
+                                            }
+                                        }
+                                    }
+
+                                    // Trả về danh sách từ khóa đã thu thập
+                                    mainHandler.post(() -> callback.onSuccess(keywords));
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    // Vẫn trả về danh sách từ khóa đã thu thập được
+                                    mainHandler.post(() -> callback.onSuccess(keywords));
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            // Vẫn trả về danh sách từ khóa đã thu thập được
+                            mainHandler.post(() -> callback.onSuccess(keywords));
+                        }
+                    });
+                } else {
+                    // Không tìm thấy dữ liệu người dùng, trả về danh sách rỗng
+                    mainHandler.post(() -> callback.onSuccess(keywords));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Error getting user preferences: " + databaseError.getMessage());
+                mainHandler.post(() -> callback.onError("Không thể lấy dữ liệu người dùng: " + databaseError.getMessage()));
             }
         });
     }

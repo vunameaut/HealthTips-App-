@@ -118,11 +118,9 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
 
     @Override
     public void sendMessage(String content) {
-        if (isSending || content == null || content.trim().isEmpty()) {
-            if (content == null || content.trim().isEmpty()) {
-                if (isViewAttached()) {
-                    view.showSendMessageError("Vui lòng nhập nội dung tin nhắn");
-                }
+        if (content == null || content.trim().isEmpty()) {
+            if (isViewAttached()) {
+                view.showSendMessageError("Vui lòng nhập nội dung tin nhắn");
             }
             return;
         }
@@ -145,8 +143,6 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
         String trimmedContent = content.trim();
         String userId = currentUser.getUid();
         long timestamp = System.currentTimeMillis();
-
-        isSending = true;
 
         // Hiển thị tin nhắn của người dùng ngay lập tức
         ChatMessage userMessage = new ChatMessage(conversationId, userId, trimmedContent, true, timestamp);
@@ -196,13 +192,11 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
 
                                 // Cập nhật thông tin cuộc trò chuyện
                                 updateConversationInfo(aiMessage);
-                                isSending = false;
                             }
 
                             @Override
                             public void onError(String error) {
                                 Log.e(TAG, "Failed to save AI message: " + error);
-                                isSending = false;
                                 // Không hiển thị lỗi cho người dùng vì tin nhắn đã được hiển thị
                             }
                         });
@@ -211,7 +205,6 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
                     @Override
                     public void onError(String error) {
                         Log.e(TAG, "Failed to get AI response: " + error);
-                        isSending = false;
 
                         if (isViewAttached()) {
                             view.hideAiTyping();
@@ -231,7 +224,6 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
             @Override
             public void onError(String error) {
                 Log.e(TAG, "Failed to save user message: " + error);
-                isSending = false;
 
                 if (isViewAttached()) {
                     view.hideSendingMessage();

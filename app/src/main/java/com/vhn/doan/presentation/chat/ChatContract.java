@@ -76,6 +76,20 @@ public interface ChatContract {
          * Hiển thị thông báo thành công
          */
         void showMessage(String message);
+
+        /**
+         * Lấy ID của cuộc trò chuyện hiện tại
+         *
+         * @return ID của cuộc trò chuyện
+         */
+        String getConversationId();
+
+        /**
+         * Thiết lập ID cho cuộc trò chuyện
+         *
+         * @param conversationId ID cuộc trò chuyện cần thiết lập
+         */
+        void setConversationId(String conversationId);
     }
 
     interface Presenter {
@@ -96,6 +110,7 @@ public interface ChatContract {
 
         /**
          * Gửi tin nhắn mới
+         *
          * @param content Nội dung tin nhắn
          */
         void sendMessage(String content);

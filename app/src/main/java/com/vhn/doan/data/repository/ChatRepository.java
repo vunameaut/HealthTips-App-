@@ -17,6 +17,15 @@ public interface ChatRepository {
      */
     void sendMessageToAI(String message, RepositoryCallback<String> callback);
 
+    /**
+     * Gửi tin nhắn tới AI qua OpenRouter API với ngữ cảnh từ cuộc trò chuyện
+     * @param message Nội dung tin nhắn
+     * @param conversationId ID cuộc trò chuyện (để lấy lịch sử)
+     * @param maxHistoryMessages Số lượng tin nhắn lịch sử tối đa để gửi (tối đa 10)
+     * @param callback Callback để nhận kết quả
+     */
+    void sendMessageToAI(String message, String conversationId, int maxHistoryMessages, RepositoryCallback<String> callback);
+
     // ========== CONVERSATION MANAGEMENT ==========
 
     /**
@@ -90,9 +99,16 @@ public interface ChatRepository {
     String extractTopic(String content);
 
     /**
-     * Kiểm tra xem còn cuộc trò chuyện nào để load không
+     * Lấy dữ liệu từ khóa ưa thích của người dùng từ Firebase
      * @param userId ID người dùng
-     * @param lastConversationTime Thời gian cuộc trò chuyện cuối cùng đã load
+     * @param callback Callback để nhận danh sách từ khóa
+     */
+    void getUserPreferences(String userId, RepositoryCallback<List<String>> callback);
+
+    /**
+     * Kiểm tra xem có thêm cuộc trò chuyện cũ hơn không (để phân trang)
+     * @param userId ID người dùng
+     * @param lastConversationTime Thời gian của cuộc trò chuyện cuối cùng hiện tại
      * @param callback Callback để nhận kết quả
      */
     void hasMoreConversations(String userId, Long lastConversationTime, RepositoryCallback<Boolean> callback);

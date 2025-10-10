@@ -102,7 +102,13 @@ public class ChatPresenter implements ChatContract.Presenter {
         String userId = currentUser.getUid();
 
         // Tạo conversationId tạm thời hoặc sử dụng conversationId hiện tại
-        String conversationId = "temp_" + userId + "_" + timestamp; // Tạo conversationId tạm thời
+        String conversationId = view.getConversationId();
+        if (conversationId == null || conversationId.isEmpty()) {
+            conversationId = "temp_" + userId + "_" + timestamp; // Tạo conversationId tạm thời
+            if (isViewAttached()) {
+                view.setConversationId(conversationId);
+            }
+        }
 
         // Hiển thị tin nhắn của người dùng ngay lập tức
         ChatMessage userMessage = new ChatMessage(conversationId, userId, trimmedContent, true, timestamp);
@@ -117,6 +123,7 @@ public class ChatPresenter implements ChatContract.Presenter {
         }
 
         // Lưu tin nhắn người dùng vào Firebase
+        final String finalConversationId = conversationId;
         chatRepository.saveChatMessage(userMessage, new RepositoryCallback<ChatMessage>() {
             @Override
             public void onSuccess(ChatMessage savedMessage) {
@@ -126,14 +133,14 @@ public class ChatPresenter implements ChatContract.Presenter {
                     view.showAiTyping();
                 }
 
-                // Gửi tin nhắn tới AI
-                chatRepository.sendMessageToAI(trimmedContent, new RepositoryCallback<String>() {
+                // Gửi tin nhắn tới AI với lịch sử cuộc trò chuyện (tối đa 10 tin nhắn gần nhất)
+                chatRepository.sendMessageToAI(trimmedContent, finalConversationId, 10, new RepositoryCallback<String>() {
                     @Override
                     public void onSuccess(String aiResponse) {
                         Log.d(TAG, "AI response received: " + aiResponse);
 
                         // Tạo tin nhắn phản hồi từ AI
-                        ChatMessage aiMessage = new ChatMessage(conversationId, userId, aiResponse, false, System.currentTimeMillis());
+                        ChatMessage aiMessage = new ChatMessage(finalConversationId, userId, aiResponse, false, System.currentTimeMillis());
                         aiMessage.setTopic(topic);
 
                         if (isViewAttached()) {
@@ -165,7 +172,7 @@ public class ChatPresenter implements ChatContract.Presenter {
                             view.hideAiTyping();
 
                             // Hiển thị tin nhắn lỗi từ AI
-                            ChatMessage errorMessage = new ChatMessage(conversationId, userId,
+                            ChatMessage errorMessage = new ChatMessage(finalConversationId, userId,
                                 "Xin lỗi, tôi không thể trả lời câu hỏi của bạn lúc này. Vui lòng thử lại sau.",
                                 false, System.currentTimeMillis());
                             view.addMessage(errorMessage);

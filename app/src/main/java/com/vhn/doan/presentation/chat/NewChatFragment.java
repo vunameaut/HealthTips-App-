@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.chat;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -21,6 +22,8 @@ import com.vhn.doan.R;
 import com.vhn.doan.data.repository.ChatRepositoryImpl;
 import com.vhn.doan.presentation.home.HomeActivity;
 
+import java.util.List;
+
 /**
  * Fragment để tạo cuộc trò chuyện mới với AI
  */
@@ -35,6 +38,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
     private MaterialCardView cardQuestion1;
     private MaterialCardView cardQuestion2;
     private MaterialCardView cardQuestion3;
+    private TextView tvQuestion1;
+    private TextView tvQuestion2;
+    private TextView tvQuestion3;
     private View layoutStatus;
     private ProgressBar progressStatus;
     private TextView tvStatus;
@@ -43,9 +49,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
     private NewChatContract.Presenter presenter;
 
     // Suggested questions
-    private static final String QUESTION_1 = "Làm thế nào để tăng cường sức đề kháng?";
-    private static final String QUESTION_2 = "Chế độ ăn nào tốt cho tim mạch?";
-    private static final String QUESTION_3 = "Cách cải thiện chất lượng giấc ngủ?";
+    private String question1 = "Làm thế nào để tăng cường sức đề kháng?";
+    private String question2 = "Chế độ ăn nào tốt cho tim mạch?";
+    private String question3 = "Cách cải thiện chất lượng giấc ngủ?";
 
     public static NewChatFragment newInstance() {
         return new NewChatFragment();
@@ -66,6 +72,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
 
         // Ẩn bottom navigation khi hiển thị tạo chat mới
         hideBottomNavigation();
+
+        // Tải câu hỏi gợi ý dựa trên dữ liệu người dùng
+        presenter.loadSuggestedQuestions();
     }
 
     private void initViews(View view) {
@@ -75,6 +84,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         cardQuestion1 = view.findViewById(R.id.card_question_1);
         cardQuestion2 = view.findViewById(R.id.card_question_2);
         cardQuestion3 = view.findViewById(R.id.card_question_3);
+        tvQuestion1 = view.findViewById(R.id.tv_question_1);
+        tvQuestion2 = view.findViewById(R.id.tv_question_2);
+        tvQuestion3 = view.findViewById(R.id.tv_question_3);
         layoutStatus = view.findViewById(R.id.layout_status);
         progressStatus = view.findViewById(R.id.progress_status);
         tvStatus = view.findViewById(R.id.tv_status);
@@ -94,9 +106,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
 
         btnSendMessage.setOnClickListener(v -> sendMessage());
 
-        cardQuestion1.setOnClickListener(v -> sendSuggestedQuestion(QUESTION_1));
-        cardQuestion2.setOnClickListener(v -> sendSuggestedQuestion(QUESTION_2));
-        cardQuestion3.setOnClickListener(v -> sendSuggestedQuestion(QUESTION_3));
+        cardQuestion1.setOnClickListener(v -> sendSuggestedQuestion(question1));
+        cardQuestion2.setOnClickListener(v -> sendSuggestedQuestion(question2));
+        cardQuestion3.setOnClickListener(v -> sendSuggestedQuestion(question3));
 
         etMessageInput.setOnEditorActionListener((v, actionId, event) -> {
             sendMessage();
@@ -198,10 +210,11 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         if (getActivity() != null) {
             ChatDetailFragment chatDetailFragment = ChatDetailFragment.newInstance(conversationId, conversationTitle);
 
+            // Thay thế NewChatFragment bằng ChatDetailFragment và thêm vào backstack để giữ trạng thái
             getParentFragmentManager()
                     .beginTransaction()
-                    .add(R.id.fragment_container, chatDetailFragment)
-                    .addToBackStack(null)
+                    .replace(R.id.fragment_container, chatDetailFragment)
+                    .addToBackStack(null) // Thêm vào backstack để giữ nguyên trạng thái khi ấn Back
                     .commit();
         }
     }
@@ -268,5 +281,73 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         if (getActivity() instanceof HomeActivity) {
             ((HomeActivity) getActivity()).showBottomNavigation();
         }
+    }
+
+    @Override
+    public void showSuggestedQuestions(List<String> questions) {
+        if (questions != null && questions.size() >= 3) {
+            question1 = questions.get(0);
+            question2 = questions.get(1);
+            question3 = questions.get(2);
+
+            tvQuestion1.setText(question1);
+            tvQuestion2.setText(question2);
+            tvQuestion3.setText(question3);
+        }
+    }
+
+    @Override
+    public void updateSuggestedQuestions(List<String> suggestedQuestions) {
+        if (suggestedQuestions != null && suggestedQuestions.size() >= 3) {
+            // Thêm biểu tượng emoji phù hợp cho mỗi câu hỏi
+            question1 = addEmojiToQuestion(suggestedQuestions.get(0), "💪");
+            question2 = addEmojiToQuestion(suggestedQuestions.get(1), "🥗");
+            question3 = addEmojiToQuestion(suggestedQuestions.get(2), "😴");
+
+            // Cập nhật nội dung các TextView
+            if (tvQuestion1 != null) tvQuestion1.setText(question1);
+            if (tvQuestion2 != null) tvQuestion2.setText(question2);
+            if (tvQuestion3 != null) tvQuestion3.setText(question3);
+        }
+    }
+
+    /**
+     * Thêm emoji vào đầu câu hỏi nếu chưa có
+     */
+    private String addEmojiToQuestion(String question, String defaultEmoji) {
+        // Kiểm tra xem câu hỏi đã có emoji chưa
+        boolean hasEmoji = question.length() > 0 &&
+                           Character.isHighSurrogate(question.charAt(0)) ||
+                           (question.codePointAt(0) >= 0x2600);
+
+        if (hasEmoji) {
+            return question;
+        } else {
+            return defaultEmoji + " " + question;
+        }
+    }
+
+    @Override
+    public void showLoadingSuggestedQuestions() {
+        // Hiển thị trạng thái đang tải bằng cách làm mờ các card câu hỏi
+        setQuestionCardsEnabled(false);
+    }
+
+    @Override
+    public void hideLoadingSuggestedQuestions() {
+        // Ẩn trạng thái đang tải bằng cách làm rõ các card câu hỏi
+        setQuestionCardsEnabled(true);
+    }
+
+    /**
+     * Triển khai phương thức từ NewChatContract.View
+     * để lấy SharedPreferences lưu trữ lịch sử câu hỏi gợi ý
+     */
+    @Override
+    public SharedPreferences getSharedPreferences() {
+        if (getContext() != null) {
+            return getContext().getSharedPreferences("chat_preferences", android.content.Context.MODE_PRIVATE);
+        }
+        return null;
     }
 }

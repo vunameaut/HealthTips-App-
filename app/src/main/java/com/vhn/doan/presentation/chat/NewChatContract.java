@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.chat;
 
+import android.content.SharedPreferences;
 import com.vhn.doan.data.ChatMessage;
 import com.vhn.doan.data.Conversation;
 import com.vhn.doan.presentation.base.BaseView;
@@ -66,6 +67,33 @@ public interface NewChatContract {
          * Hiển thị thông báo thành công
          */
         void showMessage(String message);
+
+        /**
+         * Cập nhật câu hỏi gợi ý dựa trên dữ liệu người dùng
+         */
+        void updateSuggestedQuestions(List<String> suggestedQuestions);
+
+        /**
+         * Hiển thị trạng thái đang tải câu hỏi gợi ý
+         */
+        void showLoadingSuggestedQuestions();
+
+        /**
+         * Ẩn trạng thái đang tải câu hỏi gợi ý
+         */
+        void hideLoadingSuggestedQuestions();
+
+        /**
+         * Hiển thị các câu hỏi gợi ý
+         * @param questions Danh sách các câu hỏi gợi ý
+         */
+        void showSuggestedQuestions(List<String> questions);
+
+        /**
+         * Lấy SharedPreferences để lưu trữ và truy xuất lịch sử câu hỏi
+         * @return SharedPreferences instance
+         */
+        SharedPreferences getSharedPreferences();
     }
 
     interface Presenter {
@@ -81,8 +109,14 @@ public interface NewChatContract {
 
         /**
          * Tạo cuộc trò chuyện mới và gửi tin nhắn đầu tiên
+         *
          * @param firstMessage Tin nhắn đầu tiên
          */
         void createConversationAndSendMessage(String firstMessage);
+
+        /**
+         * Tải câu hỏi gợi ý dựa trên dữ liệu người dùng
+         */
+        void loadSuggestedQuestions();
     }
 }

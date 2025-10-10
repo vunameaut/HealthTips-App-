@@ -104,6 +104,7 @@
                 android:foreground="?attr/selectableItemBackground">
 
                 <TextView
+                    android:id="@+id/tv_question_1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="💪 Làm thế nào để tăng cường sức đề kháng?"
@@ -123,6 +124,7 @@
                 android:foreground="?attr/selectableItemBackground">
 
                 <TextView
+                    android:id="@+id/tv_question_2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="🥗 Chế độ ăn nào tốt cho tim mạch?"
@@ -141,6 +143,7 @@
                 android:foreground="?attr/selectableItemBackground">
 
                 <TextView
+                    android:id="@+id/tv_question_3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="😴 Cách cải thiện chất lượng giấc ngủ?"

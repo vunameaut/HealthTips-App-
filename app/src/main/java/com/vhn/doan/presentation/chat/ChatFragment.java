@@ -48,6 +48,9 @@ public class ChatFragment extends Fragment implements ChatContract.View {
     private LinearLayoutManager layoutManager;
     private ChatContract.Presenter presenter;
 
+    // Biến lưu trữ ID của cuộc trò chuyện hiện tại
+    private String conversationId;
+
     public static ChatFragment newInstance() {
         return new ChatFragment();
     }
@@ -130,6 +133,16 @@ public class ChatFragment extends Fragment implements ChatContract.View {
     // Implementation của ChatContract.View
 
     @Override
+    public String getConversationId() {
+        return conversationId;
+    }
+
+    @Override
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
+
+    @Override
     public void showMessages(List<ChatMessage> messages) {
         if (messages == null || messages.isEmpty()) {
             layoutEmpty.setVisibility(View.VISIBLE);
@@ -138,6 +151,11 @@ public class ChatFragment extends Fragment implements ChatContract.View {
             layoutEmpty.setVisibility(View.GONE);
             rvChatMessages.setVisibility(View.VISIBLE);
             chatAdapter.setMessages(messages);
+
+            // Nếu có tin nhắn, thiết lập conversationId từ tin nhắn đầu tiên
+            if (!messages.isEmpty() && messages.get(0) != null) {
+                conversationId = messages.get(0).getConversationId();
+            }
         }
     }
 

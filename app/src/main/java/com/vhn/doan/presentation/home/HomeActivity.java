@@ -14,6 +14,7 @@ import com.google.android.material.navigation.NavigationBarView;
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.auth.LoginActivity;
 import com.vhn.doan.presentation.chat.ChatListFragment;
+import com.vhn.doan.presentation.chat.NewChatFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.presentation.video.VideoFragment;
@@ -157,7 +158,12 @@ public class HomeActivity extends AppCompatActivity {
     public void onAttachFragment(@NonNull Fragment fragment) {
         super.onAttachFragment(fragment);
 
-        if (fragment instanceof HomeFragment ||
+        // Nếu fragment là NewChatFragment, đảm bảo bottom navigation vẫn bị ẩn
+        if (fragment instanceof NewChatFragment) {
+            hideBottomNavigation();
+        }
+        // Hiển thị bottom navigation cho các fragment chính
+        else if (fragment instanceof HomeFragment ||
             fragment instanceof ChatListFragment ||
             fragment instanceof ReminderFragment ||
             fragment instanceof VideoFragment ||
