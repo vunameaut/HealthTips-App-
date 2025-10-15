@@ -17,23 +17,13 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
-        <!-- Avatar/Icon -->
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/circle_background_secondary"
-            android:src="@drawable/ic_smart_toy"
-            android:padding="12dp"
-            android:tint="@android:color/white"
-            android:contentDescription="AI Assistant" />
+        <!-- Avatar/Icon (Removed) -->
 
         <!-- Content -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="12dp"
             android:orientation="vertical">
 
             <!-- Title and Time Row -->

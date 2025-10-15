@@ -1,56 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="?android:attr/colorBackground">
 
-    <!-- Header -->
+    <!-- Load More Section -->
     <LinearLayout
+        android:id="@+id/layout_load_more"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="16dp"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp">
+        android:visibility="gone"
+        android:layout_alignParentBottom="true">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Trợ lý AI Sức khỏe"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center_vertical" />
-
+        <!-- Load More Button -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_new_chat"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:text="Tạo mới"
-            app:icon="@drawable/ic_add"
+            android:id="@+id/btn_load_more"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Xem thêm cuộc trò chuyện"
+            app:icon="@drawable/ic_refresh"
             app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:textColor="@android:color/white"
-            app:iconTint="@android:color/white" />
+            style="@style/Widget.Material3.Button.TextButton" />
 
+        <!-- Loading More Indicator -->
+        <LinearLayout
+            android:id="@+id/layout_loading_more"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đang tải thêm..."
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Content Area -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent"
+        android:layout_above="@id/layout_load_more">
 
         <!-- Conversations RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_conversations"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="32dp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:clipToPadding="false"
@@ -76,7 +87,6 @@
                 android:text="Đang tải cuộc trò chuyện..."
                 android:textSize="16sp"
                 android:textColor="?android:attr/textColorSecondary" />
-
         </LinearLayout>
 
         <!-- Empty State -->
@@ -122,54 +132,21 @@
                 android:text="Bắt đầu trò chuyện"
                 app:icon="@drawable/ic_add"
                 style="@style/Widget.Material3.Button" />
-
         </LinearLayout>
-
     </FrameLayout>
 
-    <!-- Load More Section -->
-    <LinearLayout
-        android:id="@+id/layout_load_more"
-        android:layout_width="match_parent"
+    <!-- Floating New Chat Button (bottom-right corner, lowered) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_new_chat"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:visibility="gone">
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/ic_chat"
+        app:backgroundTint="?attr/colorPrimary"
+        app:tint="@android:color/white"
+        android:contentDescription="Tạo cuộc trò chuyện mới" />
 
-        <!-- Load More Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_load_more"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Xem thêm cuộc trò chuyện"
-            app:icon="@drawable/ic_refresh"
-            app:iconGravity="textStart"
-            style="@style/Widget.Material3.Button.TextButton" />
-
-        <!-- Loading More Indicator -->
-        <LinearLayout
-            android:id="@+id/layout_loading_more"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="16dp"
-            android:visibility="gone">
-
-            <ProgressBar
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Đang tải thêm..."
-                android:textSize="14sp"
-                android:textColor="?android:attr/textColorSecondary" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

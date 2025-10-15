@@ -90,6 +90,16 @@ public interface ChatDetailContract {
          * Hiển thị thông báo thành công
          */
         void showMessage(String message);
+
+        /**
+         * Vô hiệu hóa ô nhập liệu và nút gửi
+         */
+        void disableInput();
+
+        /**
+         * Kích hoạt lại ô nhập liệu và nút gửi
+         */
+        void enableInput();
     }
 
     interface Presenter {

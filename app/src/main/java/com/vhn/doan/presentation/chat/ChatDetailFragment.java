@@ -280,12 +280,36 @@ public class ChatDetailFragment extends Fragment implements ChatDetailContract.V
     }
 
     @Override
+    public void disableInput() {
+        etMessageInput.setEnabled(false);
+        btnSendMessage.setEnabled(false);
+        hideKeyboard();
+    }
+
+    @Override
+    public void enableInput() {
+        etMessageInput.setEnabled(true);
+        btnSendMessage.setEnabled(true);
+    }
+
+    private void hideKeyboard() {
+        if (getActivity() != null) {
+            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            View view = getActivity().getCurrentFocus();
+            if (view == null) {
+                view = new View(getActivity());
+            }
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    @Override
     public void onDestroyView() {
         if (presenter != null) {
             presenter.detachView();
         }
 
-        // Hiển thị lại bottom navigation khi thoát khỏi chi tiết chat
+        // Hiển thị lại bottom navigation khi thoát khỏi chat detail
         showBottomNavigation();
 
         super.onDestroyView();

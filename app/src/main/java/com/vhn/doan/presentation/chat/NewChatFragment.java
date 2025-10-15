@@ -1,11 +1,13 @@
 package com.vhn.doan.presentation.chat;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -143,6 +145,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         tvStatus.setText("Đang tạo cuộc trò chuyện...");
         btnSendMessage.setEnabled(false);
         setQuestionCardsEnabled(false);
+        // Ẩn bàn phím và disable input khi đang tạo cuộc trò chuyện
+        hideKeyboard();
+        etMessageInput.setEnabled(false);
     }
 
     @Override
@@ -150,6 +155,8 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         // Không ẩn layoutStatus vì có thể chuyển sang trạng thái khác
         btnSendMessage.setEnabled(true);
         setQuestionCardsEnabled(true);
+        // Enable lại input khi hoàn thành
+        etMessageInput.setEnabled(true);
     }
 
     @Override
@@ -158,6 +165,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         tvStatus.setText("Đang gửi tin nhắn...");
         btnSendMessage.setEnabled(false);
         setQuestionCardsEnabled(false);
+        // Ẩn bàn phím và disable input khi đang gửi tin nhắn
+        hideKeyboard();
+        etMessageInput.setEnabled(false);
     }
 
     @Override
@@ -165,6 +175,8 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         // Không ẩn layoutStatus vì có thể chuyển sang trạng thái khác
         btnSendMessage.setEnabled(true);
         setQuestionCardsEnabled(true);
+        // Enable lại input khi hoàn thành
+        etMessageInput.setEnabled(true);
     }
 
     @Override
@@ -173,6 +185,9 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         tvStatus.setText("AI đang trả lời...");
         btnSendMessage.setEnabled(false);
         setQuestionCardsEnabled(false);
+        // Ẩn bàn phím và disable input khi AI đang trả lời - QUAN TRỌNG NHẤT
+        hideKeyboard();
+        etMessageInput.setEnabled(false);
     }
 
     @Override
@@ -180,6 +195,8 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         layoutStatus.setVisibility(View.GONE);
         btnSendMessage.setEnabled(true);
         setQuestionCardsEnabled(true);
+        // Enable lại input khi AI hoàn thành trả lời
+        etMessageInput.setEnabled(true);
     }
 
     @Override
@@ -195,6 +212,8 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         layoutStatus.setVisibility(View.GONE);
         btnSendMessage.setEnabled(true);
         setQuestionCardsEnabled(true);
+        // Enable lại input khi có lỗi
+        etMessageInput.setEnabled(true);
     }
 
     @Override
@@ -203,6 +222,8 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         layoutStatus.setVisibility(View.GONE);
         btnSendMessage.setEnabled(true);
         setQuestionCardsEnabled(true);
+        // Enable lại input khi có lỗi
+        etMessageInput.setEnabled(true);
     }
 
     @Override
@@ -210,11 +231,12 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
         if (getActivity() != null) {
             ChatDetailFragment chatDetailFragment = ChatDetailFragment.newInstance(conversationId, conversationTitle);
 
-            // Thay thế NewChatFragment bằng ChatDetailFragment và thêm vào backstack để giữ trạng thái
+            // Thay thế NewChatFragment bằng ChatDetailFragment và KHÔNG thêm vào backstack
+            // Điều này đảm bảo khi ấn Back từ ChatDetail sẽ quay về màn hình trước NewChatFragment (thường là ChatListFragment)
             getParentFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment_container, chatDetailFragment)
-                    .addToBackStack(null) // Thêm vào backstack để giữ nguyên trạng thái khi ấn Back
+                    // Không thêm addToBackStack(null) để tránh quay lại NewChatFragment
                     .commit();
         }
     }
@@ -349,5 +371,18 @@ public class NewChatFragment extends Fragment implements NewChatContract.View {
             return getContext().getSharedPreferences("chat_preferences", android.content.Context.MODE_PRIVATE);
         }
         return null;
+    }
+
+    /**
+     * Ẩn bàn phím ảo
+     */
+    private void hideKeyboard() {
+        if (getActivity() != null) {
+            View view = getActivity().getCurrentFocus();
+            if (view != null) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+        }
     }
 }

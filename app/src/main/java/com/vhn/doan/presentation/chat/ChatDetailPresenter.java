@@ -168,6 +168,7 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
                 if (isViewAttached()) {
                     view.hideSendingMessage();
                     view.showAiTyping();
+                    view.disableInput(); // Disable input while AI is thinking
                 }
 
                 // Get response from ChatBotService
@@ -180,6 +181,7 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
                             aiMessage.setTopic(topic);
                             view.addMessage(aiMessage);
                             view.scrollToLatestMessage();
+                            view.enableInput(); // Re-enable input
 
                             // Save AI response to Firebase
                             chatRepository.saveChatMessage(aiMessage, new RepositoryCallback<ChatMessage>() {
@@ -206,6 +208,7 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
                 if (isViewAttached()) {
                     view.hideSendingMessage();
                     view.showSendMessageError("Không thể lưu tin nhắn: " + error);
+                    view.enableInput(); // Re-enable input on error
                 }
             }
         });
