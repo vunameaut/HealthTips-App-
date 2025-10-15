@@ -89,7 +89,15 @@ public class ChatBotService {
     }
 
     private List<String> extractKeywords(String message) {
-        // Simple keyword extraction. In a real app, this would be more sophisticated.
-        return Arrays.asList(message.split("\\s+"));
+        // Simple keyword extraction with stop word filtering.
+        List<String> stopWords = Arrays.asList("làm", "thế nào", "để", "cách", "là", "gì", "ở", "đâu", "khi", "nào", "tôi", "bạn", "muốn");
+        String[] words = message.toLowerCase().split("\\s+");
+        List<String> keywords = new java.util.ArrayList<>();
+        for (String word : words) {
+            if (!stopWords.contains(word)) {
+                keywords.add(word);
+            }
+        }
+        return keywords;
     }
 }

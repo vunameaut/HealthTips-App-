@@ -52,24 +52,36 @@ public class KnowledgeBaseRepositoryImpl implements KnowledgeBaseRepository {
             return;
         }
 
-        for (String keyword : keywords) {
-            for (KnowledgeBaseArticle article : articles) {
-                if (article.getKeywords() != null) {
+        KnowledgeBaseArticle bestMatch = null;
+        int maxScore = 0;
+
+        for (KnowledgeBaseArticle article : articles) {
+            int currentScore = 0;
+            if (article.getKeywords() != null) {
+                for (String keyword : keywords) {
                     for (String articleKeyword : article.getKeywords()) {
                         if (articleKeyword.equalsIgnoreCase(keyword)) {
-                            callback.onSuccess(article);
-                            return;
+                            currentScore++;
                         }
                     }
                 }
-                // Also check in question
-                if (article.getQuestion() != null && article.getQuestion().toLowerCase().contains(keyword.toLowerCase())) {
-                    callback.onSuccess(article);
-                    return;
-                }
+            }
+            
+            if (currentScore > maxScore) {
+                maxScore = currentScore;
+                bestMatch = article;
             }
         }
 
-        callback.onSuccess(null); // Not found
+        // Only return a match if the score is above a certain threshold.
+        // A score of 1 could be a coincidence. Let's use a threshold of 2,
+        // or 1 if the user's query only has a few keywords.
+        int threshold = (keywords.size() <= 2) ? 1 : 2;
+
+        if (maxScore >= threshold) {
+            callback.onSuccess(bestMatch);
+        } else {
+            callback.onSuccess(null); // Not found
+        }
     }
 }
