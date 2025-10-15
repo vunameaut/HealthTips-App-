@@ -203,6 +203,61 @@ public class ChatListPresenter implements ChatListContract.Presenter {
 
         Log.d(TAG, "Conversation clicked: " + conversation.getId() + " - " + conversation.getTitle());
 
+        // --- Start of modification: Move conversation to top ---
+
+        // 1. Update the timestamp locally to prepare for background update
+        conversation.setLastMessageTime(System.currentTimeMillis());
+
+        // 2. Manually re-order the list for immediate UI update
+        int clickedPosition = -1;
+        for (int i = 0; i < conversationsList.size(); i++) {
+            if (conversationsList.get(i).getId().equals(conversation.getId())) {
+                clickedPosition = i;
+                break;
+            }
+        }
+
+        if (clickedPosition != -1) {
+            Conversation clickedConversation = conversationsList.get(clickedPosition);
+
+            if (!clickedConversation.isPinned()) {
+                // Find the index of the first non-pinned conversation
+                int firstNonPinnedIndex = 0;
+                for (int i = 0; i < conversationsList.size(); i++) {
+                    if (!conversationsList.get(i).isPinned()) {
+                        firstNonPinnedIndex = i;
+                        break;
+                    }
+                }
+
+                if (clickedPosition > firstNonPinnedIndex) {
+                    conversationsList.remove(clickedPosition);
+                    conversationsList.add(firstNonPinnedIndex, clickedConversation);
+                    if (isViewAttached()) {
+                        view.showConversations(new ArrayList<>(conversationsList));
+                    }
+                }
+            }
+        }
+
+        // 3. Update the conversation in the background
+        chatRepository.updateConversation(conversation, new RepositoryCallback<Conversation>() {
+            @Override
+            public void onSuccess(Conversation updatedConversation) {
+                Log.d(TAG, "Successfully updated conversation timestamp for reordering.");
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Failed to update conversation timestamp: " + error);
+                // Optional: handle error, maybe revert the local change if needed,
+                // but for now, we'll just log it.
+            }
+        });
+
+        // --- End of modification ---
+
+        // 4. Navigate to detail view
         if (isViewAttached()) {
             view.navigateToChatDetail(conversation.getId(), conversation.getTitle());
         }
