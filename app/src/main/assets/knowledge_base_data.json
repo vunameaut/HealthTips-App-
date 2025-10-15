@@ -1,0 +1,25 @@
+{
+  "knowledge_base": {
+    "kb_001": {
+      "question": "Làm thế nào để bật chế độ tối?",
+      "keywords": ["chế độ tối", "dark mode", "giao diện", "nền đen"],
+      "answer": "Để bật chế độ tối, bạn vào mục 'Cá nhân' -> 'Cài đặt' -> 'Giao diện' và chọn 'Chế độ tối'.",
+      "related_feature": "theme_settings",
+      "last_updated": 1678886400000
+    },
+    "kb_002": {
+      "question": "Làm sao để tìm kiếm mẹo sức khỏe?",
+      "keywords": ["tìm kiếm", "search", "mẹo", "bài viết"],
+      "answer": "Bạn có thể tìm kiếm mẹo sức khỏe bằng cách nhấn vào biểu tượng kính lúp ở màn hình chính và nhập từ khóa bạn muốn tìm.",
+      "related_feature": "search",
+      "last_updated": 1678886400000
+    },
+    "kb_003": {
+      "question": "Cách đặt lời nhắc nhở uống nước?",
+      "keywords": ["nhắc nhở", "reminder", "uống nước", "đặt lịch"],
+      "answer": "Để đặt nhắc nhở, bạn vào mục 'Nhắc nhở', nhấn nút 'Tạo mới', sau đó điền thông tin chi tiết và lưu lại.",
+      "related_feature": "reminders",
+      "last_updated": 1678886400000
+    }
+  }
+}

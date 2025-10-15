@@ -21,6 +21,7 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
     private final ChatRepository chatRepository;
     private final FirebaseAuth firebaseAuth;
     private ChatDetailContract.View view;
+    private final com.vhn.doan.services.ChatBotService chatBotService;
 
     // State management
     private String conversationId;
@@ -29,9 +30,10 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
     private boolean isLoading = false;
     private boolean isSending = false;
 
-    public ChatDetailPresenter(ChatRepository chatRepository) {
+    public ChatDetailPresenter(ChatRepository chatRepository, android.content.Context context) {
         this.chatRepository = chatRepository;
         this.firebaseAuth = FirebaseAuth.getInstance();
+        this.chatBotService = new com.vhn.doan.services.ChatBotService(context);
     }
 
     @Override
@@ -144,7 +146,7 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
         String userId = currentUser.getUid();
         long timestamp = System.currentTimeMillis();
 
-        // Hiển thị tin nhắn của người dùng ngay lập tức
+        // Display user message immediately
         ChatMessage userMessage = new ChatMessage(conversationId, userId, trimmedContent, true, timestamp);
         String topic = chatRepository.extractTopic(trimmedContent);
         userMessage.setTopic(topic);
@@ -157,7 +159,7 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
             view.hideEmptyConversation();
         }
 
-        // Lưu tin nhắn người dùng vào Firebase
+        // Save user message to Firebase
         chatRepository.saveChatMessage(userMessage, new RepositoryCallback<ChatMessage>() {
             @Override
             public void onSuccess(ChatMessage savedUserMessage) {
@@ -168,55 +170,31 @@ public class ChatDetailPresenter implements ChatDetailContract.Presenter {
                     view.showAiTyping();
                 }
 
-                // Gửi tin nhắn tới AI
-                chatRepository.sendMessageToAI(trimmedContent, new RepositoryCallback<String>() {
-                    @Override
-                    public void onSuccess(String aiResponse) {
-                        Log.d(TAG, "AI response received: " + aiResponse);
-
-                        // Tạo tin nhắn phản hồi từ AI
-                        ChatMessage aiMessage = new ChatMessage(conversationId, userId, aiResponse, false, System.currentTimeMillis());
-                        aiMessage.setTopic(topic);
-
-                        if (isViewAttached()) {
+                // Get response from ChatBotService
+                chatBotService.getResponse(trimmedContent, conversationId).thenAccept(aiResponse -> {
+                    if (isViewAttached()) {
+                        // Ensure UI updates are on the main thread
+                        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
                             view.hideAiTyping();
+                            ChatMessage aiMessage = new ChatMessage(conversationId, userId, aiResponse, false, System.currentTimeMillis());
+                            aiMessage.setTopic(topic);
                             view.addMessage(aiMessage);
                             view.scrollToLatestMessage();
-                        }
 
-                        // Lưu phản hồi AI vào Firebase
-                        chatRepository.saveChatMessage(aiMessage, new RepositoryCallback<ChatMessage>() {
-                            @Override
-                            public void onSuccess(ChatMessage savedAiMessage) {
-                                Log.d(TAG, "AI message saved successfully");
+                            // Save AI response to Firebase
+                            chatRepository.saveChatMessage(aiMessage, new RepositoryCallback<ChatMessage>() {
+                                @Override
+                                public void onSuccess(ChatMessage savedAiMessage) {
+                                    Log.d(TAG, "AI message saved successfully");
+                                    updateConversationInfo(aiMessage);
+                                }
 
-                                // Cập nhật thông tin cuộc trò chuyện
-                                updateConversationInfo(aiMessage);
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                                Log.e(TAG, "Failed to save AI message: " + error);
-                                // Không hiển thị lỗi cho người dùng vì tin nhắn đã được hiển thị
-                            }
+                                @Override
+                                public void onError(String error) {
+                                    Log.e(TAG, "Failed to save AI message: " + error);
+                                }
+                            });
                         });
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        Log.e(TAG, "Failed to get AI response: " + error);
-
-                        if (isViewAttached()) {
-                            view.hideAiTyping();
-
-                            // Hiển thị tin nhắn lỗi từ AI
-                            ChatMessage errorMessage = new ChatMessage(conversationId, userId,
-                                "Xin lỗi, tôi không thể trả lời câu hỏi của bạn lúc này. Vui lòng thử lại sau.",
-                                false, System.currentTimeMillis());
-                            view.addMessage(errorMessage);
-                            view.scrollToLatestMessage();
-                            view.showSendMessageError("Không thể nhận phản hồi từ AI: " + error);
-                        }
                     }
                 });
             }

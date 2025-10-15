@@ -110,7 +110,7 @@ public class ChatDetailFragment extends Fragment implements ChatDetailContract.V
 
     private void initPresenter() {
         ChatRepositoryImpl chatRepository = new ChatRepositoryImpl();
-        presenter = new ChatDetailPresenter(chatRepository);
+        presenter = new ChatDetailPresenter(chatRepository, getContext());
     }
 
     private void setupRecyclerView() {
