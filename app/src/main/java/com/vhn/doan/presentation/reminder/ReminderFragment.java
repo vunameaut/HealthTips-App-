@@ -49,7 +49,7 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
     // UI Components
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefresh;
-    private FloatingActionButton fabAdd;
+    private com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton fabAdd;
     private View emptyStateView;
     private View loadingView;
 
@@ -440,18 +440,23 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
 
     @Override
     public void showReminderDialog(Reminder reminder) {
-        ReminderDialog dialog = new ReminderDialog(getContext(), reminder, new ReminderDialog.OnReminderDialogListener() {
+        ReminderDialog dialog = new ReminderDialog(getContext(), new ReminderDialog.OnReminderDialogListener() {
             @Override
             public void onReminderSaved(Reminder savedReminder) {
                 presenter.saveReminder(savedReminder);
             }
 
             @Override
-            public void onReminderCanceled() {
-                // Không làm gì
+            public void onReminderDeleted(String reminderId) {
+                // Xử lý xóa reminder nếu cần
             }
         });
-        dialog.show();
+
+        if (reminder == null) {
+            dialog.showCreateDialog();
+        } else {
+            dialog.showEditDialog(reminder);
+        }
     }
 
     @Override

@@ -49,7 +49,32 @@
     <string name="related_tips">Mẹo liên quan</string>
     <string name="share">Chia sẻ</string>
     <string name="save">Lưu</string>
-    <string name="play_video">Phát video</string>
+
+    <!-- Các chuỗi cho chức năng Reminder -->
+    <string name="health_reminders">Nhắc nhở sức khỏe</string>
+    <string name="manage_your_health_reminders">Quản lý các lời nhắc sức khỏe của bạn</string>
+    <string name="active_reminders">Đang hoạt động</string>
+    <string name="add_reminder">Thêm nhắc nhở</string>
+    <string name="reminder_settings">Cài đặt nhắc nhở</string>
+    <string name="your_reminders">Các nhắc nhở của bạn</string>
+    <string name="sort">Sắp xếp</string>
+    <string name="no_reminders_title">Chưa có nhắc nhở nào</string>
+    <string name="no_reminders_message">Tạo nhắc nhở đầu tiên để theo dõi các hoạt động sức khỏe của bạn</string>
+    <string name="create_first_reminder">Tạo nhắc nhở đầu tiên</string>
+    <string name="loading_reminders">Đang tải nhắc nhở...</string>
+    <string name="active">Hoạt động</string>
+    <string name="reminder_options">Tùy chọn nhắc nhở</string>
+    <string name="reminder_sound_label">Âm thanh nhắc nhở</string>
+    <string name="vibrate">Rung</string>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="delete">Xóa</string>
+
+    <!-- Các chuỗi cho âm thanh nhắc nhở -->
+    <string name="select_reminder_sound">Chọn âm thanh nhắc nhở</string>
+    <string name="tap_to_preview_sound">Nhấn vào nút phát để nghe thử âm thanh</string>
+    <string name="available_sounds">Âm thanh có sẵn</string>
+    <string name="sound_selection_tip">Nhấn vào âm thanh để chọn, nhấn nút phát để nghe thử</string>
+    <string name="preview_sound">Nghe thử âm thanh</string>
 
     <!-- Thêm strings cho chế độ preview và giao diện mới -->
     <string name="preview_mode_title">Xem trước</string>
@@ -91,7 +116,7 @@
     <string name="upload_date_placeholder">1 ngày trước</string>
     <string name="like_button_description">Nút thích video</string>
     <string name="like_count_placeholder">0</string>
-    <string name="comment_button_description">Nút bình luận video</string>
+    <string name="comment_button_description">Nút b��nh luận video</string>
     <string name="comment_action">Bình luận</string>
     <string name="share_button_description">Nút chia sẻ video</string>
     <string name="share_action">Chia sẻ</string>
@@ -116,14 +141,13 @@
     <string name="mark_as_read">Đánh dấu đã đọc</string>
     <string name="delete_conversation">Xóa cuộc trò chuyện</string>
 
-    <!-- Dialog và thông báo cho menu ngữ cảnh -->
+    <!-- Dialog và thông báo cho menu ng��� cảnh -->
     <string name="enter_new_name">Nhập tên mới cho cuộc trò chuyện</string>
     <string name="conversation_name">Tên cuộc trò chuyện</string>
     <string name="rename">Đổi tên</string>
     <string name="cancel">Hủy</string>
     <string name="delete_conversation_confirm">Bạn có chắc chắn muốn xóa cuộc trò chuyện này?</string>
     <string name="delete_conversation_confirm_message">Tất cả tin nhắn trong cuộc trò chuyện sẽ bị xóa vĩnh viễn.</string>
-    <string name="delete">Xóa</string>
     <string name="conversation_deleted">Đã xóa cuộc trò chuyện</string>
     <string name="conversation_renamed">Đã đổi tên cuộc trò chuyện</string>
     <string name="conversation_pinned">Đã ghim cuộc trò chuyện</string>
@@ -247,6 +271,7 @@
 
     <!-- Strings cho User Interface -->
     <string name="user_avatar">Ảnh đại diện người dùng</string>
+    <string name="play_video">Phát video</string>
 
     <!-- Strings cho Search History -->
     <string name="search_history">Lịch sử tìm kiếm</string>
@@ -262,4 +287,39 @@
     <string name="search_articles_tab">Bài viết</string>
     <string name="search_videos_tab">Video</string>
 
+    <!-- Alarm Strings -->
+    <string name="alarm_dismiss">Tắt</string>
+    <string name="alarm_snooze">Báo lại</string>
+    <string name="alarm_title_default">Nhắc nhở sức khỏe</string>
+    <string name="alarm_description_default">Đã đến giờ thực hiện nhắc nhở</string>
+
+    <!-- Sound Selection -->
+    <string name="select_sound">Chọn âm thanh</string>
+    <string name="sound_alarm">Báo thức</string>
+    <string name="sound_notification">Thông báo</string>
+    <string name="sound_music">Nhạc</string>
+    <string name="sound_nature">Thiên nhiên</string>
+    <string name="sound_default">Mặc định</string>
+    <string name="sound_none">Không âm thanh</string>
+    <string name="sound_preview">Nghe thử</string>
+    <string name="sound_stop_preview">Dừng nghe thử</string>
+
+    <!-- Reminder Settings Enhanced -->
+    <string name="reminder_sound">Âm thanh nhắc nhở</string>
+    <string name="reminder_vibrate">Rung khi nhắc nhở</string>
+    <string name="reminder_volume">Âm lượng</string>
+    <string name="reminder_snooze_duration">Thời gian báo lại</string>
+    <string name="reminder_alarm_style">Hiển thị dạng báo thức</string>
+
+    <!-- Snooze Options -->
+    <string name="snooze_5_min">5 phút</string>
+    <string name="snooze_10_min">10 phút</string>
+    <string name="snooze_15_min">15 phút</string>
+    <string name="snooze_30_min">30 phút</string>
+
+    <!-- Volume Settings -->
+    <string name="volume_low">Thấp</string>
+    <string name="volume_medium">Trung bình</string>
+    <string name="volume_high">Cao</string>
+    <string name="volume_max">Tối đa</string>
 </resources>

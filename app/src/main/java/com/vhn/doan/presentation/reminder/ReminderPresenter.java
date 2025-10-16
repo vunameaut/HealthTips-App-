@@ -234,8 +234,8 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
                 reminderService.scheduleReminder(reminder);
                 android.util.Log.d("ReminderPresenter", "✅ Đã lên lịch thông báo cho reminder: " + reminder.getTitle());
             } else {
-                // Hủy thông báo nếu reminder bị tắt - cần thêm context
-                ReminderService.cancelReminder(getContextFromView(), reminder.getId());
+                // Hủy thông báo nếu reminder bị tắt
+                reminderService.cancelReminder(reminder.getId());
                 android.util.Log.d("ReminderPresenter", "❌ Đã hủy thông báo cho reminder: " + reminder.getTitle());
             }
         } catch (Exception e) {

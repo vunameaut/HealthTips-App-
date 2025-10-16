@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/alarm_background_gradient"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <!-- Thời gian hiện tại -->
+    <TextView
+        android:id="@+id/tv_alarm_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="07:30"
+        android:textSize="72sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:fontFamily="@font/roboto_light"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Ngày hiện tại -->
+    <TextView
+        android:id="@+id/tv_alarm_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thứ Hai, 16/10/2023"
+        android:textSize="16sp"
+        android:textColor="@color/white_80"
+        android:layout_marginBottom="48dp" />
+
+    <!-- Icon báo thức với animation -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="32dp"
+        app:cardCornerRadius="60dp"
+        app:cardElevation="12dp"
+        app:cardBackgroundColor="@color/white_20">
+
+        <ImageView
+            android:id="@+id/iv_alarm_icon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_alarm_ring"
+            android:tint="@color/white"
+            android:scaleType="centerInside" />
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Tiêu đề nhắc nhở -->
+    <TextView
+        android:id="@+id/tv_alarm_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Uống thuốc"
+        android:textSize="24sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Mô tả nhắc nhở -->
+    <TextView
+        android:id="@+id/tv_alarm_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đã đến giờ uống thuốc huyết áp"
+        android:textSize="16sp"
+        android:textColor="@color/white_80"
+        android:gravity="center"
+        android:layout_marginBottom="64dp" />
+
+    <!-- Các nút hành động -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="32dp">
+
+        <!-- Nút Snooze -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_snooze"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="16dp"
+            android:text="@string/alarm_snooze"
+            android:textSize="16sp"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/transparent"
+            app:strokeColor="@color/white"
+            app:strokeWidth="2dp"
+            app:cornerRadius="32dp"
+            app:icon="@drawable/ic_snooze"
+            app:iconGravity="textStart"
+            app:iconTint="@color/white" />
+
+        <!-- Nút Dismiss -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_dismiss"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:text="@string/alarm_dismiss"
+            android:textSize="16sp"
+            android:textColor="@color/alarm_background_start"
+            app:backgroundTint="@color/white"
+            app:cornerRadius="32dp"
+            app:icon="@drawable/ic_alarm_off"
+            app:iconGravity="textStart"
+            app:iconTint="@color/alarm_background_start" />
+
+    </LinearLayout>
+
+    <!-- Thanh âm lượng (tùy chọn) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="32dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_volume_down"
+            android:tint="@color/white_60" />
+
+        <SeekBar
+            android:id="@+id/seekbar_volume"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="16dp"
+            android:progressTint="@color/white"
+            android:thumbTint="@color/white"
+            android:progressBackgroundTint="@color/white_30" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_volume_up"
+            android:tint="@color/white_60" />
+
+    </LinearLayout>
+
+</LinearLayout>

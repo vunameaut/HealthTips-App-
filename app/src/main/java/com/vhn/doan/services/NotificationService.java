@@ -154,6 +154,108 @@ public class NotificationService {
     }
 
     /**
+     * Overload method để hỗ trợ ReminderWorker
+     * Hiển thị thông báo nhắc nhở với các tham số truyền vào
+     */
+    public void showReminderNotification(int notificationId, String title, String message, Intent intent) {
+        try {
+            // Tạo PendingIntent từ Intent đã truyền vào
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                notificationId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            // Tạo notification với độ ưu tiên cao
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification_reminder)
+                .setContentTitle("🔔 " + title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setAutoCancel(true)
+                .setOngoing(false)
+                .setContentIntent(pendingIntent)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText(message)
+                    .setBigContentTitle("🔔 " + title))
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setFullScreenIntent(pendingIntent, true); // Hiển thị full screen ngay cả khi khóa màn hình
+
+            // Hiển thị notification
+            NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
+            if (notificationManagerCompat.areNotificationsEnabled()) {
+                notificationManagerCompat.notify(notificationId, builder.build());
+                android.util.Log.d("NotificationService", "Đã hiển thị fallback notification: " + title);
+            } else {
+                android.util.Log.w("NotificationService", "Thông báo bị tắt bởi người dùng");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("NotificationService", "Lỗi hiển thị fallback notification", e);
+        }
+    }
+
+    /**
+     * Hiển thị thông báo với âm thanh tùy chỉnh
+     */
+    public void showReminderNotificationWithSound(Reminder reminder, String soundUri) {
+        if (reminder == null) return;
+
+        // Tạo intent để mở app khi click notification
+        Intent intent = new Intent(context, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("open_reminders", true);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification_reminder)
+            .setContentTitle("🔔 Nhắc nhở: " + reminder.getTitle())
+            .setContentText(reminder.getDescription())
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER);
+
+        // Thêm âm thanh tùy chỉnh nếu có
+        if (soundUri != null && !soundUri.isEmpty()) {
+            try {
+                android.net.Uri uri = android.net.Uri.parse(soundUri);
+                builder.setSound(uri);
+            } catch (Exception e) {
+                // Fallback về âm thanh mặc định
+                builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
+            }
+        } else {
+            builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
+        }
+
+        // Thêm rung nếu được bật
+        if (reminder.isVibrate()) {
+            builder.setDefaults(builder.build().defaults | NotificationCompat.DEFAULT_VIBRATE);
+        }
+
+        // Hiển thị notification
+        try {
+            NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
+            if (notificationManagerCompat.areNotificationsEnabled()) {
+                int notificationId = REMINDER_NOTIFICATION_ID + reminder.getId().hashCode();
+                notificationManagerCompat.notify(notificationId, builder.build());
+            }
+        } catch (Exception e) {
+            android.util.Log.e("NotificationService", "Lỗi hiển thị thông báo với âm thanh", e);
+        }
+    }
+
+    /**
      * Hiển thị thông báo nhắc nhở với các tham số riêng lẻ (static method)
      */
     public static void showReminderNotification(Context context, String title, String message, String reminderId) {

@@ -4,16 +4,19 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.slider.Slider;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.vhn.doan.R;
 import com.vhn.doan.data.Reminder;
 
@@ -23,9 +26,11 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Dialog để tạo hoặc chỉnh sửa nhắc nhở
+ * Dialog để tạo hoặc chỉnh sửa nhắc nhở với tính năng báo thức và chọn âm thanh
  */
 public class ReminderDialog {
+
+    private static final int REQUEST_SOUND_SELECTION = 1001;
 
     private Context context;
     private OnReminderDialogListener listener;
@@ -39,74 +44,81 @@ public class ReminderDialog {
     private TextView tvSelectedDate;
     private TextView tvSelectedTime;
     private Spinner spRepeatType;
-    private Switch swActive;
+    private SwitchMaterial swActive;
     private Button btnSelectDate;
     private Button btnSelectTime;
     private Button btnSave;
     private Button btnCancel;
+
+    // New UI Components for Alarm Features
+    private TextView tvSelectedSound;
+    private Button btnSelectSound;
+    private SwitchMaterial swVibrate;
+    private SwitchMaterial swAlarmStyle;
+    private Slider sliderVolume;
+    private TextView tvVolumeValue;
+    private Spinner spSnoozeMinutes;
 
     // Date and Time
     private Calendar selectedDateTime;
     private SimpleDateFormat dateFormat;
     private SimpleDateFormat timeFormat;
 
-    // Repeat types
-    private String[] repeatTypes = {
-        "Không lặp",
-        "Hàng ngày",
-        "Hàng tuần",
-        "Hàng tháng"
-    };
+    // Sound Selection
+    private String selectedSoundId = "default_alarm";
+    private String selectedSoundName = "Báo thức mặc định";
+    private String selectedSoundUri;
 
     public interface OnReminderDialogListener {
         void onReminderSaved(Reminder reminder);
-        void onReminderCanceled();
+        void onReminderDeleted(String reminderId);
     }
 
     public ReminderDialog(Context context, OnReminderDialogListener listener) {
         this.context = context;
         this.listener = listener;
-        this.isEditMode = false;
         this.selectedDateTime = Calendar.getInstance();
         this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         this.timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-
-        // Đặt thời gian mặc định là 1 giờ sau thời điểm hiện tại
-        selectedDateTime.add(Calendar.HOUR_OF_DAY, 1);
     }
 
-    public ReminderDialog(Context context, Reminder reminder, OnReminderDialogListener listener) {
-        this(context, listener);
+    public void showCreateDialog() {
+        this.isEditMode = false;
+        this.reminder = new Reminder();
+        showDialog();
+    }
+
+    public void showEditDialog(Reminder reminder) {
+        this.isEditMode = true;
         this.reminder = reminder;
-        this.isEditMode = reminder != null;
-
-        // Kiểm tra reminder không null trước khi truy cập properties
-        if (reminder != null && reminder.getReminderTimeAsDate() != null) {
-            selectedDateTime.setTime(reminder.getReminderTimeAsDate());
-        } else {
-            // Đặt thời gian mặc định là 1 giờ sau thời điểm hiện tại nếu reminder null
-            selectedDateTime = Calendar.getInstance();
-            selectedDateTime.add(Calendar.HOUR_OF_DAY, 1);
+        if (reminder.getReminderTime() != null) {
+            selectedDateTime.setTimeInMillis(reminder.getReminderTime());
         }
+        // Load sound settings
+        if (reminder.getSoundId() != null) {
+            selectedSoundId = reminder.getSoundId();
+            selectedSoundName = reminder.getSoundName();
+            selectedSoundUri = reminder.getSoundUri();
+        }
+        showDialog();
     }
 
-    public void show() {
-        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_reminder, null);
-
-        initViews(dialogView);
-        setupSpinner();
-        setupClickListeners();
-        populateData();
+    private void showDialog() {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_reminder_enhanced, null);
+        initializeViews(dialogView);
+        setupViews();
+        populateFields();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setView(dialogView);
-        builder.setTitle(isEditMode ? "Chỉnh sửa nhắc nhở" : "Tạo nhắc nhở mới");
+        builder.setCancelable(true);
 
         dialog = builder.create();
         dialog.show();
     }
 
-    private void initViews(View view) {
+    private void initializeViews(View view) {
+        // Existing views
         etTitle = view.findViewById(R.id.et_reminder_title);
         etDescription = view.findViewById(R.id.et_reminder_description);
         tvSelectedDate = view.findViewById(R.id.tv_selected_date);
@@ -118,37 +130,87 @@ public class ReminderDialog {
         btnSave = view.findViewById(R.id.btn_save_reminder);
         btnCancel = view.findViewById(R.id.btn_cancel_reminder);
 
-        // Hiển thị thời gian đã chọn
-        updateDateTimeDisplay();
+        // New views for alarm features
+        tvSelectedSound = view.findViewById(R.id.tv_selected_sound);
+        btnSelectSound = view.findViewById(R.id.btn_select_sound);
+        swVibrate = view.findViewById(R.id.sw_vibrate);
+        swAlarmStyle = view.findViewById(R.id.sw_alarm_style);
+        sliderVolume = view.findViewById(R.id.slider_volume);
+        tvVolumeValue = view.findViewById(R.id.tv_volume_value);
+        spSnoozeMinutes = view.findViewById(R.id.sp_snooze_minutes);
     }
 
-    private void setupSpinner() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-            context,
-            android.R.layout.simple_spinner_item,
-            repeatTypes
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spRepeatType.setAdapter(adapter);
-    }
+    private void setupViews() {
+        // Setup repeat type spinner
+        ArrayAdapter<CharSequence> repeatAdapter = ArrayAdapter.createFromResource(
+            context, R.array.repeat_types, android.R.layout.simple_spinner_item);
+        repeatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spRepeatType.setAdapter(repeatAdapter);
 
-    private void setupClickListeners() {
+        // Setup snooze minutes spinner
+        ArrayAdapter<CharSequence> snoozeAdapter = ArrayAdapter.createFromResource(
+            context, R.array.snooze_options, android.R.layout.simple_spinner_item);
+        snoozeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spSnoozeMinutes.setAdapter(snoozeAdapter);
+
+        // Setup volume slider
+        sliderVolume.setValueFrom(0f);
+        sliderVolume.setValueTo(100f);
+        sliderVolume.setValue(80f);
+        sliderVolume.addOnChangeListener((slider, value, fromUser) -> {
+            tvVolumeValue.setText((int)value + "%");
+        });
+
+        // Setup click listeners
         btnSelectDate.setOnClickListener(v -> showDatePicker());
         btnSelectTime.setOnClickListener(v -> showTimePicker());
+        btnSelectSound.setOnClickListener(v -> showSoundSelection());
         btnSave.setOnClickListener(v -> saveReminder());
-        btnCancel.setOnClickListener(v -> cancelDialog());
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
     }
 
-    private void populateData() {
-        if (isEditMode && reminder != null) {
+    private void populateFields() {
+        if (reminder != null) {
             etTitle.setText(reminder.getTitle());
             etDescription.setText(reminder.getDescription());
             spRepeatType.setSelection(reminder.getRepeatType());
             swActive.setChecked(reminder.isActive());
-        } else {
-            // Giá trị mặc định cho reminder mới
-            swActive.setChecked(true);
-            spRepeatType.setSelection(0); // Không lặp
+
+            // Populate alarm settings
+            swVibrate.setChecked(reminder.isVibrate());
+            swAlarmStyle.setChecked(reminder.isAlarmStyle());
+            sliderVolume.setValue(reminder.getVolume());
+            tvVolumeValue.setText(reminder.getVolume() + "%");
+
+            // Set snooze minutes selection
+            int snoozeMinutes = reminder.getSnoozeMinutes();
+            int snoozePosition = getSnoozePosition(snoozeMinutes);
+            spSnoozeMinutes.setSelection(snoozePosition);
+
+            // Update sound selection
+            updateSoundSelection();
+        }
+
+        updateDateTimeDisplay();
+    }
+
+    private int getSnoozePosition(int minutes) {
+        switch (minutes) {
+            case 5: return 0;
+            case 10: return 1;
+            case 15: return 2;
+            case 30: return 3;
+            default: return 0;
+        }
+    }
+
+    private int getSnoozeMinutesFromPosition(int position) {
+        switch (position) {
+            case 0: return 5;
+            case 1: return 10;
+            case 2: return 15;
+            case 3: return 30;
+            default: return 5;
         }
     }
 
@@ -165,9 +227,6 @@ public class ReminderDialog {
             selectedDateTime.get(Calendar.MONTH),
             selectedDateTime.get(Calendar.DAY_OF_MONTH)
         );
-
-        // Không cho phép chọn ngày trong quá khứ
-        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
         datePickerDialog.show();
     }
 
@@ -187,6 +246,31 @@ public class ReminderDialog {
         timePickerDialog.show();
     }
 
+    private void showSoundSelection() {
+        Intent intent = new Intent(context, SoundSelectionActivity.class);
+        intent.putExtra(SoundSelectionActivity.EXTRA_CURRENT_SOUND_ID, selectedSoundId);
+
+        // Start activity for result if context is Activity
+        if (context instanceof android.app.Activity) {
+            ((android.app.Activity) context).startActivityForResult(intent, REQUEST_SOUND_SELECTION);
+        }
+    }
+
+    public void onSoundSelected(String soundId, String soundName, String soundUri) {
+        selectedSoundId = soundId;
+        selectedSoundName = soundName;
+        selectedSoundUri = soundUri;
+        updateSoundSelection();
+    }
+
+    private void updateSoundSelection() {
+        if (selectedSoundName != null) {
+            tvSelectedSound.setText(selectedSoundName);
+        } else {
+            tvSelectedSound.setText(context.getString(R.string.sound_default));
+        }
+    }
+
     private void updateDateTimeDisplay() {
         tvSelectedDate.setText(dateFormat.format(selectedDateTime.getTime()));
         tvSelectedTime.setText(timeFormat.format(selectedDateTime.getTime()));
@@ -196,47 +280,33 @@ public class ReminderDialog {
         String title = etTitle.getText().toString().trim();
         String description = etDescription.getText().toString().trim();
 
-        // Validation
         if (title.isEmpty()) {
-            etTitle.setError("Vui lòng nhập tiêu đề nhắc nhở");
-            etTitle.requestFocus();
+            Toast.makeText(context, "Vui lòng nhập tiêu đề nhắc nhở", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Kiểm tra thời gian không được trong quá khứ
-        if (selectedDateTime.getTimeInMillis() <= System.currentTimeMillis()) {
-            Toast.makeText(context, "Thời gian nhắc nhở phải sau thời điểm hiện tại", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Tạo hoặc cập nhật reminder
-        if (reminder == null) {
-            reminder = new Reminder();
-        }
-
+        // Update reminder object
         reminder.setTitle(title);
         reminder.setDescription(description);
         reminder.setReminderTime(selectedDateTime.getTimeInMillis());
         reminder.setRepeatType(spRepeatType.getSelectedItemPosition());
         reminder.setActive(swActive.isChecked());
 
+        // Update alarm settings
+        reminder.setSoundId(selectedSoundId);
+        reminder.setSoundName(selectedSoundName);
+        reminder.setSoundUri(selectedSoundUri);
+        reminder.setVibrate(swVibrate.isChecked());
+        reminder.setAlarmStyle(swAlarmStyle.isChecked());
+        reminder.setVolume((int) sliderVolume.getValue());
+        reminder.setSnoozeMinutes(getSnoozeMinutesFromPosition(spSnoozeMinutes.getSelectedItemPosition()));
+
+        reminder.touch(); // Update timestamp
+
         if (listener != null) {
             listener.onReminderSaved(reminder);
         }
 
         dialog.dismiss();
-    }
-
-    private void cancelDialog() {
-        if (listener != null) {
-            listener.onReminderCanceled();
-        }
-        dialog.dismiss();
-    }
-
-    public void dismiss() {
-        if (dialog != null && dialog.isShowing()) {
-            dialog.dismiss();
-        }
     }
 }

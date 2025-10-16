@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Repeat Types -->
+    <string-array name="repeat_types">
+        <item>@string/repeat_none</item>
+        <item>@string/repeat_daily</item>
+        <item>@string/repeat_weekly</item>
+        <item>@string/repeat_monthly</item>
+    </string-array>
+
+    <!-- Snooze Options -->
+    <string-array name="snooze_options">
+        <item>@string/snooze_5_min</item>
+        <item>@string/snooze_10_min</item>
+        <item>@string/snooze_15_min</item>
+        <item>@string/snooze_30_min</item>
+    </string-array>
+
+    <!-- Volume Levels -->
+    <string-array name="volume_levels">
+        <item>@string/volume_low</item>
+        <item>@string/volume_medium</item>
+        <item>@string/volume_high</item>
+        <item>@string/volume_max</item>
+    </string-array>
+</resources>

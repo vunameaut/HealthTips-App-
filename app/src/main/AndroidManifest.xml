@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
 
     <!-- Quyền truy cập bộ nhớ -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
@@ -117,6 +119,23 @@
             android:name=".presentation.debug.ReminderTestActivity"
             android:exported="true"
             android:label="Debug Thông Báo" />
+
+        <!-- Activity chọn âm thanh cho reminder -->
+        <activity
+            android:name=".presentation.reminder.SoundSelectionActivity"
+            android:exported="false"
+            android:label="Chọn âm thanh"
+            android:theme="@style/Theme.Doan" />
+
+        <!-- Activity hiển thị báo thức reminder -->
+        <activity
+            android:name=".presentation.reminder.AlarmActivity"
+            android:exported="false"
+            android:label="Báo thức"
+            android:theme="@style/Theme.Doan"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true" />
 
         <!-- Broadcast Receivers cho Reminder -->
         <receiver

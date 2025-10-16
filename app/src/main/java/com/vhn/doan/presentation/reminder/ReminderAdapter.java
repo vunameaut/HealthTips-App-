@@ -3,17 +3,18 @@ package com.vhn.doan.presentation.reminder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.vhn.doan.R;
 import com.vhn.doan.data.Reminder;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -94,8 +95,8 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
         private TextView tvDescription;
         private TextView tvDateTime;
         private TextView tvRepeatType;
-        private Switch swActive;
-        private ImageButton btnDelete;
+        private SwitchMaterial swActive;
+        private MaterialButton btnDelete;
         private View statusIndicator;
 
         public ReminderViewHolder(@NonNull View itemView) {
@@ -136,65 +137,116 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
         }
 
         public void bind(Reminder reminder) {
-            // Hiển thị tiêu đề
-            tvTitle.setText(reminder.getTitle());
+            try {
+                // Kiểm tra reminder không null
+                if (reminder == null) {
+                    tvTitle.setText("Nhắc nhở không hợp lệ");
+                    return;
+                }
 
-            // Hiển thị mô tả
-            if (reminder.getDescription() != null && !reminder.getDescription().trim().isEmpty()) {
-                tvDescription.setText(reminder.getDescription());
-                tvDescription.setVisibility(View.VISIBLE);
-            } else {
+                // Hiển thị tiêu đề với null check
+                String title = reminder.getTitle();
+                tvTitle.setText(title != null && !title.trim().isEmpty() ? title : "Nhắc nhở không có tiêu đề");
+
+                // Hiển thị mô tả với null check
+                String description = reminder.getDescription();
+                if (description != null && !description.trim().isEmpty()) {
+                    tvDescription.setText(description);
+                    tvDescription.setVisibility(View.VISIBLE);
+                } else {
+                    tvDescription.setVisibility(View.GONE);
+                }
+
+                // Hiển thị thời gian với proper error handling
+                try {
+                    Date reminderDate = reminder.getReminderTimeAsDate();
+                    if (reminderDate != null) {
+                        tvDateTime.setText(dateTimeFormat.format(reminderDate));
+                    } else {
+                        tvDateTime.setText("Chưa đặt thời gian");
+                    }
+                } catch (Exception e) {
+                    tvDateTime.setText("Chưa đặt thời gian");
+                }
+
+                // Hiển thị loại lặp lại với error handling
+                try {
+                    String repeatType = reminder.getRepeatTypeDisplayName();
+                    tvRepeatType.setText(repeatType != null ? repeatType : "Không lặp lại");
+                } catch (Exception e) {
+                    tvRepeatType.setText("Không lặp lại");
+                }
+
+                // Cập nhật trạng thái switch
+                swActive.setChecked(reminder.isActive());
+
+                // Cập nhật indicator trạng thái với error handling
+                updateStatusIndicator(reminder);
+
+                // Cập nhật giao diện dựa trên trạng thái
+                updateItemAppearance(reminder);
+
+            } catch (Exception e) {
+                // Log error và hiển thị thông tin cơ bản
+                tvTitle.setText("Lỗi hiển thị nhắc nhở");
                 tvDescription.setVisibility(View.GONE);
+                tvDateTime.setText("--");
+                tvRepeatType.setText("--");
+                swActive.setChecked(false);
             }
-
-            // Hiển thị thời gian
-            if (reminder.getReminderTimeAsDate() != null) {
-                tvDateTime.setText(dateTimeFormat.format(reminder.getReminderTimeAsDate()));
-            } else {
-                tvDateTime.setText(itemView.getContext().getString(R.string.no_time_set));
-            }
-
-            // Hiển thị loại lặp lại
-            tvRepeatType.setText(reminder.getRepeatTypeDisplayName());
-
-            // Cập nhật trạng thái switch
-            swActive.setChecked(reminder.isActive());
-
-            // Cập nhật indicator trạng thái
-            updateStatusIndicator(reminder);
-
-            // Cập nhật giao diện dựa trên trạng thái
-            updateItemAppearance(reminder);
         }
 
         private void updateStatusIndicator(Reminder reminder) {
-            if (reminder.isActive()) {
-                if (reminder.isDue()) {
-                    // Nhắc nhở đã đến giờ
-                    statusIndicator.setBackgroundResource(R.color.status_due);
+            try {
+                if (reminder.isActive()) {
+                    try {
+                        if (reminder.isDue()) {
+                            // Nhắc nhở đã đến giờ
+                            statusIndicator.setBackgroundResource(R.color.status_due);
+                        } else {
+                            // Nhắc nhở đang hoạt động
+                            statusIndicator.setBackgroundResource(R.color.status_active);
+                        }
+                    } catch (Exception e) {
+                        // Fallback nếu isDue() gây lỗi
+                        statusIndicator.setBackgroundResource(R.color.status_active);
+                    }
                 } else {
-                    // Nhắc nhở đang hoạt động
-                    statusIndicator.setBackgroundResource(R.color.status_active);
+                    // Nhắc nhở đã tắt
+                    statusIndicator.setBackgroundResource(R.color.status_inactive);
                 }
-            } else {
-                // Nhắc nhở đã tắt
-                statusIndicator.setBackgroundResource(R.color.status_inactive);
+            } catch (Exception e) {
+                // Fallback color nếu có lỗi
+                statusIndicator.setBackgroundResource(android.R.color.darker_gray);
             }
         }
 
         private void updateItemAppearance(Reminder reminder) {
-            float alpha = reminder.isActive() ? 1.0f : 0.6f;
+            try {
+                float alpha = reminder.isActive() ? 1.0f : 0.6f;
 
-            tvTitle.setAlpha(alpha);
-            tvDescription.setAlpha(alpha);
-            tvDateTime.setAlpha(alpha);
-            tvRepeatType.setAlpha(alpha);
+                tvTitle.setAlpha(alpha);
+                tvDescription.setAlpha(alpha);
+                tvDateTime.setAlpha(alpha);
+                tvRepeatType.setAlpha(alpha);
 
-            // Highlight nếu nhắc nhở đã đến giờ và đang hoạt động
-            if (reminder.isActive() && reminder.isDue()) {
-                itemView.setBackgroundResource(R.drawable.bg_reminder_due);
-            } else {
-                itemView.setBackgroundResource(R.drawable.bg_reminder_normal);
+                // Highlight nếu nhắc nhở đã đến giờ và đang hoạt động với error handling
+                try {
+                    if (reminder.isActive() && reminder.isDue()) {
+                        itemView.setBackgroundResource(R.drawable.bg_reminder_due);
+                    } else {
+                        itemView.setBackgroundResource(R.drawable.bg_reminder_normal);
+                    }
+                } catch (Exception e) {
+                    // Fallback background
+                    itemView.setBackgroundResource(android.R.drawable.list_selector_background);
+                }
+            } catch (Exception e) {
+                // Fallback appearance
+                tvTitle.setAlpha(1.0f);
+                tvDescription.setAlpha(1.0f);
+                tvDateTime.setAlpha(1.0f);
+                tvRepeatType.setAlpha(1.0f);
             }
         }
     }
