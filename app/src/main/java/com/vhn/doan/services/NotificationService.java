@@ -13,7 +13,7 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.vhn.doan.R;
 import com.vhn.doan.data.Reminder;
-import com.vhn.doan.presentation.home.HomeActivity;
+import com.vhn.doan.presentation.reminder.AlarmActivity;
 import com.vhn.doan.receivers.ReminderActionReceiver;
 
 /**
@@ -61,12 +61,18 @@ public class NotificationService {
      * Hiển thị thông báo nhắc nhở
      */
     public void showReminderNotification(Reminder reminder) {
-        if (reminder == null) return;
+        if (reminder == null) {
+            android.util.Log.w("NotificationService", "showReminderNotification: Reminder is null");
+            return;
+        }
+        android.util.Log.d("NotificationService", "showReminderNotification: Showing notification for reminder: " + reminder.getTitle());
 
         // Tạo intent để mở app khi click notification
-        Intent intent = new Intent(context, HomeActivity.class);
+        Intent intent = new Intent(context, AlarmActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra("open_reminders", true);
+        intent.putExtra("reminder_id", reminder.getId());
+        intent.putExtra("title", reminder.getTitle());
+        intent.putExtra("message", reminder.getDescription());
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
             context,
@@ -204,9 +210,11 @@ public class NotificationService {
         if (reminder == null) return;
 
         // Tạo intent để mở app khi click notification
-        Intent intent = new Intent(context, HomeActivity.class);
+        Intent intent = new Intent(context, AlarmActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra("open_reminders", true);
+        intent.putExtra("reminder_id", reminder.getId());
+        intent.putExtra("title", reminder.getTitle());
+        intent.putExtra("message", reminder.getDescription());
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
             context,
