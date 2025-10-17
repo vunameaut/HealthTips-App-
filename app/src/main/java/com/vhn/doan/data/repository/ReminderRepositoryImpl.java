@@ -272,11 +272,11 @@ public class ReminderRepositoryImpl implements ReminderRepository {
     }
 
     /**
-     * Phương thức hỗ trợ lấy nhiều reminder theo danh sách ID
+     * Helper method để lấy chi tiết nhiều reminder theo IDs
      */
     private void fetchRemindersByIds(List<String> reminderIds, RepositoryCallback<List<Reminder>> callback) {
         List<Reminder> reminders = new ArrayList<>();
-        int[] counter = {0};
+        final int[] pendingRequests = {reminderIds.size()};
 
         for (String reminderId : reminderIds) {
             remindersRef.child(reminderId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -289,19 +289,19 @@ public class ReminderRepositoryImpl implements ReminderRepository {
                         }
                     }
 
-                    counter[0]++;
-                    if (counter[0] == reminderIds.size()) {
+                    pendingRequests[0]--;
+                    if (pendingRequests[0] == 0) {
                         // Sắp xếp theo thời gian tạo (mới nhất trước)
-                        reminders.sort((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()));
+                        reminders.sort((r1, r2) -> Long.compare(r2.getCreatedAt(), r1.getCreatedAt()));
                         callback.onSuccess(reminders);
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    counter[0]++;
-                    if (counter[0] == reminderIds.size()) {
-                        callback.onSuccess(reminders);
+                    pendingRequests[0]--;
+                    if (pendingRequests[0] == 0) {
+                        callback.onError("Lỗi khi lấy chi tiết nhắc nhở: " + databaseError.getMessage());
                     }
                 }
             });

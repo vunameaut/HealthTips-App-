@@ -110,40 +110,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Quick Actions -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_add_reminder"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/add_reminder"
-                    app:icon="@drawable/ic_add"
-                    app:iconGravity="textStart"
-                    app:cornerRadius="12dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_reminder_settings"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/reminder_settings"
-                    app:icon="@drawable/ic_settings"
-                    app:iconGravity="textStart"
-                    app:cornerRadius="12dp" />
-
-            </LinearLayout>
-
             <!-- Reminders Section -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -203,96 +169,95 @@
                         android:layout_marginHorizontal="20dp"
                         android:background="?attr/colorOutlineVariant" />
 
-                    <!-- Reminders RecyclerView with SwipeRefresh -->
-                    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                        android:id="@+id/swipe_refresh_reminders"
+                    <!-- Reminders Content Container -->
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:minHeight="200dp">
 
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/recycler_view_reminders"
+                        <!-- Loading State -->
+                        <LinearLayout
+                            android:id="@+id/layout_loading"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:nestedScrollingEnabled="false"
-                            android:padding="12dp"
-                            tools:itemCount="3"
-                            tools:listitem="@layout/item_reminder" />
+                            android:orientation="vertical"
+                            android:padding="40dp"
+                            android:gravity="center"
+                            android:visibility="gone">
 
-                    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                            <ProgressBar
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:layout_marginBottom="16dp" />
 
-                    <!-- Empty State -->
-                    <LinearLayout
-                        android:id="@+id/layout_empty_state"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="40dp"
-                        android:gravity="center"
-                        android:visibility="gone"
-                        tools:visibility="visible">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/loading_reminders"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <ImageView
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:layout_marginBottom="16dp"
-                            android:src="@drawable/ic_alarm_off"
-                            android:alpha="0.6"
-                            android:tint="?attr/colorOnSurfaceVariant"
-                            app:tint="?attr/colorOnSurfaceVariant" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <!-- Reminders RecyclerView with SwipeRefresh -->
+                        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                            android:id="@+id/swipe_refresh_reminders"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recycler_view_reminders"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:nestedScrollingEnabled="false"
+                                android:padding="12dp"
+                                android:clipToPadding="false"
+                                tools:itemCount="3"
+                                tools:listitem="@layout/item_reminder" />
+
+                        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+                        <!-- Empty State -->
+                        <LinearLayout
+                            android:id="@+id/layout_empty_state"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/no_reminders_title"
-                            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textStyle="bold" />
+                            android:orientation="vertical"
+                            android:padding="40dp"
+                            android:gravity="center"
+                            android:visibility="gone"
+                            tools:visibility="visible">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="@string/no_reminders_message"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            android:textAlignment="center"
-                            android:gravity="center" />
+                            <ImageView
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
+                                android:layout_marginBottom="16dp"
+                                android:src="@drawable/ic_alarm_off"
+                                android:alpha="0.6"
+                                android:tint="?attr/colorOnSurfaceVariant"
+                                app:tint="?attr/colorOnSurfaceVariant" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_create_first_reminder"
-                            style="@style/Widget.Material3.Button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="20dp"
-                            android:text="@string/create_first_reminder"
-                            app:icon="@drawable/ic_add"
-                            app:cornerRadius="20dp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/no_reminders_title"
+                                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textStyle="bold" />
 
-                    </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/no_reminders_message"
+                                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                android:textAlignment="center"
+                                android:gravity="center" />
 
-                    <!-- Loading State -->
-                    <LinearLayout
-                        android:id="@+id/layout_loading"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="40dp"
-                        android:gravity="center"
-                        android:visibility="gone">
+                        </LinearLayout>
 
-                        <ProgressBar
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:layout_marginBottom="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/loading_reminders"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
-
-                    </LinearLayout>
+                    </FrameLayout>
 
                 </LinearLayout>
 
@@ -303,12 +268,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:visibility="gone"
+                tools:visibility="visible"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="1dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="?attr/colorOutlineVariant"
-                android:visibility="gone"
-                tools:visibility="visible">
+                app:strokeColor="?attr/colorOutlineVariant">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -320,27 +285,28 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Debug Tools"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                         android:textColor="?attr/colorOnSurface"
                         android:layout_marginBottom="8dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_debug_notifications"
                         style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Debug Notifications"
-                        app:icon="@drawable/ic_notification"
+                        android:text="Test Notifications"
+                        app:icon="@drawable/ic_bug_report"
                         app:cornerRadius="8dp" />
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Floating Action Button -->
+    <!-- FAB -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_add_reminder"
         android:layout_width="wrap_content"
@@ -350,7 +316,7 @@
         android:text="@string/add_reminder"
         app:icon="@drawable/ic_add"
         app:backgroundTint="?attr/colorPrimary"
-        app:iconTint="@color/white"
-        android:textColor="@color/white" />
+        app:iconTint="?attr/colorOnPrimary"
+        app:tint="?attr/colorOnPrimary" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

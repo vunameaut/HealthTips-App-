@@ -56,10 +56,10 @@
     <string name="active_reminders">Đang hoạt động</string>
     <string name="add_reminder">Thêm nhắc nhở</string>
     <string name="reminder_settings">Cài đặt nhắc nhở</string>
-    <string name="your_reminders">Các nhắc nhở của bạn</string>
+    <string name="your_reminders">Danh sách nhắc nhở</string>
     <string name="sort">Sắp xếp</string>
     <string name="no_reminders_title">Chưa có nhắc nhở nào</string>
-    <string name="no_reminders_message">Tạo nhắc nhở đầu tiên để theo dõi các hoạt động sức khỏe của bạn</string>
+    <string name="no_reminders_message">Bạn chưa tạo nhắc nhở nào. Hãy tạo nhắc nhở đầu tiên để theo dõi sức khỏe của mình!</string>
     <string name="create_first_reminder">Tạo nhắc nhở đầu tiên</string>
     <string name="loading_reminders">Đang tải nhắc nhở...</string>
     <string name="active">Hoạt động</string>
@@ -104,7 +104,7 @@
     <!-- Các chuỗi cho video đã like -->
     <string name="liked_videos">Video đã thích</string>
     <string name="no_liked_videos">Chưa có video nào được thích</string>
-    <string name="no_liked_videos_subtitle">Hãy thích những video yêu thích để xem lại sau</string>
+    <string name="no_liked_videos_subtitle">Hãy thích những video yêu th��ch để xem lại sau</string>
 
     <!-- Các chuỗi cho short video item -->
     <string name="play_pause_video">Phát/Tạm dừng video</string>
@@ -179,7 +179,7 @@
     <string name="notification_channel_name">Nhắc nhở sức khỏe</string>
     <string name="notification_channel_description">Thông báo nhắc nhở về sức khỏe</string>
     <string name="notification_reminder_title">Nhắc nhở: %1$s</string>
-    <string name="notification_mark_complete">Đánh dấu hoàn thành</string>
+    <string name="notification_mark_complete">Đánh dấu hoàn th��nh</string>
 
     <!-- Các chuỗi bổ sung cho màn hình chi tiết bài viết -->
     <string name="unlike">Bỏ thích</string>
@@ -322,4 +322,20 @@
     <string name="volume_medium">Trung bình</string>
     <string name="volume_high">Cao</string>
     <string name="volume_max">Tối đa</string>
+
+    <!-- Menu strings for reminder -->
+    <string name="menu_search">Tìm kiếm</string>
+    <string name="menu_filter">Lọc</string>
+    <string name="menu_refresh">Làm mới</string>
+    <string name="menu_debug">Debug</string>
+
+    <!-- Các chuỗi cho hệ thống nhắc nhở -->
+    <string name="reminder_snooze">Báo lại</string>
+    <string name="reminder_dismiss">Tắt</string>
+    <string name="reminder_title_default">Nhắc nhở sức khỏe</string>
+    <string name="reminder_message_default">Đã đến giờ thực hiện mẹo sức khỏe!</string>
+    <string name="reminder_set_success">Đã đặt nhắc nhở thành công</string>
+    <string name="reminder_cancel_success">Đã hủy nhắc nhở</string>
+    <string name="reminder_permission_needed">Cần quyền đặt alarm chính xác</string>
+    <string name="reminder_battery_optimization">Tắt tối ưu hóa pin để nhắc nhở hoạt động tốt hơn</string>
 </resources>

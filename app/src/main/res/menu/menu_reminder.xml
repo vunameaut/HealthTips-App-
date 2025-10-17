@@ -2,33 +2,30 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Search -->
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search"
-        android:title="Tìm kiếm"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView" />
+        android:title="@string/menu_search"
+        app:showAsAction="ifRoom"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
 
-    <!-- Filter Active Only -->
     <item
         android:id="@+id/action_filter_active"
         android:icon="@drawable/ic_filter_list"
-        android:title="Chỉ hiển thị đang hoạt động"
+        android:title="@string/menu_filter"
         app:showAsAction="ifRoom" />
 
-    <!-- Refresh -->
     <item
         android:id="@+id/action_refresh"
         android:icon="@drawable/ic_refresh"
-        android:title="Làm mới"
+        android:title="@string/menu_refresh"
         app:showAsAction="never" />
 
-    <!-- Debug - mở debug activity -->
     <item
         android:id="@+id/action_debug_notifications"
-        android:icon="@drawable/ic_refresh"
-        android:title="🔧 Debug Thông Báo"
+        android:icon="@drawable/ic_bug_report"
+        android:title="@string/menu_debug"
+        android:visible="true"
         app:showAsAction="never" />
 
 </menu>

@@ -55,6 +55,11 @@ public interface ReminderContract {
          * Ẩn trạng thái empty
          */
         void hideEmptyState();
+
+        /**
+         * Cập nhật số lượng nhắc nhở đang hoạt động
+         */
+        void updateActiveReminderCount(int activeCount);
     }
 
     interface Presenter {

@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -22,6 +23,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.vhn.doan.R;
 import com.vhn.doan.data.Reminder;
+import com.vhn.doan.data.repository.ReminderRepository;
+import com.vhn.doan.data.repository.ReminderRepositoryImpl;
 import com.vhn.doan.services.ReminderService;
 
 import java.text.SimpleDateFormat;
@@ -33,6 +36,8 @@ import java.util.Locale;
  * Thiết kế như một ứng dụng báo thức thực sự
  */
 public class AlarmActivity extends AppCompatActivity {
+
+    private static final String TAG = "AlarmActivity";
 
     // Constants cho Intent extras
     public static final String EXTRA_REMINDER_ID = "reminder_id";
@@ -48,10 +53,37 @@ public class AlarmActivity extends AppCompatActivity {
     private Handler handler;
     private Runnable dismissRunnable;
 
-    private Reminder reminder;
+    private String reminderId;
+    private String title;
+    private String message;
     private ReminderService reminderService;
+    private ReminderRepository reminderRepository;
 
     private static final int AUTO_DISMISS_DELAY = 60000; // Tự động tắt sau 1 phút
+
+    /**
+     * Static method để khởi động AlarmActivity từ các component khác
+     */
+    public static void startAlarm(Context context, String reminderId, String title, String message) {
+        try {
+            Log.d(TAG, "🚨 Khởi động AlarmActivity: " + title);
+
+            Intent intent = new Intent(context, AlarmActivity.class);
+            intent.putExtra(EXTRA_REMINDER_ID, reminderId);
+            intent.putExtra(EXTRA_TITLE, title);
+            intent.putExtra(EXTRA_MESSAGE, message);
+
+            // Đảm bảo Activity có thể khởi động từ background
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                           Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                           Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+            context.startActivity(intent);
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi khởi động AlarmActivity", e);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +93,10 @@ public class AlarmActivity extends AppCompatActivity {
         setupWindowFlags();
 
         setContentView(R.layout.activity_alarm);
+
+        // Khởi tạo repository
+        reminderRepository = new ReminderRepositoryImpl();
+        reminderService = new ReminderService(this);
 
         initializeViews();
         setupReminder();
@@ -101,13 +137,15 @@ public class AlarmActivity extends AppCompatActivity {
     private void setupReminder() {
         // Lấy thông tin reminder từ Intent
         Intent intent = getIntent();
-        String reminderId = intent.getStringExtra("reminder_id");
-        String title = intent.getStringExtra("title");
-        String description = intent.getStringExtra("message");
+        reminderId = intent.getStringExtra(EXTRA_REMINDER_ID);
+        title = intent.getStringExtra(EXTRA_TITLE);
+        message = intent.getStringExtra(EXTRA_MESSAGE);
+
+        Log.d(TAG, "📱 AlarmActivity nhận dữ liệu: " + title + " (ID: " + reminderId + ")");
 
         // Hiển thị thông tin
-        tvTitle.setText(title != null ? title : "Nhắc nhở sức khỏe");
-        tvDescription.setText(description != null ? description : "Đã đến giờ thực hiện nhắc nhở");
+        tvTitle.setText(title != null ? title : getString(R.string.reminder_title_default));
+        tvDescription.setText(message != null ? message : getString(R.string.reminder_message_default));
 
         // Hiển thị thời gian hiện tại
         Date now = new Date();
@@ -116,13 +154,10 @@ public class AlarmActivity extends AppCompatActivity {
 
         tvTime.setText(timeFormat.format(now));
         tvDate.setText(dateFormat.format(now));
-
-        reminderService = new ReminderService(this);
     }
 
     private void setupButtons() {
         btnDismiss.setOnClickListener(v -> dismissAlarm());
-
         btnSnooze.setOnClickListener(v -> snoozeAlarm());
     }
 
@@ -148,7 +183,7 @@ public class AlarmActivity extends AppCompatActivity {
             audioManager.setStreamVolume(AudioManager.STREAM_ALARM, volume, 0);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "❌ Lỗi khi phát âm thanh báo thức", e);
         }
     }
 
@@ -171,60 +206,157 @@ public class AlarmActivity extends AppCompatActivity {
         handler.postDelayed(dismissRunnable, AUTO_DISMISS_DELAY);
     }
 
+    /**
+     * FIXED: Tắt thực sự nhắc nhở trong database khi ấn nút "Tắt"
+     */
     private void dismissAlarm() {
+        Log.d(TAG, "✅ Người dùng ấn Tắt - Bắt đầu tắt nhắc nhở: " + reminderId);
+
         stopAlarmSound();
         stopVibration();
+
         if (handler != null && dismissRunnable != null) {
             handler.removeCallbacks(dismissRunnable);
         }
-        finish();
+
+        // QUAN TRỌNG: Tắt nhắc nhở trong database
+        if (reminderId != null && reminderRepository != null) {
+            disableReminderInDatabase();
+        } else {
+            Log.w(TAG, "⚠️ Không thể tắt nhắc nhở - thiếu reminderId hoặc repository");
+            finish();
+        }
+    }
+
+    /**
+     * Tắt nhắc nhở trong database và gửi broadcast cập nhật UI
+     */
+    private void disableReminderInDatabase() {
+        Log.d(TAG, "🔄 Bắt đầu tắt nhắc nhở trong database: " + reminderId);
+
+        reminderRepository.getReminderById(reminderId, new ReminderRepository.RepositoryCallback<Reminder>() {
+            @Override
+            public void onSuccess(Reminder reminder) {
+                if (reminder != null) {
+                    Log.d(TAG, "📋 Tìm thấy reminder: " + reminder.getTitle() + " - Current active: " + reminder.isActive());
+
+                    // Tắt nhắc nhở
+                    reminder.setActive(false);
+                    reminder.setUpdatedAt(System.currentTimeMillis());
+
+                    // Cập nhật trong database
+                    reminderRepository.updateReminder(reminder, new ReminderRepository.RepositoryCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            Log.d(TAG, "✅ Đã tắt nhắc nhở thành công trong database");
+
+                            // Hủy scheduling
+                            if (reminderService != null) {
+                                reminderService.cancelReminder(reminderId);
+                                Log.d(TAG, "✅ Đã hủy scheduling alarm");
+                            }
+
+                            // Gửi broadcast để cập nhật UI danh sách nhắc nhở
+                            sendReminderStatusBroadcast(reminder, "dismissed_by_user");
+
+                            // Đóng activity
+                            finish();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e(TAG, "❌ Lỗi khi cập nhật reminder trong database: " + error);
+                            // Vẫn đóng activity dù có lỗi
+                            finish();
+                        }
+                    });
+                } else {
+                    Log.w(TAG, "⚠️ Không tìm thấy reminder để tắt");
+                    finish();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "❌ Lỗi khi lấy thông tin reminder: " + error);
+                // Vẫn đóng activity dù có lỗi
+                finish();
+            }
+        });
+    }
+
+    /**
+     * Gửi broadcast để thông báo thay đổi trạng thái reminder
+     */
+    private void sendReminderStatusBroadcast(Reminder reminder, String reason) {
+        try {
+            Intent intent = new Intent("REMINDER_STATUS_CHANGED");
+            intent.putExtra("reminder_id", reminder.getId());
+            intent.putExtra("reminder_title", reminder.getTitle());
+            intent.putExtra("is_active", reminder.isActive());
+            intent.putExtra("reason", reason);
+
+            sendBroadcast(intent);
+            Log.d(TAG, "📡 Đã gửi broadcast REMINDER_STATUS_CHANGED: " + reason);
+
+            // Gửi thêm broadcast force refresh UI
+            Intent refreshIntent = new Intent("REMINDER_LIST_REFRESH");
+            refreshIntent.putExtra("refresh_reason", "reminder_dismissed");
+            sendBroadcast(refreshIntent);
+            Log.d(TAG, "📡 Đã gửi broadcast REMINDER_LIST_REFRESH");
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi gửi broadcast: " + e.getMessage());
+        }
     }
 
     private void snoozeAlarm() {
+        Log.d(TAG, "⏰ Người dùng ấn Báo lại - Snooze 5 phút");
+
         stopAlarmSound();
         stopVibration();
 
         // Lên lịch báo lại sau 5 phút
-        Intent intent = getIntent();
-        String reminderId = intent.getStringExtra("reminder_id");
+        if (reminderId != null && title != null) {
+            long snoozeTime = System.currentTimeMillis() + (5 * 60 * 1000); // 5 phút
 
-        // Tạo reminder mới cho snooze
-        long snoozeTime = System.currentTimeMillis() + (5 * 60 * 1000); // 5 phút
-        Reminder snoozeReminder = new Reminder();
-        snoozeReminder.setId(reminderId + "_snooze_" + System.currentTimeMillis());
-        snoozeReminder.setTitle(intent.getStringExtra("title"));
-        snoozeReminder.setDescription(intent.getStringExtra("message"));
-        snoozeReminder.setReminderTime(snoozeTime);
-        snoozeReminder.setActive(true);
+            // Tạo reminder mới cho snooze
+            Reminder snoozeReminder = new Reminder();
+            snoozeReminder.setId(reminderId + "_snooze_" + System.currentTimeMillis());
+            snoozeReminder.setTitle(title + " (Báo lại)");
+            snoozeReminder.setDescription(message);
+            snoozeReminder.setReminderTime(snoozeTime);
+            snoozeReminder.setActive(true);
+            snoozeReminder.setRepeatType(Reminder.RepeatType.NO_REPEAT); // Snooze không lặp lại
 
-        if (reminderService != null) {
-            reminderService.scheduleReminder(snoozeReminder);
-        }
-
-        if (handler != null && dismissRunnable != null) {
-            handler.removeCallbacks(dismissRunnable);
+            if (reminderService != null) {
+                reminderService.scheduleReminder(snoozeReminder);
+                Log.d(TAG, "✅ Đã lên lịch snooze sau 5 phút");
+            }
         }
 
         finish();
     }
 
     private void stopAlarmSound() {
-        if (mediaPlayer != null) {
-            try {
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                }
+        try {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
                 mediaPlayer.release();
                 mediaPlayer = null;
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi dừng âm thanh", e);
         }
     }
 
     private void stopVibration() {
-        if (vibrator != null) {
-            vibrator.cancel();
+        try {
+            if (vibrator != null) {
+                vibrator.cancel();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi dừng rung", e);
         }
     }
 
@@ -233,26 +365,17 @@ public class AlarmActivity extends AppCompatActivity {
         super.onDestroy();
         stopAlarmSound();
         stopVibration();
+
         if (handler != null && dismissRunnable != null) {
             handler.removeCallbacks(dismissRunnable);
         }
+
+        Log.d(TAG, "🔚 AlarmActivity đã được destroy");
     }
 
     @Override
     public void onBackPressed() {
-        // Không cho phép back khi đang báo thức
-        // Phải bấm dismiss hoặc snooze
-    }
-
-    // Phương thức static để khởi động AlarmActivity
-    public static void startAlarm(Context context, String reminderId, String title, String message) {
-        Intent intent = new Intent(context, AlarmActivity.class);
-        intent.putExtra("reminder_id", reminderId);
-        intent.putExtra("title", title);
-        intent.putExtra("message", message);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                       Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                       Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        context.startActivity(intent);
+        // Ngăn người dùng thoát bằng nút back - phải bấm dismiss hoặc snooze
+        Log.d(TAG, "🔙 Người dùng ấn back - Không cho phép thoát");
     }
 }

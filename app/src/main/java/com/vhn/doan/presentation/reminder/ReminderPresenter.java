@@ -73,6 +73,9 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
 
                     applyFiltersAndSearch();
 
+                    // CẬP NHẬT SỐ LƯỢNG NHẮC NHỞ ĐANG HOẠT ĐỘNG
+                    updateActiveReminderCount();
+
                     if (filteredReminders.isEmpty()) {
                         view.showEmptyState();
                     } else {
@@ -91,6 +94,25 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
                 }
             }
         });
+    }
+
+    /**
+     * Cập nhật số lượng nhắc nhở đang hoạt động
+     */
+    private void updateActiveReminderCount() {
+        if (!isViewAttached()) return;
+
+        int activeCount = 0;
+        for (Reminder reminder : allReminders) {
+            if (reminder.isActive()) {
+                activeCount++;
+            }
+        }
+
+        // Cập nhật UI hiển thị số lượng nhắc nhở đang hoạt động
+        view.updateActiveReminderCount(activeCount);
+
+        android.util.Log.d("ReminderPresenter", "📊 Số nhắc nhở đang hoạt động: " + activeCount + "/" + allReminders.size());
     }
 
     @Override
@@ -333,6 +355,182 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
     }
 
     /**
+     * Sắp xếp danh sách nhắc nhở theo tiêu chí
+     */
+    public void sortReminders(String sortType) {
+        if (allReminders == null || allReminders.isEmpty()) {
+            return;
+        }
+
+        List<Reminder> sortedList = new ArrayList<>(filteredReminders);
+
+        switch (sortType) {
+            case "created_desc":
+                sortedList.sort((r1, r2) -> {
+                    Long time1 = r1.getCreatedAt();
+                    Long time2 = r2.getCreatedAt();
+                    if (time1 == null && time2 == null) return 0;
+                    if (time1 == null) return 1;
+                    if (time2 == null) return -1;
+                    return time2.compareTo(time1);
+                });
+                break;
+            case "created_asc":
+                sortedList.sort((r1, r2) -> {
+                    Long time1 = r1.getCreatedAt();
+                    Long time2 = r2.getCreatedAt();
+                    if (time1 == null && time2 == null) return 0;
+                    if (time1 == null) return 1;
+                    if (time2 == null) return -1;
+                    return time1.compareTo(time2);
+                });
+                break;
+            case "datetime_asc":
+                sortedList.sort((r1, r2) -> {
+                    Long time1 = r1.getReminderTime();
+                    Long time2 = r2.getReminderTime();
+                    if (time1 == null && time2 == null) return 0;
+                    if (time1 == null) return 1;
+                    if (time2 == null) return -1;
+                    return time1.compareTo(time2);
+                });
+                break;
+            case "datetime_desc":
+                sortedList.sort((r1, r2) -> {
+                    Long time1 = r1.getReminderTime();
+                    Long time2 = r2.getReminderTime();
+                    if (time1 == null && time2 == null) return 0;
+                    if (time1 == null) return 1;
+                    if (time2 == null) return -1;
+                    return time2.compareTo(time1);
+                });
+                break;
+            case "name_asc":
+                sortedList.sort((r1, r2) -> {
+                    String title1 = r1.getTitle() != null ? r1.getTitle() : "";
+                    String title2 = r2.getTitle() != null ? r2.getTitle() : "";
+                    return title1.compareToIgnoreCase(title2);
+                });
+                break;
+            case "name_desc":
+                sortedList.sort((r1, r2) -> {
+                    String title1 = r1.getTitle() != null ? r1.getTitle() : "";
+                    String title2 = r2.getTitle() != null ? r2.getTitle() : "";
+                    return title2.compareToIgnoreCase(title1);
+                });
+                break;
+            case "active_first":
+                sortedList.sort((r1, r2) -> {
+                    boolean active1 = r1.isActive();
+                    boolean active2 = r2.isActive();
+                    if (active1 && !active2) return -1;
+                    if (!active1 && active2) return 1;
+                    return 0;
+                });
+                break;
+            default:
+                // Default sort by created time desc
+                sortedList.sort((r1, r2) -> {
+                    Long time1 = r1.getCreatedAt();
+                    Long time2 = r2.getCreatedAt();
+                    if (time1 == null && time2 == null) return 0;
+                    if (time1 == null) return 1;
+                    if (time2 == null) return -1;
+                    return time2.compareTo(time1);
+                });
+                break;
+        }
+
+        this.filteredReminders = sortedList;
+
+        // Cập nhật view thay vì gọi updateView()
+        if (isViewAttached()) {
+            if (filteredReminders.isEmpty() && !allReminders.isEmpty()) {
+                view.showEmptyState();
+            } else {
+                view.hideEmptyState();
+                view.showReminders(filteredReminders);
+            }
+        }
+    }
+
+    /**
+     * Xuất danh sách nhắc nhở
+     */
+    public void exportReminders() {
+        if (getView() == null) return;
+
+        try {
+            if (allReminders == null || allReminders.isEmpty()) {
+                getView().showError("Không có dữ liệu nhắc nhở để xuất");
+                return;
+            }
+
+            // Tạo nội dung xuất
+            StringBuilder exportContent = new StringBuilder();
+            exportContent.append("DANH SÁCH NHẮC NHỞ SỨC KHỎE\n");
+            exportContent.append("============================\n\n");
+
+            for (int i = 0; i < allReminders.size(); i++) {
+                Reminder reminder = allReminders.get(i);
+                exportContent.append(String.format("%d. %s\n", i + 1,
+                        reminder.getTitle() != null ? reminder.getTitle() : "Không có tiêu đề"));
+
+                if (reminder.getDescription() != null && !reminder.getDescription().trim().isEmpty()) {
+                    exportContent.append("   Mô tả: ").append(reminder.getDescription()).append("\n");
+                }
+
+                if (reminder.getReminderTime() != null) {
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                    exportContent.append("   Thời gian: ").append(sdf.format(new java.util.Date(reminder.getReminderTime()))).append("\n");
+                }
+
+                String repeatText = getRepeatTypeText(reminder.getRepeatType());
+                exportContent.append("   Lặp lại: ").append(repeatText).append("\n");
+                exportContent.append("   Trạng thái: ").append(reminder.isActive() ? "Đang hoạt động" : "Tạm dừng").append("\n");
+                exportContent.append("\n");
+            }
+
+            exportContent.append("Tổng số nhắc nhở: ").append(allReminders.size()).append("\n");
+            int activeCount = 0;
+            for (Reminder r : allReminders) {
+                if (r.isActive()) activeCount++;
+            }
+            exportContent.append("Đang hoạt động: ").append(activeCount).append("\n");
+            exportContent.append("Tạm dừng: ").append(allReminders.size() - activeCount).append("\n");
+
+            // Gọi View để xử lý việc xuất file
+            getView().showSuccess("Đã tạo nội dung xuất thành công");
+
+            // Có thể thêm logic để lưu file vào External Storage hoặc chia sẻ
+
+        } catch (Exception e) {
+            android.util.Log.e("ReminderPresenter", "Error exporting reminders: " + e.getMessage());
+            if (getView() != null) {
+                getView().showError("Lỗi khi xuất danh sách: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Helper method để convert repeat type int thành text
+     */
+    private String getRepeatTypeText(int repeatType) {
+        switch (repeatType) {
+            case Reminder.RepeatType.NO_REPEAT:
+                return "Không lặp lại";
+            case Reminder.RepeatType.DAILY:
+                return "Hàng ngày";
+            case Reminder.RepeatType.WEEKLY:
+                return "Hàng tuần";
+            case Reminder.RepeatType.MONTHLY:
+                return "Hàng tháng";
+            default:
+                return "Tùy chỉnh";
+        }
+    }
+
+    /**
      * Áp dụng bộ lọc và tìm kiếm
      */
     private void applyFiltersAndSearch() {
@@ -369,6 +567,9 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
         allReminders.add(0, reminder); // Thêm vào đầu danh sách
         applyFiltersAndSearch();
 
+        // CẬP NHẬT SỐ LƯỢNG NHẮC NHỞ ĐANG HOẠT ĐỘNG SAU KHI THÊM MỚI
+        updateActiveReminderCount();
+
         if (isViewAttached()) {
             if (filteredReminders.isEmpty()) {
                 view.showEmptyState();
@@ -392,6 +593,9 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
 
         applyFiltersAndSearch();
 
+        // CẬP NHẬT SỐ LƯỢNG NHẮC NHỞ ĐANG HOẠT ĐỘNG SAU KHI CẬP NHẬT
+        updateActiveReminderCount();
+
         if (isViewAttached()) {
             view.updateReminderItem(updatedReminder);
         }
@@ -403,6 +607,9 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
     private void removeReminderFromList(Reminder reminder) {
         allReminders.removeIf(r -> r.getId().equals(reminder.getId()));
         filteredReminders.removeIf(r -> r.getId().equals(reminder.getId()));
+
+        // CẬP NHẬT SỐ LƯỢNG NHẮC NHỞ ĐANG HOẠT ĐỘNG SAU KHI XÓA
+        updateActiveReminderCount();
 
         if (isViewAttached()) {
             view.removeReminderItem(reminder);

@@ -1,5 +1,10 @@
 package com.vhn.doan.services;
 
+import static com.vhn.doan.data.Reminder.RepeatType.DAILY;
+import static com.vhn.doan.data.Reminder.RepeatType.MONTHLY;
+import static com.vhn.doan.data.Reminder.RepeatType.WEEKLY;
+import static com.vhn.doan.data.Reminder.RepeatType.NO_REPEAT;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -153,19 +158,28 @@ public class ReminderService {
     }
 
     /**
-     * Hủy nhắc nhở
+     * Hủy nhắc nhở đã được lên lịch
      */
     public void cancelReminder(String reminderId) {
+        if (reminderId == null || reminderId.isEmpty()) {
+            return;
+        }
+
         try {
             // Hủy AlarmManager
             Intent intent = new Intent(context, ReminderBroadcastReceiver.class);
+            intent.setAction(ACTION_REMINDER_TRIGGER);
+
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context,
                 reminderId.hashCode(),
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
-            alarmManager.cancel(pendingIntent);
+
+            if (alarmManager != null) {
+                alarmManager.cancel(pendingIntent);
+            }
 
             // Hủy WorkManager
             WorkManager.getInstance(context).cancelAllWorkByTag("reminder_" + reminderId);
@@ -176,48 +190,99 @@ public class ReminderService {
     }
 
     /**
-     * Lên lịch lại reminder cho repeat
+     * Lên lịch lặp lại cho reminder (nếu có)
      */
     public void scheduleNextRepeat(Reminder reminder) {
-        if (reminder.getRepeatType() == Reminder.RepeatType.NO_REPEAT) {
+        if (reminder == null || reminder.getRepeatType() == Reminder.RepeatType.NO_REPEAT) {
             return;
         }
 
-        Long nextTime = reminder.getNextReminderTime();
-        if (nextTime != null) {
-            Reminder nextReminder = new Reminder();
-            nextReminder.setId(reminder.getId());
-            nextReminder.setUserId(reminder.getUserId());
-            nextReminder.setTitle(reminder.getTitle());
-            nextReminder.setDescription(reminder.getDescription());
-            nextReminder.setReminderTime(nextTime);
-            nextReminder.setRepeatType(reminder.getRepeatType());
-            nextReminder.setActive(true);
-            nextReminder.setSoundId(reminder.getSoundId());
-            nextReminder.setSoundName(reminder.getSoundName());
-            nextReminder.setSoundUri(reminder.getSoundUri());
-            nextReminder.setVibrate(reminder.isVibrate());
-            nextReminder.setVolume(reminder.getVolume());
-            nextReminder.setAlarmStyle(reminder.isAlarmStyle());
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(reminder.getReminderTime());
 
-            scheduleReminder(nextReminder);
+            // Tính toán thời gian lặp lại tiếp theo
+            switch (reminder.getRepeatType()) {
+                case DAILY:
+                    calendar.add(Calendar.DAY_OF_MONTH, 1);
+                    break;
+                case WEEKLY:
+                    calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                    break;
+                case MONTHLY:
+                    calendar.add(Calendar.MONTH, 1);
+                    break;
+                default:
+                    return;
+            }
+
+            // Cập nhật thời gian mới cho reminder
+            reminder.setReminderTime(calendar.getTimeInMillis());
+
+            // Lên lịch với thời gian mới
+            scheduleReminder(reminder);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     /**
-     * Kiểm tra xem có thể lên lịch exact alarm không
+     * Kiểm tra xem có quyền lên lịch alarm chính xác không
      */
     public boolean canScheduleExactAlarms() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            return alarmManager.canScheduleExactAlarms();
+            return alarmManager != null && alarmManager.canScheduleExactAlarms();
         }
         return true;
     }
 
     /**
-     * Release wake lock nếu có
+     * Lên lịch nhắc nhở ngay lập tức (cho testing)
      */
-    public void cleanup() {
+    public void scheduleImmediateReminder(Reminder reminder) {
+        if (reminder == null) {
+            return;
+        }
+
+        // Lên lịch sau 5 giây để có thời gian chuẩn bị
+        long reminderTime = System.currentTimeMillis() + 5000;
+        reminder.setReminderTime(reminderTime);
+        scheduleReminder(reminder);
+    }
+
+    /**
+     * Lấy thời gian nhắc nhở tiếp theo cho reminder lặp lại
+     */
+    public long getNextReminderTime(Reminder reminder) {
+        if (reminder == null || reminder.getRepeatType() == Reminder.RepeatType.NO_REPEAT) {
+            return 0;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(reminder.getReminderTime());
+
+        switch (reminder.getRepeatType()) {
+            case DAILY:
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                break;
+            case WEEKLY:
+                calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                break;
+            case MONTHLY:
+                calendar.add(Calendar.MONTH, 1);
+                break;
+            default:
+                return 0;
+        }
+
+        return calendar.getTimeInMillis();
+    }
+
+    /**
+     * Giải phóng tài nguyên
+     */
+    public void release() {
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }

@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,7 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.vhn.doan.R;
 import com.vhn.doan.data.Reminder;
 import com.vhn.doan.data.repository.ReminderRepository;
@@ -36,8 +37,6 @@ import com.vhn.doan.services.ReminderService;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * Fragment hiển thị danh sách nhắc nhở theo kiến trúc MVP
@@ -136,21 +135,29 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         reminderStatusReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if ("REMINDER_STATUS_CHANGED".equals(intent.getAction())) {
+                String action = intent.getAction();
+                android.util.Log.d("ReminderFragment", "📡 Nhận broadcast: " + action);
+
+                if ("REMINDER_STATUS_CHANGED".equals(action)) {
                     handleReminderStatusChanged(intent);
+                } else if ("REMINDER_LIST_REFRESH".equals(action)) {
+                    // Force refresh toàn bộ danh sách nhắc nhở
+                    handleForceRefresh(intent);
+                } else if ("REMINDER_ERROR".equals(action)) {
+                    handleReminderError(intent);
                 }
             }
         };
 
-        IntentFilter filter = new IntentFilter("REMINDER_STATUS_CHANGED");
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("REMINDER_STATUS_CHANGED");
+        filter.addAction("REMINDER_LIST_REFRESH");
+        filter.addAction("REMINDER_ERROR");
 
         // Sửa lỗi SecurityException cho Android 13+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ yêu cầu chỉ định RECEIVER_EXPORTED hoặc RECEIVER_NOT_EXPORTED
-            // Sử dụng RECEIVER_NOT_EXPORTED vì đây là broadcast nội bộ app
             getContext().registerReceiver(reminderStatusReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
         } else {
-            // Android cũ hơn sử dụng cách đăng ký truyền thống
             getContext().registerReceiver(reminderStatusReceiver, filter);
         }
 
@@ -183,20 +190,79 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
             boolean isActive = intent.getBooleanExtra("is_active", true);
             String reason = intent.getStringExtra("reason");
 
-            android.util.Log.d("ReminderFragment", "🔄 Nhận broadcast: " + reminderId + " - Active: " + isActive + " - Reason: " + reason);
+            android.util.Log.d("ReminderFragment", "🔄 ✅ NHẬN ĐƯỢC BROADCAST: " + reminderId + " - Active: " + isActive + " - Reason: " + reason);
 
             if ("auto_disabled_after_notification".equals(reason)) {
-                // Hiển thị thông báo cho người dùng biết reminder đã tự động tắt
+                // Hiển thị thông báo cho người dùng biết reminder ��ã tự động tắt
                 showSuccess("Nhắc nhở \"" + reminderTitle + "\" đã hoàn thành và tự động tắt");
+                android.util.Log.d("ReminderFragment", "✅ Đã hiển thị thông báo tự động tắt");
             }
+
+            // QUAN TRỌNG: Force refresh ngay lập tức
+            android.util.Log.d("ReminderFragment", "🔄 Bắt đầu force refresh presenter...");
 
             // Refresh danh sách để cập nhật UI
             if (presenter != null) {
                 presenter.refreshReminders();
+                android.util.Log.d("ReminderFragment", "✅ Đã gọi presenter.refreshReminders()");
+            } else {
+                android.util.Log.e("ReminderFragment", "❌ Presenter is null!");
+            }
+
+            // Force update adapter ngay lập tức
+            if (adapter != null) {
+                android.util.Log.d("ReminderFragment", "🔄 Force notify adapter...");
+                adapter.notifyDataSetChanged();
+                android.util.Log.d("ReminderFragment", "✅ Đã gọi adapter.notifyDataSetChanged()");
+            } else {
+                android.util.Log.e("ReminderFragment", "❌ Adapter is null!");
             }
 
         } catch (Exception e) {
-            android.util.Log.e("ReminderFragment", "❌ Lỗi khi xử lý broadcast: " + e.getMessage());
+            android.util.Log.e("ReminderFragment", "❌ Lỗi khi xử lý broadcast: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Xử lý broadcast force refresh danh sách
+     */
+    private void handleForceRefresh(Intent intent) {
+        try {
+            String refreshReason = intent.getStringExtra("refresh_reason");
+            android.util.Log.d("ReminderFragment", "🔄 Force refresh UI - Lý do: " + refreshReason);
+
+            // Force refresh danh sách nhắc nhở ngay lập tức
+            if (presenter != null) {
+                presenter.refreshReminders();
+                android.util.Log.d("ReminderFragment", "✅ Đã trigger refresh presenter");
+            }
+
+            // Cập nhật UI ngay lập tức nếu có adapter
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+                android.util.Log.d("ReminderFragment", "✅ Đã notify adapter update");
+            }
+
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Lỗi khi force refresh: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Xử lý broadcast lỗi reminder
+     */
+    private void handleReminderError(Intent intent) {
+        try {
+            String reminderId = intent.getStringExtra("reminder_id");
+            String errorMessage = intent.getStringExtra("error_message");
+
+            android.util.Log.e("ReminderFragment", "❌ Nhận lỗi reminder: " + reminderId + " - " + errorMessage);
+
+            // Hiển thị thông báo lỗi cho người dùng
+            showError("Lỗi với nhắc nhở: " + errorMessage);
+
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Lỗi khi xử lý error broadcast: " + e.getMessage());
         }
     }
 
@@ -303,58 +369,121 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
 
     @Override
     protected void initViews(View view) {
-        recyclerView = view.findViewById(R.id.recycler_view_reminders);
-        swipeRefresh = view.findViewById(R.id.swipe_refresh_reminders);
-        fabAdd = view.findViewById(R.id.fab_add_reminder);
-        emptyStateView = view.findViewById(R.id.layout_empty_state);
-        loadingView = view.findViewById(R.id.layout_loading);
+        try {
+            recyclerView = view.findViewById(R.id.recycler_view_reminders);
+            swipeRefresh = view.findViewById(R.id.swipe_refresh_reminders);
+            fabAdd = view.findViewById(R.id.fab_add_reminder);
+            emptyStateView = view.findViewById(R.id.layout_empty_state);
+            loadingView = view.findViewById(R.id.layout_loading);
 
-        // Setup button trong Empty State
-        Button btnCreateFirstReminder = view.findViewById(R.id.btn_create_first_reminder);
-        if (btnCreateFirstReminder != null) {
-            btnCreateFirstReminder.setOnClickListener(v -> presenter.createReminder());
-        }
+            // Setup Debug Button với null check
+            com.google.android.material.button.MaterialButton btnDebug = view.findViewById(R.id.btn_debug_notifications);
+            if (btnDebug != null) {
+                btnDebug.setOnClickListener(v -> openDebugActivity());
+            }
 
-        // Setup Debug Button
-        com.google.android.material.button.MaterialButton btnDebug = view.findViewById(R.id.btn_debug_notifications);
-        if (btnDebug != null) {
-            btnDebug.setOnClickListener(v -> openDebugActivity());
+            // Setup Sort Button với null check
+            com.google.android.material.button.MaterialButton btnSort = view.findViewById(R.id.btn_sort_reminders);
+            if (btnSort != null) {
+                btnSort.setOnClickListener(v -> showSortDialog());
+            }
+
+            // ĐÃ BỎ TẤT CẢ CÁC NÚT THÊM NHẮC NHỞ VÀ CÀI ĐẶT - CHỈ SỬ DỤNG FAB
+
+            android.util.Log.d("ReminderFragment", "✅ Views initialized successfully");
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Error initializing views: " + e.getMessage());
+            showError("Lỗi khởi tạo giao diện: " + e.getMessage());
         }
     }
 
     private void setupRecyclerView() {
-        adapter = new ReminderAdapter(new ArrayList<>(), new ReminderAdapter.OnReminderItemClickListener() {
-            @Override
-            public void onReminderClick(Reminder reminder) {
-                presenter.editReminder(reminder);
+        try {
+            if (recyclerView == null) {
+                android.util.Log.e("ReminderFragment", "RecyclerView is null!");
+                return;
             }
 
-            @Override
-            public void onToggleClick(Reminder reminder) {
-                presenter.toggleReminder(reminder);
-            }
+            adapter = new ReminderAdapter(new ArrayList<>(), new ReminderAdapter.OnReminderItemClickListener() {
+                @Override
+                public void onReminderClick(Reminder reminder) {
+                    if (presenter != null && reminder != null) {
+                        presenter.editReminder(reminder);
+                    }
+                }
 
-            @Override
-            public void onDeleteClick(Reminder reminder) {
-                presenter.deleteReminder(reminder);
-            }
-        });
+                @Override
+                public void onToggleClick(Reminder reminder) {
+                    if (presenter != null && reminder != null) {
+                        presenter.toggleReminder(reminder);
+                    }
+                }
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
+                @Override
+                public void onDeleteClick(Reminder reminder) {
+                    if (presenter != null && reminder != null) {
+                        presenter.deleteReminder(reminder);
+                    }
+                }
+            });
+
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            recyclerView.setAdapter(adapter);
+            recyclerView.setHasFixedSize(true);
+
+            android.util.Log.d("ReminderFragment", "✅ RecyclerView setup successfully");
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Error setting up RecyclerView: " + e.getMessage());
+            showError("Lỗi thiết lập danh sách: " + e.getMessage());
+        }
     }
 
     private void setupSwipeRefresh() {
-        swipeRefresh.setOnRefreshListener(() -> presenter.refreshReminders());
-        swipeRefresh.setColorSchemeResources(
-            R.color.primary_color,
-            R.color.primary_dark,
-            R.color.accent_color
-        );
+        try {
+            if (swipeRefresh == null) {
+                android.util.Log.w("ReminderFragment", "SwipeRefreshLayout is null!");
+                return;
+            }
+
+            swipeRefresh.setOnRefreshListener(() -> {
+                if (presenter != null) {
+                    presenter.refreshReminders();
+                } else {
+                    swipeRefresh.setRefreshing(false);
+                }
+            });
+
+            swipeRefresh.setColorSchemeResources(
+                R.color.primary_color,
+                R.color.primary_dark,
+                R.color.accent_color
+            );
+
+            android.util.Log.d("ReminderFragment", "✅ SwipeRefresh setup successfully");
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Error setting up SwipeRefresh: " + e.getMessage());
+        }
     }
 
     private void setupFloatingActionButton() {
-        fabAdd.setOnClickListener(v -> presenter.createReminder());
+        try {
+            if (fabAdd == null) {
+                android.util.Log.w("ReminderFragment", "FAB is null!");
+                return;
+            }
+
+            fabAdd.setOnClickListener(v -> {
+                if (presenter != null) {
+                    presenter.createReminder();
+                } else {
+                    showError("Hệ thống chưa sẵn sàng, vui lòng thử lại sau");
+                }
+            });
+
+            android.util.Log.d("ReminderFragment", "✅ FAB setup successfully");
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Error setting up FAB: " + e.getMessage());
+        }
     }
 
     private void setupSearchView() {
@@ -391,9 +520,57 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
      */
     private void openDebugActivity() {
         if (getContext() != null) {
-            android.content.Intent intent = new android.content.Intent(getContext(),
-                com.vhn.doan.presentation.debug.ReminderTestActivity.class);
-            startActivity(intent);
+            // Thêm tùy chọn debug force refresh UI
+            new AlertDialog.Builder(getContext())
+                .setTitle("Debug Options")
+                .setItems(new String[]{
+                    "Test Notifications",
+                    "Force Refresh UI",
+                    "Check Active Count",
+                    "Refresh từ Database"
+                }, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            // Test notifications
+                            try {
+                                android.content.Intent intent = new android.content.Intent(getContext(),
+                                    com.vhn.doan.presentation.debug.ReminderTestActivity.class);
+                                startActivity(intent);
+                            } catch (Exception e) {
+                                showError("ReminderTestActivity không tồn tại");
+                            }
+                            break;
+                        case 1:
+                            // Force refresh UI
+                            android.util.Log.d("ReminderFragment", "🔄 DEBUG: Force refresh UI");
+                            if (presenter != null) {
+                                presenter.refreshReminders();
+                            }
+                            if (adapter != null) {
+                                adapter.notifyDataSetChanged();
+                            }
+                            showSuccess("Đã force refresh UI");
+                            break;
+                        case 2:
+                            // Check active count
+                            if (presenter != null) {
+                                int activeCount = presenter.getActiveReminderCount();
+                                int totalCount = presenter.getTotalReminderCount();
+                                showSuccess("Active: " + activeCount + "/" + totalCount);
+                                android.util.Log.d("ReminderFragment", "📊 DEBUG Active count: " + activeCount + "/" + totalCount);
+                            }
+                            break;
+                        case 3:
+                            // Refresh từ database
+                            android.util.Log.d("ReminderFragment", "🔄 DEBUG: Refresh từ database");
+                            if (presenter != null) {
+                                presenter.loadReminders(); // Load lại từ database
+                            }
+                            showSuccess("Đã refresh từ database");
+                            break;
+                    }
+                })
+                .show();
         }
     }
 
@@ -516,6 +693,18 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         }
     }
 
+    @Override
+    public void updateActiveReminderCount(int activeCount) {
+        // Cập nhật số lượng nhắc nhở đang hoạt động trên header
+        TextView tvActiveCount = getView() != null ? getView().findViewById(R.id.tv_active_count) : null;
+        if (tvActiveCount != null) {
+            tvActiveCount.setText(String.valueOf(activeCount));
+            android.util.Log.d("ReminderFragment", "📊 Đã cập nhật UI: " + activeCount + " nhắc nhở đang hoạt động");
+        } else {
+            android.util.Log.w("ReminderFragment", "⚠️ Không tìm thấy TextView tv_active_count để cập nhật số l��ợng");
+        }
+    }
+
     /**
      * Method public để Activity có thể gọi khi click button từ XML
      * Sửa lỗi: IllegalStateException khi click nút tạo reminder
@@ -590,5 +779,197 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
         // Setup listeners cho các UI components
         setupSwipeRefresh();
         setupFloatingActionButton();
+    }
+
+    /**
+     * Hiển thị dialog sắp xếp danh sách nhắc nhở
+     */
+    private void showSortDialog() {
+        if (getContext() == null) return;
+
+        String[] sortOptions = {
+            "Thời gian tạo (Mới nhất)",
+            "Thời gian tạo (Cũ nhất)",
+            "Thời gian nhắc nhở (Sớm nhất)",
+            "Thời gian nhắc nhở (Muộn nhất)",
+            "Theo tên (A-Z)",
+            "Theo tên (Z-A)"
+        };
+
+        new AlertDialog.Builder(getContext())
+            .setTitle("Sắp xếp danh sách")
+            .setItems(sortOptions, (dialog, which) -> {
+                // Xử lý sắp xếp dựa trên lựa chọn
+                if (presenter != null) {
+                    presenter.sortReminders(String.valueOf(which));
+                    showSuccess("Đã sắp xếp danh sách");
+                }
+            })
+            .setNegativeButton("Hủy", null)
+            .show();
+    }
+
+    /**
+     * Mở màn hình cài đặt nhắc nhở
+     */
+    private void openReminderSettings() {
+        if (getContext() == null) return;
+
+        // Vì ReminderSettingsActivity chưa tồn tại, sử dụng fallback dialog
+        android.util.Log.i("ReminderFragment", "ReminderSettingsActivity chưa được triển khai, sử dụng dialog cài đặt cơ bản");
+        showBasicSettingsDialog();
+    }
+
+    /**
+     * Hiển thị dialog cài đặt cơ bản khi không có ReminderSettingsActivity
+     */
+    private void showBasicSettingsDialog() {
+        if (getContext() == null) return;
+
+        String[] settings = {
+            "Cài đặt âm thanh thông báo",
+            "Cài đặt thời gian báo trước",
+            "Cài đặt tự động tắt nhắc nhở",
+            "Cài đặt quyền ứng dụng",
+            "Xuất danh sách nhắc nhở"
+        };
+
+        new AlertDialog.Builder(getContext())
+            .setTitle("Cài đặt nhắc nhở")
+            .setItems(settings, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        openSoundSettings();
+                        break;
+                    case 1:
+                        showAdvanceTimeSettings();
+                        break;
+                    case 2:
+                        showAutoDisableSettings();
+                        break;
+                    case 3:
+                        openAppPermissionSettings();
+                        break;
+                    case 4:
+                        exportReminders();
+                        break;
+                }
+            })
+            .setNegativeButton("Đóng", null)
+            .show();
+    }
+
+    /**
+     * Mở cài đặt âm thanh thông báo
+     */
+    private void openSoundSettings() {
+        try {
+            Intent intent = new Intent(getContext(), SoundSelectionActivity.class);
+            startActivity(intent);
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Không thể mở cài đặt âm thanh: " + e.getMessage());
+            showError("Tính năng này đang được phát triển");
+        }
+    }
+
+    /**
+     * Hiển thị cài đặt thời gian báo trước
+     */
+    private void showAdvanceTimeSettings() {
+        if (getContext() == null) return;
+
+        String[] timeOptions = {
+            "5 phút trước",
+            "10 phút trước",
+            "15 phút trước",
+            "30 phút trước",
+            "1 giờ trước",
+            "1 ngày trước"
+        };
+
+        new AlertDialog.Builder(getContext())
+            .setTitle("Thời gian báo trước")
+            .setSingleChoiceItems(timeOptions, 2, null) // Default: 15 phút
+            .setPositiveButton("Lưu", (dialog, which) -> {
+                // Lưu cài đặt thời gian báo trước
+                int selectedIndex = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                saveAdvanceTimeSetting(selectedIndex);
+                showSuccess("Đã lưu cài đặt thời gian báo trước");
+            })
+            .setNegativeButton("Hủy", null)
+            .show();
+    }
+
+    /**
+     * Lưu cài đặt thời gian báo trước
+     */
+    private void saveAdvanceTimeSetting(int selectedIndex) {
+        if (getContext() == null) return;
+
+        int[] timeInMinutes = {5, 10, 15, 30, 60, 1440}; // 1440 = 24 hours
+        int advanceTime = timeInMinutes[selectedIndex];
+
+        // Lưu vào SharedPreferences
+        android.content.SharedPreferences prefs = getContext()
+            .getSharedPreferences("reminder_settings", Context.MODE_PRIVATE);
+        prefs.edit()
+            .putInt("advance_time_minutes", advanceTime)
+            .apply();
+
+        android.util.Log.d("ReminderFragment", "✅ Đã lưu thời gian báo trước: " + advanceTime + " phút");
+    }
+
+    /**
+     * Hiển thị cài đặt tự động tắt nhắc nhở
+     */
+    private void showAutoDisableSettings() {
+        if (getContext() == null) return;
+
+        android.content.SharedPreferences prefs = getContext()
+            .getSharedPreferences("reminder_settings", Context.MODE_PRIVATE);
+        boolean currentAutoDisable = prefs.getBoolean("auto_disable_after_notification", true);
+
+        new AlertDialog.Builder(getContext())
+            .setTitle("Tự động tắt nhắc nhở")
+            .setMessage("Tự động tắt nhắc nhở sau khi hiển thị thông báo?\n\n" +
+                      "• Bật: Nhắc nhở sẽ tự động tắt sau khi thông báo\n" +
+                      "• Tắt: Nhắc nhở sẽ tiếp tục hoạt động theo lịch")
+            .setPositiveButton("Bật", (dialog, which) -> {
+                prefs.edit().putBoolean("auto_disable_after_notification", true).apply();
+                showSuccess("Đã bật tự động tắt nhắc nhở");
+            })
+            .setNegativeButton("Tắt", (dialog, which) -> {
+                prefs.edit().putBoolean("auto_disable_after_notification", false).apply();
+                showSuccess("Đã tắt tự động tắt nhắc nhở");
+            })
+            .setNeutralButton("Hủy", null)
+            .show();
+    }
+
+    /**
+     * Mở cài đặt quyền ứng dụng
+     */
+    private void openAppPermissionSettings() {
+        try {
+            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            android.net.Uri uri = android.net.Uri.fromParts("package", getContext().getPackageName(), null);
+            intent.setData(uri);
+            startActivity(intent);
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Không thể mở cài đặt quyền: " + e.getMessage());
+            showError("Không thể mở cài đặt quyền");
+        }
+    }
+
+    /**
+     * Xuất danh sách nhắc nhở
+     */
+    private void exportReminders() {
+        if (presenter != null) {
+            presenter.exportReminders();
+            showSuccess("Đang xuất danh sách nhắc nhở...");
+        } else {
+            showError("Không thể xuất dữ liệu lúc này");
+        }
     }
 }

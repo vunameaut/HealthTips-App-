@@ -94,7 +94,7 @@
                         android:text="@string/reminder_active"
                         android:textSize="16sp" />
 
-                    <Switch
+                    <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/sw_reminder_active"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -391,7 +391,7 @@
                         android:text="@string/reminder_vibrate"
                         android:textSize="16sp" />
 
-                    <Switch
+                    <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/sw_vibrate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -420,7 +420,7 @@
                         android:text="@string/reminder_alarm_style"
                         android:textSize="16sp" />
 
-                    <Switch
+                    <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/sw_alarm_style"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

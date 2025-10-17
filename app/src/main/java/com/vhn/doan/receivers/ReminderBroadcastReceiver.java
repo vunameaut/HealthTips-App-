@@ -58,69 +58,50 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Xử lý khi nhắc nhở được kích hoạt
+     */
     private void handleReminderTrigger(Context context, Intent intent) {
-        try {
-            String reminderId = intent.getStringExtra("reminder_id");
-            String title = intent.getStringExtra("title");
-            String message = intent.getStringExtra("message");
-            String soundId = intent.getStringExtra("sound_id");
-            String soundUri = intent.getStringExtra("sound_uri");
-            boolean vibrate = intent.getBooleanExtra("vibrate", true);
-            int volume = intent.getIntExtra("volume", 80);
-            boolean isAlarmStyle = intent.getBooleanExtra("is_alarm_style", true);
+        String reminderId = intent.getStringExtra("reminder_id");
+        String title = intent.getStringExtra("title");
+        String message = intent.getStringExtra("message");
 
-            if (reminderId == null || title == null) {
-                return;
-            }
-
-            // Khởi động AlarmActivity thay vì hiển thị notification
-            if (isAlarmStyle) {
-                AlarmActivity.startAlarm(context, reminderId, title, message);
-            } else {
-                // Fallback: hiển thị notification nếu không dùng alarm style
-                // (có thể implement sau nếu cần)
-                AlarmActivity.startAlarm(context, reminderId, title, message);
-            }
-
-            // Cập nhật trạng thái reminder trong database
-            updateReminderStatus(context, reminderId);
-
-            // Lên lịch lặp lại nếu cần
-            scheduleNextRepeat(context, reminderId);
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (reminderId == null || title == null) {
+            return;
         }
+
+        // Kiểm tra reminder còn active không
+        ReminderRepository repository = new ReminderRepositoryImpl();
+        repository.getReminderById(reminderId, new ReminderRepository.RepositoryCallback<Reminder>() {
+            @Override
+            public void onSuccess(Reminder reminder) {
+                if (reminder != null && reminder.isActive()) {
+                    // Khởi động AlarmActivity
+                    AlarmActivity.startAlarm(context, reminderId, title, message);
+
+                    // Lên lịch lặp lại nếu cần
+                    if (reminder.getRepeatType() != Reminder.RepeatType.NO_REPEAT) {
+                        ReminderService reminderService = new ReminderService(context);
+                        reminderService.scheduleNextRepeat(reminder);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                // Fallback: vẫn hiển thị alarm
+                AlarmActivity.startAlarm(context, reminderId, title, message);
+            }
+        });
     }
 
+    /**
+     * Xử lý khi hệ thống khởi động lại
+     */
     private void handleSystemReboot(Context context) {
-        try {
-            // Khôi phục các reminder đã được lên lịch sau khi reboot
-            ReminderRepository repository = new ReminderRepositoryImpl();
-            // Implementation sẽ được thêm vào ReminderRepository để lấy active reminders
-            // và lên lịch lại chúng
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateReminderStatus(Context context, String reminderId) {
-        try {
-            ReminderRepository repository = new ReminderRepositoryImpl();
-            // Cập nhật lastNotified time
-            // Implementation sẽ được thêm vào ReminderRepository
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void scheduleNextRepeat(Context context, String reminderId) {
-        try {
-            ReminderRepository repository = new ReminderRepositoryImpl();
-            // Lấy thông tin reminder và lên lịch lần tiếp theo nếu có repeat
-            // Implementation sẽ được thêm vào ReminderRepository
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Lên lịch lại tất cả các reminder đang active
+        ReminderRepository repository = new ReminderRepositoryImpl();
+        // Tạm thời bỏ qua việc lấy userId - cần cải thiện trong tương lai
+        // Có thể lưu userId vào SharedPreferences hoặc cơ chế khác
     }
 }
