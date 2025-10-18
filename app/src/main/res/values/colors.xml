@@ -1,30 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Màu cơ bản -->
+
+    <!-- =============================================== -->
+    <!-- BASIC COLORS - Màu cơ bản -->
+    <!-- =============================================== -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
 
-    <!-- Theme Colors -->
+    <!-- =============================================== -->
+    <!-- LIGHT MODE THEME COLORS - Màu chủ đề chế độ sáng -->
+    <!-- =============================================== -->
+
+    <!-- Primary Colors -->
+    <color name="primary_color">#4CAF50</color>
+    <color name="primary_light">#81C784</color>
+    <color name="primary_dark">#2E7D32</color>
     <color name="colorPrimary">#4CAF50</color>
     <color name="colorPrimaryDark">#2E7D32</color>
-    <color name="colorAccent">#FF9800</color>
 
-    <!-- Background Colors -->
+    <!-- Secondary Colors -->
+    <color name="secondary_color">#2196F3</color>
+    <color name="secondary_light">#64B5F6</color>
+    <color name="secondary_dark">#1976D2</color>
+    <color name="colorAccent">#2196F3</color>
+
+    <!-- =============================================== -->
+    <!-- BACKGROUND COLORS -->
+    <!-- =============================================== -->
     <color name="backgroundColor">#FFFFFF</color>
     <color name="backgroundSecondary">#F5F5F5</color>
-    <color name="background_dark">#1A1A1D</color>
-    <color name="background_dark_alt">#212124</color>
     <color name="background_light">#FFFFFF</color>
+    <color name="background_surface">#FFFFFF</color>
+    <color name="background_container">#F8F9FA</color>
 
-    <!-- Text Colors -->
+    <!-- =============================================== -->
+    <!-- TEXT COLORS -->
+    <!-- =============================================== -->
     <color name="textColorPrimary">#212124</color>
     <color name="textColorSecondary">#424242</color>
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#B0BEC5</color>
     <color name="text_primary_light">#212124</color>
     <color name="text_secondary_light">#424242</color>
+    <color name="text_disabled">#9E9E9E</color>
 
-    <!-- Grey Colors -->
+    <!-- =============================================== -->
+    <!-- BUTTON COLORS -->
+    <!-- =============================================== -->
+    <color name="primary_button_start">#4CAF50</color>
+    <color name="primary_button_end">#8BC34A</color>
+    <color name="primary_button_text">#FFFFFF</color>
+
+    <color name="secondary_button_start">#FF9800</color>
+    <color name="secondary_button_end">#FF5722</color>
+    <color name="secondary_button_text">#FFFFFF</color>
+
+    <color name="tertiary_button_background">#E0E0E0</color>
+    <color name="tertiary_button_text">#424242</color>
+
+    <!-- =============================================== -->
+    <!-- MATERIAL DESIGN 3 COLORS -->
+    <!-- =============================================== -->
+    <color name="primary_container">#E8F5E8</color>
+    <color name="secondary_container">#E3F2FD</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F5F5F5</color>
+    <color name="text_primary">#212124</color>
+    <color name="text_secondary">#424242</color>
+    <color name="error">#F44336</color>
+    <color name="outline">#BDBDBD</color>
+    <color name="outline_variant">#E0E0E0</color>
+    <color name="on_surface">#1C1B1F</color>
+    <color name="on_surface_variant">#49454F</color>
+    <color name="on_secondary_container">#1A1C38</color>
+
+    <!-- =============================================== -->
+    <!-- STATUS COLORS -->
+    <!-- =============================================== -->
+    <color name="success_color">#4CAF50</color>
+    <color name="error_color">#F44336</color>
+    <color name="warning_color">#FF9800</color>
+    <color name="info_color">#2196F3</color>
+    <color name="disabled">#BDBDBD</color>
+
+    <color name="status_active">#4CAF50</color>
+    <color name="status_inactive">#757575</color>
+    <color name="status_due">#FF5722</color>
+
+    <!-- =============================================== -->
+    <!-- GREY SCALE -->
+    <!-- =============================================== -->
     <color name="grey_50">#FAFAFA</color>
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_200">#EEEEEE</color>
@@ -36,102 +100,106 @@
     <color name="grey_800">#424242</color>
     <color name="grey_900">#212121</color>
 
-    <!-- Like Button Colors -->
-    <color name="like_color_active">#E91E63</color>
-    <color name="like_color_inactive">#757575</color>
-
-    <!-- Primary Colors -->
-    <color name="primary_color">#4CAF50</color>
-    <color name="primary_light">#81C784</color>
-    <color name="primary_dark">#2E7D32</color>
-    <color name="secondary_color">#FF9800</color>
-    <color name="secondary_light">#FFCC80</color>
-
-    <!-- Button Colors -->
-    <color name="primary_button_start">#2E7D32</color>
-    <color name="primary_button_end">#C0CA33</color>
-    <color name="primary_button_text">#FFFFFF</color>
-    <color name="secondary_button_start">#F57C00</color>
-    <color name="secondary_button_end">#D32F2F</color>
-    <color name="secondary_button_text">#FFFFFF</color>
-
-    <!-- Material Design 3 Colors -->
-    <color name="primary_container">#E8F5E8</color>
-    <color name="outline_variant">#E0E0E0</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="on_surface">#1C1B1F</color>
-    <color name="on_surface_variant">#49454F</color>
-    <color name="secondary_container">#E8F0FF</color>
-    <color name="on_secondary_container">#1A1C38</color>
-    <color name="surface_variant">#E7E0EC</color>
-
-    <!-- Status Colors -->
-    <color name="success">#4CAF50</color>
-    <color name="success_color">#4CAF50</color>
-    <color name="error">#F44336</color>
-    <color name="error_color">#F44336</color>
-    <color name="warning">#FF9800</color>
-    <color name="warning_color">#FF9800</color>
-    <color name="info_color">#2196F3</color>
-    <color name="disabled">#757575</color>
-
-    <!-- Status Specific Colors -->
-    <color name="status_due">#FF5722</color>
-    <color name="status_active">#4CAF50</color>
-    <color name="status_inactive">#757575</color>
-
-    <!-- Accent Colors -->
-    <color name="accent">#00BFFF</color>
-    <color name="accent_color">#FF9800</color>
+    <!-- =============================================== -->
+    <!-- ACCENT & HIGHLIGHT COLORS -->
+    <!-- =============================================== -->
+    <color name="accent_color">#FFC107</color>
+    <color name="highlight_color">#FFEB3B</color>
     <color name="gold">#FFD700</color>
 
-    <!-- Divider Colors -->
-    <color name="divider">#424242</color>
-    <color name="divider_color">#424242</color>
-
-    <!-- Icon Colors -->
+    <!-- =============================================== -->
+    <!-- ICON COLORS -->
+    <!-- =============================================== -->
     <color name="icon_color">#757575</color>
-    <color name="favorite_color">#E91E63</color>
-    <color name="favorite_outline">#757575</color>
-    <color name="favorite_active">#F44336</color>
-    <color name="favorite_inactive">#9E9E9E</color>
+    <color name="icon_active">#4CAF50</color>
+    <color name="icon_inactive">#BDBDBD</color>
     <color name="like_active_color">#E91E63</color>
     <color name="like_inactive_color">#757575</color>
+    <color name="favorite_active">#F44336</color>
+    <color name="favorite_inactive">#9E9E9E</color>
+    <color name="favorite_color">#F44336</color>
     <color name="red_heart">#F44336</color>
 
-    <!-- Video Colors -->
+    <!-- =============================================== -->
+    <!-- DIVIDER & BORDER COLORS -->
+    <!-- =============================================== -->
+    <color name="divider_color">#E0E0E0</color>
+    <color name="border_color">#BDBDBD</color>
+
+    <!-- =============================================== -->
+    <!-- BOTTOM NAVIGATION COLORS -->
+    <!-- =============================================== -->
+    <color name="bottom_nav_background">#FFFFFF</color>
+    <color name="bottom_nav_icon_selected">#4CAF50</color>
+    <color name="bottom_nav_icon_unselected">#757575</color>
+    <color name="bottom_nav_text_selected">#4CAF50</color>
+    <color name="bottom_nav_text_unselected">#757575</color>
+    <color name="bottom_nav_icon_color">#4CAF50</color>
+    <color name="bottom_nav_background_dark">#212124</color>
+
+    <!-- =============================================== -->
+    <!-- PROGRESS & LOADING COLORS -->
+    <!-- =============================================== -->
+    <color name="progress_color">#4CAF50</color>
+    <color name="progress_background">#E0E0E0</color>
+    <color name="loading_background">#F5F5F5</color>
+    <color name="progress_indicator_color">#4CAF50</color>
+    <color name="progress_track_color">#E0E0E0</color>
+
+    <!-- =============================================== -->
+    <!-- CHIP COLORS -->
+    <!-- =============================================== -->
+    <color name="chip_background">#E8F5E8</color>
+    <color name="chip_text">#2E7D32</color>
+    <color name="chip_selected_background">#4CAF50</color>
+    <color name="chip_selected_text">#FFFFFF</color>
+
+    <!-- =============================================== -->
+    <!-- TRANSPARENCY VARIANTS -->
+    <!-- =============================================== -->
+    <color name="white_80">#CCFFFFFF</color>
+    <color name="white_60">#99FFFFFF</color>
+    <color name="white_30">#4DFFFFFF</color>
+    <color name="white_20">#33FFFFFF</color>
+    <color name="black_80">#CC000000</color>
+    <color name="black_60">#99000000</color>
+    <color name="black_30">#4D000000</color>
+    <color name="black_20">#33000000</color>
+
+    <!-- =============================================== -->
+    <!-- LEGACY SUPPORT -->
+    <!-- =============================================== -->
+    <color name="success">#4CAF50</color>
+    <color name="error_legacy">#F44336</color>
+    <color name="warning">#FF9800</color>
+    <color name="accent">#2196F3</color>
+    <color name="divider">#E0E0E0</color>
+    <color name="background_color">#FFFFFF</color>
+
+    <!-- =============================================== -->
+    <!-- VIDEO & COMMENT COLORS -->
+    <!-- =============================================== -->
     <color name="video_overlay_background">#80000000</color>
     <color name="video_loading_background">#FF1A1A1D</color>
     <color name="bottom_sheet_background">#2A2A2D</color>
     <color name="comment_background">#333336</color>
     <color name="video_background">#1A1A1A</color>
 
-    <!-- Status Bar Colors -->
-    <color name="status_bar_color">@color/background_dark</color>
-    <color name="navigation_bar_color">@color/background_dark</color>
+    <!-- =============================================== -->
+    <!-- STATUS BAR & NAVIGATION BAR -->
+    <!-- =============================================== -->
+    <color name="status_bar_color">@color/backgroundColor</color>
+    <color name="navigation_bar_color">@color/backgroundColor</color>
 
-    <!-- Progress Colors -->
-    <color name="progress_color">#4CAF50</color>
-    <color name="progress_indicator_color">#4CAF50</color>
-    <color name="progress_track_color">#333333</color>
-
-    <!-- Background Color Alias -->
-    <color name="background_color">#1A1A1D</color>
+    <!-- =============================================== -->
+    <!-- MISC / OTHER -->
+    <!-- =============================================== -->
     <color name="md_theme_dark_onPrimary">#FFFFFF</color>
-    <color name="pinned_conversation_background">#2D2D30</color>
+    <color name="pinned_conversation_background">#F0F0F0</color>
     <color name="pinned_conversation_stroke">#4CAF50</color>
-
-    <!-- Chip Colors -->
-    <color name="chip_background">#E0F7FA</color>
-    <color name="chip_text">#00838F</color>
 
     <!-- Alarm Colors -->
     <color name="alarm_background_start">#1E3A8A</color>
     <color name="alarm_background_end">#7C3AED</color>
-    <color name="white_80">#CCFFFFFF</color>
-    <color name="white_60">#99FFFFFF</color>
-    <color name="white_30">#4DFFFFFF</color>
-    <color name="white_20">#33FFFFFF</color>
-    <color name="transparent">#00000000</color>
 
 </resources>

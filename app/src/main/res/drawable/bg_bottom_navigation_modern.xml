@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Layer list để tạo shadow và background -->
+    <item>
+        <layer-list>
+            <!-- Shadow -->
+            <item android:top="0dp">
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:angle="90"
+                        android:startColor="#08000000"
+                        android:endColor="#00000000"
+                        android:type="linear" />
+                    <corners
+                        android:topLeftRadius="20dp"
+                        android:topRightRadius="20dp" />
+                </shape>
+            </item>
+
+            <!-- Main background -->
+            <item android:top="4dp">
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:angle="90"
+                        android:startColor="@color/bottom_nav_background"
+                        android:endColor="@color/grey_50"
+                        android:type="linear" />
+                    <corners
+                        android:topLeftRadius="20dp"
+                        android:topRightRadius="20dp" />
+                    <stroke
+                        android:width="0.5dp"
+                        android:color="@color/outline_variant" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>
+

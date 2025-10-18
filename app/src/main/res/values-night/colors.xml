@@ -1,41 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Grey Colors cho Dark Mode -->
+
+    <!-- =============================================== -->
+    <!-- DARK MODE THEME COLORS - Màu chủ đề chế độ tối -->
+    <!-- =============================================== -->
+
+    <!-- Primary Colors -->
+    <color name="primary_color">#66BB6A</color>
+    <color name="primary_light">#98D982</color>
+    <color name="primary_dark">#4CAF50</color>
+    <color name="colorPrimary">#66BB6A</color>
+    <color name="colorPrimaryDark">#4CAF50</color>
+
+    <!-- Secondary Colors -->
+    <color name="secondary_color">#64B5F6</color>
+    <color name="secondary_light">#90CAF9</color>
+    <color name="secondary_dark">#42A5F5</color>
+    <color name="colorAccent">#64B5F6</color>
+
+    <!-- =============================================== -->
+    <!-- BACKGROUND COLORS -->
+    <!-- =============================================== -->
+    <color name="backgroundColor">#1A1A1D</color>
+    <color name="backgroundSecondary">#212124</color>
+    <color name="background_light">#1A1A1D</color>
+    <color name="background_surface">#212124</color>
+    <color name="background_container">#2A2A2D</color>
+    <color name="background_dark">#1A1A1D</color>
+    <color name="background_dark_alt">#212124</color>
+
+    <!-- =============================================== -->
+    <!-- TEXT COLORS -->
+    <!-- =============================================== -->
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="textColorSecondary">#B0BEC5</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0BEC5</color>
+    <color name="text_disabled">#616161</color>
+
+    <!-- =============================================== -->
+    <!-- BUTTON COLORS -->
+    <!-- =============================================== -->
+    <!-- Primary Button Gradient -->
+    <color name="primary_button_start">#4CAF50</color>
+    <color name="primary_button_end">#C0CA33</color>
+    <color name="primary_button_text">#FFFFFF</color>
+
+    <!-- Secondary Button Gradient -->
+    <color name="secondary_button_start">#FF9800</color>
+    <color name="secondary_button_end">#FF5722</color>
+    <color name="secondary_button_text">#FFFFFF</color>
+
+    <!-- Tertiary Button -->
+    <color name="tertiary_button_background">#424242</color>
+    <color name="tertiary_button_text">#FFFFFF</color>
+
+    <!-- =============================================== -->
+    <!-- MATERIAL DESIGN 3 COLORS -->
+    <!-- =============================================== -->
+    <color name="primary_container">#2D4A2F</color>
+    <color name="secondary_container">#1E3A5F</color>
+    <color name="surface">#212124</color>
+    <color name="surface_variant">#2A2A2D</color>
+    <color name="error">#FF5252</color>
+    <color name="outline">#616161</color>
+    <color name="outline_variant">#424242</color>
+    <color name="on_surface">#FFFFFF</color>
+    <color name="on_surface_variant">#B0BEC5</color>
+    <color name="on_secondary_container">#B3C5E8</color>
+
+    <!-- =============================================== -->
+    <!-- STATUS COLORS -->
+    <!-- =============================================== -->
+    <color name="success_color">#66BB6A</color>
+    <color name="error_color">#FF5252</color>
+    <color name="warning_color">#FFB74D</color>
+    <color name="info_color">#64B5F6</color>
+    <color name="disabled">#616161</color>
+    <color name="status_active">#66BB6A</color>
+    <color name="status_inactive">#9E9E9E</color>
+    <color name="status_due">#FF8A65</color>
+
+    <!-- =============================================== -->
+    <!-- GREY SCALE -->
+    <!-- =============================================== -->
     <color name="grey_50">#121212</color>
     <color name="grey_100">#1E1E1E</color>
     <color name="grey_200">#2D2D2D</color>
     <color name="grey_300">#404040</color>
     <color name="grey_400">#5F5F5F</color>
     <color name="grey_500">#9E9E9E</color>
-    <color name="grey_600">#757575</color>
-    <color name="grey_700">#616161</color>
-    <color name="grey_800">#424242</color>
-    <color name="grey_900">#212121</color>
+    <color name="grey_600">#BDBDBD</color>
+    <color name="grey_700">#E0E0E0</color>
+    <color name="grey_800">#EEEEEE</color>
+    <color name="grey_900">#F5F5F5</color>
 
-    <!-- Background Colors cho Dark Mode -->
-    <color name="backgroundColor">#1A1A1D</color>
-    <color name="backgroundSecondary">#212124</color>
+    <!-- =============================================== -->
+    <!-- ACCENT & HIGHLIGHT COLORS -->
+    <!-- =============================================== -->
+    <color name="accent_color">#00BFFF</color>
+    <color name="highlight_color">#1E90FF</color>
+    <color name="gold">#FFD700</color>
 
-    <!-- Text Colors cho Dark Mode -->
-    <color name="textColorPrimary">#FFFFFF</color>
-    <color name="textColorSecondary">#B0BEC5</color>
+    <!-- =============================================== -->
+    <!-- ICON COLORS -->
+    <!-- =============================================== -->
+    <color name="icon_color">#E0E0E0</color>
+    <color name="icon_active">#66BB6A</color>
+    <color name="icon_inactive">#757575</color>
 
-    <!-- Like Button Colors -->
+    <!-- Like & Favorite -->
+    <color name="like_active_color">#E91E63</color>
+    <color name="like_inactive_color">#9E9E9E</color>
     <color name="like_color_active">#E91E63</color>
     <color name="like_color_inactive">#9E9E9E</color>
+    <color name="favorite_active">#F44336</color>
+    <color name="favorite_inactive">#757575</color>
+    <color name="favorite_color">#F44336</color>
+    <color name="red_heart">#F44336</color>
 
-    <!-- Màu bị thiếu từ lỗi build - Night Mode -->
-    <color name="disabled">#9E9E9E</color>               <!-- Màu xám sáng hơn cho night mode -->
-    <color name="error_color">#FF5252</color>            <!-- Màu đỏ sáng hơn cho night mode -->
-    <color name="progress_color">#66BB6A</color>         <!-- Màu xanh sáng hơn cho night mode -->
+    <!-- =============================================== -->
+    <!-- DIVIDER & BORDER COLORS -->
+    <!-- =============================================== -->
+    <color name="divider_color">#424242</color>
+    <color name="border_color">#616161</color>
 
-    <!-- Màu icon cho night mode -->
-    <color name="icon_color">#E0E0E0</color>             <!-- Màu icon sáng hơn cho night mode -->
+    <!-- =============================================== -->
+    <!-- BOTTOM NAVIGATION COLORS -->
+    <!-- =============================================== -->
+    <color name="bottom_nav_background">#212124</color>
+    <color name="bottom_nav_icon_selected">#66BB6A</color>
+    <color name="bottom_nav_icon_unselected">#9E9E9E</color>
+    <color name="bottom_nav_text_selected">#66BB6A</color>
+    <color name="bottom_nav_text_unselected">#9E9E9E</color>
+    <color name="bottom_nav_icon_color">#66BB6A</color>
+    <color name="bottom_nav_background_dark">#212124</color>
 
-    <!-- Các màu bổ sung bị thiếu cho Night Mode -->
+    <!-- =============================================== -->
+    <!-- PROGRESS & LOADING COLORS -->
+    <!-- =============================================== -->
+    <color name="progress_color">#66BB6A</color>
+    <color name="progress_background">#424242</color>
+    <color name="loading_background">#212124</color>
+    <color name="progress_indicator_color">#66BB6A</color>
+    <color name="progress_track_color">#424242</color>
+
+    <!-- =============================================== -->
+    <!-- CHIP COLORS -->
+    <!-- =============================================== -->
+    <color name="chip_background">#2D4A2F</color>
+    <color name="chip_text">#81C784</color>
+    <color name="chip_selected_background">#66BB6A</color>
+    <color name="chip_selected_text">#000000</color>
+
+    <!-- =============================================== -->
+    <!-- LEGACY SUPPORT -->
+    <!-- =============================================== -->
+    <color name="success">#66BB6A</color>
+    <color name="error_legacy">#FF5252</color>
+    <color name="warning">#FFB74D</color>
+    <color name="accent">#64B5F6</color>
+    <color name="divider">#424242</color>
     <color name="background_color">#1A1A1D</color>
-    <color name="warning_color">#FFB74D</color>          <!-- Màu warning sáng hơn cho night mode -->
-    <color name="status_due">#FF8A65</color>             <!-- Màu status due sáng hơn cho night mode -->
-    <color name="status_active">#66BB6A</color>          <!-- Màu status active sáng hơn cho night mode -->
-    <color name="md_theme_dark_onPrimary">#000000</color><!-- Màu text trên primary cho dark theme -->
+
+    <!-- =============================================== -->
+    <!-- VIDEO & COMMENT COLORS -->
+    <!-- =============================================== -->
+    <color name="video_overlay_background">#80000000</color>
+    <color name="video_loading_background">#FF1A1A1D</color>
+    <color name="bottom_sheet_background">#2A2A2D</color>
+    <color name="comment_background">#333336</color>
+    <color name="video_background">#1A1A1A</color>
+
+    <!-- =============================================== -->
+    <!-- STATUS BAR & NAVIGATION BAR -->
+    <!-- =============================================== -->
+    <color name="status_bar_color">@color/backgroundColor</color>
+    <color name="navigation_bar_color">@color/backgroundColor</color>
+
+    <!-- =============================================== -->
+    <!-- MISC / OTHER -->
+    <!-- =============================================== -->
+    <color name="md_theme_dark_onPrimary">#000000</color>
+    <color name="pinned_conversation_background">#2D2D30</color>
+    <color name="pinned_conversation_stroke">#66BB6A</color>
+
+    <!-- Alarm Colors -->
+    <color name="alarm_background_start">#1E3A8A</color>
+    <color name="alarm_background_end">#7C3AED</color>
+
 </resources>

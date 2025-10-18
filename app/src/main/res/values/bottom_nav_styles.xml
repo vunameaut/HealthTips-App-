@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Style cho Bottom Navigation Active Indicator -->
+    <style name="BottomNavActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:width">56dp</item>
+        <item name="android:height">28dp</item>
+        <item name="android:color">@color/primary_container</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="marginHorizontal">4dp</item>
+    </style>
+
+    <!-- Style cho Bottom Navigation Item để căn giữa -->
+    <style name="BottomNavItem" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Background đơn giản -->
+    <solid android:color="@color/bottom_nav_background" />
+    <!-- Chỉ bo góc trên -->
+    <corners
+        android:topLeftRadius="20dp"
+        android:topRightRadius="20dp" />
+    <!-- Viền mỏng -->
+    <stroke
+        android:width="0.5dp"
+        android:color="@color/outline_variant" />
+</shape>
+

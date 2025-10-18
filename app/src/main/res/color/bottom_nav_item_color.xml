@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/primary_button_end" android:state_checked="true" />
-    <item android:color="@color/text_secondary" android:state_checked="false" />
+    <!-- Selected state - Primary color with slight glow effect -->
+    <item android:color="@color/primary_dark" android:state_checked="true" />
+    <!-- Unselected state - Muted gray -->
+    <item android:color="@color/grey_600" android:state_checked="false" />
+    <!-- Default state -->
+    <item android:color="@color/grey_600" />
 </selector>
-
