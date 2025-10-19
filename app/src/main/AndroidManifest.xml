@@ -137,6 +137,54 @@
             android:turnScreenOn="true"
             android:excludeFromRecents="true" />
 
+        <!-- Settings and Privacy Activities -->
+        <activity
+            android:name=".presentation.settings.SettingsAndPrivacyActivity"
+            android:exported="false" />
+
+        <!-- Account Section Activities -->
+        <activity
+            android:name=".presentation.settings.account.AccountManagementActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.settings.account.PrivacySettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.settings.account.SecuritySettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.settings.account.PermissionsSettingsActivity"
+            android:exported="false" />
+
+        <!-- Content and Display Section Activities -->
+        <activity
+            android:name=".presentation.settings.content.NotificationSettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.settings.content.LanguageSettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.settings.content.DisplaySettingsActivity"
+            android:exported="false" />
+
+        <!-- Support and About Section Activities -->
+        <activity
+            android:name=".presentation.settings.support.ReportIssueActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.settings.support.SupportHelpActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.settings.support.TermsPolicyActivity"
+            android:exported="false" />
+
         <!-- Broadcast Receivers cho Reminder -->
         <receiver
             android:name=".receivers.ReminderBroadcastReceiver"

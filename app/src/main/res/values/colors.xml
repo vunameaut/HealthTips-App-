@@ -202,4 +202,15 @@
     <color name="alarm_background_start">#1E3A8A</color>
     <color name="alarm_background_end">#7C3AED</color>
 
+    <!-- =============================================== -->
+    <!-- CARD AND SECTION COLORS -->
+    <!-- =============================================== -->
+    <color name="card_background">#2A2A2E</color>
+    <color name="card_border">#404040</color>
+    <color name="ripple_gray_color">#40606060</color>
+
+    <!-- =============================================== -->
+    <!-- DARK MODE THEME COLORS - Màu chủ đề chế độ tối -->
+    <!-- =============================================== -->
+
 </resources>

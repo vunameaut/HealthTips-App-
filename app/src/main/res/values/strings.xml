@@ -164,7 +164,7 @@
     <string name="reminder_time">Thời gian nhắc nhở</string>
     <string name="reminder_repeat">Lặp lại</string>
     <string name="reminder_active">Kích hoạt</string>
-    <string name="create_reminder">Tạo nhắc nhở</string>
+    <string name="create_reminder">Tạo nhắc nh��</string>
     <string name="edit_reminder">Chỉnh sửa nhắc nhở</string>
     <string name="delete_reminder">Xóa nhắc nhở</string>
     <string name="no_reminders">Chưa có nhắc nhở nào</string>
@@ -270,7 +270,7 @@
     <string name="no_search_results">Không tìm thấy kết quả</string>
 
     <!-- Strings cho User Interface -->
-    <string name="user_avatar">Ảnh đại diện người dùng</string>
+    <string name="user_avatar">Ảnh đ��i diện người dùng</string>
     <string name="play_video">Phát video</string>
 
     <!-- Strings cho Search History -->
@@ -279,63 +279,89 @@
 
     <!-- Strings cho Video -->
     <string name="video_poster_description">Poster video</string>
-    <string name="video_thumbnail">Thumbnail video</string>
-    <string name="clear_all_history">Xóa tất cả lịch sử</string>
-    <string name="see_more_history">Xem thêm lịch sử</string>
-    <string name="see_less_history">Thu gọn lịch sử</string>
-    <string name="no_search_history">Không có lịch sử tìm kiếm</string>
-    <string name="search_articles_tab">Bài viết</string>
-    <string name="search_videos_tab">Video</string>
 
-    <!-- Alarm Strings -->
-    <string name="alarm_dismiss">Tắt</string>
-    <string name="alarm_snooze">Báo lại</string>
-    <string name="alarm_title_default">Nhắc nhở sức khỏe</string>
-    <string name="alarm_description_default">Đã đến giờ thực hiện nhắc nhở</string>
+    <!-- Strings cho Settings và Privacy -->
+    <string name="settings_and_privacy">Cài đặt và quyền riêng tư</string>
 
-    <!-- Sound Selection -->
-    <string name="select_sound">Chọn âm thanh</string>
-    <string name="sound_alarm">Báo thức</string>
-    <string name="sound_notification">Thông báo</string>
-    <string name="sound_music">Nhạc</string>
-    <string name="sound_nature">Thiên nhiên</string>
-    <string name="sound_default">Mặc định</string>
-    <string name="sound_none">Không âm thanh</string>
-    <string name="sound_preview">Nghe thử</string>
-    <string name="sound_stop_preview">Dừng nghe thử</string>
+    <!-- Phần Tài khoản -->
+    <string name="account_section">Tài khoản</string>
+    <string name="account_management">Tài khoản</string>
+    <string name="privacy_settings">Quyền riêng tư</string>
+    <string name="security_settings">Bảo mật</string>
+    <string name="permissions_settings">Quyền</string>
 
-    <!-- Reminder Settings Enhanced -->
-    <string name="reminder_sound">Âm thanh nhắc nhở</string>
-    <string name="reminder_vibrate">Rung khi nhắc nhở</string>
-    <string name="reminder_volume">Âm lượng</string>
-    <string name="reminder_snooze_duration">Thời gian báo lại</string>
-    <string name="reminder_alarm_style">Hiển thị dạng báo thức</string>
+    <!-- Phần Nội dung và hiển thị -->
+    <string name="content_display_section">Nội dung và hiển thị</string>
+    <string name="notification_settings">Thông báo</string>
+    <string name="language_settings">Ngôn ngữ</string>
+    <string name="display_settings">Hiển thị</string>
 
-    <!-- Snooze Options -->
+    <!-- Phần Hỗ trợ và giới thiệu -->
+    <string name="support_about_section">Hỗ trợ và giới thiệu</string>
+    <string name="report_issue">Báo cáo vấn đề</string>
+    <string name="support_help">Hỗ trợ</string>
+    <string name="terms_policy">Điều khoản và chính sách</string>
+
+    <!-- Descriptions -->
+    <string name="account_management_desc">Quản lý thông tin tài khoản của bạn</string>
+    <string name="privacy_settings_desc">Cài đặt quyền riêng tư và bảo mật</string>
+    <string name="security_settings_desc">Quản lý bảo mật tài khoản</string>
+    <string name="permissions_settings_desc">Quản lý quyền truy cập ứng dụng</string>
+    <string name="notification_settings_desc">Cài đặt thông báo và nhắc nhở</string>
+    <string name="language_settings_desc">Chọn ngôn ngữ hiển thị</string>
+    <string name="display_settings_desc">Tùy chỉnh giao diện hiển thị</string>
+    <string name="report_issue_desc">Báo cáo lỗi hoặc vấn đề gặp phải</string>
+    <string name="support_help_desc">Nhận hỗ trợ và hướng dẫn</string>
+    <string name="terms_policy_desc">Xem điều khoản sử dụng và chính sách</string>
+
+    <!-- Strings bị thiếu cho Snooze Options -->
     <string name="snooze_5_min">5 phút</string>
     <string name="snooze_10_min">10 phút</string>
     <string name="snooze_15_min">15 phút</string>
     <string name="snooze_30_min">30 phút</string>
 
-    <!-- Volume Settings -->
+    <!-- Strings bị thiếu cho Volume Levels -->
     <string name="volume_low">Thấp</string>
     <string name="volume_medium">Trung bình</string>
     <string name="volume_high">Cao</string>
     <string name="volume_max">Tối đa</string>
 
-    <!-- Menu strings for reminder -->
+    <!-- Strings bị thiếu cho Menu -->
     <string name="menu_search">Tìm kiếm</string>
     <string name="menu_filter">Lọc</string>
     <string name="menu_refresh">Làm mới</string>
     <string name="menu_debug">Debug</string>
 
-    <!-- Các chuỗi cho hệ thống nhắc nhở -->
+    <!-- Strings cho AppBar Scrolling -->
+    <string name="appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
+
+    <!-- Strings bổ sung cho Reminder -->
+    <string name="reminder_title_default">Nhắc nhở sức khỏe</string>
+    <string name="reminder_message_default">Đã đến giờ nhắc nhở của bạn</string>
     <string name="reminder_snooze">Báo lại</string>
     <string name="reminder_dismiss">Tắt</string>
-    <string name="reminder_title_default">Nhắc nhở sức khỏe</string>
-    <string name="reminder_message_default">Đã đến giờ thực hiện mẹo sức khỏe!</string>
-    <string name="reminder_set_success">Đã đặt nhắc nhở thành công</string>
-    <string name="reminder_cancel_success">Đã hủy nhắc nhở</string>
-    <string name="reminder_permission_needed">Cần quyền đặt alarm chính xác</string>
-    <string name="reminder_battery_optimization">Tắt tối ưu hóa pin để nhắc nhở hoạt động tốt hơn</string>
+    <string name="select_sound">Chọn âm thanh</string>
+    <string name="reminder_sound">Âm thanh nhắc nhở</string>
+    <string name="sound_default">Âm thanh mặc định</string>
+    <string name="reminder_volume">Âm lượng</string>
+    <string name="reminder_snooze_duration">Thời gian báo lại</string>
+    <string name="reminder_vibrate">Rung</string>
+    <string name="reminder_alarm_style">Kiểu báo thức</string>
+
+    <!-- Strings cho Sound Types -->
+    <string name="sound_alarm">Báo thức</string>
+    <string name="sound_notification">Thông báo</string>
+    <string name="sound_music">Nhạc</string>
+    <string name="sound_none">Không âm thanh</string>
+
+    <!-- Strings cho Search History -->
+    <string name="clear_all_history">Xóa tất cả lịch sử</string>
+    <string name="see_more_history">Xem thêm lịch sử</string>
+    <string name="see_less_history">Thu gọn lịch sử</string>
+    <string name="no_search_history">Không có lịch sử tìm kiếm</string>
+
+    <!-- Strings cho Search Tabs -->
+    <string name="search_articles_tab">Bài viết</string>
+    <string name="search_videos_tab">Video</string>
+
 </resources>

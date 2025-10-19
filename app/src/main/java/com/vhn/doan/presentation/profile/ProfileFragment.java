@@ -27,7 +27,7 @@ import com.vhn.doan.data.User;
 import com.vhn.doan.data.repository.UserRepository;
 import com.vhn.doan.data.repository.UserRepositoryImpl;
 import com.vhn.doan.presentation.auth.LoginActivity;
-import com.vhn.doan.presentation.profile.SettingsActivity;
+import com.vhn.doan.presentation.settings.SettingsAndPrivacyActivity;
 import com.vhn.doan.presentation.base.BaseFragment;
 
 /**
@@ -192,7 +192,7 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
     private void openSettings() {
         if (getContext() != null) {
-            Intent intent = new Intent(getContext(), SettingsActivity.class);
+            Intent intent = new Intent(getContext(), SettingsAndPrivacyActivity.class);
             startActivity(intent);
         }
     }

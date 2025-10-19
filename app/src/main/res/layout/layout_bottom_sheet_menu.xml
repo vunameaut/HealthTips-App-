@@ -49,7 +49,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cài đặt"
+            android:text="@string/settings_and_privacy"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
             android:textColor="@color/text_primary" />
 
