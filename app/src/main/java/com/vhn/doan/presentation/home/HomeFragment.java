@@ -406,9 +406,11 @@ public class HomeFragment extends Fragment implements HomeView {
 
         // Xem tất cả danh mục
         textViewSeeAllCategories.setOnClickListener(v -> {
+            CategoryFragment categoryFragment = CategoryFragment.newInstance();
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, CategoryFragment.newInstance())
+                    .hide(this)
+                    .add(R.id.fragment_container, categoryFragment)
                     .addToBackStack(null)
                     .commit();
         });
@@ -447,6 +449,36 @@ public class HomeFragment extends Fragment implements HomeView {
         if (isRecommendedTipsLoaded && recommendedTipsAdapter != null &&
             recommendedTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
             startAutoScrollForRecommended();
+        }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        if (!hidden) {
+            // Fragment được hiển thị lại (khi back từ CategoryFragment)
+            // Refresh dữ liệu để đảm bảo cập nhật mới nhất
+            if (presenter != null) {
+                presenter.start();
+                presenter.listenToCategories();
+                presenter.listenToLatestHealthTips();
+            }
+
+            // Tiếp tục auto-scroll nếu đã có dữ liệu
+            if (isRecommendedTipsLoaded && recommendedTipsAdapter != null &&
+                recommendedTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
+                startAutoScrollForRecommended();
+            }
+        } else {
+            // Fragment bị ẩn (khi chuyển sang CategoryFragment)
+            // Dừng auto-scroll để tiết kiệm tài nguyên
+            stopAutoScrollForRecommended();
+
+            // Dừng các listener để tránh memory leak
+            if (presenter != null) {
+                presenter.stop();
+            }
         }
     }
 

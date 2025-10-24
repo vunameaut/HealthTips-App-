@@ -164,16 +164,17 @@ public class CategoryFragment extends Fragment implements CategoryView, Category
 
     @Override
     public void navigateToCategoryDetail(Category category) {
-        if (isAdded()) {
-            // Tạo bundle với thông tin danh mục
-            Bundle args = new Bundle();
-            args.putString("CATEGORY_ID", category.getId());
+        if (isAdded() && category != null && category.getId() != null) {
+            // Tạo Intent để chuyển đến CategoryDetailListActivity
+            android.content.Intent intent = new android.content.Intent(requireContext(), com.vhn.doan.presentation.category.detail.CategoryDetailListActivity.class);
 
-            // TODO: Thực hiện điều hướng đến màn hình chi tiết danh mục
-            // Navigation Component hoặc Fragment Transaction có thể được sử dụng ở đây
+            // Truyền ID của danh mục
+            intent.putExtra(com.vhn.doan.utils.Constants.CATEGORY_ID_KEY, category.getId());
 
-            // Tạm thời hiển thị thông báo
-            Toast.makeText(requireContext(), "Đã chọn danh mục: " + category.getName(), Toast.LENGTH_SHORT).show();
+            // Khởi chạy Activity mới
+            startActivity(intent);
+        } else {
+            Toast.makeText(requireContext(), "Không thể mở chi tiết danh mục do thiếu thông tin", Toast.LENGTH_SHORT).show();
         }
     }
 
