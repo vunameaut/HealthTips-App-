@@ -182,6 +182,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".presentation.settings.support.FAQActivity"
+            android:exported="false"
+            android:label="@string/faq" />
+
+        <activity
             android:name=".presentation.settings.support.TermsPolicyActivity"
             android:exported="false" />
 

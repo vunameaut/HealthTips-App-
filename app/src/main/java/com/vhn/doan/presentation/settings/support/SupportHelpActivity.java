@@ -28,7 +28,7 @@ public class SupportHelpActivity extends AppCompatActivity {
 
     private void setupViews() {
         ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> onBackPressed());
+        btnBack.setOnClickListener(v -> finish());
     }
 
     private void setupClickListeners() {
@@ -39,17 +39,15 @@ public class SupportHelpActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // FAQ - đang phát triển
+        // FAQ
         LinearLayout layoutFAQ = findViewById(R.id.layoutFAQ);
-        layoutFAQ.setOnClickListener(v -> {
-            Toast.makeText(this, "Tính năng FAQ đang được phát triển", Toast.LENGTH_SHORT).show();
-        });
+        layoutFAQ.setOnClickListener(v -> startActivity(new Intent(this, FAQActivity.class)));
 
         // Liên hệ qua email
         LinearLayout layoutContact = findViewById(R.id.layoutContact);
         layoutContact.setOnClickListener(v -> {
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-            emailIntent.setData(Uri.parse("mailto:support@healthtips.vn"));
+            emailIntent.setData(Uri.parse("mailto:vuhoainam.dev@gmail.com"));
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Hỗ trợ HealthTips App");
 
             try {

@@ -124,7 +124,7 @@ public class LegalDocumentActivity extends AppCompatActivity {
                 "<p>Chúng tôi có quyền sửa đổi các điều khoản này bất cứ lúc nào. Chúng tôi sẽ thông báo cho bạn về những thay đổi quan trọng thông qua Ứng dụng hoặc email. Việc tiếp tục sử dụng Ứng dụng sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận các điều khoản mới.</p>" +
 
                 "<h3>11. Liên hệ</h3>" +
-                "<p>Nếu bạn có bất kỳ câu hỏi nào về Điều khoản dịch vụ này, vui lòng liên hệ với chúng tôi qua email: support@healthtips.com</p>";
+                "<p>Nếu bạn có bất kỳ câu hỏi nào về Điều khoản dịch vụ này, vui lòng liên hệ với chúng tôi qua email: vuhoainam.dev@gmail.com</p>";
     }
 
     private String getPrivacyPolicyContent() {
@@ -262,7 +262,7 @@ public class LegalDocumentActivity extends AppCompatActivity {
                 "<p>Nếu bạn thấy nội dung hoặc hành vi vi phạm các nguyên tắc này, vui lòng báo cáo:</p>" +
                 "<ul>" +
                 "<li>Sử dụng tính năng \"Báo cáo\" trong ứng dụng</li>" +
-                "<li>Liên hệ đội ngũ hỗ trợ qua email: support@healthtips.com</li>" +
+                "<li>Liên hệ đội ngũ hỗ trợ qua email: vuhoainam.dev@gmail.com</li>" +
                 "<li>Cung cấp chi tiết cụ thể để chúng tôi có thể xem xét</li>" +
                 "</ul>" +
 
