@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.auth.LoginActivity;
 import com.vhn.doan.presentation.base.BaseFragment;
+import com.vhn.doan.presentation.settings.SettingsAndPrivacyActivity;
 
 /**
  * Fragment đơn giản cho profile người dùng
@@ -125,7 +126,9 @@ public class SimpleProfileFragment extends BaseFragment {
 
         // Thiết lập sự kiện click cho các tùy chọn
         txtSetting.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Chức năng cài đặt đang phát triển", Toast.LENGTH_SHORT).show();
+            // Mở màn hình Settings và Privacy
+            Intent intent = new Intent(getContext(), SettingsAndPrivacyActivity.class);
+            startActivity(intent);
             bottomSheetDialog.dismiss();
         });
 
@@ -203,6 +206,11 @@ public class SimpleProfileFragment extends BaseFragment {
     }
 
     public void showLoading(boolean isLoading) {
-        // TODO: Hiển thị hoặc ẩn loading indicator
+        if (getView() != null) {
+            View loadingView = getView().findViewById(R.id.loadingLayout);
+            if (loadingView != null) {
+                loadingView.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            }
+        }
     }
 }

@@ -272,7 +272,12 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
     @Override
     public void showLoading(boolean isLoading) {
-        // TODO: Hiển thị hoặc ẩn loading indicator
+        if (getView() != null) {
+            View loadingView = getView().findViewById(R.id.loadingLayout);
+            if (loadingView != null) {
+                loadingView.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            }
+        }
     }
 
     private String buildUserInfoString(FirebaseUser user) {

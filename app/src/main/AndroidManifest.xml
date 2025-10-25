@@ -185,6 +185,32 @@
             android:name=".presentation.settings.support.TermsPolicyActivity"
             android:exported="false" />
 
+        <!-- New Support Activities -->
+        <activity
+            android:name=".presentation.support.CreateSupportTicketActivity"
+            android:exported="false"
+            android:label="@string/create_ticket" />
+
+        <activity
+            android:name=".presentation.support.SupportTicketsActivity"
+            android:exported="false"
+            android:label="@string/my_tickets" />
+
+        <activity
+            android:name=".presentation.support.TicketDetailActivity"
+            android:exported="false"
+            android:label="@string/ticket_detail_title" />
+
+        <!-- About Activities -->
+        <activity
+            android:name=".presentation.about.AboutActivity"
+            android:exported="false"
+            android:label="@string/about_app" />
+
+        <activity
+            android:name=".presentation.about.LegalDocumentActivity"
+            android:exported="false" />
+
         <!-- Broadcast Receivers cho Reminder -->
         <receiver
             android:name=".receivers.ReminderBroadcastReceiver"

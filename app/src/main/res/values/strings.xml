@@ -364,4 +364,148 @@
     <string name="search_articles_tab">Bài viết</string>
     <string name="search_videos_tab">Video</string>
 
+    <!-- ========== Support & About Strings ========== -->
+
+    <!-- Support Center -->
+    <string name="support_center">Trung tâm hỗ trợ</string>
+    <string name="support_center_desc">Báo cáo vấn đề và nhận hỗ trợ</string>
+    <string name="help_center">Trung tâm trợ giúp</string>
+    <string name="contact_support">Liên hệ hỗ trợ</string>
+    <string name="my_tickets">Yêu cầu của tôi</string>
+    <string name="create_ticket">Tạo yêu cầu hỗ trợ</string>
+    <string name="view_all_tickets">Xem tất cả yêu cầu</string>
+
+    <!-- Ticket Types -->
+    <string name="ticket_type">Loại vấn đề</string>
+    <string name="ticket_type_bug_report">Báo cáo lỗi</string>
+    <string name="ticket_type_content_report">Báo cáo nội dung</string>
+    <string name="ticket_type_feature_request">Đề xuất tính năng</string>
+    <string name="ticket_type_account_issue">Vấn đề tài khoản</string>
+    <string name="ticket_type_general_inquiry">Câu hỏi chung</string>
+    <string name="ticket_type_other">Khác</string>
+
+    <!-- Ticket Status -->
+    <string name="ticket_status">Trạng thái</string>
+    <string name="ticket_status_open">Đang mở</string>
+    <string name="ticket_status_in_progress">Đang xử lý</string>
+    <string name="ticket_status_resolved">Đã giải quyết</string>
+    <string name="ticket_status_closed">Đã đóng</string>
+
+    <!-- Ticket Priority -->
+    <string name="ticket_priority">Mức độ ưu tiên</string>
+    <string name="ticket_priority_low">Thấp</string>
+    <string name="ticket_priority_medium">Trung bình</string>
+    <string name="ticket_priority_high">Cao</string>
+    <string name="ticket_priority_urgent">Khẩn cấp</string>
+
+    <!-- Ticket Form -->
+    <string name="ticket_subject">Tiêu đề</string>
+    <string name="ticket_subject_hint">Mô tả ngắn gọn vấn đề</string>
+    <string name="ticket_description">Mô tả chi tiết</string>
+    <string name="ticket_description_hint">Vui lòng mô tả chi tiết vấn đề bạn gặp phải...</string>
+    <string name="ticket_attach_screenshot">Đính kèm ảnh chụp màn hình</string>
+    <string name="ticket_screenshot_attached">Đã đính kèm ảnh</string>
+    <string name="ticket_remove_screenshot">Xóa ảnh</string>
+    <string name="ticket_submit">Gửi yêu cầu</string>
+    <string name="ticket_submitting">Đang gửi...</string>
+    <string name="ticket_submit_success">Đã gửi yêu cầu thành công</string>
+    <string name="ticket_submit_error">Không thể gửi yêu cầu</string>
+
+    <!-- Ticket Details -->
+    <string name="ticket_detail_title">Chi tiết yêu cầu</string>
+    <string name="ticket_id">Mã yêu cầu</string>
+    <string name="ticket_created_at">Ngày tạo</string>
+    <string name="ticket_updated_at">Cập nhật lần cuối</string>
+    <string name="ticket_description_label">Mô tả vấn đề</string>
+    <string name="ticket_device_info_label">Thông tin thiết bị</string>
+    <string name="ticket_admin_response_label">Phản hồi từ hỗ trợ</string>
+    <string name="ticket_admin_response">Phản hồi từ hỗ trợ</string>
+    <string name="ticket_no_response">Chưa có phản hồi</string>
+    <string name="ticket_waiting_response">Đang chờ phản hồi...</string>
+    <string name="ticket_screenshot_desc">Ảnh chụp màn hình đính kèm</string>
+    <string name="status_open">Đang mở</string>
+    <string name="priority_medium">Trung bình</string>
+    <string name="ticket_type_bug">Báo cáo lỗi</string>
+
+    <!-- Ticket List -->
+    <string name="no_tickets_title">Chưa có yêu cầu hỗ trợ</string>
+    <string name="no_tickets_message">Bạn chưa có yêu cầu hỗ trợ nào. Nếu gặp vấn đề, hãy tạo yêu cầu mới.</string>
+    <string name="loading_tickets">Đang tải danh sách yêu cầu...</string>
+
+    <!-- About App -->
+    <string name="about_app">Giới thiệu</string>
+    <string name="about_app_desc">Thông tin về ứng dụng</string>
+    <string name="app_version">Phiên bản ứng dụng</string>
+    <string name="app_description">Mô tả ứng dụng</string>
+    <string name="app_description_text">HealthTips là ứng dụng cung cấp các mẹo sức khỏe hữu ích, giúp bạn chăm sóc sức khỏe tốt hơn mỗi ngày. Ứng dụng cung cấp các tính năng như: xem mẹo sức khỏe, video ngắn, chat AI, nhắc nhở sức khỏe và nhiều tính năng khác.</string>
+    <string name="developed_by">Phát triển bởi</string>
+    <string name="developer_name">HealthTips Team</string>
+    <string name="contact_us">Liên hệ với chúng tôi</string>
+    <string name="contact_email">Email</string>
+    <string name="contact_email_value">support@healthtips.com</string>
+    <string name="follow_us">Theo dõi chúng tôi</string>
+    <string name="rate_app">Đánh giá ứng dụng</string>
+    <string name="share_app">Chia sẻ ứng dụng</string>
+    <string name="share_app_text">Hãy thử HealthTips - Ứng dụng mẹo sức khỏe tuyệt vời!</string>
+
+    <!-- Terms & Policies -->
+    <string name="terms_of_service">Điều khoản dịch vụ</string>
+    <string name="privacy_policy">Chính sách bảo mật</string>
+    <string name="community_guidelines">Nguyên tắc cộng đồng</string>
+    <string name="copyright_policy">Chính sách bản quyền</string>
+    <string name="cookie_policy">Chính sách cookie</string>
+    <string name="intellectual_property">Quyền sở hữu trí tuệ</string>
+
+    <!-- Legal -->
+    <string name="legal">Pháp lý</string>
+    <string name="last_updated">Cập nhật lần cuối</string>
+    <string name="effective_date">Ngày hiệu lực</string>
+
+    <!-- FAQ -->
+    <string name="faq">Câu hỏi thường gặp</string>
+    <string name="faq_how_to_use">Làm thế nào để sử dụng ứng dụng?</string>
+    <string name="faq_how_to_save">Làm thế nào để lưu mẹo yêu thích?</string>
+    <string name="faq_how_to_reminder">Làm thế nào để tạo nhắc nhở?</string>
+    <string name="faq_how_to_chat">Làm thế nào để sử dụng chat AI?</string>
+    <string name="faq_how_to_report">Làm thế nào để báo cáo nội dung?</string>
+
+    <!-- Report Content -->
+    <string name="report_content">Báo cáo nội dung</string>
+    <string name="report_content_reason">Lý do báo cáo</string>
+    <string name="report_spam">Spam</string>
+    <string name="report_inappropriate">Nội dung không phù hợp</string>
+    <string name="report_misleading">Thông tin sai lệch</string>
+    <string name="report_harassment">Quấy rối</string>
+    <string name="report_violence">Bạo lực</string>
+    <string name="report_hate_speech">Phát ngôn thù ghét</string>
+    <string name="report_copyright">Vi phạm bản quyền</string>
+    <string name="report_other_reason">Lý do khác</string>
+    <string name="report_details">Chi tiết báo cáo</string>
+    <string name="report_submit">Gửi báo cáo</string>
+    <string name="report_success">Đã gửi báo cáo thành công</string>
+    <string name="report_thank_you">Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét và xử lý.</string>
+
+    <!-- Validation Messages -->
+    <string name="error_empty_subject">Vui lòng nhập tiêu đề</string>
+    <string name="error_empty_description">Vui lòng nhập mô tả chi tiết</string>
+    <string name="error_select_ticket_type">Vui lòng chọn loại vấn đề</string>
+    <string name="select_ticket_type">Chọn loại vấn đề</string>
+    <string name="device_info_auto_collected">Thông tin thiết bị sẽ được tự động gửi kèm để hỗ trợ tốt hơn</string>
+    <string name="error_loading_failed">Tải dữ liệu thất bại</string>
+    <string name="error_network">Lỗi kết nối mạng</string>
+
+    <!-- Common Actions -->
+    <string name="action_retry">Thử lại</string>
+    <string name="action_cancel">Hủy</string>
+    <string name="action_ok">OK</string>
+    <string name="action_send">Gửi</string>
+    <string name="action_close">Đóng</string>
+    <string name="action_back">Quay lại</string>
+    <string name="action_next">Tiếp theo</string>
+    <string name="action_done">Hoàn thành</string>
+    <string name="action_view">Xem</string>
+    <string name="action_delete">Xóa</string>
+    <string name="action_edit">Chỉnh sửa</string>
+    <string name="action_select_image">Chọn ảnh</string>
+
 </resources>

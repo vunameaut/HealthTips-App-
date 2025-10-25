@@ -1,0 +1,19 @@
+{
+  "rules": {
+    "support_tickets": {
+      ".indexOn": ["userId", "createdAt", "status"],
+      "$ticketId": {
+        ".read": "auth != null && (data.child('userId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (data.child('userId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".validate": "newData.hasChildren(['ticketId', 'userId', 'subject', 'description', 'type', 'status', 'priority', 'createdAt'])"
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}
+

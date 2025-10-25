@@ -187,7 +187,6 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
 
     @Override
     public void navigateToChatDetail(String conversationId, String conversationTitle) {
-        // TODO: Chuyển đến ChatDetailFragment với conversationId
         if (getActivity() != null) {
             ChatDetailFragment chatDetailFragment = ChatDetailFragment.newInstance(conversationId, conversationTitle);
 
@@ -201,7 +200,6 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
 
     @Override
     public void navigateToNewChat() {
-        // TODO: Chuyển đến NewChatFragment hoặc ChatDetailFragment với conversationId mới
         if (getActivity() != null) {
             NewChatFragment newChatFragment = NewChatFragment.newInstance();
 

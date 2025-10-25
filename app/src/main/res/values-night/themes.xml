@@ -14,6 +14,15 @@
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
 
+        <!-- Custom attributes -->
+        <item name="textColorPrimary">@color/text_primary</item>
+        <item name="textColorSecondary">@color/text_secondary</item>
+        <item name="colorPrimarySurface">@color/background_dark</item>
+        <item name="colorOnPrimarySurface">@color/text_primary</item>
+        <item name="colorCardBackground">@color/background_dark_alt</item>
+        <item name="colorDivider">@color/text_secondary</item>
+        <item name="backgroundColor">@color/background_dark</item>
+
         <item name="colorError">@color/error</item>
 
         <!-- Áp dụng màu trạng thái thanh hệ thống -->
