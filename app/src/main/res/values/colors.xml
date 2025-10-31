@@ -42,6 +42,14 @@
     <color name="text_primary_light">#212124</color>
     <color name="text_secondary_light">#424242</color>
     <color name="text_disabled">#9E9E9E</color>
+    <color name="text_hint">#9E9E9E</color>
+
+    <!-- =============================================== -->
+    <!-- PRIMARY GREEN SHADES -->
+    <!-- =============================================== -->
+    <color name="primary_green">#4CAF50</color>
+    <color name="primary_green_light">#81C784</color>
+    <color name="primary_green_dark">#2E7D32</color>
 
     <!-- =============================================== -->
     <!-- BUTTON COLORS -->

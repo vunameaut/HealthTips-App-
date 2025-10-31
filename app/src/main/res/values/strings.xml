@@ -494,6 +494,14 @@
     <string name="error_loading_failed">Tải dữ liệu thất bại</string>
     <string name="error_network">Lỗi kết nối mạng</string>
 
+    <!-- Additional Strings for Report Issue -->
+    <string name="subject">Tiêu đề</string>
+    <string name="enter_subject">Nhập tiêu đề vấn đề</string>
+    <string name="enter_description">Mô tả chi tiết vấn đề bạn gặp phải...</string>
+    <string name="device_info">Thông tin thiết bị</string>
+    <string name="icon">Biểu tượng</string>
+    <string name="navigate">Điều hướng</string>
+
     <!-- Common Actions -->
     <string name="action_retry">Thử lại</string>
     <string name="action_cancel">Hủy</string>

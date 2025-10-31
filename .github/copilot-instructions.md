@@ -5,6 +5,22 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
 ## Hướng dẫn chung:
 0.  **Ngôn ngữ phản hồi:**
     * **Luôn viết phản hồi / mô tả bằng tiếng Việt.**
+
+**QUAN TRỌNG - QUY TẮC NGHIÊM NGẶT:**
+0.1. **KHÔNG TỰ Ý TẠO FILE HƯỚNG DẪN:**
+    * **NGHIÊM CẤM tự động tạo bất kỳ file hướng dẫn, tài liệu (README, GUIDE, INSTRUCTION, etc.) nào mà không có yêu cầu rõ ràng từ người dùng.**
+    * **Chỉ tập trung vào việc viết code, sửa lỗi và triển khai chức năng theo yêu cầu.**
+
+0.2. **KHÔNG TỰ Ý CHẠY BUILD TERMINAL:**
+    * **NGHIÊM CẤM tự động chạy các lệnh build, gradle, compile hoặc bất kỳ lệnh terminal nào mà không có yêu cầu cụ thể từ người dùng.**
+    * **Chú tâm vào việc sửa code và thực hiện đúng yêu cầu thay vì chạy build.**
+    * **Chỉ chạy terminal khi người dùng yêu cầu một cách rõ ràng.**
+
+0.3. **KHÔNG TỰ Ý SỬA CẤU HÌNH:**
+    * **NGHIÊM CẤM tự động chỉnh sửa các file cấu hình (build.gradle, AndroidManifest.xml, proguard-rules.pro, gradle.properties, etc.) mà không có yêu cầu cụ thể.**
+    * **Chỉ sửa các file Java, XML layout, resources khi được yêu cầu triển khai chức năng.**
+    * **Nếu cần thay đổi cấu hình, phải hỏi ý kiến người dùng trước.**
+
 1.  **Ngôn ngữ và Kiến trúc:**
     * Sử dụng **Java** làm ngôn ngữ lập trình chính.
     * Tuân thủ chặt chẽ kiến trúc **MVP (Model-View-Presenter)** cho tất cả các màn hình và luồng logic.

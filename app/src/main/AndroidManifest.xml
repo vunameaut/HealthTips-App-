@@ -172,6 +172,15 @@
             android:name=".presentation.settings.content.DisplaySettingsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".presentation.settings.content.TermsPolicyActivity"
+            android:exported="false"
+            android:label="@string/terms_policy" />
+
+        <activity
+            android:name=".presentation.settings.content.TermsPolicyDetailActivity"
+            android:exported="false" />
+
         <!-- Support and About Section Activities -->
         <activity
             android:name=".presentation.settings.support.ReportIssueActivity"
@@ -186,9 +195,6 @@
             android:exported="false"
             android:label="@string/faq" />
 
-        <activity
-            android:name=".presentation.settings.support.TermsPolicyActivity"
-            android:exported="false" />
 
         <!-- New Support Activities -->
         <activity

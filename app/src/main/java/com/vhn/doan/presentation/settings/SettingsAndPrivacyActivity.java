@@ -3,7 +3,6 @@ package com.vhn.doan.presentation.settings;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,9 +14,9 @@ import com.vhn.doan.presentation.settings.account.PermissionsSettingsActivity;
 import com.vhn.doan.presentation.settings.content.NotificationSettingsActivity;
 import com.vhn.doan.presentation.settings.content.LanguageSettingsActivity;
 import com.vhn.doan.presentation.settings.content.DisplaySettingsActivity;
+import com.vhn.doan.presentation.settings.content.TermsPolicyActivity;
 import com.vhn.doan.presentation.settings.support.ReportIssueActivity;
 import com.vhn.doan.presentation.settings.support.SupportHelpActivity;
-import com.vhn.doan.presentation.settings.support.TermsPolicyActivity;
 
 /**
  * Activity chính cho "Cài đặt và quyền riêng tư"
@@ -36,7 +35,7 @@ public class SettingsAndPrivacyActivity extends AppCompatActivity {
 
     private void setupViews() {
         ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> onBackPressed());
+        btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     private void setupClickListeners() {
