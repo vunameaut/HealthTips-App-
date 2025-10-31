@@ -159,6 +159,11 @@
             android:name=".presentation.settings.account.PermissionsSettingsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".presentation.settings.account.SecurityAndPermissionsActivity"
+            android:exported="false"
+            android:label="@string/security_and_permissions" />
+
         <!-- Content and Display Section Activities -->
         <activity
             android:name=".presentation.settings.content.NotificationSettingsActivity"

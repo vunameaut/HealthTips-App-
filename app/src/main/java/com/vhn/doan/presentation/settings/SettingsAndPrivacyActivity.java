@@ -8,14 +8,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.settings.account.AccountManagementActivity;
-import com.vhn.doan.presentation.settings.account.PrivacySettingsActivity;
-import com.vhn.doan.presentation.settings.account.SecuritySettingsActivity;
-import com.vhn.doan.presentation.settings.account.PermissionsSettingsActivity;
+import com.vhn.doan.presentation.settings.account.SecurityAndPermissionsActivity;
 import com.vhn.doan.presentation.settings.content.NotificationSettingsActivity;
 import com.vhn.doan.presentation.settings.content.LanguageSettingsActivity;
 import com.vhn.doan.presentation.settings.content.DisplaySettingsActivity;
 import com.vhn.doan.presentation.settings.content.TermsPolicyActivity;
 import com.vhn.doan.presentation.settings.support.ReportIssueActivity;
+import com.vhn.doan.presentation.settings.support.SupportHelpActivity;
 import com.vhn.doan.presentation.settings.support.SupportHelpActivity;
 
 /**
@@ -43,14 +42,8 @@ public class SettingsAndPrivacyActivity extends AppCompatActivity {
         findViewById(R.id.layoutAccountManagement).setOnClickListener(v ->
             startActivity(new Intent(this, AccountManagementActivity.class)));
 
-        findViewById(R.id.layoutPrivacySettings).setOnClickListener(v ->
-            startActivity(new Intent(this, PrivacySettingsActivity.class)));
-
-        findViewById(R.id.layoutSecuritySettings).setOnClickListener(v ->
-            startActivity(new Intent(this, SecuritySettingsActivity.class)));
-
-        findViewById(R.id.layoutPermissionsSettings).setOnClickListener(v ->
-            startActivity(new Intent(this, PermissionsSettingsActivity.class)));
+        findViewById(R.id.layoutSecurityAndPermissions).setOnClickListener(v ->
+            startActivity(new Intent(this, SecurityAndPermissionsActivity.class)));
 
         // Phần Nội dung và hiển thị
         findViewById(R.id.layoutNotificationSettings).setOnClickListener(v ->

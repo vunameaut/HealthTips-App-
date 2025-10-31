@@ -87,9 +87,10 @@
 
             </LinearLayout>
 
-            <!-- Quyền riêng tư -->
+
+            <!-- Quyền và Bảo mật -->
             <LinearLayout
-                android:id="@+id/layoutPrivacySettings"
+                android:id="@+id/layoutSecurityAndPermissions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -102,7 +103,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/privacy_settings"
+                    android:text="@string/security_and_permissions"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp" />
 
@@ -110,65 +111,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="@string/privacy_settings_desc"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <!-- Bảo mật -->
-            <LinearLayout
-                android:id="@+id/layoutSecuritySettings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/ripple_gray"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/security_settings"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/security_settings_desc"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <!-- Quyền -->
-            <LinearLayout
-                android:id="@+id/layoutPermissionsSettings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/ripple_gray"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/permissions_settings"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/permissions_settings_desc"
+                    android:text="@string/security_and_permissions_desc"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
 

@@ -289,6 +289,7 @@
     <string name="privacy_settings">Quyền riêng tư</string>
     <string name="security_settings">Bảo mật</string>
     <string name="permissions_settings">Quyền</string>
+    <string name="security_and_permissions">Quyền và Bảo mật</string>
 
     <!-- Phần Nội dung và hiển thị -->
     <string name="content_display_section">Nội dung và hiển thị</string>
@@ -307,6 +308,7 @@
     <string name="privacy_settings_desc">Cài đặt quyền riêng tư và bảo mật</string>
     <string name="security_settings_desc">Quản lý bảo mật tài khoản</string>
     <string name="permissions_settings_desc">Quản lý quyền truy cập ứng dụng</string>
+    <string name="security_and_permissions_desc">Quản lý bảo mật và quyền truy cập</string>
     <string name="notification_settings_desc">Cài đặt thông báo và nhắc nhở</string>
     <string name="language_settings_desc">Chọn ngôn ngữ hiển thị</string>
     <string name="display_settings_desc">Tùy chỉnh giao diện hiển thị</string>
@@ -515,5 +517,143 @@
     <string name="action_delete">Xóa</string>
     <string name="action_edit">Chỉnh sửa</string>
     <string name="action_select_image">Chọn ảnh</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_info_title">Thông tin tài khoản</string>
+    <string name="account_email_label">Email</string>
+    <string name="account_email_placeholder">user@example.com</string>
+    <string name="account_display_name_label">Tên hiển thị</string>
+    <string name="account_display_name_placeholder">Người dùng</string>
+    <string name="account_joined_date_label">Ngày tham gia</string>
+    <string name="account_joined_date_placeholder">01/01/2024</string>
+    <string name="account_manage_title">Quản lý tài khoản</string>
+    <string name="account_edit_profile">Chỉnh sửa hồ sơ</string>
+    <string name="account_edit_profile_desc">Cập nhật thông tin cá nhân của bạn</string>
+    <string name="account_change_password">Đổi mật khẩu</string>
+    <string name="account_change_password_desc">Thay đổi mật khẩu đăng nhập</string>
+    <string name="account_two_factor_auth">Xác thực hai yếu tố</string>
+    <string name="account_two_factor_auth_desc">Tăng cường bảo mật tài khoản</string>
+    <string name="account_danger_zone">Vùng nguy hiểm</string>
+    <string name="account_logout">Đăng xuất</string>
+    <string name="account_logout_desc">Đăng xuất khỏi tài khoản này</string>
+    <string name="account_delete">Xóa tài khoản</string>
+    <string name="account_delete_desc">Xóa vĩnh viễn tài khoản và dữ liệu</string>
+
+    <!-- ========== Privacy Settings Strings ========== -->
+    <string name="privacy_intro">Kiểm soát ai có thể xem thông tin và hoạt động của bạn</string>
+    <string name="privacy_profile_title">Hiển thị hồ sơ</string>
+    <string name="privacy_public_profile">Hồ sơ công khai</string>
+    <string name="privacy_public_profile_desc">Cho phép mọi người xem hồ sơ của bạn</string>
+    <string name="privacy_show_email">Hiển thị email</string>
+    <string name="privacy_show_email_desc">Cho phép người khác xem email của bạn</string>
+    <string name="privacy_activity_title">Hoạt động</string>
+    <string name="privacy_show_activity">Hiển thị hoạt động</string>
+    <string name="privacy_show_activity_desc">Cho phép người khác xem hoạt động của bạn</string>
+    <string name="privacy_show_liked_posts">Bài viết yêu thích</string>
+    <string name="privacy_show_liked_posts_desc">Hiển thị các bài viết bạn đã thích</string>
+    <string name="privacy_data_title">Dữ liệu và lưu trữ</string>
+    <string name="privacy_clear_search_history">Xóa lịch sử tìm kiếm</string>
+    <string name="privacy_clear_search_history_desc">Xóa tất cả lịch sử tìm kiếm của bạn</string>
+    <string name="privacy_clear_view_history">Xóa lịch sử xem</string>
+    <string name="privacy_clear_view_history_desc">Xóa lịch sử các bài viết đã xem</string>
+    <string name="privacy_download_data">Tải dữ liệu của bạn</string>
+    <string name="privacy_download_data_desc">Tải xuống một bản sao dữ liệu của bạn</string>
+    <string name="privacy_block_title">Chặn và hạn chế</string>
+    <string name="privacy_blocked_users">Người dùng đã chặn</string>
+    <string name="privacy_blocked_users_count">0 người dùng</string>
+
+
+    <!-- ========== Security Settings Strings ========== -->
+    <string name="security_and_permissions_intro">Quản lý bảo mật tài khoản và quyền truy cập ứng dụng</string>
+    <string name="security_section_title">Bảo mật</string>
+    <string name="security_intro">Quản lý bảo mật và kiểm soát truy cập tài khoản</string>
+    <string name="security_password_title">Mật khẩu và xác thực</string>
+    <string name="security_change_password">Đổi mật khẩu</string>
+    <string name="security_change_password_desc">Cập nhật mật khẩu đăng nhập của bạn</string>
+    <string name="security_two_factor">Xác thực hai yếu tố</string>
+    <string name="security_two_factor_desc">Thêm lớp bảo mật bổ sung cho tài khoản</string>
+    <string name="security_fingerprint">Đăng nhập bằng vân tay</string>
+    <string name="security_fingerprint_desc">Sử dụng vân tay để đăng nhập nhanh</string>
+    <string name="security_face_id">Đăng nhập bằng khuôn mặt</string>
+    <string name="security_face_id_desc">Sử dụng nhận diện khuôn mặt</string>
+
+    <string name="security_sessions_title">Phiên đăng nhập</string>
+    <string name="security_session_title">Phiên đăng nhập</string>
+    <string name="security_active_sessions">Phiên đang hoạt động</string>
+    <string name="security_active_sessions_desc">Quản lý các thiết bị đã đăng nhập</string>
+    <string name="security_auto_logout">Tự động đăng xuất</string>
+    <string name="security_auto_logout_desc">Đăng xuất sau thời gian không hoạt động</string>
+
+    <string name="security_advanced_title">Bảo mật nâng cao</string>
+    <string name="security_data_title">Bảo mật dữ liệu</string>
+    <string name="security_encrypt_data">Mã hóa dữ liệu</string>
+    <string name="security_encrypt_data_desc">Mã hóa dữ liệu cá nhân trên thiết bị</string>
+    <string name="security_secure_mode">Chế độ bảo mật cao</string>
+    <string name="security_secure_mode_desc">Chặn chụp màn hình và ghi màn hình</string>
+    <string name="security_suspicious_alert">Cảnh báo đăng nhập lạ</string>
+    <string name="security_suspicious_alert_desc">Nhận thông báo khi có đăng nhập bất thường</string>
+
+    <string name="security_activity_title">Hoạt động tài khoản</string>
+    <string name="security_login_history">Lịch sử đăng nhập</string>
+    <string name="security_login_history_desc">Xem các lần đăng nhập gần đây</string>
+    <string name="security_suspicious_activity">Hoạt động đáng ngờ</string>
+    <string name="security_suspicious_activity_desc">Nhận thông báo về hoạt động bất thường</string>
+
+    <!-- ========== Permissions Settings Strings ========== -->
+    <string name="permissions_section_title">Quyền truy cập</string>
+    <string name="permissions_intro">Quản lý quyền truy cập của ứng dụng vào thiết bị</string>
+    <string name="permissions_app_title">Quyền ứng dụng</string>
+    <string name="permissions_required_title">Quyền bắt buộc</string>
+    <string name="permissions_storage">Bộ nhớ</string>
+    <string name="permissions_storage_desc">Lưu trữ ảnh và dữ liệu offline</string>
+    <string name="permissions_camera">Camera</string>
+    <string name="permissions_camera_desc">Chụp ảnh cho hồ sơ và báo cáo</string>
+    <string name="permissions_notification">Thông báo</string>
+    <string name="permissions_notification_desc">Nhận nhắc nhở sức khỏe</string>
+    <string name="permissions_notifications">Thông báo</string>
+    <string name="permissions_notifications_desc">Nhận nhắc nhở sức khỏe</string>
+
+    <string name="permissions_optional_title">Quyền tùy chọn</string>
+    <string name="permissions_location">Vị trí</string>
+    <string name="permissions_location_desc">Cung cấp nội dung phù hợp với khu vực</string>
+    <string name="permissions_contacts">Danh bạ</string>
+    <string name="permissions_contacts_desc">Chia sẻ mẹo sức khỏe với bạn bè</string>
+    <string name="permissions_microphone">Microphone</string>
+    <string name="permissions_microphone_desc">Tìm kiếm bằng giọng nói</string>
+
+    <string name="permissions_management_title">Quản lý quyền</string>
+    <string name="permissions_app_settings_title">Cài đặt ứng dụng</string>
+    <string name="permissions_open_settings">Mở cài đặt hệ thống</string>
+    <string name="permissions_open_settings_desc">Thay đổi quyền trong cài đặt Android</string>
+    <string name="permissions_reset">Đặt lại quyền</string>
+    <string name="permissions_reset_desc">Thu hồi tất cả quyền đã cấp</string>
+    <string name="permissions_reset_permissions">Đặt lại quyền</string>
+    <string name="permissions_reset_permissions_desc">Thu hồi tất cả quyền đã cấp</string>
+
+    <string name="permission_status_granted">Đã cấp</string>
+    <string name="permission_status_denied">Bị từ chối</string>
+    <string name="permission_status_not_requested">Chưa yêu cầu</string>
+
+    <!-- Icon Content Descriptions -->
+    <string name="icon_email_desc">Biểu tượng email</string>
+    <string name="icon_person_desc">Biểu tượng người dùng</string>
+    <string name="icon_calendar_desc">Biểu tượng lịch</string>
+    <string name="icon_edit_desc">Biểu tượng chỉnh sửa</string>
+    <string name="icon_lock_desc">Biểu tượng khóa</string>
+    <string name="icon_shield_desc">Biểu tượng khiên bảo vệ</string>
+    <string name="icon_logout_desc">Biểu tượng đăng xuất</string>
+    <string name="icon_delete_desc">Biểu tượng xóa</string>
+    <string name="icon_arrow_forward_desc">Mũi tên tiếp theo</string>
+    <string name="icon_people_desc">Biểu tượng nhiều người</string>
+    <string name="icon_visibility_desc">Biểu tượng hiển thị</string>
+    <string name="icon_favorite_desc">Biểu tượng yêu thích</string>
+    <string name="icon_history_desc">Biểu tượng lịch sử</string>
+    <string name="icon_download_desc">Biểu tượng tải xuống</string>
+    <string name="icon_fingerprint_desc">Biểu tượng vân tay</string>
+    <string name="icon_notification_desc">Biểu tượng thông báo</string>
+    <string name="icon_settings_desc">Biểu tượng cài đặt</string>
+
+    <!-- Security and Permissions Misc -->
+    <string name="one_device">1 thiết bị</string>
 
 </resources>

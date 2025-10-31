@@ -85,7 +85,9 @@
     <!-- STATUS COLORS -->
     <!-- =============================================== -->
     <color name="success_color">#4CAF50</color>
+    <color name="success_green">#4CAF50</color>
     <color name="error_color">#F44336</color>
+    <color name="error_red">#F44336</color>
     <color name="warning_color">#FF9800</color>
     <color name="info_color">#2196F3</color>
     <color name="disabled">#BDBDBD</color>
