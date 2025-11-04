@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.vhn.doan.R;
+import com.vhn.doan.utils.LocaleHelper;
 
 /**
  * Activity cài đặt ngôn ngữ
@@ -109,11 +110,15 @@ public class LanguageSettingsActivity extends AppCompatActivity {
                 languageName = "Español";
             }
 
-            preferences.edit().putString("app_language", languageCode).apply();
+            // Apply locale using LocaleHelper
+            LocaleHelper.setLocale(this, languageCode);
 
             Toast.makeText(this,
-                "Đã chọn ngôn ngữ: " + languageName + ". Khởi động lại ứng dụng để áp dụng.",
-                Toast.LENGTH_LONG).show();
+                "Đã chọn ngôn ngữ: " + languageName + ". Đang áp dụng...",
+                Toast.LENGTH_SHORT).show();
+
+            // Restart activity to apply changes immediately
+            LocaleHelper.restartActivity(this);
         });
     }
 }

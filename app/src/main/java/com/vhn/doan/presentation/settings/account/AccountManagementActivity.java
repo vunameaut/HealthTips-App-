@@ -97,13 +97,14 @@ public class AccountManagementActivity extends AppCompatActivity {
     private void setupListeners() {
         // Edit Profile
         btnEditProfile.setOnClickListener(v -> {
-            // TODO: Navigate to Edit Profile Activity
-            Toast.makeText(this, "Chức năng đang phát triển", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, com.vhn.doan.presentation.profile.EditProfileActivity.class);
+            startActivity(intent);
         });
 
         // Change Password
         btnChangePassword.setOnClickListener(v -> {
-            showChangePasswordDialog();
+            Intent intent = new Intent(this, ChangePasswordActivity.class);
+            startActivity(intent);
         });
 
         // Two Factor Auth
@@ -129,25 +130,6 @@ public class AccountManagementActivity extends AppCompatActivity {
         btnDeleteAccount.setOnClickListener(v -> {
             showDeleteAccountConfirmDialog();
         });
-    }
-
-    private void showChangePasswordDialog() {
-        new MaterialAlertDialogBuilder(this)
-            .setTitle("Đổi mật khẩu")
-            .setMessage("Bạn sẽ nhận được email hướng dẫn đặt lại mật khẩu")
-            .setPositiveButton("Gửi email", (dialog, which) -> {
-                if (currentUser != null && currentUser.getEmail() != null) {
-                    mAuth.sendPasswordResetEmail(currentUser.getEmail())
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(this, "Đã gửi email đặt lại mật khẩu", Toast.LENGTH_LONG).show();
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
-                }
-            })
-            .setNegativeButton("Hủy", null)
-            .show();
     }
 
     private void showTwoFactorSetupDialog() {
@@ -184,15 +166,38 @@ public class AccountManagementActivity extends AppCompatActivity {
     }
 
     private void showFinalDeleteConfirmation() {
-        new MaterialAlertDialogBuilder(this)
+        // Create EditText for confirmation input
+        final android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint("Nhập 'XOA' để xác nhận");
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+
+        // Add padding
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        input.setPadding(padding, padding, padding, padding);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
             .setTitle("Xác nhận lần cuối")
-            .setMessage("Nhập 'XOA' để xác nhận xóa tài khoản")
-            .setView(R.layout.dialog_reminder) // Temporary, should create proper input dialog
-            .setPositiveButton("Xác nhận", (dialog, which) -> {
-                performDeleteAccount();
-            })
+            .setMessage("Nhập 'XOA' để xác nhận xóa tài khoản vĩnh viễn")
+            .setView(input)
+            .setPositiveButton("Xác nhận", null) // Set to null first, override below
             .setNegativeButton("Hủy", null)
-            .show();
+            .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            android.widget.Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> {
+                String inputText = input.getText().toString().trim();
+                if (inputText.equalsIgnoreCase("XOA")) {
+                    performDeleteAccount();
+                    dialog.dismiss();
+                } else {
+                    input.setError("Vui lòng nhập chính xác 'XOA'");
+                    input.requestFocus();
+                }
+            });
+        });
+
+        dialog.show();
     }
 
     private void performLogout() {

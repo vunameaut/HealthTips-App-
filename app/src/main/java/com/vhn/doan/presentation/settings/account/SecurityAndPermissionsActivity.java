@@ -29,8 +29,6 @@ import com.vhn.doan.R;
 public class SecurityAndPermissionsActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "SecuritySettings";
-    private static final String KEY_TWO_FACTOR = "two_factor_enabled";
-    private static final String KEY_FINGERPRINT = "fingerprint_enabled";
     private static final String KEY_AUTO_LOGOUT = "auto_logout_enabled";
     private static final String KEY_ENCRYPT_DATA = "encrypt_data_enabled";
     private static final String KEY_SECURE_MODE = "secure_mode_enabled";
@@ -38,10 +36,6 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
 
     // Security Views
     private MaterialToolbar toolbar;
-    private LinearLayout btnChangePassword;
-    private LinearLayout btnTwoFactor;
-    private SwitchMaterial switchTwoFactor;
-    private SwitchMaterial switchFingerprint;
     private LinearLayout btnActiveSessions;
     private TextView tvSessionCount;
     private SwitchMaterial switchAutoLogout;
@@ -95,10 +89,6 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         // Security Views
-        btnChangePassword = findViewById(R.id.btnChangePassword);
-        btnTwoFactor = findViewById(R.id.btnTwoFactor);
-        switchTwoFactor = findViewById(R.id.switchTwoFactor);
-        switchFingerprint = findViewById(R.id.switchFingerprint);
         btnActiveSessions = findViewById(R.id.btnActiveSessions);
         tvSessionCount = findViewById(R.id.tvSessionCount);
         switchAutoLogout = findViewById(R.id.switchAutoLogout);
@@ -126,8 +116,6 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
     }
 
     private void loadSecuritySettings() {
-        switchTwoFactor.setChecked(preferences.getBoolean(KEY_TWO_FACTOR, false));
-        switchFingerprint.setChecked(preferences.getBoolean(KEY_FINGERPRINT, false));
         switchAutoLogout.setChecked(preferences.getBoolean(KEY_AUTO_LOGOUT, false));
         switchEncryptData.setChecked(preferences.getBoolean(KEY_ENCRYPT_DATA, true));
         switchSecureMode.setChecked(preferences.getBoolean(KEY_SECURE_MODE, false));
@@ -170,27 +158,6 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
     }
 
     private void setupSecurityListeners() {
-        // Đổi mật khẩu
-        btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
-
-        // Xác thực hai yếu tố
-        btnTwoFactor.setOnClickListener(v -> switchTwoFactor.setChecked(!switchTwoFactor.isChecked()));
-
-        switchTwoFactor.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            saveSetting(KEY_TWO_FACTOR, isChecked);
-            if (isChecked) {
-                showTwoFactorSetupDialog();
-            } else {
-                Toast.makeText(this, "Đã tắt xác thực hai yếu tố", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Vân tay
-        switchFingerprint.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            saveSetting(KEY_FINGERPRINT, isChecked);
-            Toast.makeText(this, isChecked ? "Đã bật đăng nhập bằng vân tay" : "Đã tắt đăng nhập bằng vân tay",
-                    Toast.LENGTH_SHORT).show();
-        });
 
         // Phiên đăng nhập
         btnActiveSessions.setOnClickListener(v -> showActiveSessionsDialog());
@@ -259,17 +226,6 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Đổi mật khẩu")
                 .setMessage("Bạn sẽ được chuyển đến màn hình đổi mật khẩu. Tiếp tục?")
-                .setPositiveButton("Tiếp tục", (dialog, which) -> {
-                    // TODO: Navigate to change password activity
-                    Toast.makeText(this, "Chức năng đang phát triển", Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("Hủy", null)
-                .show();
-    }
-
-    private void showTwoFactorSetupDialog() {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle("Thiết lập xác thực hai yếu tố")
                 .setMessage("Chọn phương thức xác thực:")
                 .setPositiveButton("SMS", (dialog, which) -> {
                     Toast.makeText(this, "Đang thiết lập xác thực qua SMS...", Toast.LENGTH_SHORT).show();

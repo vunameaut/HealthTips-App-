@@ -11,7 +11,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.vhn.doan.R;
+
+import androidx.annotation.NonNull;
 
 /**
  * Activity cài đặt quyền riêng tư
@@ -36,6 +45,8 @@ public class PrivacySettingsActivity extends AppCompatActivity {
     private TextView tvBlockedCount;
 
     private SharedPreferences preferences;
+    private FirebaseAuth mAuth;
+    private DatabaseReference userSettingsRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +54,16 @@ public class PrivacySettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_privacy_settings);
 
         preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        mAuth = FirebaseAuth.getInstance();
+
+        // Initialize Firebase reference
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            userSettingsRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(currentUser.getUid())
+                .child("privacy_settings");
+        }
 
         setupViews();
         loadPrivacySettings();
@@ -66,14 +87,64 @@ public class PrivacySettingsActivity extends AppCompatActivity {
     }
 
     private void loadPrivacySettings() {
-        // Load saved settings
+        if (userSettingsRef != null) {
+            // Load from Firebase
+            userSettingsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // Load from Firebase
+                        boolean publicProfile = snapshot.child(KEY_PUBLIC_PROFILE).getValue(Boolean.class) != null
+                            ? snapshot.child(KEY_PUBLIC_PROFILE).getValue(Boolean.class)
+                            : true;
+                        boolean showEmail = snapshot.child(KEY_SHOW_EMAIL).getValue(Boolean.class) != null
+                            ? snapshot.child(KEY_SHOW_EMAIL).getValue(Boolean.class)
+                            : false;
+                        boolean showActivity = snapshot.child(KEY_SHOW_ACTIVITY).getValue(Boolean.class) != null
+                            ? snapshot.child(KEY_SHOW_ACTIVITY).getValue(Boolean.class)
+                            : true;
+                        boolean showLikedPosts = snapshot.child(KEY_SHOW_LIKED_POSTS).getValue(Boolean.class) != null
+                            ? snapshot.child(KEY_SHOW_LIKED_POSTS).getValue(Boolean.class)
+                            : true;
+
+                        switchPublicProfile.setChecked(publicProfile);
+                        switchShowEmail.setChecked(showEmail);
+                        switchShowActivity.setChecked(showActivity);
+                        switchShowLikedPosts.setChecked(showLikedPosts);
+
+                        // Also save to local SharedPreferences as cache
+                        preferences.edit()
+                            .putBoolean(KEY_PUBLIC_PROFILE, publicProfile)
+                            .putBoolean(KEY_SHOW_EMAIL, showEmail)
+                            .putBoolean(KEY_SHOW_ACTIVITY, showActivity)
+                            .putBoolean(KEY_SHOW_LIKED_POSTS, showLikedPosts)
+                            .apply();
+                    } else {
+                        // No Firebase data, load from SharedPreferences
+                        loadFromLocalPreferences();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // On error, fallback to local preferences
+                    loadFromLocalPreferences();
+                }
+            });
+        } else {
+            // No user logged in, load from local preferences
+            loadFromLocalPreferences();
+        }
+
+        // Load blocked users count (mock data for now)
+        updateBlockedUsersCount(0);
+    }
+
+    private void loadFromLocalPreferences() {
         switchPublicProfile.setChecked(preferences.getBoolean(KEY_PUBLIC_PROFILE, true));
         switchShowEmail.setChecked(preferences.getBoolean(KEY_SHOW_EMAIL, false));
         switchShowActivity.setChecked(preferences.getBoolean(KEY_SHOW_ACTIVITY, true));
         switchShowLikedPosts.setChecked(preferences.getBoolean(KEY_SHOW_LIKED_POSTS, true));
-
-        // Load blocked users count (mock data for now)
-        updateBlockedUsersCount(0);
     }
 
     private void setupListeners() {
@@ -122,8 +193,17 @@ public class PrivacySettingsActivity extends AppCompatActivity {
     }
 
     private void savePrivacySetting(String key, boolean value) {
+        // Save to local SharedPreferences
         preferences.edit().putBoolean(key, value).apply();
-        // TODO: Sync with Firebase/Firestore
+
+        // Sync with Firebase
+        if (userSettingsRef != null) {
+            userSettingsRef.child(key).setValue(value)
+                .addOnFailureListener(e -> {
+                    // Silent fail, data is still in local preferences
+                    android.util.Log.e("PrivacySettings", "Failed to sync to Firebase: " + e.getMessage());
+                });
+        }
     }
 
     private void showClearSearchHistoryDialog() {

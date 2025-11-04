@@ -6,7 +6,15 @@ import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.annotation.NonNull;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.vhn.doan.R;
 
 /**
@@ -15,6 +23,8 @@ import com.vhn.doan.R;
 public class NotificationSettingsActivity extends AppCompatActivity {
 
     private SharedPreferences preferences;
+    private FirebaseAuth mAuth;
+    private DatabaseReference userSettingsRef;
 
     private SwitchCompat switchAllNotifications;
     private SwitchCompat switchHealthTips;
@@ -32,6 +42,16 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_notification_settings);
 
         preferences = getSharedPreferences("NotificationSettings", MODE_PRIVATE);
+        mAuth = FirebaseAuth.getInstance();
+
+        // Initialize Firebase reference
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            userSettingsRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(currentUser.getUid())
+                .child("notification_settings");
+        }
 
         setupViews();
         loadSettings();
@@ -54,6 +74,73 @@ public class NotificationSettingsActivity extends AppCompatActivity {
     }
 
     private void loadSettings() {
+        if (userSettingsRef != null) {
+            // Load from Firebase
+            userSettingsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // Load from Firebase
+                        applySettings(snapshot);
+                    } else {
+                        // No Firebase data, load from SharedPreferences
+                        loadFromLocalPreferences();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // On error, fallback to local preferences
+                    loadFromLocalPreferences();
+                }
+            });
+        } else {
+            // No user logged in, load from local preferences
+            loadFromLocalPreferences();
+        }
+    }
+
+    private void applySettings(DataSnapshot snapshot) {
+        boolean allNotifications = getBoolean(snapshot, "all_notifications", true);
+        boolean healthTips = getBoolean(snapshot, "health_tips", true);
+        boolean reminders = getBoolean(snapshot, "reminders", true);
+        boolean likes = getBoolean(snapshot, "likes", true);
+        boolean comments = getBoolean(snapshot, "comments", true);
+        boolean follows = getBoolean(snapshot, "follows", true);
+        boolean updates = getBoolean(snapshot, "updates", true);
+        boolean sound = getBoolean(snapshot, "sound", true);
+        boolean vibration = getBoolean(snapshot, "vibration", true);
+
+        switchAllNotifications.setChecked(allNotifications);
+        switchHealthTips.setChecked(healthTips);
+        switchReminders.setChecked(reminders);
+        switchLikes.setChecked(likes);
+        switchComments.setChecked(comments);
+        switchFollows.setChecked(follows);
+        switchUpdates.setChecked(updates);
+        switchSound.setChecked(sound);
+        switchVibration.setChecked(vibration);
+
+        // Cache to local
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("all_notifications", allNotifications);
+        editor.putBoolean("health_tips", healthTips);
+        editor.putBoolean("reminders", reminders);
+        editor.putBoolean("likes", likes);
+        editor.putBoolean("comments", comments);
+        editor.putBoolean("follows", follows);
+        editor.putBoolean("updates", updates);
+        editor.putBoolean("sound", sound);
+        editor.putBoolean("vibration", vibration);
+        editor.apply();
+    }
+
+    private boolean getBoolean(DataSnapshot snapshot, String key, boolean defaultValue) {
+        Boolean value = snapshot.child(key).getValue(Boolean.class);
+        return value != null ? value : defaultValue;
+    }
+
+    private void loadFromLocalPreferences() {
         switchAllNotifications.setChecked(preferences.getBoolean("all_notifications", true));
         switchHealthTips.setChecked(preferences.getBoolean("health_tips", true));
         switchReminders.setChecked(preferences.getBoolean("reminders", true));
@@ -65,9 +152,19 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         switchVibration.setChecked(preferences.getBoolean("vibration", true));
     }
 
+    private void saveSetting(String key, boolean value) {
+        // Save to local
+        preferences.edit().putBoolean(key, value).apply();
+
+        // Sync to Firebase
+        if (userSettingsRef != null) {
+            userSettingsRef.child(key).setValue(value);
+        }
+    }
+
     private void setupListeners() {
         switchAllNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            preferences.edit().putBoolean("all_notifications", isChecked).apply();
+            saveSetting("all_notifications", isChecked);
 
             if (!isChecked) {
                 switchHealthTips.setEnabled(false);
@@ -87,27 +184,27 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         });
 
         switchHealthTips.setOnCheckedChangeListener((buttonView, isChecked) ->
-            preferences.edit().putBoolean("health_tips", isChecked).apply());
+            saveSetting("health_tips", isChecked));
 
         switchReminders.setOnCheckedChangeListener((buttonView, isChecked) ->
-            preferences.edit().putBoolean("reminders", isChecked).apply());
+            saveSetting("reminders", isChecked));
 
         switchLikes.setOnCheckedChangeListener((buttonView, isChecked) ->
-            preferences.edit().putBoolean("likes", isChecked).apply());
+            saveSetting("likes", isChecked));
 
         switchComments.setOnCheckedChangeListener((buttonView, isChecked) ->
-            preferences.edit().putBoolean("comments", isChecked).apply());
+            saveSetting("comments", isChecked));
 
         switchFollows.setOnCheckedChangeListener((buttonView, isChecked) ->
-            preferences.edit().putBoolean("follows", isChecked).apply());
+            saveSetting("follows", isChecked));
 
         switchUpdates.setOnCheckedChangeListener((buttonView, isChecked) ->
-            preferences.edit().putBoolean("updates", isChecked).apply());
+            saveSetting("updates", isChecked));
 
         switchSound.setOnCheckedChangeListener((buttonView, isChecked) ->
-            preferences.edit().putBoolean("sound", isChecked).apply());
+            saveSetting("sound", isChecked));
 
         switchVibration.setOnCheckedChangeListener((buttonView, isChecked) ->
-            preferences.edit().putBoolean("vibration", isChecked).apply());
+            saveSetting("vibration", isChecked));
     }
 }

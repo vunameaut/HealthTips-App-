@@ -13,6 +13,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 
 import com.vhn.doan.R;
+import com.vhn.doan.utils.FontSizeHelper;
+
+import android.widget.Toast;
 
 /**
  * Activity cài đặt hiển thị
@@ -123,7 +126,17 @@ public class DisplaySettingsActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 int fontSize = seekBar.getProgress() + 12;
+
+                // Save using helper
+                FontSizeHelper.saveFontSize(DisplaySettingsActivity.this, fontSize);
+
+                // Also save to local prefs for backwards compatibility
                 preferences.edit().putInt("font_size", fontSize).apply();
+
+                // Notify user
+                Toast.makeText(DisplaySettingsActivity.this,
+                    "Kích thước chữ sẽ được áp dụng khi khởi động lại ứng dụng",
+                    Toast.LENGTH_SHORT).show();
             }
         });
     }

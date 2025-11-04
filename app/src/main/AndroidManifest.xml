@@ -71,10 +71,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".presentation.profile.SettingsActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".presentation.healthtip.detail.HealthTipDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.HealthTipDetail" />
@@ -152,17 +148,13 @@
             android:exported="false" />
 
         <activity
-            android:name=".presentation.settings.account.SecuritySettingsActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".presentation.settings.account.PermissionsSettingsActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".presentation.settings.account.SecurityAndPermissionsActivity"
             android:exported="false"
             android:label="@string/security_and_permissions" />
+
+        <activity
+            android:name=".presentation.settings.account.ChangePasswordActivity"
+            android:exported="false" />
 
         <!-- Content and Display Section Activities -->
         <activity
