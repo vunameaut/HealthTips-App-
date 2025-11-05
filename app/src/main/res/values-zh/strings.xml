@@ -1,0 +1,825 @@
+<resources>
+    <!-- Application name -->
+    <string name="app_name">健康小贴士</string>
+
+    <!-- Login screen strings -->
+    <string name="login">登录</string>
+    <string name="register">注册</string>
+    <string name="email">电子邮箱</string>
+    <string name="password">密码</string>
+    <string name="confirm_password">确认密码</string>
+    <string name="forgot_password">忘记密码？</string>
+    <string name="dont_have_account">没有账户？立即注册</string>
+    <string name="already_have_account">已有账户？立即登录</string>
+
+    <!-- Forgot password screen strings -->
+    <string name="reset_password">重置密码</string>
+    <string name="reset_password_instructions">输入您的电子邮箱以接收密码重置说明</string>
+    <string name="send_reset_email">发送重置邮件</string>
+    <string name="back_to_login">返回登录</string>
+
+    <!-- Home screen strings -->
+    <string name="categories">分类</string>
+    <string name="recommended_for_you">为您推荐</string>
+    <string name="latest_tips">最新贴士</string>
+    <string name="most_viewed">最多浏览</string>
+    <string name="most_liked">最多点赞</string>
+    <string name="see_all">查看全部</string>
+    <string name="search">搜索</string>
+    <string name="offline_mode">离线模式</string>
+    <string name="home">首页</string>
+
+    <!-- View all health tips screen strings -->
+    <string name="all_recommended_tips">所有推荐贴士</string>
+    <string name="all_latest_tips">所有最新贴士</string>
+    <string name="all_most_viewed_tips">所有最多浏览贴士</string>
+    <string name="all_most_liked_tips">所有最多点赞贴士</string>
+    <string name="no_health_tips_found">未找到健康贴士</string>
+    <string name="no_health_tips_description">此分类当前没有健康贴士</string>
+
+    <!-- Bottom navigation strings -->
+    <string name="nav_home">首页</string>
+    <string name="nav_chat">AI聊天</string>
+    <string name="nav_reminders">提醒</string>
+    <string name="nav_videos">短视频</string>
+    <string name="nav_favorites">收藏</string>
+    <string name="nav_profile">个人资料</string>
+
+    <!-- Detail screen strings -->
+    <string name="related_tips">相关贴士</string>
+    <string name="share">分享</string>
+    <string name="save">保存</string>
+
+    <!-- Reminder feature strings -->
+    <string name="health_reminders">健康提醒</string>
+    <string name="manage_your_health_reminders">管理您的健康提醒</string>
+    <string name="active_reminders">活跃</string>
+    <string name="add_reminder">添加提醒</string>
+    <string name="reminder_settings">提醒设置</string>
+    <string name="your_reminders">您的提醒</string>
+    <string name="sort">排序</string>
+    <string name="no_reminders_title">暂无提醒</string>
+    <string name="no_reminders_message">您还没有创建任何提醒。创建第一个提醒来跟踪您的健康！</string>
+    <string name="create_first_reminder">创建第一个提醒</string>
+    <string name="loading_reminders">加载提醒中...</string>
+    <string name="active">活跃</string>
+    <string name="reminder_options">提醒选项</string>
+    <string name="reminder_sound_label">提醒铃声</string>
+    <string name="vibrate">振动</string>
+    <string name="edit">编辑</string>
+    <string name="delete">删除</string>
+
+    <!-- Reminder sound strings -->
+    <string name="select_reminder_sound">选择提醒铃声</string>
+    <string name="tap_to_preview_sound">点击播放按钮预览铃声</string>
+    <string name="available_sounds">可用铃声</string>
+    <string name="sound_selection_tip">点击选择，播放按钮预览</string>
+    <string name="preview_sound">预览铃声</string>
+
+    <!-- Preview mode and new interface strings -->
+    <string name="preview_mode_title">预览</string>
+    <string name="test_interface_title">测试新界面</string>
+    <string name="content_image_description">内容插图</string>
+    <string name="author_prefix">作者：</string>
+    <string name="content_loading">加载内容中...</string>
+    <string name="content_error">无法加载内容</string>
+    <string name="health_tip_image">健康贴士文章图片</string>
+
+    <!-- Video search results strings -->
+    <string name="loading_videos">加载视频中...</string>
+    <string name="no_video_results_title">未找到视频</string>
+    <string name="no_video_results_message">尝试使用不同的关键词搜索或检查您的网络连接</string>
+    <string name="try_again">重试</string>
+
+    <!-- Video interaction strings -->
+    <string name="like">点赞</string>
+    <string name="comment">评论</string>
+    <string name="view_count_format">%s 次观看</string>
+
+    <!-- Common strings -->
+    <string name="error_occurred">发生错误</string>
+    <string name="network_error">网络错误</string>
+    <string name="retry">重试</string>
+
+    <!-- Liked videos strings -->
+    <string name="liked_videos">点赞的视频</string>
+    <string name="no_liked_videos">没有点赞的视频</string>
+    <string name="no_liked_videos_subtitle">点赞您喜欢的视频以便稍后观看</string>
+
+    <!-- Short video item strings -->
+    <string name="play_pause_video">播放/暂停视频</string>
+    <string name="video_title_placeholder">视频标题</string>
+    <string name="video_caption_placeholder">视频描述</string>
+    <string name="see_more">查看更多</string>
+    <string name="see_less">收起</string>
+    <string name="view_count_placeholder">0 次观看</string>
+    <string name="upload_date_placeholder">1天前</string>
+    <string name="like_button_description">点赞视频按钮</string>
+    <string name="like_count_placeholder">0</string>
+    <string name="comment_button_description">评论视频按钮</string>
+    <string name="comment_action">评论</string>
+    <string name="share_button_description">分享视频按钮</string>
+    <string name="share_action">分享</string>
+    <string name="double_tap_heart_animation">双击爱心动画</string>
+
+    <!-- Error and success messages -->
+    <string name="error_login">登录失败</string>
+    <string name="error_register">注册失败</string>
+    <string name="error_reset_password">无法重置密码</string>
+    <string name="success_login">登录成功</string>
+    <string name="success_register">注册成功</string>
+    <string name="success_reset_password">密码重置邮件已发送</string>
+
+    <!-- Conversation context menu strings -->
+    <string name="rename_conversation">重命名对话</string>
+    <string name="pin_conversation">置顶对话</string>
+    <string name="unpin_conversation">取消置顶对话</string>
+    <string name="mute_conversation">静音通知</string>
+    <string name="unmute_conversation">取消静音通知</string>
+    <string name="share_conversation">分享对话</string>
+    <string name="copy_messages">复制消息</string>
+    <string name="mark_as_read">标记为已读</string>
+    <string name="delete_conversation">删除对话</string>
+
+    <!-- Dialog and notification for context menu -->
+    <string name="enter_new_name">输入新的对话名称</string>
+    <string name="conversation_name">对话名称</string>
+    <string name="rename">重命名</string>
+    <string name="cancel">取消</string>
+    <string name="delete_conversation_confirm">您确定要删除此对话吗？</string>
+    <string name="delete_conversation_confirm_message">此对话中的所有消息将被永久删除。</string>
+    <string name="conversation_deleted">对话已删除</string>
+    <string name="conversation_renamed">对话已重命名</string>
+    <string name="conversation_pinned">对话已置顶</string>
+    <string name="conversation_unpinned">对话已取消置顶</string>
+    <string name="conversation_muted">通知已静音</string>
+    <string name="conversation_unmuted">通知已取消静音</string>
+    <string name="messages_copied">消息已复制</string>
+    <string name="marked_as_read">已标记为已读</string>
+
+    <!-- Reminder screen strings -->
+    <string name="no_time_set">未设置时间</string>
+    <string name="reminder_title">提醒标题</string>
+    <string name="reminder_description">提醒描述</string>
+    <string name="reminder_time">提醒时间</string>
+    <string name="reminder_repeat">重复</string>
+    <string name="reminder_active">活跃</string>
+    <string name="create_reminder">创建提醒</string>
+    <string name="edit_reminder">编辑提醒</string>
+    <string name="delete_reminder">删除提醒</string>
+    <string name="no_reminders">暂无提醒</string>
+
+    <!-- Repeat type strings -->
+    <string name="repeat_none">不重复</string>
+    <string name="repeat_daily">每日</string>
+    <string name="repeat_weekly">每周</string>
+    <string name="repeat_monthly">每月</string>
+
+    <!-- Notification strings -->
+    <string name="notification_channel_name">健康提醒</string>
+    <string name="notification_channel_description">健康提醒通知</string>
+    <string name="notification_reminder_title">提醒：%1$s</string>
+    <string name="notification_mark_complete">标记为完成</string>
+
+    <!-- Additional strings for article detail screen -->
+    <string name="unlike">取消点赞</string>
+    <string name="add_to_favorite">添加到收藏</string>
+    <string name="remove_from_favorite">从收藏中移除</string>
+    <string name="share_tip">分享健康贴士</string>
+    <string name="added_to_favorites">已添加到收藏</string>
+    <string name="removed_from_favorites">已从收藏中移除</string>
+
+    <!-- Category screen strings -->
+    <string name="categories_title">所有健康主题</string>
+    <string name="categories_subtitle">探索各种健康主题</string>
+    <string name="empty_categories_title">未找到分类</string>
+    <string name="empty_categories_message">当前没有要显示的分类</string>
+    <string name="empty_categories_description">分类将显示在这里</string>
+
+    <!-- Common strings -->
+    <string name="ok">确定</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="loading">加载中...</string>
+    <string name="error">错误</string>
+    <string name="success">成功</string>
+    <string name="favorite">收藏</string>
+    <string name="no_favorites">您还没有收藏</string>
+    <string name="back">返回</string>
+
+    <!-- Category detail screen strings -->
+    <string name="empty_tips_description">此分类中暂无贴士</string>
+    <string name="empty_tips_title">空列表</string>
+    <string name="empty_tips_message">此分类当前没有健康贴士</string>
+
+    <!-- Short video feature strings -->
+    <string name="no_videos_available">没有可用的视频</string>
+    <string name="pull_to_refresh_videos">下拉刷新视频列表</string>
+    <string name="video_liked">视频已点赞</string>
+    <string name="video_unliked">视频已取消点赞</string>
+    <string name="video_shared">视频已分享</string>
+    <string name="comment_feature_coming_soon">评论功能即将推出</string>
+    <string name="enter_comment">输入评论</string>
+    <string name="comments">评论</string>
+    <string name="no_comments">暂无评论</string>
+    <string name="reply">回复</string>
+    <string name="reply_to">回复 %1$s</string>
+    <string name="share_video">分享视频</string>
+    <string name="view_user_profile">查看用户资料</string>
+    <string name="error_loading_videos">无法加载视频。请重试。</string>
+    <string name="trending_videos">热门视频</string>
+
+    <!-- Icon placeholders for short video feature -->
+    <string name="ic_video_placeholder">ic_video_placeholder</string>
+    <string name="ic_video_error">ic_video_error</string>
+    <string name="ic_user_placeholder">ic_user_placeholder</string>
+    <string name="ic_heart_filled">ic_heart_filled</string>
+    <string name="ic_heart_outline">ic_heart_outline</string>
+    <string name="ic_comment">ic_comment</string>
+    <string name="ic_share">ic_share</string>
+    <string name="ic_play_arrow">ic_play_arrow</string>
+    <string name="ic_visibility">ic_visibility</string>
+    <string name="ic_schedule">ic_schedule</string>
+    <string name="ic_video_empty">ic_video_empty</string>
+
+    <!-- Additional strings -->
+    <string name="settings_under_development">设置功能开发中</string>
+    <string name="like_video">点赞视频</string>
+    <string name="share_video_action">分享视频</string>
+
+    <!-- Strings for Search Activity -->
+    <string name="search_hint">搜索健康贴士、视频...</string>
+    <string name="clear">清除</string>
+
+    <!-- Strings for Comments Bottom Sheet -->
+    <string name="comments_title">评论</string>
+    <string name="close_comments">关闭评论</string>
+    <string name="empty_comments_title">暂无评论</string>
+    <string name="empty_comments_message">成为第一个评论的人！</string>
+    <string name="comment_input_hint">写下评论...</string>
+    <string name="send_comment">发送</string>
+
+    <!-- Strings for Reply Bottom Sheet -->
+    <string name="reply_comment_title">回复评论</string>
+    <string name="close_reply">关闭回复</string>
+    <string name="replying_to">回复给</string>
+    <string name="reply_input_hint">写下回复...</string>
+    <string name="send_reply">回复</string>
+
+    <!-- Strings for Search Results -->
+    <string name="no_search_results">未找到结果</string>
+
+    <!-- Strings for User Interface -->
+    <string name="user_avatar">用户头像</string>
+    <string name="play_video">播放视频</string>
+
+    <!-- Strings for Search History -->
+    <string name="search_history">搜索历史</string>
+    <string name="delete_search_history">删除搜索历史</string>
+
+    <!-- Strings for Video -->
+    <string name="video_poster_description">视频海报</string>
+
+    <!-- Strings for Settings and Privacy -->
+    <string name="settings_and_privacy">设置和隐私</string>
+
+    <!-- Account Section -->
+    <string name="account_section">账户</string>
+    <string name="account_management">账户</string>
+    <string name="privacy_settings">隐私</string>
+    <string name="security_settings">安全</string>
+    <string name="permissions_settings">权限</string>
+    <string name="security_and_permissions">权限和安全</string>
+
+    <!-- Content and Display Section -->
+    <string name="content_display_section">内容和显示</string>
+    <string name="notification_settings">通知</string>
+    <string name="language_settings">语言</string>
+    <string name="display_settings">显示</string>
+
+    <!-- Support and About Section -->
+    <string name="support_about_section">支持和关于</string>
+    <string name="report_issue">报告问题</string>
+    <string name="support_help">支持</string>
+    <string name="terms_policy">条款和政策</string>
+
+    <!-- Descriptions -->
+    <string name="account_management_desc">管理您的账户信息</string>
+    <string name="privacy_settings_desc">隐私和安全设置</string>
+    <string name="security_settings_desc">管理账户安全</string>
+    <string name="permissions_settings_desc">管理应用权限</string>
+    <string name="security_and_permissions_desc">管理安全和访问权限</string>
+    <string name="notification_settings_desc">通知和提醒设置</string>
+    <string name="language_settings_desc">选择显示语言</string>
+    <string name="display_settings_desc">自定义显示界面</string>
+    <string name="report_issue_desc">报告错误或问题</string>
+    <string name="support_help_desc">获取支持和指导</string>
+    <string name="terms_policy_desc">查看使用条款和政策</string>
+
+    <!-- Missing strings for Snooze Options -->
+    <string name="snooze_5_min">5分钟</string>
+    <string name="snooze_10_min">10分钟</string>
+    <string name="snooze_15_min">15分钟</string>
+    <string name="snooze_30_min">30分钟</string>
+
+    <!-- Missing strings for Volume Levels -->
+    <string name="volume_low">低</string>
+    <string name="volume_medium">中</string>
+    <string name="volume_high">高</string>
+    <string name="volume_max">最大</string>
+
+    <!-- Missing strings for Menu -->
+    <string name="menu_search">搜索</string>
+    <string name="menu_filter">筛选</string>
+    <string name="menu_refresh">刷新</string>
+    <string name="menu_debug">调试</string>
+
+    <!-- Strings for AppBar Scrolling -->
+    <string name="appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
+
+    <!-- Additional strings for Reminder -->
+    <string name="reminder_title_default">健康提醒</string>
+    <string name="reminder_message_default">您的提醒时间到了</string>
+    <string name="reminder_snooze">稍后提醒</string>
+    <string name="reminder_dismiss">关闭</string>
+    <string name="select_sound">选择铃声</string>
+    <string name="reminder_sound">提醒铃声</string>
+    <string name="sound_default">默认铃声</string>
+    <string name="reminder_volume">音量</string>
+    <string name="reminder_snooze_duration">稍后提醒时长</string>
+    <string name="reminder_vibrate">振动</string>
+    <string name="reminder_alarm_style">闹钟样式</string>
+
+    <!-- Strings for Sound Types -->
+    <string name="sound_alarm">闹钟</string>
+    <string name="sound_notification">通知</string>
+    <string name="sound_music">音乐</string>
+    <string name="sound_none">无声</string>
+
+    <!-- Strings for Search History -->
+    <string name="clear_all_history">清除所有历史</string>
+    <string name="see_more_history">查看更多历史</string>
+    <string name="see_less_history">收起历史</string>
+    <string name="no_search_history">没有搜索历史</string>
+
+    <!-- Strings for Search Tabs -->
+    <string name="search_articles_tab">文章</string>
+    <string name="search_videos_tab">视频</string>
+
+    <!-- ========== Support & About Strings ========== -->
+
+    <!-- Support Center -->
+    <string name="support_center">支持中心</string>
+    <string name="support_center_desc">报告问题并获取支持</string>
+    <string name="help_center">帮助中心</string>
+    <string name="contact_support">联系支持</string>
+    <string name="my_tickets">我的工单</string>
+    <string name="create_ticket">创建支持工单</string>
+    <string name="view_all_tickets">查看所有工单</string>
+
+    <!-- Ticket Types -->
+    <string name="ticket_type">问题类型</string>
+    <string name="ticket_type_bug_report">错误报告</string>
+    <string name="ticket_type_content_report">内容报告</string>
+    <string name="ticket_type_feature_request">功能请求</string>
+    <string name="ticket_type_account_issue">账户问题</string>
+    <string name="ticket_type_general_inquiry">一般咨询</string>
+    <string name="ticket_type_other">其他</string>
+
+    <!-- Ticket Status -->
+    <string name="ticket_status">状态</string>
+    <string name="ticket_status_open">开放</string>
+    <string name="ticket_status_in_progress">进行中</string>
+    <string name="ticket_status_resolved">已解决</string>
+    <string name="ticket_status_closed">已关闭</string>
+
+    <!-- Ticket Priority -->
+    <string name="ticket_priority">优先级</string>
+    <string name="ticket_priority_low">低</string>
+    <string name="ticket_priority_medium">中</string>
+    <string name="ticket_priority_high">高</string>
+    <string name="ticket_priority_urgent">紧急</string>
+
+    <!-- Ticket Form -->
+    <string name="ticket_subject">主题</string>
+    <string name="ticket_subject_hint">问题的简要描述</string>
+    <string name="ticket_description">详细描述</string>
+    <string name="ticket_description_hint">请详细描述问题...</string>
+    <string name="ticket_attach_screenshot">附加截图</string>
+    <string name="ticket_screenshot_attached">截图已附加</string>
+    <string name="ticket_remove_screenshot">移除截图</string>
+    <string name="ticket_submit">提交工单</string>
+    <string name="ticket_submitting">提交中...</string>
+    <string name="ticket_submit_success">工单提交成功</string>
+    <string name="ticket_submit_error">无法提交工单</string>
+
+    <!-- Ticket Details -->
+    <string name="ticket_detail_title">工单详情</string>
+    <string name="ticket_id">工单ID</string>
+    <string name="ticket_created_at">创建于</string>
+    <string name="ticket_updated_at">最后更新</string>
+    <string name="ticket_description_label">问题描述</string>
+    <string name="ticket_device_info_label">设备信息</string>
+    <string name="ticket_admin_response_label">支持回复</string>
+    <string name="ticket_admin_response">支持回复</string>
+    <string name="ticket_no_response">暂无回复</string>
+    <string name="ticket_waiting_response">等待回复中...</string>
+    <string name="ticket_screenshot_desc">附加截图</string>
+    <string name="status_open">开放</string>
+    <string name="priority_medium">中</string>
+    <string name="ticket_type_bug">错误报告</string>
+
+    <!-- Ticket List -->
+    <string name="no_tickets_title">没有支持工单</string>
+    <string name="no_tickets_message">您没有任何支持工单。如果遇到问题，请创建新工单。</string>
+    <string name="loading_tickets">加载工单中...</string>
+
+    <!-- About App -->
+    <string name="about_app">关于</string>
+    <string name="about_app_desc">应用信息</string>
+    <string name="app_version">应用版本</string>
+    <string name="app_description">应用描述</string>
+    <string name="app_description_text">健康小贴士是一款提供有用健康贴士的应用，帮助您每天更好地照顾您的健康。该应用提供以下功能：查看健康贴士、短视频、AI聊天、健康提醒等多种功能。</string>
+    <string name="developed_by">开发者</string>
+    <string name="developer_name">健康小贴士团队</string>
+    <string name="contact_us">联系我们</string>
+    <string name="contact_email">电子邮箱</string>
+    <string name="contact_email_value">vuhoainam.dev@gmail.com</string>
+    <string name="follow_us">关注我们</string>
+    <string name="rate_app">评价应用</string>
+    <string name="share_app">分享应用</string>
+    <string name="share_app_text">试试健康小贴士 - 一款出色的健康贴士应用！</string>
+
+    <!-- Terms & Policies -->
+    <string name="terms_of_service">服务条款</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="community_guidelines">社区准则</string>
+    <string name="copyright_policy">版权政策</string>
+    <string name="cookie_policy">Cookie政策</string>
+    <string name="intellectual_property">知识产权</string>
+
+    <!-- Legal -->
+    <string name="legal">法律</string>
+    <string name="last_updated">最后更新</string>
+    <string name="effective_date">生效日期</string>
+
+    <!-- FAQ -->
+    <string name="faq">常见问题</string>
+    <string name="faq_how_to_use">如何使用应用？</string>
+    <string name="faq_how_to_save">如何保存喜欢的贴士？</string>
+    <string name="faq_how_to_reminder">如何创建提醒？</string>
+    <string name="faq_how_to_chat">如何使用AI聊天？</string>
+    <string name="faq_how_to_report">如何报告内容？</string>
+
+    <!-- Report Content -->
+    <string name="report_content">报告内容</string>
+    <string name="report_content_reason">报告原因</string>
+    <string name="report_spam">垃圾信息</string>
+    <string name="report_inappropriate">不当内容</string>
+    <string name="report_misleading">误导信息</string>
+    <string name="report_harassment">骚扰</string>
+    <string name="report_violence">暴力</string>
+    <string name="report_hate_speech">仇恨言论</string>
+    <string name="report_copyright">版权侵犯</string>
+    <string name="report_other_reason">其他原因</string>
+    <string name="report_details">报告详情</string>
+    <string name="report_submit">提交报告</string>
+    <string name="report_success">报告提交成功</string>
+    <string name="report_thank_you">感谢您的报告。我们将审查并采取行动。</string>
+
+    <!-- Validation Messages -->
+    <string name="error_empty_subject">请输入主题</string>
+    <string name="error_empty_description">请输入详细描述</string>
+    <string name="error_select_ticket_type">请选择问题类型</string>
+    <string name="select_ticket_type">选择问题类型</string>
+    <string name="device_info_auto_collected">设备信息将自动发送以获得更好的支持</string>
+    <string name="error_loading_failed">加载失败</string>
+    <string name="error_network">网络错误</string>
+
+    <!-- Additional Strings for Report Issue -->
+    <string name="subject">主题</string>
+    <string name="enter_subject">输入问题主题</string>
+    <string name="enter_description">详细描述问题...</string>
+    <string name="device_info">设备信息</string>
+    <string name="icon">图标</string>
+    <string name="navigate">导航</string>
+
+    <!-- Common Actions -->
+    <string name="action_retry">重试</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_ok">确定</string>
+    <string name="action_send">发送</string>
+    <string name="action_close">关闭</string>
+    <string name="action_back">返回</string>
+    <string name="action_next">下一步</string>
+    <string name="action_done">完成</string>
+    <string name="action_view">查看</string>
+    <string name="action_delete">删除</string>
+    <string name="action_edit">编辑</string>
+    <string name="action_select_image">选择图片</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_info_title">账户信息</string>
+    <string name="account_email_label">电子邮箱</string>
+    <string name="account_email_placeholder">user@example.com</string>
+    <string name="account_display_name_label">显示名称</string>
+    <string name="account_display_name_placeholder">用户</string>
+    <string name="account_joined_date_label">加入日期</string>
+    <string name="account_joined_date_placeholder">01/01/2024</string>
+    <string name="account_manage_title">账户管理</string>
+    <string name="account_edit_profile">编辑资料</string>
+    <string name="account_edit_profile_desc">更新您的个人信息</string>
+    <string name="account_change_password">更改密码</string>
+    <string name="account_change_password_desc">更改您的登录密码</string>
+    <string name="account_two_factor_auth">双因素认证</string>
+    <string name="account_two_factor_auth_desc">增强账户安全</string>
+    <string name="account_danger_zone">危险区域</string>
+    <string name="account_logout">退出登录</string>
+    <string name="account_logout_desc">从此账户退出登录</string>
+    <string name="account_delete">删除账户</string>
+    <string name="account_delete_desc">永久删除账户和数据</string>
+
+    <!-- ========== Privacy Settings Strings ========== -->
+    <string name="privacy_intro">控制谁可以看到您的信息和活动</string>
+    <string name="privacy_profile_title">资料显示</string>
+    <string name="privacy_public_profile">公开资料</string>
+    <string name="privacy_public_profile_desc">允许所有人查看您的资料</string>
+    <string name="privacy_show_email">显示电子邮箱</string>
+    <string name="privacy_show_email_desc">允许他人看到您的电子邮箱</string>
+    <string name="privacy_activity_title">活动</string>
+    <string name="privacy_show_activity">显示活动</string>
+    <string name="privacy_show_activity_desc">允许他人看到您的活动</string>
+    <string name="privacy_show_liked_posts">点赞的帖子</string>
+    <string name="privacy_show_liked_posts_desc">显示您点赞的帖子</string>
+    <string name="privacy_data_title">数据和存储</string>
+    <string name="privacy_clear_search_history">清除搜索历史</string>
+    <string name="privacy_clear_search_history_desc">删除所有搜索历史</string>
+    <string name="privacy_clear_view_history">清除浏览历史</string>
+    <string name="privacy_clear_view_history_desc">清除已查看文章的历史</string>
+    <string name="privacy_download_data">下载您的数据</string>
+    <string name="privacy_download_data_desc">下载您的数据副本</string>
+    <string name="privacy_block_title">屏蔽和限制</string>
+    <string name="privacy_blocked_users">已屏蔽的用户</string>
+    <string name="privacy_blocked_users_count">0位用户</string>
+
+
+    <!-- ========== Security Settings Strings ========== -->
+    <string name="security_and_permissions_intro">管理账户安全和应用访问权限</string>
+    <string name="security_section_title">安全</string>
+    <string name="security_intro">管理安全和账户访问控制</string>
+    <string name="security_password_title">密码和认证</string>
+    <string name="security_change_password">更改密码</string>
+    <string name="security_change_password_desc">更新您的登录密码</string>
+    <string name="security_two_factor">双因素认证</string>
+    <string name="security_two_factor_desc">为您的账户添加额外的安全层</string>
+    <string name="security_fingerprint">指纹登录</string>
+    <string name="security_fingerprint_desc">使用指纹快速登录</string>
+    <string name="security_face_id">面部登录</string>
+    <string name="security_face_id_desc">使用面部识别</string>
+
+    <string name="security_sessions_title">登录会话</string>
+    <string name="security_session_title">登录会话</string>
+    <string name="security_active_sessions">活跃会话</string>
+    <string name="security_active_sessions_desc">管理已登录的设备</string>
+    <string name="security_auto_logout">自动退出</string>
+    <string name="security_auto_logout_desc">闲置后自动退出</string>
+
+    <string name="security_advanced_title">高级安全</string>
+    <string name="security_data_title">数据安全</string>
+    <string name="security_encrypt_data">加密数据</string>
+    <string name="security_encrypt_data_desc">加密设备上的个人数据</string>
+    <string name="security_secure_mode">高安全模式</string>
+    <string name="security_secure_mode_desc">阻止截图和屏幕录制</string>
+    <string name="security_suspicious_alert">可疑登录警报</string>
+    <string name="security_suspicious_alert_desc">获取异常登录活动通知</string>
+
+    <string name="security_activity_title">账户活动</string>
+    <string name="security_login_history">登录历史</string>
+    <string name="security_login_history_desc">查看最近的登录活动</string>
+    <string name="security_suspicious_activity">可疑活动</string>
+    <string name="security_suspicious_activity_desc">获取异常活动通知</string>
+
+    <!-- ========== Permissions Settings Strings ========== -->
+    <string name="permissions_section_title">访问权限</string>
+    <string name="permissions_intro">管理应用对设备功能的访问</string>
+    <string name="permissions_app_title">应用权限</string>
+    <string name="permissions_required_title">必需权限</string>
+    <string name="permissions_storage">存储</string>
+    <string name="permissions_storage_desc">存储照片和离线数据</string>
+    <string name="permissions_camera">相机</string>
+    <string name="permissions_camera_desc">拍照用于资料和报告</string>
+    <string name="permissions_notification">通知</string>
+    <string name="permissions_notification_desc">接收健康提醒</string>
+    <string name="permissions_notifications">通知</string>
+    <string name="permissions_notifications_desc">接收健康提醒</string>
+
+    <string name="permissions_optional_title">可选权限</string>
+    <string name="permissions_location">位置</string>
+    <string name="permissions_location_desc">提供适合地区的内容</string>
+    <string name="permissions_contacts">联系人</string>
+    <string name="permissions_contacts_desc">与朋友分享健康贴士</string>
+    <string name="permissions_microphone">麦克风</string>
+    <string name="permissions_microphone_desc">语音搜索</string>
+
+    <string name="permissions_management_title">权限管理</string>
+    <string name="permissions_app_settings_title">应用设置</string>
+    <string name="permissions_open_settings">打开系统设置</string>
+    <string name="permissions_open_settings_desc">在Android设置中更改权限</string>
+    <string name="permissions_reset">重置权限</string>
+    <string name="permissions_reset_desc">撤销所有授予的权限</string>
+    <string name="permissions_reset_permissions">重置权限</string>
+    <string name="permissions_reset_permissions_desc">撤销所有授予的权限</string>
+
+    <string name="permission_status_granted">已授予</string>
+    <string name="permission_status_denied">已拒绝</string>
+    <string name="permission_status_not_requested">未请求</string>
+
+    <!-- Icon Content Descriptions -->
+    <string name="icon_email_desc">电子邮箱图标</string>
+    <string name="icon_person_desc">个人图标</string>
+    <string name="icon_calendar_desc">日历图标</string>
+    <string name="icon_edit_desc">编辑图标</string>
+    <string name="icon_lock_desc">锁图标</string>
+    <string name="icon_shield_desc">盾牌图标</string>
+    <string name="icon_logout_desc">退出登录图标</string>
+    <string name="icon_delete_desc">删除图标</string>
+    <string name="icon_arrow_forward_desc">前进箭头</string>
+    <string name="icon_people_desc">人员图标</string>
+    <string name="icon_visibility_desc">可见性图标</string>
+    <string name="icon_favorite_desc">收藏图标</string>
+    <string name="icon_history_desc">历史图标</string>
+    <string name="icon_download_desc">下载图标</string>
+    <string name="icon_fingerprint_desc">指纹图标</string>
+    <string name="icon_notification_desc">通知图标</string>
+    <string name="icon_settings_desc">设置图标</string>
+
+    <!-- Security and Permissions Misc -->
+    <string name="one_device">1台设备</string>
+
+    <!-- ========== Language Settings Strings ========== -->
+    <string name="language_selection_desc">选择应用的显示语言</string>
+    <string name="language_restart_notice">应用将自动重启以应用新语言</string>
+    <string name="language_changed">语言已更改：%1$s。正在应用...</string>
+
+    <!-- Language names -->
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_english">English</string>
+    <string name="lang_chinese">中文 (Chinese)</string>
+    <string name="lang_japanese">日本語 (Japanese)</string>
+    <string name="lang_korean">한국어 (Korean)</string>
+    <string name="lang_french">Français (French)</string>
+    <string name="lang_german">Deutsch (German)</string>
+    <string name="lang_spanish">Español (Spanish)</string>
+
+    <!-- ========== Notification Settings Strings ========== -->
+    <string name="notification_manage_desc">管理您想接收的通知</string>
+    <string name="all_notifications">所有通知</string>
+    <string name="toggle_all_notifications">开启/关闭所有通知</string>
+    <string name="content_notifications">内容通知</string>
+    <string name="new_health_tips">新健康贴士</string>
+    <string name="new_tips_notification">有新贴士时通知</string>
+    <string name="reminders">提醒</string>
+    <string name="schedule_reminders">计划提醒</string>
+    <string name="interaction_notifications">互动通知</string>
+    <string name="likes">点赞</string>
+    <string name="new_followers">新关注者</string>
+    <string name="system_notifications">系统通知</string>
+    <string name="app_updates">应用更新</string>
+    <string name="sound_settings">声音设置</string>
+    <string name="sound">声音</string>
+    <string name="vibration">振动</string>
+
+    <!-- ========== Display Settings Strings ========== -->
+    <string name="display_customize_desc">自定义应用显示界面</string>
+    <string name="display_mode">显示模式</string>
+    <string name="dark_mode">深色模式</string>
+    <string name="dark_mode_quick">快速启用深色模式</string>
+    <string name="theme_mode">主题模式</string>
+    <string name="system_default">系统默认</string>
+    <string name="light_mode">浅色模式</string>
+    <string name="font_size">字体大小</string>
+    <string name="font_size_display">显示字体大小</string>
+    <string name="small">小</string>
+    <string name="large">大</string>
+    <string name="preview">预览：</string>
+    <string name="preview_text_sample">这是预览字体大小的示例文本</string>
+    <string name="restart_app_notice">某些更改将立即应用，其他可能需要重启应用</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_pending_deletion">⚠️ 账户待删除</string>
+    <string name="account_deletion_countdown">您的账户将在以下时间后删除：%1$s</string>
+    <string name="cancel_account_deletion">取消账户删除</string>
+
+    <!-- ========== Change Password Strings ========== -->
+    <string name="change_password_desc">输入您的当前密码和新密码</string>
+    <string name="change_password_action">更改密码</string>
+    <string name="password_requirements">您的密码必须至少6个字符，并应包含大写字母、小写字母、数字和特殊字符以提高安全性。</string>
+    <string name="current_password">当前密码</string>
+    <string name="new_password">新密码</string>
+    <string name="confirm_new_password">确认新密码</string>
+
+    <!-- ========== Edit Profile Strings ========== -->
+    <string name="display_name">显示名称</string>
+    <string name="phone_number">电话号码</string>
+    <string name="email_example">电子邮箱：example@gmail.com</string>
+
+    <!-- ========== About App Strings ========== -->
+    <string name="quick_actions">快速操作</string>
+    <string name="copyright_text">© 2024 健康小贴士。保留所有权利。</string>
+
+    <!-- ========== Login/Register Strings ========== -->
+    <string name="no_account_register">没有账户？立即注册</string>
+
+    <!-- ========== Chat Strings ========== -->
+    <string name="no_conversations">暂无对话</string>
+    <string name="chat_welcome">您好！我是您的健康AI助手</string>
+    <string name="chat_ai_greeting">欢迎使用健康AI助手！</string>
+    <string name="chat_hint">输入您的健康问题...</string>
+    <string name="chat_continue_hint">继续对话...</string>
+    <string name="ai_responding">AI正在回复</string>
+    <string name="start_conversation">开始对话</string>
+    <string name="view_more_conversations">查看更多对话</string>
+    <string name="new_conversation_desc">创建新对话</string>
+
+    <!-- ========== Alarm/Reminder Strings ========== -->
+    <string name="alarm_time_default">08:30</string>
+    <string name="alarm_date_example">星期一，2025年10月17日</string>
+    <string name="health_reminder_default">健康提醒</string>
+    <string name="health_reminder_message">该看健康贴士了！</string>
+
+    <!-- ========== Video Strings ========== -->
+    <string name="no_liked_videos_yet">暂无点赞的视频</string>
+
+    <!-- ========== Support Strings ========== -->
+    <string name="device_info_notice">设备信息将自动发送以获得更好的支持</string>
+
+    <!-- ========== FAQ Strings ========== -->
+    <string name="faq_title">常见问题</string>
+
+    <!-- ========== Other Common Strings ========== -->
+    <string name="choose">选择</string>
+    <string name="avatar">头像</string>
+    <string name="featured_posts">⭐ 精选帖子</string>
+    <string name="alarm_settings">闹钟设置</string>
+
+    <!-- ========== Health Tip Detail Strings ========== -->
+    <string name="category_label">分类：</string>
+    <string name="tags_label">标签：</string>
+    <string name="like_action">点赞</string>
+
+    <!-- ========== Dialog Reminder Strings ========== -->
+    <string name="date_label">日期：</string>
+    <string name="time_label">时间：</string>
+    <string name="hour_label">小时：</string>
+    <string name="repeat_label">重复：</string>
+    <string name="activate_reminder">激活提醒：</string>
+    <string name="reminder_info">提醒信息</string>
+    <string name="time_and_repeat">时间和重复</string>
+    <string name="save_changes">保存更改</string>
+    <string name="date_placeholder">--/--/----</string>
+    <string name="time_placeholder">--:--</string>
+    <string name="date_example">2025年10月16日</string>
+    <string name="time_example">08:00</string>
+    <string name="volume_percent">80%</string>
+
+    <!-- ========== Chat AI Strings ========== -->
+    <string name="ai_health_assistant">AI健康助手</string>
+    <string name="creating_conversation">创建对话中...</string>
+    <string name="sending_message">发送消息中...</string>
+    <string name="ai_replying">AI正在回复...</string>
+    <string name="error_create_conversation">创建对话错误：%1$s</string>
+    <string name="error_send_message">发送消息错误：%1$s</string>
+    <string name="please_enter_message">请输入消息</string>
+    <string name="delete_all_conversations_confirm">您确定要删除所有对话历史吗？</string>
+    <string name="sample_question_1">💪 如何增强免疫力？</string>
+    <string name="sample_question_2">🥗 什么饮食对心脏健康有益？</string>
+    <string name="sample_question_3">😴 如何提高睡眠质量？</string>
+
+    <!-- ========== Video Strings (Extended) ========== -->
+    <string name="loading_liked_videos">加载点赞的视频中...</string>
+    <string name="no_liked_videos_title">没有点赞的视频</string>
+    <string name="no_liked_videos_desc">发现并点赞您喜欢的视频！</string>
+    <string name="loading_videos_text">加载视频中...</string>
+    <string name="no_videos_title">没有可用的视频</string>
+    <string name="no_videos_desc">请稍后重试或检查您的网络连接</string>
+    <string name="try_again_action">重试</string>
+    <string name="duration_placeholder">0:30</string>
+    <string name="views_placeholder">1.2K</string>
+    <string name="views_count">次观看</string>
+    <string name="months_ago">个月前</string>
+    <string name="weeks_ago">周前</string>
+    <string name="days_ago">天前</string>
+    <string name="hours_ago">小时前</string>
+    <string name="minutes_ago">分钟前</string>
+    <string name="years_ago">年前</string>
+    <string name="just_now">刚刚</string>
+
+    <!-- ========== Profile Strings ========== -->
+    <string name="username_label">用户名</string>
+    <string name="username_placeholder">\@username</string>
+    <string name="article_title_placeholder">文章标题</string>
+    <string name="favorite_articles">收藏的文章</string>
+    <string name="favorite_articles_tab">收藏的文章</string>
+    <string name="video_liked_tab">点赞的视频</string>
+
+</resources>

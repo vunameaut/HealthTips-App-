@@ -1,0 +1,825 @@
+<resources>
+    <!-- Application name -->
+    <string name="app_name">건강 팁</string>
+
+    <!-- Login screen strings -->
+    <string name="login">로그인</string>
+    <string name="register">회원가입</string>
+    <string name="email">이메일</string>
+    <string name="password">비밀번호</string>
+    <string name="confirm_password">비밀번호 확인</string>
+    <string name="forgot_password">비밀번호를 잊으셨나요?</string>
+    <string name="dont_have_account">계정이 없으신가요? 회원가입하세요</string>
+    <string name="already_have_account">이미 계정이 있으신가요? 로그인하세요</string>
+
+    <!-- Forgot password screen strings -->
+    <string name="reset_password">비밀번호 재설정</string>
+    <string name="reset_password_instructions">비밀번호 재설정 안내를 받으려면 이메일을 입력하세요</string>
+    <string name="send_reset_email">재설정 이메일 보내기</string>
+    <string name="back_to_login">로그인으로 돌아가기</string>
+
+    <!-- Home screen strings -->
+    <string name="categories">카테고리</string>
+    <string name="recommended_for_you">추천</string>
+    <string name="latest_tips">최신 팁</string>
+    <string name="most_viewed">가장 많이 본</string>
+    <string name="most_liked">가장 많이 좋아요한</string>
+    <string name="see_all">모두 보기</string>
+    <string name="search">검색</string>
+    <string name="offline_mode">오프라인 모드</string>
+    <string name="home">홈</string>
+
+    <!-- View all health tips screen strings -->
+    <string name="all_recommended_tips">모든 추천 팁</string>
+    <string name="all_latest_tips">모든 최신 팁</string>
+    <string name="all_most_viewed_tips">가장 많이 본 팁</string>
+    <string name="all_most_liked_tips">가장 많이 좋아요한 팁</string>
+    <string name="no_health_tips_found">건강 팁을 찾을 수 없습니다</string>
+    <string name="no_health_tips_description">이 카테고리에는 현재 건강 팁이 없습니다</string>
+
+    <!-- Bottom navigation strings -->
+    <string name="nav_home">홈</string>
+    <string name="nav_chat">AI 채팅</string>
+    <string name="nav_reminders">알림</string>
+    <string name="nav_videos">쇼츠</string>
+    <string name="nav_favorites">즐겨찾기</string>
+    <string name="nav_profile">프로필</string>
+
+    <!-- Detail screen strings -->
+    <string name="related_tips">관련 팁</string>
+    <string name="share">공유</string>
+    <string name="save">저장</string>
+
+    <!-- Reminder feature strings -->
+    <string name="health_reminders">건강 알림</string>
+    <string name="manage_your_health_reminders">건강 알림 관리</string>
+    <string name="active_reminders">활성</string>
+    <string name="add_reminder">알림 추가</string>
+    <string name="reminder_settings">알림 설정</string>
+    <string name="your_reminders">내 알림</string>
+    <string name="sort">정렬</string>
+    <string name="no_reminders_title">아직 알림이 없습니다</string>
+    <string name="no_reminders_message">아직 알림을 만들지 않았습니다. 첫 번째 알림을 만들어 건강을 관리하세요!</string>
+    <string name="create_first_reminder">첫 번째 알림 만들기</string>
+    <string name="loading_reminders">알림 로딩 중...</string>
+    <string name="active">활성</string>
+    <string name="reminder_options">알림 옵션</string>
+    <string name="reminder_sound_label">알림 소리</string>
+    <string name="vibrate">진동</string>
+    <string name="edit">편집</string>
+    <string name="delete">삭제</string>
+
+    <!-- Reminder sound strings -->
+    <string name="select_reminder_sound">알림 소리 선택</string>
+    <string name="tap_to_preview_sound">재생 버튼을 눌러 소리 미리보기</string>
+    <string name="available_sounds">사용 가능한 소리</string>
+    <string name="sound_selection_tip">선택하려면 탭하고, 미리보려면 재생 버튼을 누르세요</string>
+    <string name="preview_sound">소리 미리보기</string>
+
+    <!-- Preview mode and new interface strings -->
+    <string name="preview_mode_title">미리보기</string>
+    <string name="test_interface_title">새 인터페이스 테스트</string>
+    <string name="content_image_description">콘텐츠 일러스트 이미지</string>
+    <string name="author_prefix">작성자:</string>
+    <string name="content_loading">콘텐츠 로딩 중...</string>
+    <string name="content_error">콘텐츠를 로드할 수 없습니다</string>
+    <string name="health_tip_image">건강 팁 기사 이미지</string>
+
+    <!-- Video search results strings -->
+    <string name="loading_videos">동영상 로딩 중...</string>
+    <string name="no_video_results_title">동영상을 찾을 수 없습니다</string>
+    <string name="no_video_results_message">다른 키워드로 검색하거나 네트워크 연결을 확인하세요</string>
+    <string name="try_again">다시 시도</string>
+
+    <!-- Video interaction strings -->
+    <string name="like">좋아요</string>
+    <string name="comment">댓글</string>
+    <string name="view_count_format">조회수 %s회</string>
+
+    <!-- Common strings -->
+    <string name="error_occurred">오류가 발생했습니다</string>
+    <string name="network_error">네트워크 오류</string>
+    <string name="retry">다시 시도</string>
+
+    <!-- Liked videos strings -->
+    <string name="liked_videos">좋아요한 동영상</string>
+    <string name="no_liked_videos">좋아요한 동영상이 없습니다</string>
+    <string name="no_liked_videos_subtitle">나중에 보려면 좋아하는 동영상에 좋아요를 누르세요</string>
+
+    <!-- Short video item strings -->
+    <string name="play_pause_video">동영상 재생/일시정지</string>
+    <string name="video_title_placeholder">동영상 제목</string>
+    <string name="video_caption_placeholder">동영상 설명</string>
+    <string name="see_more">더보기</string>
+    <string name="see_less">접기</string>
+    <string name="view_count_placeholder">조회수 0회</string>
+    <string name="upload_date_placeholder">1일 전</string>
+    <string name="like_button_description">동영상 좋아요 버튼</string>
+    <string name="like_count_placeholder">0</string>
+    <string name="comment_button_description">동영상 댓글 버튼</string>
+    <string name="comment_action">댓글</string>
+    <string name="share_button_description">동영상 공유 버튼</string>
+    <string name="share_action">공유</string>
+    <string name="double_tap_heart_animation">더블 탭 하트 애니메이션</string>
+
+    <!-- Error and success messages -->
+    <string name="error_login">로그인 실패</string>
+    <string name="error_register">회원가입 실패</string>
+    <string name="error_reset_password">비밀번호를 재설정할 수 없습니다</string>
+    <string name="success_login">로그인 성공</string>
+    <string name="success_register">회원가입 성공</string>
+    <string name="success_reset_password">비밀번호 재설정 이메일을 보냈습니다</string>
+
+    <!-- Conversation context menu strings -->
+    <string name="rename_conversation">대화 이름 변경</string>
+    <string name="pin_conversation">대화 고정</string>
+    <string name="unpin_conversation">대화 고정 해제</string>
+    <string name="mute_conversation">알림 음소거</string>
+    <string name="unmute_conversation">알림 음소거 해제</string>
+    <string name="share_conversation">대화 공유</string>
+    <string name="copy_messages">메시지 복사</string>
+    <string name="mark_as_read">읽음으로 표시</string>
+    <string name="delete_conversation">대화 삭제</string>
+
+    <!-- Dialog and notification for context menu -->
+    <string name="enter_new_name">새 대화 이름 입력</string>
+    <string name="conversation_name">대화 이름</string>
+    <string name="rename">이름 변경</string>
+    <string name="cancel">취소</string>
+    <string name="delete_conversation_confirm">이 대화를 삭제하시겠습니까?</string>
+    <string name="delete_conversation_confirm_message">이 대화의 모든 메시지가 영구적으로 삭제됩니다.</string>
+    <string name="conversation_deleted">대화가 삭제되었습니다</string>
+    <string name="conversation_renamed">대화 이름이 변경되었습니다</string>
+    <string name="conversation_pinned">대화가 고정되었습니다</string>
+    <string name="conversation_unpinned">대화 고정이 해제되었습니다</string>
+    <string name="conversation_muted">알림이 음소거되었습니다</string>
+    <string name="conversation_unmuted">알림 음소거가 해제되었습니다</string>
+    <string name="messages_copied">메시지가 복사되었습니다</string>
+    <string name="marked_as_read">읽음으로 표시되었습니다</string>
+
+    <!-- Reminder screen strings -->
+    <string name="no_time_set">시간이 설정되지 않음</string>
+    <string name="reminder_title">알림 제목</string>
+    <string name="reminder_description">알림 설명</string>
+    <string name="reminder_time">알림 시간</string>
+    <string name="reminder_repeat">반복</string>
+    <string name="reminder_active">활성</string>
+    <string name="create_reminder">알림 만들기</string>
+    <string name="edit_reminder">알림 편집</string>
+    <string name="delete_reminder">알림 삭제</string>
+    <string name="no_reminders">아직 알림이 없습니다</string>
+
+    <!-- Repeat type strings -->
+    <string name="repeat_none">반복 안 함</string>
+    <string name="repeat_daily">매일</string>
+    <string name="repeat_weekly">매주</string>
+    <string name="repeat_monthly">매월</string>
+
+    <!-- Notification strings -->
+    <string name="notification_channel_name">건강 알림</string>
+    <string name="notification_channel_description">건강 알림 통지</string>
+    <string name="notification_reminder_title">알림: %1$s</string>
+    <string name="notification_mark_complete">완료로 표시</string>
+
+    <!-- Additional strings for article detail screen -->
+    <string name="unlike">좋아요 취소</string>
+    <string name="add_to_favorite">즐겨찾기에 추가</string>
+    <string name="remove_from_favorite">즐겨찾기에서 제거</string>
+    <string name="share_tip">건강 팁 공유</string>
+    <string name="added_to_favorites">즐겨찾기에 추가되었습니다</string>
+    <string name="removed_from_favorites">즐겨찾기에서 제거되었습니다</string>
+
+    <!-- Category screen strings -->
+    <string name="categories_title">모든 건강 주제</string>
+    <string name="categories_subtitle">다양한 건강 주제 탐색</string>
+    <string name="empty_categories_title">카테고리를 찾을 수 없습니다</string>
+    <string name="empty_categories_message">현재 표시할 카테고리가 없습니다</string>
+    <string name="empty_categories_description">카테고리가 여기에 표시됩니다</string>
+
+    <!-- Common strings -->
+    <string name="ok">확인</string>
+    <string name="yes">예</string>
+    <string name="no">아니오</string>
+    <string name="loading">로딩 중...</string>
+    <string name="error">오류</string>
+    <string name="success">성공</string>
+    <string name="favorite">즐겨찾기</string>
+    <string name="no_favorites">아직 즐겨찾기가 없습니다</string>
+    <string name="back">뒤로</string>
+
+    <!-- Category detail screen strings -->
+    <string name="empty_tips_description">이 카테고리에는 아직 팁이 없습니다</string>
+    <string name="empty_tips_title">빈 목록</string>
+    <string name="empty_tips_message">이 카테고리에는 현재 건강 팁이 없습니다</string>
+
+    <!-- Short video feature strings -->
+    <string name="no_videos_available">사용 가능한 동영상이 없습니다</string>
+    <string name="pull_to_refresh_videos">당겨서 동영상 목록 새로고침</string>
+    <string name="video_liked">동영상에 좋아요를 눌렀습니다</string>
+    <string name="video_unliked">동영상 좋아요를 취소했습니다</string>
+    <string name="video_shared">동영상을 공유했습니다</string>
+    <string name="comment_feature_coming_soon">댓글 기능이 곧 제공됩니다</string>
+    <string name="enter_comment">댓글 입력</string>
+    <string name="comments">댓글</string>
+    <string name="no_comments">아직 댓글이 없습니다</string>
+    <string name="reply">답글</string>
+    <string name="reply_to">%1$s님에게 답글</string>
+    <string name="share_video">동영상 공유</string>
+    <string name="view_user_profile">사용자 프로필 보기</string>
+    <string name="error_loading_videos">동영상을 로드할 수 없습니다. 다시 시도하세요.</string>
+    <string name="trending_videos">인기 동영상</string>
+
+    <!-- Icon placeholders for short video feature -->
+    <string name="ic_video_placeholder">ic_video_placeholder</string>
+    <string name="ic_video_error">ic_video_error</string>
+    <string name="ic_user_placeholder">ic_user_placeholder</string>
+    <string name="ic_heart_filled">ic_heart_filled</string>
+    <string name="ic_heart_outline">ic_heart_outline</string>
+    <string name="ic_comment">ic_comment</string>
+    <string name="ic_share">ic_share</string>
+    <string name="ic_play_arrow">ic_play_arrow</string>
+    <string name="ic_visibility">ic_visibility</string>
+    <string name="ic_schedule">ic_schedule</string>
+    <string name="ic_video_empty">ic_video_empty</string>
+
+    <!-- Additional strings -->
+    <string name="settings_under_development">설정 기능 개발 중</string>
+    <string name="like_video">동영상 좋아요</string>
+    <string name="share_video_action">동영상 공유</string>
+
+    <!-- Strings for Search Activity -->
+    <string name="search_hint">건강 팁, 동영상 검색...</string>
+    <string name="clear">지우기</string>
+
+    <!-- Strings for Comments Bottom Sheet -->
+    <string name="comments_title">댓글</string>
+    <string name="close_comments">댓글 닫기</string>
+    <string name="empty_comments_title">댓글이 없습니다</string>
+    <string name="empty_comments_message">첫 번째로 댓글을 달아보세요!</string>
+    <string name="comment_input_hint">댓글 작성...</string>
+    <string name="send_comment">전송</string>
+
+    <!-- Strings for Reply Bottom Sheet -->
+    <string name="reply_comment_title">댓글에 답글</string>
+    <string name="close_reply">답글 닫기</string>
+    <string name="replying_to">답글 대상</string>
+    <string name="reply_input_hint">답글 작성...</string>
+    <string name="send_reply">답글</string>
+
+    <!-- Strings for Search Results -->
+    <string name="no_search_results">검색 결과가 없습니다</string>
+
+    <!-- Strings for User Interface -->
+    <string name="user_avatar">사용자 아바타</string>
+    <string name="play_video">동영상 재생</string>
+
+    <!-- Strings for Search History -->
+    <string name="search_history">검색 기록</string>
+    <string name="delete_search_history">검색 기록 삭제</string>
+
+    <!-- Strings for Video -->
+    <string name="video_poster_description">동영상 포스터</string>
+
+    <!-- Strings for Settings and Privacy -->
+    <string name="settings_and_privacy">설정 및 개인정보</string>
+
+    <!-- Account Section -->
+    <string name="account_section">계정</string>
+    <string name="account_management">계정</string>
+    <string name="privacy_settings">개인정보</string>
+    <string name="security_settings">보안</string>
+    <string name="permissions_settings">권한</string>
+    <string name="security_and_permissions">권한 및 보안</string>
+
+    <!-- Content and Display Section -->
+    <string name="content_display_section">콘텐츠 및 표시</string>
+    <string name="notification_settings">알림</string>
+    <string name="language_settings">언어</string>
+    <string name="display_settings">디스플레이</string>
+
+    <!-- Support and About Section -->
+    <string name="support_about_section">지원 및 정보</string>
+    <string name="report_issue">문제 신고</string>
+    <string name="support_help">지원</string>
+    <string name="terms_policy">약관 및 정책</string>
+
+    <!-- Descriptions -->
+    <string name="account_management_desc">계정 정보 관리</string>
+    <string name="privacy_settings_desc">개인정보 및 보안 설정</string>
+    <string name="security_settings_desc">계정 보안 관리</string>
+    <string name="permissions_settings_desc">앱 권한 관리</string>
+    <string name="security_and_permissions_desc">보안 및 액세스 권한 관리</string>
+    <string name="notification_settings_desc">알림 및 리마인더 설정</string>
+    <string name="language_settings_desc">표시 언어 선택</string>
+    <string name="display_settings_desc">디스플레이 인터페이스 맞춤설정</string>
+    <string name="report_issue_desc">버그 또는 문제 신고</string>
+    <string name="support_help_desc">지원 및 안내 받기</string>
+    <string name="terms_policy_desc">이용 약관 및 정책 보기</string>
+
+    <!-- Missing strings for Snooze Options -->
+    <string name="snooze_5_min">5분</string>
+    <string name="snooze_10_min">10분</string>
+    <string name="snooze_15_min">15분</string>
+    <string name="snooze_30_min">30분</string>
+
+    <!-- Missing strings for Volume Levels -->
+    <string name="volume_low">낮음</string>
+    <string name="volume_medium">중간</string>
+    <string name="volume_high">높음</string>
+    <string name="volume_max">최대</string>
+
+    <!-- Missing strings for Menu -->
+    <string name="menu_search">검색</string>
+    <string name="menu_filter">필터</string>
+    <string name="menu_refresh">새로고침</string>
+    <string name="menu_debug">디버그</string>
+
+    <!-- Strings for AppBar Scrolling -->
+    <string name="appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
+
+    <!-- Additional strings for Reminder -->
+    <string name="reminder_title_default">건강 알림</string>
+    <string name="reminder_message_default">알림 시간입니다</string>
+    <string name="reminder_snooze">다시 알림</string>
+    <string name="reminder_dismiss">닫기</string>
+    <string name="select_sound">소리 선택</string>
+    <string name="reminder_sound">알림 소리</string>
+    <string name="sound_default">기본 소리</string>
+    <string name="reminder_volume">볼륨</string>
+    <string name="reminder_snooze_duration">다시 알림 시간</string>
+    <string name="reminder_vibrate">진동</string>
+    <string name="reminder_alarm_style">알람 스타일</string>
+
+    <!-- Strings for Sound Types -->
+    <string name="sound_alarm">알람</string>
+    <string name="sound_notification">알림</string>
+    <string name="sound_music">음악</string>
+    <string name="sound_none">소리 없음</string>
+
+    <!-- Strings for Search History -->
+    <string name="clear_all_history">모든 기록 지우기</string>
+    <string name="see_more_history">기록 더보기</string>
+    <string name="see_less_history">기록 접기</string>
+    <string name="no_search_history">검색 기록이 없습니다</string>
+
+    <!-- Strings for Search Tabs -->
+    <string name="search_articles_tab">기사</string>
+    <string name="search_videos_tab">동영상</string>
+
+    <!-- ========== Support & About Strings ========== -->
+
+    <!-- Support Center -->
+    <string name="support_center">지원 센터</string>
+    <string name="support_center_desc">문제를 신고하고 지원을 받으세요</string>
+    <string name="help_center">도움말 센터</string>
+    <string name="contact_support">지원팀에 문의</string>
+    <string name="my_tickets">내 티켓</string>
+    <string name="create_ticket">지원 티켓 만들기</string>
+    <string name="view_all_tickets">모든 티켓 보기</string>
+
+    <!-- Ticket Types -->
+    <string name="ticket_type">문제 유형</string>
+    <string name="ticket_type_bug_report">버그 신고</string>
+    <string name="ticket_type_content_report">콘텐츠 신고</string>
+    <string name="ticket_type_feature_request">기능 요청</string>
+    <string name="ticket_type_account_issue">계정 문제</string>
+    <string name="ticket_type_general_inquiry">일반 문의</string>
+    <string name="ticket_type_other">기타</string>
+
+    <!-- Ticket Status -->
+    <string name="ticket_status">상태</string>
+    <string name="ticket_status_open">열림</string>
+    <string name="ticket_status_in_progress">진행 중</string>
+    <string name="ticket_status_resolved">해결됨</string>
+    <string name="ticket_status_closed">닫힘</string>
+
+    <!-- Ticket Priority -->
+    <string name="ticket_priority">우선순위</string>
+    <string name="ticket_priority_low">낮음</string>
+    <string name="ticket_priority_medium">중간</string>
+    <string name="ticket_priority_high">높음</string>
+    <string name="ticket_priority_urgent">긴급</string>
+
+    <!-- Ticket Form -->
+    <string name="ticket_subject">제목</string>
+    <string name="ticket_subject_hint">문제에 대한 간단한 설명</string>
+    <string name="ticket_description">상세 설명</string>
+    <string name="ticket_description_hint">문제를 자세히 설명해주세요...</string>
+    <string name="ticket_attach_screenshot">스크린샷 첨부</string>
+    <string name="ticket_screenshot_attached">스크린샷이 첨부되었습니다</string>
+    <string name="ticket_remove_screenshot">스크린샷 제거</string>
+    <string name="ticket_submit">티켓 제출</string>
+    <string name="ticket_submitting">제출 중...</string>
+    <string name="ticket_submit_success">티켓이 성공적으로 제출되었습니다</string>
+    <string name="ticket_submit_error">티켓을 제출할 수 없습니다</string>
+
+    <!-- Ticket Details -->
+    <string name="ticket_detail_title">티켓 상세정보</string>
+    <string name="ticket_id">티켓 ID</string>
+    <string name="ticket_created_at">생성일</string>
+    <string name="ticket_updated_at">마지막 업데이트</string>
+    <string name="ticket_description_label">문제 설명</string>
+    <string name="ticket_device_info_label">기기 정보</string>
+    <string name="ticket_admin_response_label">지원팀 답변</string>
+    <string name="ticket_admin_response">지원팀 답변</string>
+    <string name="ticket_no_response">아직 답변이 없습니다</string>
+    <string name="ticket_waiting_response">답변 대기 중...</string>
+    <string name="ticket_screenshot_desc">첨부된 스크린샷</string>
+    <string name="status_open">열림</string>
+    <string name="priority_medium">중간</string>
+    <string name="ticket_type_bug">버그 신고</string>
+
+    <!-- Ticket List -->
+    <string name="no_tickets_title">지원 티켓이 없습니다</string>
+    <string name="no_tickets_message">지원 티켓이 없습니다. 문제가 발생하면 새 티켓을 만드세요.</string>
+    <string name="loading_tickets">티켓 로딩 중...</string>
+
+    <!-- About App -->
+    <string name="about_app">정보</string>
+    <string name="about_app_desc">앱 정보</string>
+    <string name="app_version">앱 버전</string>
+    <string name="app_description">앱 설명</string>
+    <string name="app_description_text">건강 팁은 매일 건강을 더 잘 관리할 수 있도록 유용한 건강 팁을 제공하는 앱입니다. 앱은 건강 팁 보기, 쇼츠, AI 채팅, 건강 알림 등 다양한 기능을 제공합니다.</string>
+    <string name="developed_by">개발자</string>
+    <string name="developer_name">건강 팁 팀</string>
+    <string name="contact_us">문의하기</string>
+    <string name="contact_email">이메일</string>
+    <string name="contact_email_value">vuhoainam.dev@gmail.com</string>
+    <string name="follow_us">팔로우하기</string>
+    <string name="rate_app">앱 평가</string>
+    <string name="share_app">앱 공유</string>
+    <string name="share_app_text">건강 팁을 사용해보세요 - 놀라운 건강 팁 앱입니다!</string>
+
+    <!-- Terms & Policies -->
+    <string name="terms_of_service">서비스 약관</string>
+    <string name="privacy_policy">개인정보 처리방침</string>
+    <string name="community_guidelines">커뮤니티 가이드라인</string>
+    <string name="copyright_policy">저작권 정책</string>
+    <string name="cookie_policy">쿠키 정책</string>
+    <string name="intellectual_property">지적 재산권</string>
+
+    <!-- Legal -->
+    <string name="legal">법적 고지</string>
+    <string name="last_updated">마지막 업데이트</string>
+    <string name="effective_date">발효일</string>
+
+    <!-- FAQ -->
+    <string name="faq">자주 묻는 질문</string>
+    <string name="faq_how_to_use">앱 사용 방법은?</string>
+    <string name="faq_how_to_save">좋아하는 팁을 저장하는 방법은?</string>
+    <string name="faq_how_to_reminder">알림을 만드는 방법은?</string>
+    <string name="faq_how_to_chat">AI 채팅 사용 방법은?</string>
+    <string name="faq_how_to_report">콘텐츠를 신고하는 방법은?</string>
+
+    <!-- Report Content -->
+    <string name="report_content">콘텐츠 신고</string>
+    <string name="report_content_reason">신고 사유</string>
+    <string name="report_spam">스팸</string>
+    <string name="report_inappropriate">부적절한 콘텐츠</string>
+    <string name="report_misleading">오해의 소지가 있는 정보</string>
+    <string name="report_harassment">괴롭힘</string>
+    <string name="report_violence">폭력</string>
+    <string name="report_hate_speech">혐오 발언</string>
+    <string name="report_copyright">저작권 침해</string>
+    <string name="report_other_reason">기타 사유</string>
+    <string name="report_details">신고 세부정보</string>
+    <string name="report_submit">신고 제출</string>
+    <string name="report_success">신고가 성공적으로 제출되었습니다</string>
+    <string name="report_thank_you">신고해 주셔서 감사합니다. 검토 후 조치하겠습니다.</string>
+
+    <!-- Validation Messages -->
+    <string name="error_empty_subject">제목을 입력하세요</string>
+    <string name="error_empty_description">상세 설명을 입력하세요</string>
+    <string name="error_select_ticket_type">문제 유형을 선택하세요</string>
+    <string name="select_ticket_type">문제 유형 선택</string>
+    <string name="device_info_auto_collected">기기 정보가 자동으로 전송되어 더 나은 지원을 제공합니다</string>
+    <string name="error_loading_failed">로딩 실패</string>
+    <string name="error_network">네트워크 오류</string>
+
+    <!-- Additional Strings for Report Issue -->
+    <string name="subject">제목</string>
+    <string name="enter_subject">문제 제목 입력</string>
+    <string name="enter_description">문제를 자세히 설명...</string>
+    <string name="device_info">기기 정보</string>
+    <string name="icon">아이콘</string>
+    <string name="navigate">탐색</string>
+
+    <!-- Common Actions -->
+    <string name="action_retry">다시 시도</string>
+    <string name="action_cancel">취소</string>
+    <string name="action_ok">확인</string>
+    <string name="action_send">전송</string>
+    <string name="action_close">닫기</string>
+    <string name="action_back">뒤로</string>
+    <string name="action_next">다음</string>
+    <string name="action_done">완료</string>
+    <string name="action_view">보기</string>
+    <string name="action_delete">삭제</string>
+    <string name="action_edit">편집</string>
+    <string name="action_select_image">이미지 선택</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_info_title">계정 정보</string>
+    <string name="account_email_label">이메일</string>
+    <string name="account_email_placeholder">user@example.com</string>
+    <string name="account_display_name_label">표시 이름</string>
+    <string name="account_display_name_placeholder">사용자</string>
+    <string name="account_joined_date_label">가입일</string>
+    <string name="account_joined_date_placeholder">2024년 1월 1일</string>
+    <string name="account_manage_title">계정 관리</string>
+    <string name="account_edit_profile">프로필 편집</string>
+    <string name="account_edit_profile_desc">개인 정보 업데이트</string>
+    <string name="account_change_password">비밀번호 변경</string>
+    <string name="account_change_password_desc">로그인 비밀번호 변경</string>
+    <string name="account_two_factor_auth">2단계 인증</string>
+    <string name="account_two_factor_auth_desc">계정 보안 강화</string>
+    <string name="account_danger_zone">위험 영역</string>
+    <string name="account_logout">로그아웃</string>
+    <string name="account_logout_desc">이 계정에서 로그아웃</string>
+    <string name="account_delete">계정 삭제</string>
+    <string name="account_delete_desc">계정과 데이터를 영구적으로 삭제</string>
+
+    <!-- ========== Privacy Settings Strings ========== -->
+    <string name="privacy_intro">누가 귀하의 정보와 활동을 볼 수 있는지 제어</string>
+    <string name="privacy_profile_title">프로필 표시</string>
+    <string name="privacy_public_profile">공개 프로필</string>
+    <string name="privacy_public_profile_desc">모든 사람이 귀하의 프로필을 볼 수 있도록 허용</string>
+    <string name="privacy_show_email">이메일 표시</string>
+    <string name="privacy_show_email_desc">다른 사람이 귀하의 이메일을 볼 수 있도록 허용</string>
+    <string name="privacy_activity_title">활동</string>
+    <string name="privacy_show_activity">활동 표시</string>
+    <string name="privacy_show_activity_desc">다른 사람이 귀하의 활동을 볼 수 있도록 허용</string>
+    <string name="privacy_show_liked_posts">좋아요한 게시물</string>
+    <string name="privacy_show_liked_posts_desc">좋아요한 게시물 표시</string>
+    <string name="privacy_data_title">데이터 및 저장소</string>
+    <string name="privacy_clear_search_history">검색 기록 지우기</string>
+    <string name="privacy_clear_search_history_desc">모든 검색 기록 삭제</string>
+    <string name="privacy_clear_view_history">조회 기록 지우기</string>
+    <string name="privacy_clear_view_history_desc">조회한 기사의 기록 지우기</string>
+    <string name="privacy_download_data">데이터 다운로드</string>
+    <string name="privacy_download_data_desc">데이터 사본 다운로드</string>
+    <string name="privacy_block_title">차단 및 제한</string>
+    <string name="privacy_blocked_users">차단한 사용자</string>
+    <string name="privacy_blocked_users_count">0명의 사용자</string>
+
+
+    <!-- ========== Security Settings Strings ========== -->
+    <string name="security_and_permissions_intro">계정 보안 및 앱 액세스 권한 관리</string>
+    <string name="security_section_title">보안</string>
+    <string name="security_intro">보안 및 계정 액세스 제어 관리</string>
+    <string name="security_password_title">비밀번호 및 인증</string>
+    <string name="security_change_password">비밀번호 변경</string>
+    <string name="security_change_password_desc">로그인 비밀번호 업데이트</string>
+    <string name="security_two_factor">2단계 인증</string>
+    <string name="security_two_factor_desc">계정에 추가 보안 계층 추가</string>
+    <string name="security_fingerprint">지문 로그인</string>
+    <string name="security_fingerprint_desc">지문을 사용하여 빠른 로그인</string>
+    <string name="security_face_id">얼굴 로그인</string>
+    <string name="security_face_id_desc">얼굴 인식 사용</string>
+
+    <string name="security_sessions_title">로그인 세션</string>
+    <string name="security_session_title">로그인 세션</string>
+    <string name="security_active_sessions">활성 세션</string>
+    <string name="security_active_sessions_desc">로그인한 기기 관리</string>
+    <string name="security_auto_logout">자동 로그아웃</string>
+    <string name="security_auto_logout_desc">비활성 후 로그아웃</string>
+
+    <string name="security_advanced_title">고급 보안</string>
+    <string name="security_data_title">데이터 보안</string>
+    <string name="security_encrypt_data">데이터 암호화</string>
+    <string name="security_encrypt_data_desc">기기의 개인 데이터 암호화</string>
+    <string name="security_secure_mode">높은 보안 모드</string>
+    <string name="security_secure_mode_desc">스크린샷 및 화면 녹화 차단</string>
+    <string name="security_suspicious_alert">의심스러운 로그인 알림</string>
+    <string name="security_suspicious_alert_desc">비정상적인 로그인 활동 알림 받기</string>
+
+    <string name="security_activity_title">계정 활동</string>
+    <string name="security_login_history">로그인 기록</string>
+    <string name="security_login_history_desc">최근 로그인 활동 보기</string>
+    <string name="security_suspicious_activity">의심스러운 활동</string>
+    <string name="security_suspicious_activity_desc">비정상적인 활동 알림 받기</string>
+
+    <!-- ========== Permissions Settings Strings ========== -->
+    <string name="permissions_section_title">액세스 권한</string>
+    <string name="permissions_intro">앱의 기기 기능 액세스 관리</string>
+    <string name="permissions_app_title">앱 권한</string>
+    <string name="permissions_required_title">필수 권한</string>
+    <string name="permissions_storage">저장소</string>
+    <string name="permissions_storage_desc">사진 및 오프라인 데이터 저장</string>
+    <string name="permissions_camera">카메라</string>
+    <string name="permissions_camera_desc">프로필 및 신고용 사진 촬영</string>
+    <string name="permissions_notification">알림</string>
+    <string name="permissions_notification_desc">건강 알림 받기</string>
+    <string name="permissions_notifications">알림</string>
+    <string name="permissions_notifications_desc">건강 알림 받기</string>
+
+    <string name="permissions_optional_title">선택적 권한</string>
+    <string name="permissions_location">위치</string>
+    <string name="permissions_location_desc">지역에 적합한 콘텐츠 제공</string>
+    <string name="permissions_contacts">연락처</string>
+    <string name="permissions_contacts_desc">친구와 건강 팁 공유</string>
+    <string name="permissions_microphone">마이크</string>
+    <string name="permissions_microphone_desc">음성 검색</string>
+
+    <string name="permissions_management_title">권한 관리</string>
+    <string name="permissions_app_settings_title">앱 설정</string>
+    <string name="permissions_open_settings">시스템 설정 열기</string>
+    <string name="permissions_open_settings_desc">Android 설정에서 권한 변경</string>
+    <string name="permissions_reset">권한 재설정</string>
+    <string name="permissions_reset_desc">부여된 모든 권한 취소</string>
+    <string name="permissions_reset_permissions">권한 재설정</string>
+    <string name="permissions_reset_permissions_desc">부여된 모든 권한 취소</string>
+
+    <string name="permission_status_granted">허용됨</string>
+    <string name="permission_status_denied">거부됨</string>
+    <string name="permission_status_not_requested">요청되지 않음</string>
+
+    <!-- Icon Content Descriptions -->
+    <string name="icon_email_desc">이메일 아이콘</string>
+    <string name="icon_person_desc">사람 아이콘</string>
+    <string name="icon_calendar_desc">달력 아이콘</string>
+    <string name="icon_edit_desc">편집 아이콘</string>
+    <string name="icon_lock_desc">잠금 아이콘</string>
+    <string name="icon_shield_desc">방패 아이콘</string>
+    <string name="icon_logout_desc">로그아웃 아이콘</string>
+    <string name="icon_delete_desc">삭제 아이콘</string>
+    <string name="icon_arrow_forward_desc">앞으로 화살표</string>
+    <string name="icon_people_desc">사람들 아이콘</string>
+    <string name="icon_visibility_desc">가시성 아이콘</string>
+    <string name="icon_favorite_desc">즐겨찾기 아이콘</string>
+    <string name="icon_history_desc">기록 아이콘</string>
+    <string name="icon_download_desc">다운로드 아이콘</string>
+    <string name="icon_fingerprint_desc">지문 아이콘</string>
+    <string name="icon_notification_desc">알림 아이콘</string>
+    <string name="icon_settings_desc">설정 아이콘</string>
+
+    <!-- Security and Permissions Misc -->
+    <string name="one_device">1개의 기기</string>
+
+    <!-- ========== Language Settings Strings ========== -->
+    <string name="language_selection_desc">앱의 표시 언어 선택</string>
+    <string name="language_restart_notice">앱이 자동으로 재시작되어 새 언어가 적용됩니다</string>
+    <string name="language_changed">언어가 변경되었습니다: %1$s. 적용 중...</string>
+
+    <!-- Language names -->
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_english">English</string>
+    <string name="lang_chinese">中文 (Chinese)</string>
+    <string name="lang_japanese">日本語 (Japanese)</string>
+    <string name="lang_korean">한국어 (Korean)</string>
+    <string name="lang_french">Français (French)</string>
+    <string name="lang_german">Deutsch (German)</string>
+    <string name="lang_spanish">Español (Spanish)</string>
+
+    <!-- ========== Notification Settings Strings ========== -->
+    <string name="notification_manage_desc">받고 싶은 알림 관리</string>
+    <string name="all_notifications">모든 알림</string>
+    <string name="toggle_all_notifications">모든 알림 켜기/끄기</string>
+    <string name="content_notifications">콘텐츠 알림</string>
+    <string name="new_health_tips">새로운 건강 팁</string>
+    <string name="new_tips_notification">새로운 팁이 제공될 때 알림</string>
+    <string name="reminders">알림</string>
+    <string name="schedule_reminders">알림 예약</string>
+    <string name="interaction_notifications">상호작용 알림</string>
+    <string name="likes">좋아요</string>
+    <string name="new_followers">새 팔로워</string>
+    <string name="system_notifications">시스템 알림</string>
+    <string name="app_updates">앱 업데이트</string>
+    <string name="sound_settings">소리 설정</string>
+    <string name="sound">소리</string>
+    <string name="vibration">진동</string>
+
+    <!-- ========== Display Settings Strings ========== -->
+    <string name="display_customize_desc">앱 디스플레이 인터페이스 맞춤설정</string>
+    <string name="display_mode">디스플레이 모드</string>
+    <string name="dark_mode">다크 모드</string>
+    <string name="dark_mode_quick">다크 모드 빠르게 활성화</string>
+    <string name="theme_mode">테마 모드</string>
+    <string name="system_default">시스템 기본값</string>
+    <string name="light_mode">라이트 모드</string>
+    <string name="font_size">글꼴 크기</string>
+    <string name="font_size_display">표시 글꼴 크기</string>
+    <string name="small">작게</string>
+    <string name="large">크게</string>
+    <string name="preview">미리보기:</string>
+    <string name="preview_text_sample">글꼴 크기를 미리 보기 위한 샘플 텍스트입니다</string>
+    <string name="restart_app_notice">일부 변경 사항은 즉시 적용되지만 다른 변경 사항은 앱 재시작이 필요할 수 있습니다</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_pending_deletion">⚠️ 계정 삭제 대기 중</string>
+    <string name="account_deletion_countdown">귀하의 계정은 다음 시간 후에 삭제됩니다: %1$s</string>
+    <string name="cancel_account_deletion">계정 삭제 취소</string>
+
+    <!-- ========== Change Password Strings ========== -->
+    <string name="change_password_desc">현재 비밀번호와 새 비밀번호를 입력하세요</string>
+    <string name="change_password_action">비밀번호 변경</string>
+    <string name="password_requirements">비밀번호는 최소 6자 이상이어야 하며 보안을 강화하기 위해 대문자, 소문자, 숫자 및 특수 문자를 포함해야 합니다.</string>
+    <string name="current_password">현재 비밀번호</string>
+    <string name="new_password">새 비밀번호</string>
+    <string name="confirm_new_password">새 비밀번호 확인</string>
+
+    <!-- ========== Edit Profile Strings ========== -->
+    <string name="display_name">표시 이름</string>
+    <string name="phone_number">전화번호</string>
+    <string name="email_example">이메일: example@gmail.com</string>
+
+    <!-- ========== About App Strings ========== -->
+    <string name="quick_actions">빠른 작업</string>
+    <string name="copyright_text">© 2024 건강 팁. 모든 권리 보유.</string>
+
+    <!-- ========== Login/Register Strings ========== -->
+    <string name="no_account_register">계정이 없으신가요? 지금 회원가입하세요</string>
+
+    <!-- ========== Chat Strings ========== -->
+    <string name="no_conversations">아직 대화가 없습니다</string>
+    <string name="chat_welcome">안녕하세요! 저는 귀하의 건강 AI 어시스턴트입니다</string>
+    <string name="chat_ai_greeting">건강 AI 어시스턴트에 오신 것을 환영합니다!</string>
+    <string name="chat_hint">건강 관련 질문을 입력하세요...</string>
+    <string name="chat_continue_hint">대화를 계속하세요...</string>
+    <string name="ai_responding">AI가 응답하고 있습니다</string>
+    <string name="start_conversation">대화 시작</string>
+    <string name="view_more_conversations">더 많은 대화 보기</string>
+    <string name="new_conversation_desc">새 대화 만들기</string>
+
+    <!-- ========== Alarm/Reminder Strings ========== -->
+    <string name="alarm_time_default">08:30</string>
+    <string name="alarm_date_example">월요일, 2025년 10월 17일</string>
+    <string name="health_reminder_default">건강 알림</string>
+    <string name="health_reminder_message">건강 팁을 볼 시간입니다!</string>
+
+    <!-- ========== Video Strings ========== -->
+    <string name="no_liked_videos_yet">아직 좋아요한 동영상이 없습니다</string>
+
+    <!-- ========== Support Strings ========== -->
+    <string name="device_info_notice">기기 정보가 자동으로 전송되어 더 나은 지원을 제공합니다</string>
+
+    <!-- ========== FAQ Strings ========== -->
+    <string name="faq_title">자주 묻는 질문</string>
+
+    <!-- ========== Other Common Strings ========== -->
+    <string name="choose">선택</string>
+    <string name="avatar">아바타</string>
+    <string name="featured_posts">⭐ 주요 게시물</string>
+    <string name="alarm_settings">알람 설정</string>
+
+    <!-- ========== Health Tip Detail Strings ========== -->
+    <string name="category_label">카테고리:</string>
+    <string name="tags_label">태그:</string>
+    <string name="like_action">좋아요</string>
+
+    <!-- ========== Dialog Reminder Strings ========== -->
+    <string name="date_label">날짜:</string>
+    <string name="time_label">시간:</string>
+    <string name="hour_label">시:</string>
+    <string name="repeat_label">반복:</string>
+    <string name="activate_reminder">알림 활성화:</string>
+    <string name="reminder_info">알림 정보</string>
+    <string name="time_and_repeat">시간 및 반복</string>
+    <string name="save_changes">변경사항 저장</string>
+    <string name="date_placeholder">--/--/----</string>
+    <string name="time_placeholder">--:--</string>
+    <string name="date_example">2025년 10월 16일</string>
+    <string name="time_example">08:00</string>
+    <string name="volume_percent">80%</string>
+
+    <!-- ========== Chat AI Strings ========== -->
+    <string name="ai_health_assistant">AI 건강 어시스턴트</string>
+    <string name="creating_conversation">대화 생성 중...</string>
+    <string name="sending_message">메시지 전송 중...</string>
+    <string name="ai_replying">AI가 답장하고 있습니다...</string>
+    <string name="error_create_conversation">대화 생성 오류: %1$s</string>
+    <string name="error_send_message">메시지 전송 오류: %1$s</string>
+    <string name="please_enter_message">메시지를 입력하세요</string>
+    <string name="delete_all_conversations_confirm">모든 대화 기록을 삭제하시겠습니까?</string>
+    <string name="sample_question_1">💪 면역력을 높이는 방법은?</string>
+    <string name="sample_question_2">🥗 심장 건강에 좋은 식단은?</string>
+    <string name="sample_question_3">😴 수면의 질을 향상시키는 방법은?</string>
+
+    <!-- ========== Video Strings (Extended) ========== -->
+    <string name="loading_liked_videos">좋아요한 동영상 로딩 중...</string>
+    <string name="no_liked_videos_title">좋아요한 동영상이 없습니다</string>
+    <string name="no_liked_videos_desc">좋아하는 동영상을 발견하고 좋아요를 누르세요!</string>
+    <string name="loading_videos_text">동영상 로딩 중...</string>
+    <string name="no_videos_title">사용 가능한 동영상이 없습니다</string>
+    <string name="no_videos_desc">나중에 다시 시도하거나 네트워크 연결을 확인하세요</string>
+    <string name="try_again_action">다시 시도</string>
+    <string name="duration_placeholder">0:30</string>
+    <string name="views_placeholder">1.2K</string>
+    <string name="views_count">조회수</string>
+    <string name="months_ago">개월 전</string>
+    <string name="weeks_ago">주 전</string>
+    <string name="days_ago">일 전</string>
+    <string name="hours_ago">시간 전</string>
+    <string name="minutes_ago">분 전</string>
+    <string name="years_ago">년 전</string>
+    <string name="just_now">방금</string>
+
+    <!-- ========== Profile Strings ========== -->
+    <string name="username_label">사용자명</string>
+    <string name="username_placeholder">\@username</string>
+    <string name="article_title_placeholder">기사 제목</string>
+    <string name="favorite_articles">즐겨찾기 기사</string>
+    <string name="favorite_articles_tab">즐겨찾기 기사</string>
+    <string name="video_liked_tab">좋아요한 동영상</string>
+
+</resources>

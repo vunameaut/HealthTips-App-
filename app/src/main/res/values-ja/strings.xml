@@ -1,0 +1,825 @@
+<resources>
+    <!-- Application name -->
+    <string name="app_name">健康のヒント</string>
+
+    <!-- Login screen strings -->
+    <string name="login">ログイン</string>
+    <string name="register">登録</string>
+    <string name="email">メールアドレス</string>
+    <string name="password">パスワード</string>
+    <string name="confirm_password">パスワードの確認</string>
+    <string name="forgot_password">パスワードをお忘れですか？</string>
+    <string name="dont_have_account">アカウントをお持ちでない方は登録してください</string>
+    <string name="already_have_account">既にアカウントをお持ちの方はログインしてください</string>
+
+    <!-- Forgot password screen strings -->
+    <string name="reset_password">パスワードをリセット</string>
+    <string name="reset_password_instructions">パスワードリセットの手順を受け取るためにメールアドレスを入力してください</string>
+    <string name="send_reset_email">リセットメールを送信</string>
+    <string name="back_to_login">ログインに戻る</string>
+
+    <!-- Home screen strings -->
+    <string name="categories">カテゴリー</string>
+    <string name="recommended_for_you">おすすめ</string>
+    <string name="latest_tips">最新のヒント</string>
+    <string name="most_viewed">最も閲覧されたもの</string>
+    <string name="most_liked">最も評価されたもの</string>
+    <string name="see_all">すべて表示</string>
+    <string name="search">検索</string>
+    <string name="offline_mode">オフラインモード</string>
+    <string name="home">ホーム</string>
+
+    <!-- View all health tips screen strings -->
+    <string name="all_recommended_tips">すべてのおすすめヒント</string>
+    <string name="all_latest_tips">すべての最新ヒント</string>
+    <string name="all_most_viewed_tips">最も閲覧されたヒント</string>
+    <string name="all_most_liked_tips">最も評価されたヒント</string>
+    <string name="no_health_tips_found">健康ヒントが見つかりません</string>
+    <string name="no_health_tips_description">このカテゴリーには現在健康ヒントがありません</string>
+
+    <!-- Bottom navigation strings -->
+    <string name="nav_home">ホーム</string>
+    <string name="nav_chat">AIチャット</string>
+    <string name="nav_reminders">リマインダー</string>
+    <string name="nav_videos">ショート動画</string>
+    <string name="nav_favorites">お気に入り</string>
+    <string name="nav_profile">プロフィール</string>
+
+    <!-- Detail screen strings -->
+    <string name="related_tips">関連するヒント</string>
+    <string name="share">共有</string>
+    <string name="save">保存</string>
+
+    <!-- Reminder feature strings -->
+    <string name="health_reminders">健康リマインダー</string>
+    <string name="manage_your_health_reminders">健康リマインダーを管理</string>
+    <string name="active_reminders">アクティブ</string>
+    <string name="add_reminder">リマインダーを追加</string>
+    <string name="reminder_settings">リマインダー設定</string>
+    <string name="your_reminders">あなたのリマインダー</string>
+    <string name="sort">並べ替え</string>
+    <string name="no_reminders_title">まだリマインダーがありません</string>
+    <string name="no_reminders_message">まだリマインダーを作成していません。最初のリマインダーを作成して健康を追跡しましょう！</string>
+    <string name="create_first_reminder">最初のリマインダーを作成</string>
+    <string name="loading_reminders">リマインダーを読み込み中...</string>
+    <string name="active">アクティブ</string>
+    <string name="reminder_options">リマインダーオプション</string>
+    <string name="reminder_sound_label">リマインダーサウンド</string>
+    <string name="vibrate">バイブレーション</string>
+    <string name="edit">編集</string>
+    <string name="delete">削除</string>
+
+    <!-- Reminder sound strings -->
+    <string name="select_reminder_sound">リマインダーサウンドを選択</string>
+    <string name="tap_to_preview_sound">再生ボタンをタップしてサウンドをプレビュー</string>
+    <string name="available_sounds">利用可能なサウンド</string>
+    <string name="sound_selection_tip">タップして選択、再生ボタンでプレビュー</string>
+    <string name="preview_sound">サウンドをプレビュー</string>
+
+    <!-- Preview mode and new interface strings -->
+    <string name="preview_mode_title">プレビュー</string>
+    <string name="test_interface_title">新しいインターフェースをテスト</string>
+    <string name="content_image_description">コンテンツイラスト画像</string>
+    <string name="author_prefix">著者：</string>
+    <string name="content_loading">コンテンツを読み込み中...</string>
+    <string name="content_error">コンテンツを読み込めません</string>
+    <string name="health_tip_image">健康ヒント記事の画像</string>
+
+    <!-- Video search results strings -->
+    <string name="loading_videos">動画を読み込み中...</string>
+    <string name="no_video_results_title">動画が見つかりません</string>
+    <string name="no_video_results_message">別のキーワードで検索するか、ネットワーク接続を確認してください</string>
+    <string name="try_again">再試行</string>
+
+    <!-- Video interaction strings -->
+    <string name="like">いいね</string>
+    <string name="comment">コメント</string>
+    <string name="view_count_format">%s 回の視聴</string>
+
+    <!-- Common strings -->
+    <string name="error_occurred">エラーが発生しました</string>
+    <string name="network_error">ネットワークエラー</string>
+    <string name="retry">再試行</string>
+
+    <!-- Liked videos strings -->
+    <string name="liked_videos">いいねした動画</string>
+    <string name="no_liked_videos">いいねした動画がありません</string>
+    <string name="no_liked_videos_subtitle">お気に入りの動画にいいねして後で見ましょう</string>
+
+    <!-- Short video item strings -->
+    <string name="play_pause_video">動画を再生/一時停止</string>
+    <string name="video_title_placeholder">動画タイトル</string>
+    <string name="video_caption_placeholder">動画の説明</string>
+    <string name="see_more">もっと見る</string>
+    <string name="see_less">閉じる</string>
+    <string name="view_count_placeholder">0 回の視聴</string>
+    <string name="upload_date_placeholder">1日前</string>
+    <string name="like_button_description">動画にいいねボタン</string>
+    <string name="like_count_placeholder">0</string>
+    <string name="comment_button_description">動画にコメントボタン</string>
+    <string name="comment_action">コメント</string>
+    <string name="share_button_description">動画を共有ボタン</string>
+    <string name="share_action">共有</string>
+    <string name="double_tap_heart_animation">ダブルタップハートアニメーション</string>
+
+    <!-- Error and success messages -->
+    <string name="error_login">ログインに失敗しました</string>
+    <string name="error_register">登録に失敗しました</string>
+    <string name="error_reset_password">パスワードをリセットできません</string>
+    <string name="success_login">ログインに成功しました</string>
+    <string name="success_register">登録に成功しました</string>
+    <string name="success_reset_password">パスワードリセットメールを送信しました</string>
+
+    <!-- Conversation context menu strings -->
+    <string name="rename_conversation">会話名を変更</string>
+    <string name="pin_conversation">会話をピン留め</string>
+    <string name="unpin_conversation">会話のピン留めを解除</string>
+    <string name="mute_conversation">通知をミュート</string>
+    <string name="unmute_conversation">通知のミュートを解除</string>
+    <string name="share_conversation">会話を共有</string>
+    <string name="copy_messages">メッセージをコピー</string>
+    <string name="mark_as_read">既読にする</string>
+    <string name="delete_conversation">会話を削除</string>
+
+    <!-- Dialog and notification for context menu -->
+    <string name="enter_new_name">新しい会話名を入力</string>
+    <string name="conversation_name">会話名</string>
+    <string name="rename">名前を変更</string>
+    <string name="cancel">キャンセル</string>
+    <string name="delete_conversation_confirm">この会話を削除してもよろしいですか？</string>
+    <string name="delete_conversation_confirm_message">この会話のすべてのメッセージが永久に削除されます。</string>
+    <string name="conversation_deleted">会話を削除しました</string>
+    <string name="conversation_renamed">会話名を変更しました</string>
+    <string name="conversation_pinned">会話をピン留めしました</string>
+    <string name="conversation_unpinned">会話のピン留めを解除しました</string>
+    <string name="conversation_muted">通知をミュートにしました</string>
+    <string name="conversation_unmuted">通知のミュートを解除しました</string>
+    <string name="messages_copied">メッセージをコピーしました</string>
+    <string name="marked_as_read">既読にしました</string>
+
+    <!-- Reminder screen strings -->
+    <string name="no_time_set">時間が設定されていません</string>
+    <string name="reminder_title">リマインダータイトル</string>
+    <string name="reminder_description">リマインダーの説明</string>
+    <string name="reminder_time">リマインダー時間</string>
+    <string name="reminder_repeat">繰り返し</string>
+    <string name="reminder_active">アクティブ</string>
+    <string name="create_reminder">リマインダーを作成</string>
+    <string name="edit_reminder">リマインダーを編集</string>
+    <string name="delete_reminder">リマインダーを削除</string>
+    <string name="no_reminders">まだリマインダーがありません</string>
+
+    <!-- Repeat type strings -->
+    <string name="repeat_none">繰り返しなし</string>
+    <string name="repeat_daily">毎日</string>
+    <string name="repeat_weekly">毎週</string>
+    <string name="repeat_monthly">毎月</string>
+
+    <!-- Notification strings -->
+    <string name="notification_channel_name">健康リマインダー</string>
+    <string name="notification_channel_description">健康リマインダー通知</string>
+    <string name="notification_reminder_title">リマインダー：%1$s</string>
+    <string name="notification_mark_complete">完了にする</string>
+
+    <!-- Additional strings for article detail screen -->
+    <string name="unlike">いいねを取り消す</string>
+    <string name="add_to_favorite">お気に入りに追加</string>
+    <string name="remove_from_favorite">お気に入りから削除</string>
+    <string name="share_tip">健康ヒントを共有</string>
+    <string name="added_to_favorites">お気に入りに追加しました</string>
+    <string name="removed_from_favorites">お気に入りから削除しました</string>
+
+    <!-- Category screen strings -->
+    <string name="categories_title">すべての健康トピック</string>
+    <string name="categories_subtitle">さまざまな健康トピックを探索</string>
+    <string name="empty_categories_title">カテゴリーが見つかりません</string>
+    <string name="empty_categories_message">現在表示するカテゴリーがありません</string>
+    <string name="empty_categories_description">カテゴリーはここに表示されます</string>
+
+    <!-- Common strings -->
+    <string name="ok">OK</string>
+    <string name="yes">はい</string>
+    <string name="no">いいえ</string>
+    <string name="loading">読み込み中...</string>
+    <string name="error">エラー</string>
+    <string name="success">成功</string>
+    <string name="favorite">お気に入り</string>
+    <string name="no_favorites">まだお気に入りがありません</string>
+    <string name="back">戻る</string>
+
+    <!-- Category detail screen strings -->
+    <string name="empty_tips_description">このカテゴリーにはまだヒントがありません</string>
+    <string name="empty_tips_title">リストが空です</string>
+    <string name="empty_tips_message">このカテゴリーには現在健康ヒントがありません</string>
+
+    <!-- Short video feature strings -->
+    <string name="no_videos_available">利用可能な動画がありません</string>
+    <string name="pull_to_refresh_videos">引いて動画リストを更新</string>
+    <string name="video_liked">動画にいいねしました</string>
+    <string name="video_unliked">動画のいいねを取り消しました</string>
+    <string name="video_shared">動画を共有しました</string>
+    <string name="comment_feature_coming_soon">コメント機能は近日公開</string>
+    <string name="enter_comment">コメントを入力</string>
+    <string name="comments">コメント</string>
+    <string name="no_comments">まだコメントがありません</string>
+    <string name="reply">返信</string>
+    <string name="reply_to">%1$s に返信</string>
+    <string name="share_video">動画を共有</string>
+    <string name="view_user_profile">ユーザープロフィールを表示</string>
+    <string name="error_loading_videos">動画を読み込めません。再試行してください。</string>
+    <string name="trending_videos">トレンド動画</string>
+
+    <!-- Icon placeholders for short video feature -->
+    <string name="ic_video_placeholder">ic_video_placeholder</string>
+    <string name="ic_video_error">ic_video_error</string>
+    <string name="ic_user_placeholder">ic_user_placeholder</string>
+    <string name="ic_heart_filled">ic_heart_filled</string>
+    <string name="ic_heart_outline">ic_heart_outline</string>
+    <string name="ic_comment">ic_comment</string>
+    <string name="ic_share">ic_share</string>
+    <string name="ic_play_arrow">ic_play_arrow</string>
+    <string name="ic_visibility">ic_visibility</string>
+    <string name="ic_schedule">ic_schedule</string>
+    <string name="ic_video_empty">ic_video_empty</string>
+
+    <!-- Additional strings -->
+    <string name="settings_under_development">設定機能は開発中です</string>
+    <string name="like_video">動画にいいね</string>
+    <string name="share_video_action">動画を共有</string>
+
+    <!-- Strings for Search Activity -->
+    <string name="search_hint">健康ヒント、動画を検索...</string>
+    <string name="clear">クリア</string>
+
+    <!-- Strings for Comments Bottom Sheet -->
+    <string name="comments_title">コメント</string>
+    <string name="close_comments">コメントを閉じる</string>
+    <string name="empty_comments_title">コメントがありません</string>
+    <string name="empty_comments_message">最初にコメントしましょう！</string>
+    <string name="comment_input_hint">コメントを書く...</string>
+    <string name="send_comment">送信</string>
+
+    <!-- Strings for Reply Bottom Sheet -->
+    <string name="reply_comment_title">コメントに返信</string>
+    <string name="close_reply">返信を閉じる</string>
+    <string name="replying_to">返信先</string>
+    <string name="reply_input_hint">返信を書く...</string>
+    <string name="send_reply">返信</string>
+
+    <!-- Strings for Search Results -->
+    <string name="no_search_results">結果が見つかりません</string>
+
+    <!-- Strings for User Interface -->
+    <string name="user_avatar">ユーザーアバター</string>
+    <string name="play_video">動画を再生</string>
+
+    <!-- Strings for Search History -->
+    <string name="search_history">検索履歴</string>
+    <string name="delete_search_history">検索履歴を削除</string>
+
+    <!-- Strings for Video -->
+    <string name="video_poster_description">動画ポスター</string>
+
+    <!-- Strings for Settings and Privacy -->
+    <string name="settings_and_privacy">設定とプライバシー</string>
+
+    <!-- Account Section -->
+    <string name="account_section">アカウント</string>
+    <string name="account_management">アカウント</string>
+    <string name="privacy_settings">プライバシー</string>
+    <string name="security_settings">セキュリティ</string>
+    <string name="permissions_settings">権限</string>
+    <string name="security_and_permissions">権限とセキュリティ</string>
+
+    <!-- Content and Display Section -->
+    <string name="content_display_section">コンテンツと表示</string>
+    <string name="notification_settings">通知</string>
+    <string name="language_settings">言語</string>
+    <string name="display_settings">表示</string>
+
+    <!-- Support and About Section -->
+    <string name="support_about_section">サポートと情報</string>
+    <string name="report_issue">問題を報告</string>
+    <string name="support_help">サポート</string>
+    <string name="terms_policy">利用規約とポリシー</string>
+
+    <!-- Descriptions -->
+    <string name="account_management_desc">アカウント情報を管理</string>
+    <string name="privacy_settings_desc">プライバシーとセキュリティの設定</string>
+    <string name="security_settings_desc">アカウントのセキュリティを管理</string>
+    <string name="permissions_settings_desc">アプリの権限を管理</string>
+    <string name="security_and_permissions_desc">セキュリティとアクセス権限を管理</string>
+    <string name="notification_settings_desc">通知とリマインダーの設定</string>
+    <string name="language_settings_desc">表示言語を選択</string>
+    <string name="display_settings_desc">表示インターフェースをカスタマイズ</string>
+    <string name="report_issue_desc">バグや問題を報告</string>
+    <string name="support_help_desc">サポートとガイダンスを取得</string>
+    <string name="terms_policy_desc">利用規約とポリシーを表示</string>
+
+    <!-- Missing strings for Snooze Options -->
+    <string name="snooze_5_min">5分</string>
+    <string name="snooze_10_min">10分</string>
+    <string name="snooze_15_min">15分</string>
+    <string name="snooze_30_min">30分</string>
+
+    <!-- Missing strings for Volume Levels -->
+    <string name="volume_low">低</string>
+    <string name="volume_medium">中</string>
+    <string name="volume_high">高</string>
+    <string name="volume_max">最大</string>
+
+    <!-- Missing strings for Menu -->
+    <string name="menu_search">検索</string>
+    <string name="menu_filter">フィルター</string>
+    <string name="menu_refresh">更新</string>
+    <string name="menu_debug">デバッグ</string>
+
+    <!-- Strings for AppBar Scrolling -->
+    <string name="appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
+
+    <!-- Additional strings for Reminder -->
+    <string name="reminder_title_default">健康リマインダー</string>
+    <string name="reminder_message_default">リマインダーの時間です</string>
+    <string name="reminder_snooze">スヌーズ</string>
+    <string name="reminder_dismiss">閉じる</string>
+    <string name="select_sound">サウンドを選択</string>
+    <string name="reminder_sound">リマインダーサウンド</string>
+    <string name="sound_default">デフォルトサウンド</string>
+    <string name="reminder_volume">音量</string>
+    <string name="reminder_snooze_duration">スヌーズ時間</string>
+    <string name="reminder_vibrate">バイブレーション</string>
+    <string name="reminder_alarm_style">アラームスタイル</string>
+
+    <!-- Strings for Sound Types -->
+    <string name="sound_alarm">アラーム</string>
+    <string name="sound_notification">通知</string>
+    <string name="sound_music">音楽</string>
+    <string name="sound_none">サウンドなし</string>
+
+    <!-- Strings for Search History -->
+    <string name="clear_all_history">すべての履歴をクリア</string>
+    <string name="see_more_history">もっと履歴を見る</string>
+    <string name="see_less_history">履歴を折りたたむ</string>
+    <string name="no_search_history">検索履歴がありません</string>
+
+    <!-- Strings for Search Tabs -->
+    <string name="search_articles_tab">記事</string>
+    <string name="search_videos_tab">動画</string>
+
+    <!-- ========== Support & About Strings ========== -->
+
+    <!-- Support Center -->
+    <string name="support_center">サポートセンター</string>
+    <string name="support_center_desc">問題を報告してサポートを受ける</string>
+    <string name="help_center">ヘルプセンター</string>
+    <string name="contact_support">サポートに連絡</string>
+    <string name="my_tickets">マイチケット</string>
+    <string name="create_ticket">サポートチケットを作成</string>
+    <string name="view_all_tickets">すべてのチケットを表示</string>
+
+    <!-- Ticket Types -->
+    <string name="ticket_type">問題の種類</string>
+    <string name="ticket_type_bug_report">バグ報告</string>
+    <string name="ticket_type_content_report">コンテンツ報告</string>
+    <string name="ticket_type_feature_request">機能リクエスト</string>
+    <string name="ticket_type_account_issue">アカウントの問題</string>
+    <string name="ticket_type_general_inquiry">一般的なお問い合わせ</string>
+    <string name="ticket_type_other">その他</string>
+
+    <!-- Ticket Status -->
+    <string name="ticket_status">ステータス</string>
+    <string name="ticket_status_open">オープン</string>
+    <string name="ticket_status_in_progress">進行中</string>
+    <string name="ticket_status_resolved">解決済み</string>
+    <string name="ticket_status_closed">クローズ</string>
+
+    <!-- Ticket Priority -->
+    <string name="ticket_priority">優先度</string>
+    <string name="ticket_priority_low">低</string>
+    <string name="ticket_priority_medium">中</string>
+    <string name="ticket_priority_high">高</string>
+    <string name="ticket_priority_urgent">緊急</string>
+
+    <!-- Ticket Form -->
+    <string name="ticket_subject">件名</string>
+    <string name="ticket_subject_hint">問題の簡単な説明</string>
+    <string name="ticket_description">詳細な説明</string>
+    <string name="ticket_description_hint">問題を詳しく説明してください...</string>
+    <string name="ticket_attach_screenshot">スクリーンショットを添付</string>
+    <string name="ticket_screenshot_attached">スクリーンショットを添付しました</string>
+    <string name="ticket_remove_screenshot">スクリーンショットを削除</string>
+    <string name="ticket_submit">チケットを送信</string>
+    <string name="ticket_submitting">送信中...</string>
+    <string name="ticket_submit_success">チケットを正常に送信しました</string>
+    <string name="ticket_submit_error">チケットを送信できません</string>
+
+    <!-- Ticket Details -->
+    <string name="ticket_detail_title">チケット詳細</string>
+    <string name="ticket_id">チケットID</string>
+    <string name="ticket_created_at">作成日</string>
+    <string name="ticket_updated_at">最終更新</string>
+    <string name="ticket_description_label">問題の説明</string>
+    <string name="ticket_device_info_label">デバイス情報</string>
+    <string name="ticket_admin_response_label">サポート回答</string>
+    <string name="ticket_admin_response">サポート回答</string>
+    <string name="ticket_no_response">まだ回答がありません</string>
+    <string name="ticket_waiting_response">回答待ち...</string>
+    <string name="ticket_screenshot_desc">添付されたスクリーンショット</string>
+    <string name="status_open">オープン</string>
+    <string name="priority_medium">中</string>
+    <string name="ticket_type_bug">バグ報告</string>
+
+    <!-- Ticket List -->
+    <string name="no_tickets_title">サポートチケットがありません</string>
+    <string name="no_tickets_message">サポートチケットがありません。問題が発生した場合は、新しいチケットを作成してください。</string>
+    <string name="loading_tickets">チケットを読み込み中...</string>
+
+    <!-- About App -->
+    <string name="about_app">情報</string>
+    <string name="about_app_desc">アプリ情報</string>
+    <string name="app_version">アプリバージョン</string>
+    <string name="app_description">アプリの説明</string>
+    <string name="app_description_text">健康のヒントは、毎日の健康管理に役立つ有用な健康ヒントを提供するアプリです。このアプリは、健康ヒントの閲覧、ショート動画、AIチャット、健康リマインダーなど、多くの機能を提供しています。</string>
+    <string name="developed_by">開発者</string>
+    <string name="developer_name">健康のヒントチーム</string>
+    <string name="contact_us">お問い合わせ</string>
+    <string name="contact_email">メールアドレス</string>
+    <string name="contact_email_value">vuhoainam.dev@gmail.com</string>
+    <string name="follow_us">フォローする</string>
+    <string name="rate_app">アプリを評価</string>
+    <string name="share_app">アプリを共有</string>
+    <string name="share_app_text">健康のヒントを試してみてください - 素晴らしい健康ヒントアプリです！</string>
+
+    <!-- Terms & Policies -->
+    <string name="terms_of_service">利用規約</string>
+    <string name="privacy_policy">プライバシーポリシー</string>
+    <string name="community_guidelines">コミュニティガイドライン</string>
+    <string name="copyright_policy">著作権ポリシー</string>
+    <string name="cookie_policy">Cookieポリシー</string>
+    <string name="intellectual_property">知的財産</string>
+
+    <!-- Legal -->
+    <string name="legal">法的情報</string>
+    <string name="last_updated">最終更新</string>
+    <string name="effective_date">発効日</string>
+
+    <!-- FAQ -->
+    <string name="faq">よくある質問</string>
+    <string name="faq_how_to_use">アプリの使い方は？</string>
+    <string name="faq_how_to_save">お気に入りのヒントを保存するには？</string>
+    <string name="faq_how_to_reminder">リマインダーを作成するには？</string>
+    <string name="faq_how_to_chat">AIチャットの使い方は？</string>
+    <string name="faq_how_to_report">コンテンツを報告するには？</string>
+
+    <!-- Report Content -->
+    <string name="report_content">コンテンツを報告</string>
+    <string name="report_content_reason">報告理由</string>
+    <string name="report_spam">スパム</string>
+    <string name="report_inappropriate">不適切なコンテンツ</string>
+    <string name="report_misleading">誤解を招く情報</string>
+    <string name="report_harassment">嫌がらせ</string>
+    <string name="report_violence">暴力</string>
+    <string name="report_hate_speech">ヘイトスピーチ</string>
+    <string name="report_copyright">著作権侵害</string>
+    <string name="report_other_reason">その他の理由</string>
+    <string name="report_details">報告の詳細</string>
+    <string name="report_submit">報告を送信</string>
+    <string name="report_success">報告を正常に送信しました</string>
+    <string name="report_thank_you">報告ありがとうございます。確認して対応いたします。</string>
+
+    <!-- Validation Messages -->
+    <string name="error_empty_subject">件名を入力してください</string>
+    <string name="error_empty_description">詳細な説明を入力してください</string>
+    <string name="error_select_ticket_type">問題の種類を選択してください</string>
+    <string name="select_ticket_type">問題の種類を選択</string>
+    <string name="device_info_auto_collected">デバイス情報は自動的に送信され、より良いサポートを提供します</string>
+    <string name="error_loading_failed">読み込みに失敗しました</string>
+    <string name="error_network">ネットワークエラー</string>
+
+    <!-- Additional Strings for Report Issue -->
+    <string name="subject">件名</string>
+    <string name="enter_subject">問題の件名を入力</string>
+    <string name="enter_description">問題を詳しく説明...</string>
+    <string name="device_info">デバイス情報</string>
+    <string name="icon">アイコン</string>
+    <string name="navigate">ナビゲート</string>
+
+    <!-- Common Actions -->
+    <string name="action_retry">再試行</string>
+    <string name="action_cancel">キャンセル</string>
+    <string name="action_ok">OK</string>
+    <string name="action_send">送信</string>
+    <string name="action_close">閉じる</string>
+    <string name="action_back">戻る</string>
+    <string name="action_next">次へ</string>
+    <string name="action_done">完了</string>
+    <string name="action_view">表示</string>
+    <string name="action_delete">削除</string>
+    <string name="action_edit">編集</string>
+    <string name="action_select_image">画像を選択</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_info_title">アカウント情報</string>
+    <string name="account_email_label">メールアドレス</string>
+    <string name="account_email_placeholder">user@example.com</string>
+    <string name="account_display_name_label">表示名</string>
+    <string name="account_display_name_placeholder">ユーザー</string>
+    <string name="account_joined_date_label">参加日</string>
+    <string name="account_joined_date_placeholder">2024年1月1日</string>
+    <string name="account_manage_title">アカウント管理</string>
+    <string name="account_edit_profile">プロフィールを編集</string>
+    <string name="account_edit_profile_desc">個人情報を更新</string>
+    <string name="account_change_password">パスワードを変更</string>
+    <string name="account_change_password_desc">ログインパスワードを変更</string>
+    <string name="account_two_factor_auth">2要素認証</string>
+    <string name="account_two_factor_auth_desc">アカウントのセキュリティを強化</string>
+    <string name="account_danger_zone">危険ゾーン</string>
+    <string name="account_logout">ログアウト</string>
+    <string name="account_logout_desc">このアカウントからログアウト</string>
+    <string name="account_delete">アカウントを削除</string>
+    <string name="account_delete_desc">アカウントとデータを永久に削除</string>
+
+    <!-- ========== Privacy Settings Strings ========== -->
+    <string name="privacy_intro">あなたの情報とアクティビティを誰が見ることができるかを制御</string>
+    <string name="privacy_profile_title">プロフィール表示</string>
+    <string name="privacy_public_profile">公開プロフィール</string>
+    <string name="privacy_public_profile_desc">すべての人があなたのプロフィールを表示できるようにする</string>
+    <string name="privacy_show_email">メールアドレスを表示</string>
+    <string name="privacy_show_email_desc">他の人があなたのメールアドレスを見ることができるようにする</string>
+    <string name="privacy_activity_title">アクティビティ</string>
+    <string name="privacy_show_activity">アクティビティを表示</string>
+    <string name="privacy_show_activity_desc">他の人があなたのアクティビティを見ることができるようにする</string>
+    <string name="privacy_show_liked_posts">いいねした投稿</string>
+    <string name="privacy_show_liked_posts_desc">あなたがいいねした投稿を表示</string>
+    <string name="privacy_data_title">データとストレージ</string>
+    <string name="privacy_clear_search_history">検索履歴をクリア</string>
+    <string name="privacy_clear_search_history_desc">すべての検索履歴を削除</string>
+    <string name="privacy_clear_view_history">閲覧履歴をクリア</string>
+    <string name="privacy_clear_view_history_desc">閲覧した記事の履歴をクリア</string>
+    <string name="privacy_download_data">データをダウンロード</string>
+    <string name="privacy_download_data_desc">データのコピーをダウンロード</string>
+    <string name="privacy_block_title">ブロックと制限</string>
+    <string name="privacy_blocked_users">ブロックしたユーザー</string>
+    <string name="privacy_blocked_users_count">0人のユーザー</string>
+
+
+    <!-- ========== Security Settings Strings ========== -->
+    <string name="security_and_permissions_intro">アカウントのセキュリティとアプリのアクセス権限を管理</string>
+    <string name="security_section_title">セキュリティ</string>
+    <string name="security_intro">セキュリティとアカウントアクセス制御を管理</string>
+    <string name="security_password_title">パスワードと認証</string>
+    <string name="security_change_password">パスワードを変更</string>
+    <string name="security_change_password_desc">ログインパスワードを更新</string>
+    <string name="security_two_factor">2要素認証</string>
+    <string name="security_two_factor_desc">アカウントに追加のセキュリティレイヤーを追加</string>
+    <string name="security_fingerprint">指紋ログイン</string>
+    <string name="security_fingerprint_desc">指紋を使用して素早くログイン</string>
+    <string name="security_face_id">顔認証ログイン</string>
+    <string name="security_face_id_desc">顔認識を使用</string>
+
+    <string name="security_sessions_title">ログインセッション</string>
+    <string name="security_session_title">ログインセッション</string>
+    <string name="security_active_sessions">アクティブセッション</string>
+    <string name="security_active_sessions_desc">ログインしているデバイスを管理</string>
+    <string name="security_auto_logout">自動ログアウト</string>
+    <string name="security_auto_logout_desc">非アクティブ後にログアウト</string>
+
+    <string name="security_advanced_title">高度なセキュリティ</string>
+    <string name="security_data_title">データセキュリティ</string>
+    <string name="security_encrypt_data">データを暗号化</string>
+    <string name="security_encrypt_data_desc">デバイス上の個人データを暗号化</string>
+    <string name="security_secure_mode">高セキュリティモード</string>
+    <string name="security_secure_mode_desc">スクリーンショットと画面録画をブロック</string>
+    <string name="security_suspicious_alert">不審なログインアラート</string>
+    <string name="security_suspicious_alert_desc">異常なログインアクティビティの通知を受け取る</string>
+
+    <string name="security_activity_title">アカウントアクティビティ</string>
+    <string name="security_login_history">ログイン履歴</string>
+    <string name="security_login_history_desc">最近のログインアクティビティを表示</string>
+    <string name="security_suspicious_activity">不審なアクティビティ</string>
+    <string name="security_suspicious_activity_desc">異常なアクティビティの通知を受け取る</string>
+
+    <!-- ========== Permissions Settings Strings ========== -->
+    <string name="permissions_section_title">アクセス権限</string>
+    <string name="permissions_intro">アプリのデバイス機能へのアクセスを管理</string>
+    <string name="permissions_app_title">アプリの権限</string>
+    <string name="permissions_required_title">必須権限</string>
+    <string name="permissions_storage">ストレージ</string>
+    <string name="permissions_storage_desc">写真とオフラインデータを保存</string>
+    <string name="permissions_camera">カメラ</string>
+    <string name="permissions_camera_desc">プロフィールと報告用に写真を撮影</string>
+    <string name="permissions_notification">通知</string>
+    <string name="permissions_notification_desc">健康リマインダーを受信</string>
+    <string name="permissions_notifications">通知</string>
+    <string name="permissions_notifications_desc">健康リマインダーを受信</string>
+
+    <string name="permissions_optional_title">オプションの権限</string>
+    <string name="permissions_location">位置情報</string>
+    <string name="permissions_location_desc">地域に適したコンテンツを提供</string>
+    <string name="permissions_contacts">連絡先</string>
+    <string name="permissions_contacts_desc">友達と健康ヒントを共有</string>
+    <string name="permissions_microphone">マイク</string>
+    <string name="permissions_microphone_desc">音声検索</string>
+
+    <string name="permissions_management_title">権限管理</string>
+    <string name="permissions_app_settings_title">アプリ設定</string>
+    <string name="permissions_open_settings">システム設定を開く</string>
+    <string name="permissions_open_settings_desc">Android設定で権限を変更</string>
+    <string name="permissions_reset">権限をリセット</string>
+    <string name="permissions_reset_desc">すべての付与された権限を取り消す</string>
+    <string name="permissions_reset_permissions">権限をリセット</string>
+    <string name="permissions_reset_permissions_desc">すべての付与された権限を取り消す</string>
+
+    <string name="permission_status_granted">許可済み</string>
+    <string name="permission_status_denied">拒否</string>
+    <string name="permission_status_not_requested">リクエストされていません</string>
+
+    <!-- Icon Content Descriptions -->
+    <string name="icon_email_desc">メールアイコン</string>
+    <string name="icon_person_desc">人物アイコン</string>
+    <string name="icon_calendar_desc">カレンダーアイコン</string>
+    <string name="icon_edit_desc">編集アイコン</string>
+    <string name="icon_lock_desc">ロックアイコン</string>
+    <string name="icon_shield_desc">シールドアイコン</string>
+    <string name="icon_logout_desc">ログアウトアイコン</string>
+    <string name="icon_delete_desc">削除アイコン</string>
+    <string name="icon_arrow_forward_desc">前進矢印</string>
+    <string name="icon_people_desc">人々アイコン</string>
+    <string name="icon_visibility_desc">表示アイコン</string>
+    <string name="icon_favorite_desc">お気に入りアイコン</string>
+    <string name="icon_history_desc">履歴アイコン</string>
+    <string name="icon_download_desc">ダウンロードアイコン</string>
+    <string name="icon_fingerprint_desc">指紋アイコン</string>
+    <string name="icon_notification_desc">通知アイコン</string>
+    <string name="icon_settings_desc">設定アイコン</string>
+
+    <!-- Security and Permissions Misc -->
+    <string name="one_device">1台のデバイス</string>
+
+    <!-- ========== Language Settings Strings ========== -->
+    <string name="language_selection_desc">アプリの表示言語を選択</string>
+    <string name="language_restart_notice">アプリは自動的に再起動して新しい言語を適用します</string>
+    <string name="language_changed">言語が変更されました：%1$s。適用中...</string>
+
+    <!-- Language names -->
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_english">English</string>
+    <string name="lang_chinese">中文 (Chinese)</string>
+    <string name="lang_japanese">日本語 (Japanese)</string>
+    <string name="lang_korean">한국어 (Korean)</string>
+    <string name="lang_french">Français (French)</string>
+    <string name="lang_german">Deutsch (German)</string>
+    <string name="lang_spanish">Español (Spanish)</string>
+
+    <!-- ========== Notification Settings Strings ========== -->
+    <string name="notification_manage_desc">受信したい通知を管理</string>
+    <string name="all_notifications">すべての通知</string>
+    <string name="toggle_all_notifications">すべての通知をオン/オフ</string>
+    <string name="content_notifications">コンテンツ通知</string>
+    <string name="new_health_tips">新しい健康ヒント</string>
+    <string name="new_tips_notification">新しいヒントが利用可能になったときに通知</string>
+    <string name="reminders">リマインダー</string>
+    <string name="schedule_reminders">リマインダーをスケジュール</string>
+    <string name="interaction_notifications">インタラクション通知</string>
+    <string name="likes">いいね</string>
+    <string name="new_followers">新しいフォロワー</string>
+    <string name="system_notifications">システム通知</string>
+    <string name="app_updates">アプリの更新</string>
+    <string name="sound_settings">サウンド設定</string>
+    <string name="sound">サウンド</string>
+    <string name="vibration">バイブレーション</string>
+
+    <!-- ========== Display Settings Strings ========== -->
+    <string name="display_customize_desc">アプリの表示インターフェースをカスタマイズ</string>
+    <string name="display_mode">表示モード</string>
+    <string name="dark_mode">ダークモード</string>
+    <string name="dark_mode_quick">ダークモードをすばやく有効にする</string>
+    <string name="theme_mode">テーマモード</string>
+    <string name="system_default">システムデフォルト</string>
+    <string name="light_mode">ライトモード</string>
+    <string name="font_size">フォントサイズ</string>
+    <string name="font_size_display">表示フォントサイズ</string>
+    <string name="small">小</string>
+    <string name="large">大</string>
+    <string name="preview">プレビュー：</string>
+    <string name="preview_text_sample">これはフォントサイズをプレビューするためのサンプルテキストです</string>
+    <string name="restart_app_notice">一部の変更はすぐに適用されますが、他の変更にはアプリの再起動が必要な場合があります</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_pending_deletion">⚠️ アカウント削除待ち</string>
+    <string name="account_deletion_countdown">あなたのアカウントは次の時間後に削除されます：%1$s</string>
+    <string name="cancel_account_deletion">アカウント削除をキャンセル</string>
+
+    <!-- ========== Change Password Strings ========== -->
+    <string name="change_password_desc">現在のパスワードと新しいパスワードを入力</string>
+    <string name="change_password_action">パスワードを変更</string>
+    <string name="password_requirements">パスワードは少なくとも6文字で、セキュリティを向上させるために大文字、小文字、数字、特殊文字を含める必要があります。</string>
+    <string name="current_password">現在のパスワード</string>
+    <string name="new_password">新しいパスワード</string>
+    <string name="confirm_new_password">新しいパスワードを確認</string>
+
+    <!-- ========== Edit Profile Strings ========== -->
+    <string name="display_name">表示名</string>
+    <string name="phone_number">電話番号</string>
+    <string name="email_example">メールアドレス：example@gmail.com</string>
+
+    <!-- ========== About App Strings ========== -->
+    <string name="quick_actions">クイックアクション</string>
+    <string name="copyright_text">© 2024 健康のヒント。全著作権所有。</string>
+
+    <!-- ========== Login/Register Strings ========== -->
+    <string name="no_account_register">アカウントをお持ちでない方は今すぐ登録</string>
+
+    <!-- ========== Chat Strings ========== -->
+    <string name="no_conversations">まだ会話がありません</string>
+    <string name="chat_welcome">こんにちは！私はあなたの健康AIアシスタントです</string>
+    <string name="chat_ai_greeting">健康AIアシスタントへようこそ！</string>
+    <string name="chat_hint">健康に関する質問を入力...</string>
+    <string name="chat_continue_hint">会話を続ける...</string>
+    <string name="ai_responding">AIが応答しています</string>
+    <string name="start_conversation">会話を始める</string>
+    <string name="view_more_conversations">もっと会話を見る</string>
+    <string name="new_conversation_desc">新しい会話を作成</string>
+
+    <!-- ========== Alarm/Reminder Strings ========== -->
+    <string name="alarm_time_default">08:30</string>
+    <string name="alarm_date_example">月曜日、2025年10月17日</string>
+    <string name="health_reminder_default">健康リマインダー</string>
+    <string name="health_reminder_message">健康ヒントを見る時間です！</string>
+
+    <!-- ========== Video Strings ========== -->
+    <string name="no_liked_videos_yet">まだいいねした動画がありません</string>
+
+    <!-- ========== Support Strings ========== -->
+    <string name="device_info_notice">デバイス情報は自動的に送信され、より良いサポートを提供します</string>
+
+    <!-- ========== FAQ Strings ========== -->
+    <string name="faq_title">よくある質問</string>
+
+    <!-- ========== Other Common Strings ========== -->
+    <string name="choose">選択</string>
+    <string name="avatar">アバター</string>
+    <string name="featured_posts">⭐ 注目の投稿</string>
+    <string name="alarm_settings">アラーム設定</string>
+
+    <!-- ========== Health Tip Detail Strings ========== -->
+    <string name="category_label">カテゴリー：</string>
+    <string name="tags_label">タグ：</string>
+    <string name="like_action">いいね</string>
+
+    <!-- ========== Dialog Reminder Strings ========== -->
+    <string name="date_label">日付：</string>
+    <string name="time_label">時間：</string>
+    <string name="hour_label">時：</string>
+    <string name="repeat_label">繰り返し：</string>
+    <string name="activate_reminder">リマインダーを有効化：</string>
+    <string name="reminder_info">リマインダー情報</string>
+    <string name="time_and_repeat">時間と繰り返し</string>
+    <string name="save_changes">変更を保存</string>
+    <string name="date_placeholder">--/--/----</string>
+    <string name="time_placeholder">--:--</string>
+    <string name="date_example">2025年10月16日</string>
+    <string name="time_example">08:00</string>
+    <string name="volume_percent">80%</string>
+
+    <!-- ========== Chat AI Strings ========== -->
+    <string name="ai_health_assistant">AI健康アシスタント</string>
+    <string name="creating_conversation">会話を作成中...</string>
+    <string name="sending_message">メッセージを送信中...</string>
+    <string name="ai_replying">AIが返信中...</string>
+    <string name="error_create_conversation">会話の作成エラー：%1$s</string>
+    <string name="error_send_message">メッセージ送信エラー：%1$s</string>
+    <string name="please_enter_message">メッセージを入力してください</string>
+    <string name="delete_all_conversations_confirm">すべての会話履歴を削除してもよろしいですか？</string>
+    <string name="sample_question_1">💪 免疫力を高めるには？</string>
+    <string name="sample_question_2">🥗 心臓の健康に良い食事は？</string>
+    <string name="sample_question_3">😴 睡眠の質を向上させるには？</string>
+
+    <!-- ========== Video Strings (Extended) ========== -->
+    <string name="loading_liked_videos">いいねした動画を読み込み中...</string>
+    <string name="no_liked_videos_title">いいねした動画がありません</string>
+    <string name="no_liked_videos_desc">お気に入りの動画を発見していいねしましょう！</string>
+    <string name="loading_videos_text">動画を読み込み中...</string>
+    <string name="no_videos_title">利用可能な動画がありません</string>
+    <string name="no_videos_desc">後でもう一度試すか、ネットワーク接続を確認してください</string>
+    <string name="try_again_action">再試行</string>
+    <string name="duration_placeholder">0:30</string>
+    <string name="views_placeholder">1.2K</string>
+    <string name="views_count">回の視聴</string>
+    <string name="months_ago">ヶ月前</string>
+    <string name="weeks_ago">週間前</string>
+    <string name="days_ago">日前</string>
+    <string name="hours_ago">時間前</string>
+    <string name="minutes_ago">分前</string>
+    <string name="years_ago">年前</string>
+    <string name="just_now">たった今</string>
+
+    <!-- ========== Profile Strings ========== -->
+    <string name="username_label">ユーザー名</string>
+    <string name="username_placeholder">\@username</string>
+    <string name="article_title_placeholder">記事タイトル</string>
+    <string name="favorite_articles">お気に入りの記事</string>
+    <string name="favorite_articles_tab">お気に入りの記事</string>
+    <string name="video_liked_tab">いいねした動画</string>
+
+</resources>
