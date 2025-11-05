@@ -78,7 +78,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Tên hiển thị">
+                android:hint="@string/display_name">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_display_name"
@@ -95,7 +95,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Số điện thoại">
+                android:hint="@string/phone_number">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_phone"
@@ -112,7 +112,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:textSize="16sp"
-                android:text="Email: example@gmail.com"
+                android:text="@string/email_example"
                 android:textColor="?android:attr/textColorSecondary" />
 
             <com.google.android.material.button.MaterialButton
@@ -120,7 +120,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:text="Lưu thay đổi"
+                android:text="@string/save_changes"
                 app:cornerRadius="8dp" />
 
         </LinearLayout>

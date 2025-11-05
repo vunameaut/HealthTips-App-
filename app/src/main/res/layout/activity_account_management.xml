@@ -371,7 +371,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚠️ Tài khoản đang chờ xóa"
+                    android:text="@string/account_pending_deletion"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textColor="#E65100"
                     android:textStyle="bold" />
@@ -381,7 +381,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Tài khoản của bạn sẽ bị xóa sau: X ngày X giờ"
+                    android:text="@string/account_deletion_countdown"
                     android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                     android:textColor="#E65100" />
 
@@ -408,7 +408,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="Hủy yêu cầu xóa tài khoản"
+                        android:text="@string/cancel_account_deletion"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textColor="#E65100"
                         android:textStyle="bold" />

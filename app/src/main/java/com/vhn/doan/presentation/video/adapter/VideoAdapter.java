@@ -627,7 +627,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             }
 
             // Counts
-            viewCountTextView.setText(formatCount(video.getViewCount()) + " lượt xem");
+            viewCountTextView.setText(formatCount(video.getViewCount()) + " " + itemView.getContext().getString(R.string.views_count));
             likeCountTextView.setText(formatCount(video.getLikeCount()));
 
             // Upload date
@@ -702,19 +702,19 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             long years = days / 365;
 
             if (years > 0) {
-                return years + " năm trước";
+                return years + " " + itemView.getContext().getString(R.string.years_ago);
             } else if (months > 0) {
-                return months + " tháng trước";
+                return months + " " + itemView.getContext().getString(R.string.months_ago);
             } else if (weeks > 0) {
-                return weeks + " tuần trước";
+                return weeks + " " + itemView.getContext().getString(R.string.weeks_ago);
             } else if (days > 0) {
-                return days + " ngày trước";
+                return days + " " + itemView.getContext().getString(R.string.days_ago);
             } else if (hours > 0) {
-                return hours + " giờ trước";
+                return hours + " " + itemView.getContext().getString(R.string.hours_ago);
             } else if (minutes > 0) {
-                return minutes + " phút trước";
+                return minutes + " " + itemView.getContext().getString(R.string.minutes_ago);
             } else {
-                return "Vừa xong";
+                return itemView.getContext().getString(R.string.just_now);
             }
         }
     }

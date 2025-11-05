@@ -137,10 +137,10 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
-                    tab.setText("Bài viết yêu thích");
+                    tab.setText(R.string.favorite_articles_tab);
                     break;
                 case 1:
-                    tab.setText("Video đã like");
+                    tab.setText(R.string.video_liked_tab);
                     break;
             }
         }).attach();

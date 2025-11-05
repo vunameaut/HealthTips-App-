@@ -656,4 +656,170 @@
     <!-- Security and Permissions Misc -->
     <string name="one_device">1 thiết bị</string>
 
+    <!-- ========== Language Settings Strings ========== -->
+    <string name="language_selection_desc">Chọn ngôn ngữ hiển thị cho ứng dụng</string>
+    <string name="language_restart_notice">Ứng dụng sẽ tự động khởi động lại để áp dụng ngôn ngữ mới</string>
+    <string name="language_changed">Đã đổi ngôn ngữ: %1$s. Đang áp dụng...</string>
+
+    <!-- Language names -->
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_english">English</string>
+    <string name="lang_chinese">中文 (Chinese)</string>
+    <string name="lang_japanese">日本語 (Japanese)</string>
+    <string name="lang_korean">한국어 (Korean)</string>
+    <string name="lang_french">Français (French)</string>
+    <string name="lang_german">Deutsch (German)</string>
+    <string name="lang_spanish">Español (Spanish)</string>
+
+    <!-- ========== Notification Settings Strings ========== -->
+    <string name="notification_manage_desc">Quản lý thông báo bạn muốn nhận</string>
+    <string name="all_notifications">Tất cả thông báo</string>
+    <string name="toggle_all_notifications">Bật/tắt tất cả thông báo</string>
+    <string name="content_notifications">Thông báo về nội dung</string>
+    <string name="new_health_tips">Mẹo sức khỏe mới</string>
+    <string name="new_tips_notification">Thông báo khi có mẹo mới</string>
+    <string name="reminders">Nhắc nhở</string>
+    <string name="schedule_reminders">Nhắc nhở về lịch trình</string>
+    <string name="interaction_notifications">Thông báo tương tác</string>
+    <string name="likes">Lượt thích</string>
+    <string name="new_followers">Người theo dõi mới</string>
+    <string name="system_notifications">Thông báo hệ thống</string>
+    <string name="app_updates">Cập nhật ứng dụng</string>
+    <string name="sound_settings">Cài đặt âm thanh</string>
+    <string name="sound">Âm thanh</string>
+    <string name="vibration">Rung</string>
+
+    <!-- ========== Display Settings Strings ========== -->
+    <string name="display_customize_desc">Tùy chỉnh giao diện hiển thị của ứng dụng</string>
+    <string name="display_mode">Chế độ hiển thị</string>
+    <string name="dark_mode">Chế độ tối</string>
+    <string name="dark_mode_quick">Bật chế độ tối nhanh</string>
+    <string name="theme_mode">Chế độ giao diện</string>
+    <string name="system_default">Theo hệ thống</string>
+    <string name="light_mode">Chế độ sáng</string>
+    <string name="font_size">Kích thước chữ</string>
+    <string name="font_size_display">Kích thước chữ hiển thị</string>
+    <string name="small">Nhỏ</string>
+    <string name="large">Lớn</string>
+    <string name="preview">Xem trước:</string>
+    <string name="preview_text_sample">Đây là văn bản mẫu để xem trước kích thước chữ</string>
+    <string name="restart_app_notice">Một số thay đổi sẽ được áp dụng ngay lập tức, một số có thể cần khởi động lại ứng dụng</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_pending_deletion">⚠️ Tài khoản đang chờ xóa</string>
+    <string name="account_deletion_countdown">Tài khoản của bạn sẽ bị xóa sau: %1$s</string>
+    <string name="cancel_account_deletion">Hủy yêu cầu xóa tài khoản</string>
+
+    <!-- ========== Change Password Strings ========== -->
+    <string name="change_password_desc">Nhập mật khẩu hiện tại và mật khẩu mới của bạn</string>
+    <string name="change_password_action">Đổi mật khẩu</string>
+    <string name="password_requirements">Mật khẩu của bạn phải có ít nhất 6 ký tự và nên bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt để bảo mật tốt hơn.</string>
+    <string name="current_password">Mật khẩu hiện tại</string>
+    <string name="new_password">Mật khẩu mới</string>
+    <string name="confirm_new_password">Xác nhận mật khẩu mới</string>
+
+    <!-- ========== Edit Profile Strings ========== -->
+    <string name="display_name">Tên hiển thị</string>
+    <string name="phone_number">Số điện thoại</string>
+    <string name="email_example">Email: example@gmail.com</string>
+
+    <!-- ========== About App Strings ========== -->
+    <string name="quick_actions">Hành động nhanh</string>
+    <string name="copyright_text">© 2024 HealthTips. All rights reserved.</string>
+
+    <!-- ========== Login/Register Strings ========== -->
+    <string name="no_account_register">Chưa có tài khoản? Đăng ký ngay</string>
+
+    <!-- ========== Chat Strings ========== -->
+    <string name="no_conversations">Chưa có cuộc trò chuyện nào</string>
+    <string name="chat_welcome">Chào bạn! Tôi là trợ lý AI về sức khỏe</string>
+    <string name="chat_ai_greeting">Chào mừng bạn đến với Trợ lý AI Sức khỏe!</string>
+    <string name="chat_hint">Nhập câu hỏi về sức khỏe...</string>
+    <string name="chat_continue_hint">Tiếp tục cuộc trò chuyện...</string>
+    <string name="ai_responding">AI đang trả lời</string>
+    <string name="start_conversation">Bắt đầu trò chuyện</string>
+    <string name="view_more_conversations">Xem thêm cuộc trò chuyện</string>
+    <string name="new_conversation_desc">Tạo cuộc trò chuyện mới</string>
+
+    <!-- ========== Alarm/Reminder Strings ========== -->
+    <string name="alarm_time_default">08:30</string>
+    <string name="alarm_date_example">Thứ Hai, 17/10/2025</string>
+    <string name="health_reminder_default">Nhắc nhở sức khỏe</string>
+    <string name="health_reminder_message">Đã đến giờ thực hiện mẹo sức khỏe!</string>
+
+    <!-- ========== Video Strings ========== -->
+    <string name="no_liked_videos_yet">Chưa có video nào được thích</string>
+
+    <!-- ========== Support Strings ========== -->
+    <string name="device_info_notice">Thông tin thiết bị sẽ được tự động gửi kèm để hỗ trợ tốt hơn</string>
+
+    <!-- ========== FAQ Strings ========== -->
+    <string name="faq_title">Câu hỏi thường gặp</string>
+
+    <!-- ========== Other Common Strings ========== -->
+    <string name="choose">Chọn</string>
+    <string name="avatar">Ảnh đại diện</string>
+    <string name="featured_posts">⭐ BÀI VIẾT NỔI BẬT</string>
+    <string name="alarm_settings">Cài đặt báo thức</string>
+
+    <!-- ========== Health Tip Detail Strings ========== -->
+    <string name="category_label">Danh mục:</string>
+    <string name="tags_label">Tags:</string>
+    <string name="like_action">Thích</string>
+
+    <!-- ========== Dialog Reminder Strings ========== -->
+    <string name="date_label">Ngày:</string>
+    <string name="time_label">Thời gian:</string>
+    <string name="hour_label">Giờ:</string>
+    <string name="repeat_label">Lặp lại:</string>
+    <string name="activate_reminder">Kích hoạt nhắc nhở:</string>
+    <string name="reminder_info">Thông tin nhắc nhở</string>
+    <string name="time_and_repeat">Thời gian và lặp lại</string>
+    <string name="save_changes">Lưu thay đổi</string>
+    <string name="date_placeholder">--/--/----</string>
+    <string name="time_placeholder">--:--</string>
+    <string name="date_example">16/10/2025</string>
+    <string name="time_example">08:00</string>
+    <string name="volume_percent">80%</string>
+
+    <!-- ========== Chat AI Strings ========== -->
+    <string name="ai_health_assistant">Trợ lý AI Sức khỏe</string>
+    <string name="creating_conversation">Đang tạo cuộc trò chuyện...</string>
+    <string name="sending_message">Đang gửi tin nhắn...</string>
+    <string name="ai_replying">AI đang trả lời...</string>
+    <string name="error_create_conversation">Lỗi tạo cuộc trò chuyện: %1$s</string>
+    <string name="error_send_message">Lỗi gửi tin nhắn: %1$s</string>
+    <string name="please_enter_message">Vui lòng nhập nội dung tin nhắn</string>
+    <string name="delete_all_conversations_confirm">Bạn có chắc chắn muốn xóa toàn bộ lịch sử cuộc trò chuyện không?</string>
+    <string name="sample_question_1">💪 Làm thế nào để tăng cường sức đề kháng?</string>
+    <string name="sample_question_2">🥗 Chế độ ăn nào tốt cho tim mạch?</string>
+    <string name="sample_question_3">😴 Cách cải thiện chất lượng giấc ngủ?</string>
+
+    <!-- ========== Video Strings (Extended) ========== -->
+    <string name="loading_liked_videos">Đang tải video đã thích...</string>
+    <string name="no_liked_videos_title">Chưa có video nào được thích</string>
+    <string name="no_liked_videos_desc">Hãy khám phá và thích những video yêu thích của bạn!</string>
+    <string name="loading_videos_text">Đang tải video...</string>
+    <string name="no_videos_title">Không có video nào</string>
+    <string name="no_videos_desc">Hãy thử lại sau hoặc kiểm tra kết nối mạng</string>
+    <string name="try_again_action">Thử lại</string>
+    <string name="duration_placeholder">0:30</string>
+    <string name="views_placeholder">1.2K</string>
+    <string name="views_count">lượt xem</string>
+    <string name="months_ago">tháng trước</string>
+    <string name="weeks_ago">tuần trước</string>
+    <string name="days_ago">ngày trước</string>
+    <string name="hours_ago">giờ trước</string>
+    <string name="minutes_ago">phút trước</string>
+    <string name="years_ago">năm trước</string>
+    <string name="just_now">Vừa xong</string>
+
+    <!-- ========== Profile Strings ========== -->
+    <string name="username_label">Tên Người Dùng</string>
+    <string name="username_placeholder">\@username</string>
+    <string name="article_title_placeholder">Tiêu đề bài viết</string>
+    <string name="favorite_articles">Bài viết yêu thích</string>
+    <string name="favorite_articles_tab">Bài viết yêu thích</string>
+    <string name="video_liked_tab">Video đã like</string>
+
 </resources>

@@ -58,7 +58,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Ngày:"
+                android:text="@string/date_label"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -67,7 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:text="--/--/----"
+                android:text="@string/date_placeholder"
                 android:textSize="16sp"
                 android:textColor="@color/primary_color" />
 
@@ -76,7 +76,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chọn"
+                android:text="@string/choose"
                 android:textSize="12sp"
                 app:strokeColor="@color/primary_color" />
 
@@ -94,7 +94,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Thời gian:"
+                android:text="@string/time_label"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -103,7 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:text="--:--"
+                android:text="@string/time_placeholder"
                 android:textSize="16sp"
                 android:textColor="@color/primary_color" />
 
@@ -112,7 +112,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chọn"
+                android:text="@string/choose"
                 android:textSize="12sp"
                 app:strokeColor="@color/primary_color" />
 
@@ -130,7 +130,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Lặp lại:"
+                android:text="@string/repeat_label"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -154,7 +154,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Kích hoạt nhắc nhở:"
+                android:text="@string/activate_reminder"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -188,7 +188,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:text="Hủy"
+                android:text="@string/cancel"
                 android:textColor="@color/text_secondary" />
 
             <Button
@@ -196,7 +196,7 @@
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Lưu"
+                android:text="@string/save"
                 android:backgroundTint="@color/primary_color"
                 android:textColor="@android:color/white" />
 

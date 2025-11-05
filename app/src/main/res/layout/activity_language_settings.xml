@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Chọn ngôn ngữ hiển thị cho ứng dụng"
+            android:text="@string/language_selection_desc"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
@@ -73,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:padding="16dp"
-                    android:text="Tiếng Việt"
+                    android:text="@string/lang_vietnamese"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
@@ -89,7 +89,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:padding="16dp"
-                    android:text="English"
+                    android:text="@string/lang_english"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
@@ -105,7 +105,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:padding="16dp"
-                    android:text="中文 (Chinese)"
+                    android:text="@string/lang_chinese"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
@@ -121,7 +121,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:padding="16dp"
-                    android:text="日本語 (Japanese)"
+                    android:text="@string/lang_japanese"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
@@ -137,7 +137,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:padding="16dp"
-                    android:text="한국어 (Korean)"
+                    android:text="@string/lang_korean"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
@@ -153,7 +153,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:padding="16dp"
-                    android:text="Français (French)"
+                    android:text="@string/lang_french"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
@@ -169,7 +169,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:padding="16dp"
-                    android:text="Deutsch (German)"
+                    android:text="@string/lang_german"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
@@ -185,7 +185,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:padding="16dp"
-                    android:text="Español (Spanish)"
+                    android:text="@string/lang_spanish"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
@@ -214,7 +214,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Bạn cần khởi động lại ứng dụng để áp dụng ngôn ngữ mới"
+                android:text="@string/language_restart_notice"
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 

@@ -38,7 +38,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Thông tin nhắc nhở"
+                    android:text="@string/reminder_info"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:textColor="?attr/colorPrimary"
@@ -123,7 +123,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Thời gian và lặp lại"
+                    android:text="@string/time_and_repeat"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:textColor="?attr/colorPrimary"
@@ -141,14 +141,14 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Ngày:"
+                        android:text="@string/date_label"
                         android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/tv_selected_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="16/10/2025"
+                        android:text="@string/date_example"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginEnd="8dp" />
@@ -157,7 +157,7 @@
                         android:id="@+id/btn_select_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Chọn"
+                        android:text="@string/choose"
                         style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 </LinearLayout>
@@ -174,14 +174,14 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Giờ:"
+                        android:text="@string/hour_label"
                         android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/tv_selected_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="08:00"
+                        android:text="@string/time_example"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginEnd="8dp" />
@@ -190,7 +190,7 @@
                         android:id="@+id/btn_select_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Chọn"
+                        android:text="@string/choose"
                         style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 </LinearLayout>
@@ -238,7 +238,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Cài đặt báo thức"
+                    android:text="@string/alarm_settings"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:textColor="?attr/colorPrimary"
@@ -285,7 +285,7 @@
                         android:id="@+id/btn_select_sound"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Chọn"
+                        android:text="@string/choose"
                         style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 </LinearLayout>
@@ -322,7 +322,7 @@
                             android:id="@+id/tv_volume_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="80%"
+                            android:text="@string/volume_percent"
                             android:textSize="14sp"
                             android:textStyle="bold" />
 

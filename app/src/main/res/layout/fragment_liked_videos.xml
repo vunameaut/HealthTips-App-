@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Đang tải video đã thích..."
+            android:text="@string/loading_liked_videos"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="16sp" />
 
@@ -69,7 +69,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Chưa có video nào được thích"
+            android:text="@string/no_liked_videos_title"
             android:textAlignment="center"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="18sp"
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Hãy khám phá và thích những video yêu thích của bạn!"
+            android:text="@string/no_liked_videos_desc"
             android:textAlignment="center"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"

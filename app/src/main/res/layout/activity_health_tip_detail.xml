@@ -74,7 +74,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Danh mục:"
+                    android:text="@string/category_label"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                     android:textColor="@color/text_secondary"
                     android:layout_marginEnd="8dp" />
@@ -150,7 +150,7 @@
                 android:paddingTop="6dp"
                 android:paddingEnd="12dp"
                 android:paddingBottom="6dp"
-                android:text="⭐ BÀI VIẾT NỔI BẬT"
+                android:text="@string/featured_posts"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
                 android:textColor="@color/gold"
                 android:textStyle="bold"
@@ -237,7 +237,7 @@
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/bg_secondary_button"
                     android:drawablePadding="8dp"
-                    android:text="Thích"
+                    android:text="@string/like_action"
                     android:textColor="@color/text_primary"
                     app:drawableStartCompat="@drawable/ic_thumb_up"
                     app:drawableTint="@color/text_primary" />
@@ -251,7 +251,7 @@
                     android:layout_marginStart="8dp"
                     android:background="@drawable/bg_secondary_button"
                     android:drawablePadding="8dp"
-                    android:text="Chia sẻ"
+                    android:text="@string/share_action"
                     android:textColor="@color/text_primary"
                     app:drawableStartCompat="@drawable/ic_share"
                     app:drawableTint="@color/text_primary" />
@@ -263,7 +263,7 @@
                 android:id="@+id/textViewTagsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tags:"
+                android:text="@string/tags_label"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                 android:textColor="@color/text_secondary"
                 android:layout_marginBottom="8dp"

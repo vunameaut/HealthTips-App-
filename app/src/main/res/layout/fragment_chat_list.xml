@@ -21,7 +21,7 @@
             android:id="@+id/btn_load_more"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Xem thêm cuộc trò chuyện"
+            android:text="@string/view_more_conversations"
             app:icon="@drawable/ic_refresh"
             app:iconGravity="textStart"
             style="@style/Widget.Material3.Button.TextButton" />
@@ -44,7 +44,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Đang tải thêm..."
+                android:text="@string/loading"
                 android:textSize="14sp"
                 android:textColor="?android:attr/textColorSecondary" />
         </LinearLayout>
@@ -84,7 +84,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Đang tải cuộc trò chuyện..."
+                android:text="@string/loading_reminders"
                 android:textSize="16sp"
                 android:textColor="?android:attr/textColorSecondary" />
         </LinearLayout>
@@ -109,7 +109,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chưa có cuộc trò chuyện nào"
+                android:text="@string/no_conversations"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
@@ -119,7 +119,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nhấn nút 'Tạo mới' để bắt đầu cuộc trò chuyện đầu tiên với AI về sức khỏe"
+                android:text="@string/chat_ai_greeting"
                 android:textSize="14sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:gravity="center" />
@@ -129,7 +129,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Bắt đầu trò chuyện"
+                android:text="@string/start_conversation"
                 app:icon="@drawable/ic_add"
                 style="@style/Widget.Material3.Button" />
         </LinearLayout>
@@ -147,6 +147,6 @@
         android:src="@drawable/ic_chat"
         app:backgroundTint="?attr/colorPrimary"
         app:tint="@android:color/white"
-        android:contentDescription="Tạo cuộc trò chuyện mới" />
+        android:contentDescription="@string/new_conversation_desc" />
 
 </RelativeLayout>

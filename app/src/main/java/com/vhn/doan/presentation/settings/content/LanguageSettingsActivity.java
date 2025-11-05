@@ -82,39 +82,43 @@ public class LanguageSettingsActivity extends AppCompatActivity {
     private void setupListeners() {
         radioGroupLanguage.setOnCheckedChangeListener((group, checkedId) -> {
             String languageCode = "";
-            String languageName = "";
+            int languageNameResId = 0;
 
             if (checkedId == R.id.rbVietnamese) {
                 languageCode = "vi";
-                languageName = "Tiếng Việt";
+                languageNameResId = R.string.lang_vietnamese;
             } else if (checkedId == R.id.rbEnglish) {
                 languageCode = "en";
-                languageName = "English";
+                languageNameResId = R.string.lang_english;
             } else if (checkedId == R.id.rbChinese) {
                 languageCode = "zh";
-                languageName = "中文";
+                languageNameResId = R.string.lang_chinese;
             } else if (checkedId == R.id.rbJapanese) {
                 languageCode = "ja";
-                languageName = "日本語";
+                languageNameResId = R.string.lang_japanese;
             } else if (checkedId == R.id.rbKorean) {
                 languageCode = "ko";
-                languageName = "한국어";
+                languageNameResId = R.string.lang_korean;
             } else if (checkedId == R.id.rbFrench) {
                 languageCode = "fr";
-                languageName = "Français";
+                languageNameResId = R.string.lang_french;
             } else if (checkedId == R.id.rbGerman) {
                 languageCode = "de";
-                languageName = "Deutsch";
+                languageNameResId = R.string.lang_german;
             } else if (checkedId == R.id.rbSpanish) {
                 languageCode = "es";
-                languageName = "Español";
+                languageNameResId = R.string.lang_spanish;
             }
+
+            // Get language name from resources
+            String languageName = getString(languageNameResId);
 
             // Apply locale using LocaleHelper
             LocaleHelper.setLocale(this, languageCode);
 
+            // Show toast with language changed message
             Toast.makeText(this,
-                "Đã chọn ngôn ngữ: " + languageName + ". Đang áp dụng...",
+                getString(R.string.language_changed, languageName),
                 Toast.LENGTH_SHORT).show();
 
             // Restart activity to apply changes immediately

@@ -41,7 +41,7 @@
             android:layout_marginBottom="8dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="Tiêu đề bài viết"
+            android:text="@string/article_title_placeholder"
             android:textColor="@android:color/white"
             android:textSize="12sp"
             android:textStyle="bold" />

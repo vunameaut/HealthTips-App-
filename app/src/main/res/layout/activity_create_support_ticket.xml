@@ -198,7 +198,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Thông tin thiết bị sẽ được tự động gửi kèm để hỗ trợ tốt hơn"
+                android:text="@string/device_info_notice"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_marginBottom="24dp"

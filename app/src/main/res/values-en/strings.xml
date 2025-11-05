@@ -1,0 +1,825 @@
+<resources>
+    <!-- Application name -->
+    <string name="app_name">HealthTips</string>
+
+    <!-- Login screen strings -->
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="dont_have_account">Don\'t have an account? Register</string>
+    <string name="already_have_account">Already have an account? Login</string>
+
+    <!-- Forgot password screen strings -->
+    <string name="reset_password">Reset Password</string>
+    <string name="reset_password_instructions">Enter your email to receive password reset instructions</string>
+    <string name="send_reset_email">Send Reset Email</string>
+    <string name="back_to_login">Back to Login</string>
+
+    <!-- Home screen strings -->
+    <string name="categories">Categories</string>
+    <string name="recommended_for_you">Recommended for You</string>
+    <string name="latest_tips">Latest Tips</string>
+    <string name="most_viewed">Most Viewed</string>
+    <string name="most_liked">Most Liked</string>
+    <string name="see_all">See All</string>
+    <string name="search">Search</string>
+    <string name="offline_mode">Offline Mode</string>
+    <string name="home">Home</string>
+
+    <!-- View all health tips screen strings -->
+    <string name="all_recommended_tips">All Recommended Tips</string>
+    <string name="all_latest_tips">All Latest Tips</string>
+    <string name="all_most_viewed_tips">All Most Viewed Tips</string>
+    <string name="all_most_liked_tips">All Most Liked Tips</string>
+    <string name="no_health_tips_found">No Health Tips Found</string>
+    <string name="no_health_tips_description">There are currently no health tips in this category</string>
+
+    <!-- Bottom navigation strings -->
+    <string name="nav_home">Home</string>
+    <string name="nav_chat">AI Chat</string>
+    <string name="nav_reminders">Reminders</string>
+    <string name="nav_videos">Short Videos</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Detail screen strings -->
+    <string name="related_tips">Related Tips</string>
+    <string name="share">Share</string>
+    <string name="save">Save</string>
+
+    <!-- Reminder feature strings -->
+    <string name="health_reminders">Health Reminders</string>
+    <string name="manage_your_health_reminders">Manage your health reminders</string>
+    <string name="active_reminders">Active</string>
+    <string name="add_reminder">Add Reminder</string>
+    <string name="reminder_settings">Reminder Settings</string>
+    <string name="your_reminders">Your Reminders</string>
+    <string name="sort">Sort</string>
+    <string name="no_reminders_title">No Reminders Yet</string>
+    <string name="no_reminders_message">You haven\'t created any reminders. Create your first one to track your health!</string>
+    <string name="create_first_reminder">Create First Reminder</string>
+    <string name="loading_reminders">Loading Reminders...</string>
+    <string name="active">Active</string>
+    <string name="reminder_options">Reminder Options</string>
+    <string name="reminder_sound_label">Reminder Sound</string>
+    <string name="vibrate">Vibrate</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+
+    <!-- Reminder sound strings -->
+    <string name="select_reminder_sound">Select Reminder Sound</string>
+    <string name="tap_to_preview_sound">Tap play button to preview sound</string>
+    <string name="available_sounds">Available Sounds</string>
+    <string name="sound_selection_tip">Tap to select, play button to preview</string>
+    <string name="preview_sound">Preview Sound</string>
+
+    <!-- Preview mode and new interface strings -->
+    <string name="preview_mode_title">Preview</string>
+    <string name="test_interface_title">Test New Interface</string>
+    <string name="content_image_description">Content illustration image</string>
+    <string name="author_prefix">Author:</string>
+    <string name="content_loading">Loading content...</string>
+    <string name="content_error">Unable to load content</string>
+    <string name="health_tip_image">Health tip article image</string>
+
+    <!-- Video search results strings -->
+    <string name="loading_videos">Loading videos...</string>
+    <string name="no_video_results_title">No Videos Found</string>
+    <string name="no_video_results_message">Try searching with different keywords or check your network connection</string>
+    <string name="try_again">Try Again</string>
+
+    <!-- Video interaction strings -->
+    <string name="like">Like</string>
+    <string name="comment">Comment</string>
+    <string name="view_count_format">%s views</string>
+
+    <!-- Common strings -->
+    <string name="error_occurred">An Error Occurred</string>
+    <string name="network_error">Network Error</string>
+    <string name="retry">Retry</string>
+
+    <!-- Liked videos strings -->
+    <string name="liked_videos">Liked Videos</string>
+    <string name="no_liked_videos">No Liked Videos</string>
+    <string name="no_liked_videos_subtitle">Like your favorite videos to watch them later</string>
+
+    <!-- Short video item strings -->
+    <string name="play_pause_video">Play/Pause Video</string>
+    <string name="video_title_placeholder">Video Title</string>
+    <string name="video_caption_placeholder">Video Description</string>
+    <string name="see_more">See More</string>
+    <string name="see_less">See Less</string>
+    <string name="view_count_placeholder">0 views</string>
+    <string name="upload_date_placeholder">1 day ago</string>
+    <string name="like_button_description">Like video button</string>
+    <string name="like_count_placeholder">0</string>
+    <string name="comment_button_description">Comment video button</string>
+    <string name="comment_action">Comment</string>
+    <string name="share_button_description">Share video button</string>
+    <string name="share_action">Share</string>
+    <string name="double_tap_heart_animation">Double-tap heart animation</string>
+
+    <!-- Error and success messages -->
+    <string name="error_login">Login Failed</string>
+    <string name="error_register">Registration Failed</string>
+    <string name="error_reset_password">Unable to Reset Password</string>
+    <string name="success_login">Login Successful</string>
+    <string name="success_register">Registration Successful</string>
+    <string name="success_reset_password">Password Reset Email Sent</string>
+
+    <!-- Conversation context menu strings -->
+    <string name="rename_conversation">Rename Conversation</string>
+    <string name="pin_conversation">Pin Conversation</string>
+    <string name="unpin_conversation">Unpin Conversation</string>
+    <string name="mute_conversation">Mute Notifications</string>
+    <string name="unmute_conversation">Unmute Notifications</string>
+    <string name="share_conversation">Share Conversation</string>
+    <string name="copy_messages">Copy Messages</string>
+    <string name="mark_as_read">Mark as Read</string>
+    <string name="delete_conversation">Delete Conversation</string>
+
+    <!-- Dialog and notification for context menu -->
+    <string name="enter_new_name">Enter new conversation name</string>
+    <string name="conversation_name">Conversation Name</string>
+    <string name="rename">Rename</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_conversation_confirm">Are you sure you want to delete this conversation?</string>
+    <string name="delete_conversation_confirm_message">All messages in this conversation will be permanently deleted.</string>
+    <string name="conversation_deleted">Conversation Deleted</string>
+    <string name="conversation_renamed">Conversation Renamed</string>
+    <string name="conversation_pinned">Conversation Pinned</string>
+    <string name="conversation_unpinned">Conversation Unpinned</string>
+    <string name="conversation_muted">Notifications Muted</string>
+    <string name="conversation_unmuted">Notifications Unmuted</string>
+    <string name="messages_copied">Messages Copied</string>
+    <string name="marked_as_read">Marked as Read</string>
+
+    <!-- Reminder screen strings -->
+    <string name="no_time_set">No Time Set</string>
+    <string name="reminder_title">Reminder Title</string>
+    <string name="reminder_description">Reminder Description</string>
+    <string name="reminder_time">Reminder Time</string>
+    <string name="reminder_repeat">Repeat</string>
+    <string name="reminder_active">Active</string>
+    <string name="create_reminder">Create Reminder</string>
+    <string name="edit_reminder">Edit Reminder</string>
+    <string name="delete_reminder">Delete Reminder</string>
+    <string name="no_reminders">No Reminders Yet</string>
+
+    <!-- Repeat type strings -->
+    <string name="repeat_none">No Repeat</string>
+    <string name="repeat_daily">Daily</string>
+    <string name="repeat_weekly">Weekly</string>
+    <string name="repeat_monthly">Monthly</string>
+
+    <!-- Notification strings -->
+    <string name="notification_channel_name">Health Reminders</string>
+    <string name="notification_channel_description">Health reminder notifications</string>
+    <string name="notification_reminder_title">Reminder: %1$s</string>
+    <string name="notification_mark_complete">Mark Complete</string>
+
+    <!-- Additional strings for article detail screen -->
+    <string name="unlike">Unlike</string>
+    <string name="add_to_favorite">Add to Favorites</string>
+    <string name="remove_from_favorite">Remove from Favorites</string>
+    <string name="share_tip">Share Health Tip</string>
+    <string name="added_to_favorites">Added to Favorites</string>
+    <string name="removed_from_favorites">Removed from Favorites</string>
+
+    <!-- Category screen strings -->
+    <string name="categories_title">All Health Topics</string>
+    <string name="categories_subtitle">Explore diverse health topics</string>
+    <string name="empty_categories_title">No Categories Found</string>
+    <string name="empty_categories_message">There are currently no categories to display</string>
+    <string name="empty_categories_description">Categories will appear here</string>
+
+    <!-- Common strings -->
+    <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="loading">Loading...</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="favorite">Favorite</string>
+    <string name="no_favorites">You have no favorites yet</string>
+    <string name="back">Back</string>
+
+    <!-- Category detail screen strings -->
+    <string name="empty_tips_description">No tips in this category yet</string>
+    <string name="empty_tips_title">Empty List</string>
+    <string name="empty_tips_message">This category currently has no health tips</string>
+
+    <!-- Short video feature strings -->
+    <string name="no_videos_available">No Videos Available</string>
+    <string name="pull_to_refresh_videos">Pull to refresh video list</string>
+    <string name="video_liked">Video Liked</string>
+    <string name="video_unliked">Video Unliked</string>
+    <string name="video_shared">Video Shared</string>
+    <string name="comment_feature_coming_soon">Comment feature coming soon</string>
+    <string name="enter_comment">Enter Comment</string>
+    <string name="comments">Comments</string>
+    <string name="no_comments">No Comments Yet</string>
+    <string name="reply">Reply</string>
+    <string name="reply_to">Reply to %1$s</string>
+    <string name="share_video">Share Video</string>
+    <string name="view_user_profile">View User Profile</string>
+    <string name="error_loading_videos">Unable to load videos. Please try again.</string>
+    <string name="trending_videos">Trending Videos</string>
+
+    <!-- Icon placeholders for short video feature -->
+    <string name="ic_video_placeholder">ic_video_placeholder</string>
+    <string name="ic_video_error">ic_video_error</string>
+    <string name="ic_user_placeholder">ic_user_placeholder</string>
+    <string name="ic_heart_filled">ic_heart_filled</string>
+    <string name="ic_heart_outline">ic_heart_outline</string>
+    <string name="ic_comment">ic_comment</string>
+    <string name="ic_share">ic_share</string>
+    <string name="ic_play_arrow">ic_play_arrow</string>
+    <string name="ic_visibility">ic_visibility</string>
+    <string name="ic_schedule">ic_schedule</string>
+    <string name="ic_video_empty">ic_video_empty</string>
+
+    <!-- Additional strings -->
+    <string name="settings_under_development">Settings feature under development</string>
+    <string name="like_video">Like Video</string>
+    <string name="share_video_action">Share Video</string>
+
+    <!-- Strings for Search Activity -->
+    <string name="search_hint">Search health tips, videos...</string>
+    <string name="clear">Clear</string>
+
+    <!-- Strings for Comments Bottom Sheet -->
+    <string name="comments_title">Comments</string>
+    <string name="close_comments">Close Comments</string>
+    <string name="empty_comments_title">No Comments</string>
+    <string name="empty_comments_message">Be the first to comment!</string>
+    <string name="comment_input_hint">Write a comment...</string>
+    <string name="send_comment">Send</string>
+
+    <!-- Strings for Reply Bottom Sheet -->
+    <string name="reply_comment_title">Reply to Comment</string>
+    <string name="close_reply">Close Reply</string>
+    <string name="replying_to">Replying to</string>
+    <string name="reply_input_hint">Write a reply...</string>
+    <string name="send_reply">Reply</string>
+
+    <!-- Strings for Search Results -->
+    <string name="no_search_results">No Results Found</string>
+
+    <!-- Strings for User Interface -->
+    <string name="user_avatar">User Avatar</string>
+    <string name="play_video">Play Video</string>
+
+    <!-- Strings for Search History -->
+    <string name="search_history">Search History</string>
+    <string name="delete_search_history">Delete Search History</string>
+
+    <!-- Strings for Video -->
+    <string name="video_poster_description">Video Poster</string>
+
+    <!-- Strings for Settings and Privacy -->
+    <string name="settings_and_privacy">Settings and Privacy</string>
+
+    <!-- Account Section -->
+    <string name="account_section">Account</string>
+    <string name="account_management">Account</string>
+    <string name="privacy_settings">Privacy</string>
+    <string name="security_settings">Security</string>
+    <string name="permissions_settings">Permissions</string>
+    <string name="security_and_permissions">Permissions and Security</string>
+
+    <!-- Content and Display Section -->
+    <string name="content_display_section">Content and Display</string>
+    <string name="notification_settings">Notifications</string>
+    <string name="language_settings">Language</string>
+    <string name="display_settings">Display</string>
+
+    <!-- Support and About Section -->
+    <string name="support_about_section">Support and About</string>
+    <string name="report_issue">Report Issue</string>
+    <string name="support_help">Support</string>
+    <string name="terms_policy">Terms and Policy</string>
+
+    <!-- Descriptions -->
+    <string name="account_management_desc">Manage your account information</string>
+    <string name="privacy_settings_desc">Privacy and security settings</string>
+    <string name="security_settings_desc">Manage account security</string>
+    <string name="permissions_settings_desc">Manage app permissions</string>
+    <string name="security_and_permissions_desc">Manage security and access permissions</string>
+    <string name="notification_settings_desc">Notification and reminder settings</string>
+    <string name="language_settings_desc">Choose display language</string>
+    <string name="display_settings_desc">Customize display interface</string>
+    <string name="report_issue_desc">Report bugs or issues</string>
+    <string name="support_help_desc">Get support and guidance</string>
+    <string name="terms_policy_desc">View terms of use and policies</string>
+
+    <!-- Missing strings for Snooze Options -->
+    <string name="snooze_5_min">5 minutes</string>
+    <string name="snooze_10_min">10 minutes</string>
+    <string name="snooze_15_min">15 minutes</string>
+    <string name="snooze_30_min">30 minutes</string>
+
+    <!-- Missing strings for Volume Levels -->
+    <string name="volume_low">Low</string>
+    <string name="volume_medium">Medium</string>
+    <string name="volume_high">High</string>
+    <string name="volume_max">Max</string>
+
+    <!-- Missing strings for Menu -->
+    <string name="menu_search">Search</string>
+    <string name="menu_filter">Filter</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_debug">Debug</string>
+
+    <!-- Strings for AppBar Scrolling -->
+    <string name="appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
+
+    <!-- Additional strings for Reminder -->
+    <string name="reminder_title_default">Health Reminder</string>
+    <string name="reminder_message_default">It\'s time for your reminder</string>
+    <string name="reminder_snooze">Snooze</string>
+    <string name="reminder_dismiss">Dismiss</string>
+    <string name="select_sound">Select Sound</string>
+    <string name="reminder_sound">Reminder Sound</string>
+    <string name="sound_default">Default Sound</string>
+    <string name="reminder_volume">Volume</string>
+    <string name="reminder_snooze_duration">Snooze Duration</string>
+    <string name="reminder_vibrate">Vibrate</string>
+    <string name="reminder_alarm_style">Alarm Style</string>
+
+    <!-- Strings for Sound Types -->
+    <string name="sound_alarm">Alarm</string>
+    <string name="sound_notification">Notification</string>
+    <string name="sound_music">Music</string>
+    <string name="sound_none">No Sound</string>
+
+    <!-- Strings for Search History -->
+    <string name="clear_all_history">Clear All History</string>
+    <string name="see_more_history">See More History</string>
+    <string name="see_less_history">Collapse History</string>
+    <string name="no_search_history">No Search History</string>
+
+    <!-- Strings for Search Tabs -->
+    <string name="search_articles_tab">Articles</string>
+    <string name="search_videos_tab">Videos</string>
+
+    <!-- ========== Support & About Strings ========== -->
+
+    <!-- Support Center -->
+    <string name="support_center">Support Center</string>
+    <string name="support_center_desc">Report issues and get support</string>
+    <string name="help_center">Help Center</string>
+    <string name="contact_support">Contact Support</string>
+    <string name="my_tickets">My Tickets</string>
+    <string name="create_ticket">Create Support Ticket</string>
+    <string name="view_all_tickets">View All Tickets</string>
+
+    <!-- Ticket Types -->
+    <string name="ticket_type">Issue Type</string>
+    <string name="ticket_type_bug_report">Bug Report</string>
+    <string name="ticket_type_content_report">Content Report</string>
+    <string name="ticket_type_feature_request">Feature Request</string>
+    <string name="ticket_type_account_issue">Account Issue</string>
+    <string name="ticket_type_general_inquiry">General Inquiry</string>
+    <string name="ticket_type_other">Other</string>
+
+    <!-- Ticket Status -->
+    <string name="ticket_status">Status</string>
+    <string name="ticket_status_open">Open</string>
+    <string name="ticket_status_in_progress">In Progress</string>
+    <string name="ticket_status_resolved">Resolved</string>
+    <string name="ticket_status_closed">Closed</string>
+
+    <!-- Ticket Priority -->
+    <string name="ticket_priority">Priority</string>
+    <string name="ticket_priority_low">Low</string>
+    <string name="ticket_priority_medium">Medium</string>
+    <string name="ticket_priority_high">High</string>
+    <string name="ticket_priority_urgent">Urgent</string>
+
+    <!-- Ticket Form -->
+    <string name="ticket_subject">Subject</string>
+    <string name="ticket_subject_hint">Brief description of the issue</string>
+    <string name="ticket_description">Detailed Description</string>
+    <string name="ticket_description_hint">Please describe the issue in detail...</string>
+    <string name="ticket_attach_screenshot">Attach Screenshot</string>
+    <string name="ticket_screenshot_attached">Screenshot Attached</string>
+    <string name="ticket_remove_screenshot">Remove Screenshot</string>
+    <string name="ticket_submit">Submit Ticket</string>
+    <string name="ticket_submitting">Submitting...</string>
+    <string name="ticket_submit_success">Ticket Submitted Successfully</string>
+    <string name="ticket_submit_error">Unable to Submit Ticket</string>
+
+    <!-- Ticket Details -->
+    <string name="ticket_detail_title">Ticket Details</string>
+    <string name="ticket_id">Ticket ID</string>
+    <string name="ticket_created_at">Created On</string>
+    <string name="ticket_updated_at">Last Updated</string>
+    <string name="ticket_description_label">Issue Description</string>
+    <string name="ticket_device_info_label">Device Information</string>
+    <string name="ticket_admin_response_label">Support Response</string>
+    <string name="ticket_admin_response">Support Response</string>
+    <string name="ticket_no_response">No Response Yet</string>
+    <string name="ticket_waiting_response">Waiting for Response...</string>
+    <string name="ticket_screenshot_desc">Attached Screenshot</string>
+    <string name="status_open">Open</string>
+    <string name="priority_medium">Medium</string>
+    <string name="ticket_type_bug">Bug Report</string>
+
+    <!-- Ticket List -->
+    <string name="no_tickets_title">No Support Tickets</string>
+    <string name="no_tickets_message">You don\'t have any support tickets. If you encounter an issue, create a new ticket.</string>
+    <string name="loading_tickets">Loading Tickets...</string>
+
+    <!-- About App -->
+    <string name="about_app">About</string>
+    <string name="about_app_desc">Information about the app</string>
+    <string name="app_version">App Version</string>
+    <string name="app_description">App Description</string>
+    <string name="app_description_text">HealthTips is an app that provides useful health tips to help you take better care of your health every day. The app offers features such as: viewing health tips, short videos, AI chat, health reminders, and many other features.</string>
+    <string name="developed_by">Developed By</string>
+    <string name="developer_name">HealthTips Team</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="contact_email">Email</string>
+    <string name="contact_email_value">vuhoainam.dev@gmail.com</string>
+    <string name="follow_us">Follow Us</string>
+    <string name="rate_app">Rate App</string>
+    <string name="share_app">Share App</string>
+    <string name="share_app_text">Try HealthTips - An Amazing Health Tips App!</string>
+
+    <!-- Terms & Policies -->
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="community_guidelines">Community Guidelines</string>
+    <string name="copyright_policy">Copyright Policy</string>
+    <string name="cookie_policy">Cookie Policy</string>
+    <string name="intellectual_property">Intellectual Property</string>
+
+    <!-- Legal -->
+    <string name="legal">Legal</string>
+    <string name="last_updated">Last Updated</string>
+    <string name="effective_date">Effective Date</string>
+
+    <!-- FAQ -->
+    <string name="faq">Frequently Asked Questions</string>
+    <string name="faq_how_to_use">How to use the app?</string>
+    <string name="faq_how_to_save">How to save favorite tips?</string>
+    <string name="faq_how_to_reminder">How to create a reminder?</string>
+    <string name="faq_how_to_chat">How to use AI chat?</string>
+    <string name="faq_how_to_report">How to report content?</string>
+
+    <!-- Report Content -->
+    <string name="report_content">Report Content</string>
+    <string name="report_content_reason">Report Reason</string>
+    <string name="report_spam">Spam</string>
+    <string name="report_inappropriate">Inappropriate Content</string>
+    <string name="report_misleading">Misleading Information</string>
+    <string name="report_harassment">Harassment</string>
+    <string name="report_violence">Violence</string>
+    <string name="report_hate_speech">Hate Speech</string>
+    <string name="report_copyright">Copyright Violation</string>
+    <string name="report_other_reason">Other Reason</string>
+    <string name="report_details">Report Details</string>
+    <string name="report_submit">Submit Report</string>
+    <string name="report_success">Report Submitted Successfully</string>
+    <string name="report_thank_you">Thank you for reporting. We will review and take action.</string>
+
+    <!-- Validation Messages -->
+    <string name="error_empty_subject">Please enter a subject</string>
+    <string name="error_empty_description">Please enter a detailed description</string>
+    <string name="error_select_ticket_type">Please select an issue type</string>
+    <string name="select_ticket_type">Select Issue Type</string>
+    <string name="device_info_auto_collected">Device information will be automatically sent for better support</string>
+    <string name="error_loading_failed">Loading Failed</string>
+    <string name="error_network">Network Error</string>
+
+    <!-- Additional Strings for Report Issue -->
+    <string name="subject">Subject</string>
+    <string name="enter_subject">Enter issue subject</string>
+    <string name="enter_description">Describe the issue in detail...</string>
+    <string name="device_info">Device Information</string>
+    <string name="icon">Icon</string>
+    <string name="navigate">Navigate</string>
+
+    <!-- Common Actions -->
+    <string name="action_retry">Retry</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
+    <string name="action_send">Send</string>
+    <string name="action_close">Close</string>
+    <string name="action_back">Back</string>
+    <string name="action_next">Next</string>
+    <string name="action_done">Done</string>
+    <string name="action_view">View</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_select_image">Select Image</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_info_title">Account Information</string>
+    <string name="account_email_label">Email</string>
+    <string name="account_email_placeholder">user@example.com</string>
+    <string name="account_display_name_label">Display Name</string>
+    <string name="account_display_name_placeholder">User</string>
+    <string name="account_joined_date_label">Joined Date</string>
+    <string name="account_joined_date_placeholder">01/01/2024</string>
+    <string name="account_manage_title">Account Management</string>
+    <string name="account_edit_profile">Edit Profile</string>
+    <string name="account_edit_profile_desc">Update your personal information</string>
+    <string name="account_change_password">Change Password</string>
+    <string name="account_change_password_desc">Change your login password</string>
+    <string name="account_two_factor_auth">Two-Factor Authentication</string>
+    <string name="account_two_factor_auth_desc">Enhance account security</string>
+    <string name="account_danger_zone">Danger Zone</string>
+    <string name="account_logout">Logout</string>
+    <string name="account_logout_desc">Logout from this account</string>
+    <string name="account_delete">Delete Account</string>
+    <string name="account_delete_desc">Permanently delete account and data</string>
+
+    <!-- ========== Privacy Settings Strings ========== -->
+    <string name="privacy_intro">Control who can see your information and activity</string>
+    <string name="privacy_profile_title">Profile Display</string>
+    <string name="privacy_public_profile">Public Profile</string>
+    <string name="privacy_public_profile_desc">Allow everyone to view your profile</string>
+    <string name="privacy_show_email">Show Email</string>
+    <string name="privacy_show_email_desc">Allow others to see your email</string>
+    <string name="privacy_activity_title">Activity</string>
+    <string name="privacy_show_activity">Show Activity</string>
+    <string name="privacy_show_activity_desc">Allow others to see your activity</string>
+    <string name="privacy_show_liked_posts">Liked Posts</string>
+    <string name="privacy_show_liked_posts_desc">Show posts you\'ve liked</string>
+    <string name="privacy_data_title">Data and Storage</string>
+    <string name="privacy_clear_search_history">Clear Search History</string>
+    <string name="privacy_clear_search_history_desc">Delete all your search history</string>
+    <string name="privacy_clear_view_history">Clear View History</string>
+    <string name="privacy_clear_view_history_desc">Clear history of viewed articles</string>
+    <string name="privacy_download_data">Download Your Data</string>
+    <string name="privacy_download_data_desc">Download a copy of your data</string>
+    <string name="privacy_block_title">Block and Restrict</string>
+    <string name="privacy_blocked_users">Blocked Users</string>
+    <string name="privacy_blocked_users_count">0 users</string>
+
+
+    <!-- ========== Security Settings Strings ========== -->
+    <string name="security_and_permissions_intro">Manage account security and app access permissions</string>
+    <string name="security_section_title">Security</string>
+    <string name="security_intro">Manage security and account access control</string>
+    <string name="security_password_title">Password and Authentication</string>
+    <string name="security_change_password">Change Password</string>
+    <string name="security_change_password_desc">Update your login password</string>
+    <string name="security_two_factor">Two-Factor Authentication</string>
+    <string name="security_two_factor_desc">Add an extra layer of security to your account</string>
+    <string name="security_fingerprint">Fingerprint Login</string>
+    <string name="security_fingerprint_desc">Use fingerprint for quick login</string>
+    <string name="security_face_id">Face Login</string>
+    <string name="security_face_id_desc">Use face recognition</string>
+
+    <string name="security_sessions_title">Login Sessions</string>
+    <string name="security_session_title">Login Session</string>
+    <string name="security_active_sessions">Active Sessions</string>
+    <string name="security_active_sessions_desc">Manage logged-in devices</string>
+    <string name="security_auto_logout">Auto Logout</string>
+    <string name="security_auto_logout_desc">Logout after inactivity</string>
+
+    <string name="security_advanced_title">Advanced Security</string>
+    <string name="security_data_title">Data Security</string>
+    <string name="security_encrypt_data">Encrypt Data</string>
+    <string name="security_encrypt_data_desc">Encrypt personal data on device</string>
+    <string name="security_secure_mode">High Security Mode</string>
+    <string name="security_secure_mode_desc">Block screenshots and screen recording</string>
+    <string name="security_suspicious_alert">Suspicious Login Alert</string>
+    <string name="security_suspicious_alert_desc">Get notified of unusual login activity</string>
+
+    <string name="security_activity_title">Account Activity</string>
+    <string name="security_login_history">Login History</string>
+    <string name="security_login_history_desc">View recent login activity</string>
+    <string name="security_suspicious_activity">Suspicious Activity</string>
+    <string name="security_suspicious_activity_desc">Get notified of unusual activity</string>
+
+    <!-- ========== Permissions Settings Strings ========== -->
+    <string name="permissions_section_title">Access Permissions</string>
+    <string name="permissions_intro">Manage app access to device features</string>
+    <string name="permissions_app_title">App Permissions</string>
+    <string name="permissions_required_title">Required Permissions</string>
+    <string name="permissions_storage">Storage</string>
+    <string name="permissions_storage_desc">Store photos and offline data</string>
+    <string name="permissions_camera">Camera</string>
+    <string name="permissions_camera_desc">Take photos for profile and reports</string>
+    <string name="permissions_notification">Notifications</string>
+    <string name="permissions_notification_desc">Receive health reminders</string>
+    <string name="permissions_notifications">Notifications</string>
+    <string name="permissions_notifications_desc">Receive health reminders</string>
+
+    <string name="permissions_optional_title">Optional Permissions</string>
+    <string name="permissions_location">Location</string>
+    <string name="permissions_location_desc">Provide region-appropriate content</string>
+    <string name="permissions_contacts">Contacts</string>
+    <string name="permissions_contacts_desc">Share health tips with friends</string>
+    <string name="permissions_microphone">Microphone</string>
+    <string name="permissions_microphone_desc">Voice search</string>
+
+    <string name="permissions_management_title">Permission Management</string>
+    <string name="permissions_app_settings_title">App Settings</string>
+    <string name="permissions_open_settings">Open System Settings</string>
+    <string name="permissions_open_settings_desc">Change permissions in Android settings</string>
+    <string name="permissions_reset">Reset Permissions</string>
+    <string name="permissions_reset_desc">Revoke all granted permissions</string>
+    <string name="permissions_reset_permissions">Reset Permissions</string>
+    <string name="permissions_reset_permissions_desc">Revoke all granted permissions</string>
+
+    <string name="permission_status_granted">Granted</string>
+    <string name="permission_status_denied">Denied</string>
+    <string name="permission_status_not_requested">Not Requested</string>
+
+    <!-- Icon Content Descriptions -->
+    <string name="icon_email_desc">Email Icon</string>
+    <string name="icon_person_desc">Person Icon</string>
+    <string name="icon_calendar_desc">Calendar Icon</string>
+    <string name="icon_edit_desc">Edit Icon</string>
+    <string name="icon_lock_desc">Lock Icon</string>
+    <string name="icon_shield_desc">Shield Icon</string>
+    <string name="icon_logout_desc">Logout Icon</string>
+    <string name="icon_delete_desc">Delete Icon</string>
+    <string name="icon_arrow_forward_desc">Forward Arrow</string>
+    <string name="icon_people_desc">People Icon</string>
+    <string name="icon_visibility_desc">Visibility Icon</string>
+    <string name="icon_favorite_desc">Favorite Icon</string>
+    <string name="icon_history_desc">History Icon</string>
+    <string name="icon_download_desc">Download Icon</string>
+    <string name="icon_fingerprint_desc">Fingerprint Icon</string>
+    <string name="icon_notification_desc">Notification Icon</string>
+    <string name="icon_settings_desc">Settings Icon</string>
+
+    <!-- Security and Permissions Misc -->
+    <string name="one_device">1 device</string>
+
+    <!-- ========== Language Settings Strings ========== -->
+    <string name="language_selection_desc">Choose display language for the app</string>
+    <string name="language_restart_notice">The app will automatically restart to apply the new language</string>
+    <string name="language_changed">Language changed: %1$s. Applying...</string>
+
+    <!-- Language names -->
+    <string name="lang_vietnamese">Tiếng Việt</string>
+    <string name="lang_english">English</string>
+    <string name="lang_chinese">中文 (Chinese)</string>
+    <string name="lang_japanese">日本語 (Japanese)</string>
+    <string name="lang_korean">한국어 (Korean)</string>
+    <string name="lang_french">Français (French)</string>
+    <string name="lang_german">Deutsch (German)</string>
+    <string name="lang_spanish">Español (Spanish)</string>
+
+    <!-- ========== Notification Settings Strings ========== -->
+    <string name="notification_manage_desc">Manage the notifications you want to receive</string>
+    <string name="all_notifications">All Notifications</string>
+    <string name="toggle_all_notifications">Turn on/off all notifications</string>
+    <string name="content_notifications">Content Notifications</string>
+    <string name="new_health_tips">New Health Tips</string>
+    <string name="new_tips_notification">Notify when new tips available</string>
+    <string name="reminders">Reminders</string>
+    <string name="schedule_reminders">Schedule reminders</string>
+    <string name="interaction_notifications">Interaction Notifications</string>
+    <string name="likes">Likes</string>
+    <string name="new_followers">New Followers</string>
+    <string name="system_notifications">System Notifications</string>
+    <string name="app_updates">App Updates</string>
+    <string name="sound_settings">Sound Settings</string>
+    <string name="sound">Sound</string>
+    <string name="vibration">Vibration</string>
+
+    <!-- ========== Display Settings Strings ========== -->
+    <string name="display_customize_desc">Customize the app display interface</string>
+    <string name="display_mode">Display Mode</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="dark_mode_quick">Enable dark mode quickly</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="system_default">System Default</string>
+    <string name="light_mode">Light Mode</string>
+    <string name="font_size">Font Size</string>
+    <string name="font_size_display">Display Font Size</string>
+    <string name="small">Small</string>
+    <string name="large">Large</string>
+    <string name="preview">Preview:</string>
+    <string name="preview_text_sample">This is sample text to preview font size</string>
+    <string name="restart_app_notice">Some changes will apply immediately, others may require app restart</string>
+
+    <!-- ========== Account Management Strings ========== -->
+    <string name="account_pending_deletion">⚠️ Account Pending Deletion</string>
+    <string name="account_deletion_countdown">Your account will be deleted in: %1$s</string>
+    <string name="cancel_account_deletion">Cancel Account Deletion</string>
+
+    <!-- ========== Change Password Strings ========== -->
+    <string name="change_password_desc">Enter your current password and new password</string>
+    <string name="change_password_action">Change Password</string>
+    <string name="password_requirements">Your password must be at least 6 characters and should include uppercase, lowercase, numbers, and special characters for better security.</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+
+    <!-- ========== Edit Profile Strings ========== -->
+    <string name="display_name">Display Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="email_example">Email: example@gmail.com</string>
+
+    <!-- ========== About App Strings ========== -->
+    <string name="quick_actions">Quick Actions</string>
+    <string name="copyright_text">© 2024 HealthTips. All rights reserved.</string>
+
+    <!-- ========== Login/Register Strings ========== -->
+    <string name="no_account_register">Don\'t have an account? Register now</string>
+
+    <!-- ========== Chat Strings ========== -->
+    <string name="no_conversations">No conversations yet</string>
+    <string name="chat_welcome">Hello! I\'m your health AI assistant</string>
+    <string name="chat_ai_greeting">Welcome to Health AI Assistant!</string>
+    <string name="chat_hint">Enter your health question...</string>
+    <string name="chat_continue_hint">Continue the conversation...</string>
+    <string name="ai_responding">AI is responding</string>
+    <string name="start_conversation">Start conversation</string>
+    <string name="view_more_conversations">View more conversations</string>
+    <string name="new_conversation_desc">Create new conversation</string>
+
+    <!-- ========== Alarm/Reminder Strings ========== -->
+    <string name="alarm_time_default">08:30</string>
+    <string name="alarm_date_example">Monday, 10/17/2025</string>
+    <string name="health_reminder_default">Health Reminder</string>
+    <string name="health_reminder_message">It\'s time for your health tip!</string>
+
+    <!-- ========== Video Strings ========== -->
+    <string name="no_liked_videos_yet">No liked videos yet</string>
+
+    <!-- ========== Support Strings ========== -->
+    <string name="device_info_notice">Device information will be automatically sent for better support</string>
+
+    <!-- ========== FAQ Strings ========== -->
+    <string name="faq_title">Frequently Asked Questions</string>
+
+    <!-- ========== Other Common Strings ========== -->
+    <string name="choose">Choose</string>
+    <string name="avatar">Avatar</string>
+    <string name="featured_posts">⭐ FEATURED POSTS</string>
+    <string name="alarm_settings">Alarm Settings</string>
+
+    <!-- ========== Health Tip Detail Strings ========== -->
+    <string name="category_label">Category:</string>
+    <string name="tags_label">Tags:</string>
+    <string name="like_action">Like</string>
+
+    <!-- ========== Dialog Reminder Strings ========== -->
+    <string name="date_label">Date:</string>
+    <string name="time_label">Time:</string>
+    <string name="hour_label">Hour:</string>
+    <string name="repeat_label">Repeat:</string>
+    <string name="activate_reminder">Activate reminder:</string>
+    <string name="reminder_info">Reminder Information</string>
+    <string name="time_and_repeat">Time and Repeat</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="date_placeholder">--/--/----</string>
+    <string name="time_placeholder">--:--</string>
+    <string name="date_example">10/16/2025</string>
+    <string name="time_example">08:00</string>
+    <string name="volume_percent">80%</string>
+
+    <!-- ========== Chat AI Strings ========== -->
+    <string name="ai_health_assistant">AI Health Assistant</string>
+    <string name="creating_conversation">Creating conversation...</string>
+    <string name="sending_message">Sending message...</string>
+    <string name="ai_replying">AI is replying...</string>
+    <string name="error_create_conversation">Error creating conversation: %1$s</string>
+    <string name="error_send_message">Error sending message: %1$s</string>
+    <string name="please_enter_message">Please enter a message</string>
+    <string name="delete_all_conversations_confirm">Are you sure you want to delete all conversation history?</string>
+    <string name="sample_question_1">💪 How to boost immunity?</string>
+    <string name="sample_question_2">🥗 What diet is good for heart health?</string>
+    <string name="sample_question_3">😴 How to improve sleep quality?</string>
+
+    <!-- ========== Video Strings (Extended) ========== -->
+    <string name="loading_liked_videos">Loading liked videos...</string>
+    <string name="no_liked_videos_title">No Liked Videos</string>
+    <string name="no_liked_videos_desc">Discover and like your favorite videos!</string>
+    <string name="loading_videos_text">Loading videos...</string>
+    <string name="no_videos_title">No videos available</string>
+    <string name="no_videos_desc">Please try again later or check your network connection</string>
+    <string name="try_again_action">Try Again</string>
+    <string name="duration_placeholder">0:30</string>
+    <string name="views_placeholder">1.2K</string>
+    <string name="views_count">views</string>
+    <string name="months_ago">months ago</string>
+    <string name="weeks_ago">weeks ago</string>
+    <string name="days_ago">days ago</string>
+    <string name="hours_ago">hours ago</string>
+    <string name="minutes_ago">minutes ago</string>
+    <string name="years_ago">years ago</string>
+    <string name="just_now">Just now</string>
+
+    <!-- ========== Profile Strings ========== -->
+    <string name="username_label">Username</string>
+    <string name="username_placeholder">\@username</string>
+    <string name="article_title_placeholder">Article Title</string>
+    <string name="favorite_articles">Favorite Articles</string>
+    <string name="favorite_articles_tab">Favorite Articles</string>
+    <string name="video_liked_tab">Liked Videos</string>
+
+</resources>

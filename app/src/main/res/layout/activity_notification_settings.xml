@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Quản lý thông báo bạn muốn nhận"
+            android:text="@string/notification_manage_desc"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
@@ -80,7 +80,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Tất cả thông báo"
+                            android:text="@string/all_notifications"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -89,7 +89,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Bật/tắt tất cả thông báo"
+                            android:text="@string/toggle_all_notifications"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
 
@@ -111,7 +111,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Thông báo về nội dung"
+            android:text="@string/content_notifications"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -154,14 +154,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Mẹo sức khỏe mới"
+                            android:text="@string/new_health_tips"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Thông báo khi có mẹo mới"
+                            android:text="@string/new_tips_notification"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
 
@@ -204,14 +204,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Nhắc nhở"
+                            android:text="@string/reminders"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Nhắc nhở về lịch trình"
+                            android:text="@string/schedule_reminders"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
 
@@ -233,7 +233,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Thông báo tương tác"
+            android:text="@string/interaction_notifications"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -271,7 +271,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Lượt thích"
+                        android:text="@string/likes"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -307,7 +307,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Bình luận"
+                        android:text="@string/comment"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -343,7 +343,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Người theo dõi mới"
+                        android:text="@string/new_followers"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -363,7 +363,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Thông báo hệ thống"
+            android:text="@string/system_notifications"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -401,7 +401,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Cập nhật ứng dụng"
+                        android:text="@string/app_updates"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -421,7 +421,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Cài đặt âm thanh"
+            android:text="@string/sound_settings"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -460,7 +460,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Âm thanh"
+                        android:text="@string/sound"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -496,7 +496,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Rung"
+                        android:text="@string/vibration"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
