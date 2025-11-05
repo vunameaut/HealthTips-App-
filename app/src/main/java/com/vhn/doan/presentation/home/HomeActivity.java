@@ -6,13 +6,13 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.auth.LoginActivity;
+import com.vhn.doan.presentation.base.BaseActivity;
 import com.vhn.doan.presentation.chat.ChatListFragment;
 import com.vhn.doan.presentation.chat.NewChatFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
@@ -26,7 +26,7 @@ import com.vhn.doan.utils.UserSessionManager;
  * HomeActivity là màn hình chính của ứng dụng sau khi đăng nhập
  * Chứa HomeFragment và các Fragment khác thông qua BottomNavigationView
  */
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends BaseActivity {
 
     private static final String TAG = "HomeActivity";
     private BottomNavigationView bottomNavigationView;

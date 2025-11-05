@@ -9,9 +9,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.vhn.doan.R;
+import com.vhn.doan.presentation.base.BaseActivity;
 import com.vhn.doan.services.AuthManager;
 import com.vhn.doan.services.AuthManager.AuthCallback;
 
@@ -19,7 +18,7 @@ import com.vhn.doan.services.AuthManager.AuthCallback;
  * ForgotPasswordActivity xử lý chức năng quên mật khẩu
  * Cho phép người dùng gửi yêu cầu đặt lại mật khẩu qua email
  */
-public class ForgotPasswordActivity extends AppCompatActivity {
+public class ForgotPasswordActivity extends BaseActivity {
 
     private EditText editTextEmail;
     private Button buttonResetPassword;

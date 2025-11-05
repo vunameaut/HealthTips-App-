@@ -26,13 +26,18 @@ public class FontSizeHelper {
         // Calculate scale based on default (16sp)
         float fontScale = fontSize / 16f;
 
-        Configuration configuration = context.getResources().getConfiguration();
+        Configuration configuration = new Configuration(context.getResources().getConfiguration());
         configuration.fontScale = fontScale;
 
-        Resources resources = context.getResources();
-        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
-
-        return context;
+        // Use createConfigurationContext instead of deprecated updateConfiguration
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            return context.createConfigurationContext(configuration);
+        } else {
+            // For older Android versions, still use updateConfiguration
+            Resources resources = context.getResources();
+            resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+            return context;
+        }
     }
 
     /**

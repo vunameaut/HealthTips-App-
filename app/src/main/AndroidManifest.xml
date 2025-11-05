@@ -42,7 +42,8 @@
         <!-- Activities -->
         <activity
             android:name=".presentation.auth.LoginActivity"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -51,11 +52,13 @@
 
         <activity
             android:name=".presentation.auth.ForgotPasswordActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".presentation.auth.RegisterActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".presentation.home.HomeActivity"
@@ -108,7 +111,8 @@
         <!-- Màn hình chỉnh sửa thông tin cá nhân -->
         <activity
             android:name=".presentation.profile.EditProfileActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Debug Activity -->
         <activity
@@ -154,7 +158,8 @@
 
         <activity
             android:name=".presentation.settings.account.ChangePasswordActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Content and Display Section Activities -->
         <activity
@@ -181,7 +186,8 @@
         <!-- Support and About Section Activities -->
         <activity
             android:name=".presentation.settings.support.ReportIssueActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".presentation.settings.support.SupportHelpActivity"
@@ -197,7 +203,8 @@
         <activity
             android:name=".presentation.support.CreateSupportTicketActivity"
             android:exported="false"
-            android:label="@string/create_ticket" />
+            android:label="@string/create_ticket"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".presentation.support.SupportTicketsActivity"
@@ -207,7 +214,8 @@
         <activity
             android:name=".presentation.support.TicketDetailActivity"
             android:exported="false"
-            android:label="@string/ticket_detail_title" />
+            android:label="@string/ticket_detail_title"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- About Activities -->
         <activity

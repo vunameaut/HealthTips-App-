@@ -9,9 +9,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.vhn.doan.R;
+import com.vhn.doan.presentation.base.BaseActivity;
 import com.vhn.doan.presentation.home.HomeFragment;
 
 /**
@@ -19,7 +18,7 @@ import com.vhn.doan.presentation.home.HomeFragment;
  * Lớp này triển khai giao diện AuthView và sử dụng AuthPresenter
  * để xử lý logic đăng ký theo mô hình MVP
  */
-public class RegisterActivity extends AppCompatActivity implements AuthView {
+public class RegisterActivity extends BaseActivity implements AuthView {
 
     // UI components
     private EditText editTextEmail;

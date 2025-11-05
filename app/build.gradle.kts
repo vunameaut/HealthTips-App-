@@ -142,6 +142,9 @@ dependencies {
     // Thêm thư viện Desugaring để hỗ trợ tính năng Java 8+ trên các thiết bị cũ
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
+    // Thư viện mã hóa dữ liệu
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -21,12 +20,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.vhn.doan.R;
+import com.vhn.doan.presentation.base.BaseActivity;
+import com.vhn.doan.utils.SessionManager;
+
+import java.util.List;
 
 /**
  * Activity quản lý Quyền và Bảo mật
  * Gộp chung các tính năng bảo mật và quyền truy cập
  */
-public class SecurityAndPermissionsActivity extends AppCompatActivity {
+public class SecurityAndPermissionsActivity extends BaseActivity {
 
     private static final String PREFS_NAME = "SecuritySettings";
     private static final String KEY_AUTO_LOGOUT = "auto_logout_enabled";
@@ -63,6 +66,8 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
 
     private SharedPreferences preferences;
     private FirebaseAuth mAuth;
+    private com.vhn.doan.utils.EncryptionManager encryptionManager;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +76,8 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
 
         preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
+        encryptionManager = new com.vhn.doan.utils.EncryptionManager(this);
+        sessionManager = new SessionManager(this);
 
         setupViews();
         loadSecuritySettings();
@@ -121,8 +128,29 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
         switchSecureMode.setChecked(preferences.getBoolean(KEY_SECURE_MODE, false));
         switchSuspiciousAlert.setChecked(preferences.getBoolean(KEY_SUSPICIOUS_ALERT, true));
 
-        // Session count
-        tvSessionCount.setText(getString(R.string.one_device));
+        // Load actual session count
+        loadSessionCount();
+    }
+
+    private void loadSessionCount() {
+        sessionManager.getActiveSessions(new SessionManager.SessionCallback() {
+            @Override
+            public void onSessionsLoaded(List<SessionManager.SessionInfo> sessions) {
+                int count = sessions.size();
+                if (count == 0) {
+                    tvSessionCount.setText("Không có phiên nào");
+                } else if (count == 1) {
+                    tvSessionCount.setText("1 thiết bị");
+                } else {
+                    tvSessionCount.setText(count + " thiết bị");
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                tvSessionCount.setText("Không thể tải");
+            }
+        });
     }
 
     private void updatePermissionStatus() {
@@ -173,15 +201,37 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
         // Mã hóa dữ liệu
         switchEncryptData.setOnCheckedChangeListener((buttonView, isChecked) -> {
             saveSetting(KEY_ENCRYPT_DATA, isChecked);
-            Toast.makeText(this, isChecked ? "Đã bật mã hóa dữ liệu" : "Đã tắt mã hóa dữ liệu",
-                    Toast.LENGTH_SHORT).show();
+
+            // Enable/disable encryption via EncryptionManager
+            encryptionManager.setEncryptionEnabled(isChecked);
+
+            if (isChecked) {
+                // Show migration dialog
+                showEncryptionMigrationDialog();
+            } else {
+                Toast.makeText(this, "Đã tắt mã hóa dữ liệu. Dữ liệu mới sẽ không được mã hóa.",
+                        Toast.LENGTH_LONG).show();
+            }
         });
 
         // Chế độ bảo mật
         switchSecureMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             saveSetting(KEY_SECURE_MODE, isChecked);
-            Toast.makeText(this, isChecked ? "Đã bật chế độ bảo mật cao" : "Đã tắt chế độ bảo mật cao",
-                    Toast.LENGTH_SHORT).show();
+
+            if (isChecked) {
+                // Apply FLAG_SECURE immediately
+                getWindow().setFlags(
+                        android.view.WindowManager.LayoutParams.FLAG_SECURE,
+                        android.view.WindowManager.LayoutParams.FLAG_SECURE
+                );
+                Toast.makeText(this, "✅ Đã bật chế độ bảo mật cao\n📵 Đã chặn chụp màn hình và quay màn hình",
+                        Toast.LENGTH_LONG).show();
+            } else {
+                // Remove FLAG_SECURE immediately
+                getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                Toast.makeText(this, "Đã tắt chế độ bảo mật cao",
+                        Toast.LENGTH_SHORT).show();
+            }
         });
 
         // Lịch sử đăng nhập
@@ -238,14 +288,93 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
     }
 
     private void showActiveSessionsDialog() {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle("Phiên đăng nhập đang hoạt động")
-                .setMessage("• Thiết bị hiện tại\n  Đăng nhập: Hôm nay\n  Vị trí: Hà Nội, Việt Nam")
-                .setPositiveButton("Đóng", null)
-                .setNegativeButton("Đăng xuất khỏi tất cả", (dialog, which) -> {
-                    Toast.makeText(this, "Đã đăng xuất khỏi tất cả thiết bị khác", Toast.LENGTH_SHORT).show();
-                })
-                .show();
+        // Show loading dialog first
+        android.app.ProgressDialog loadingDialog = new android.app.ProgressDialog(this);
+        loadingDialog.setMessage("Đang tải phiên hoạt động...");
+        loadingDialog.setCancelable(false);
+        loadingDialog.show();
+
+        // Load actual data from SessionManager
+        sessionManager.getActiveSessions(new SessionManager.SessionCallback() {
+            @Override
+            public void onSessionsLoaded(List<SessionManager.SessionInfo> sessions) {
+                loadingDialog.dismiss();
+
+                if (sessions.isEmpty()) {
+                    new MaterialAlertDialogBuilder(SecurityAndPermissionsActivity.this)
+                            .setTitle("Phiên đăng nhập đang hoạt động")
+                            .setMessage("Không có phiên đăng nhập nào")
+                            .setPositiveButton("Đóng", null)
+                            .show();
+                    return;
+                }
+
+                // Update session count in UI
+                tvSessionCount.setText(sessions.size() + " thiết bị");
+
+                // Build message from actual sessions
+                StringBuilder message = new StringBuilder();
+                int otherSessionsCount = 0;
+
+                for (int i = 0; i < sessions.size(); i++) {
+                    SessionManager.SessionInfo session = sessions.get(i);
+                    message.append("• ").append(session.deviceName);
+
+                    if (session.isCurrentDevice) {
+                        message.append(" (Thiết bị này)");
+                    } else {
+                        otherSessionsCount++;
+                    }
+
+                    message.append("\n  Đăng nhập: ").append(session.getFormattedLoginTime())
+                            .append("\n  Hoạt động: ").append(session.getFormattedLastActive())
+                            .append("\n  Android ").append(session.androidVersion);
+
+                    if (session.location != null && !session.location.equals("N/A")) {
+                        message.append("\n  Vị trí: ").append(session.location);
+                    }
+
+                    if (i < sessions.size() - 1) {
+                        message.append("\n\n");
+                    }
+                }
+
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(SecurityAndPermissionsActivity.this)
+                        .setTitle("Phiên đăng nhập đang hoạt động")
+                        .setMessage(message.toString())
+                        .setPositiveButton("Đóng", null);
+
+                // Only show "Logout all others" if there are other sessions
+                if (otherSessionsCount > 0) {
+                    builder.setNegativeButton("Đăng xuất " + otherSessionsCount + " thiết bị khác", (dialog, which) -> {
+                        sessionManager.logoutAllOtherSessions(new SessionManager.LogoutCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Toast.makeText(SecurityAndPermissionsActivity.this,
+                                        "Đã đăng xuất khỏi tất cả thiết bị khác", Toast.LENGTH_SHORT).show();
+                                // Refresh session count
+                                tvSessionCount.setText("1 thiết bị");
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(SecurityAndPermissionsActivity.this,
+                                        "Lỗi: " + error, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    });
+                }
+
+                builder.show();
+            }
+
+            @Override
+            public void onError(String error) {
+                loadingDialog.dismiss();
+                Toast.makeText(SecurityAndPermissionsActivity.this,
+                        "Lỗi: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void showAutoLogoutTimeDialog() {
@@ -259,12 +388,84 @@ public class SecurityAndPermissionsActivity extends AppCompatActivity {
     }
 
     private void showLoginHistoryDialog() {
+        // Show loading dialog first
+        android.app.ProgressDialog loadingDialog = new android.app.ProgressDialog(this);
+        loadingDialog.setMessage("Đang tải lịch sử đăng nhập...");
+        loadingDialog.setCancelable(false);
+        loadingDialog.show();
+
+        // Load actual data from SessionManager
+        sessionManager.getActiveSessions(new SessionManager.SessionCallback() {
+            @Override
+            public void onSessionsLoaded(List<SessionManager.SessionInfo> sessions) {
+                loadingDialog.dismiss();
+
+                if (sessions.isEmpty()) {
+                    new MaterialAlertDialogBuilder(SecurityAndPermissionsActivity.this)
+                            .setTitle("Lịch sử đăng nhập")
+                            .setMessage("Không có lịch sử đăng nhập")
+                            .setPositiveButton("Đóng", null)
+                            .show();
+                    return;
+                }
+
+                // Build message from actual sessions
+                StringBuilder message = new StringBuilder();
+                for (int i = 0; i < sessions.size(); i++) {
+                    SessionManager.SessionInfo session = sessions.get(i);
+                    message.append("• ").append(session.getFormattedLoginTime());
+
+                    if (session.isCurrentDevice) {
+                        message.append(" (Thiết bị này)");
+                    }
+
+                    message.append("\n  ")
+                            .append(session.deviceName)
+                            .append("\n  ")
+                            .append("Android ").append(session.androidVersion)
+                            .append("\n  Hoạt động lần cuối: ").append(session.getFormattedLastActive());
+
+                    if (session.location != null && !session.location.equals("N/A")) {
+                        message.append("\n  Vị trí: ").append(session.location);
+                    }
+
+                    if (i < sessions.size() - 1) {
+                        message.append("\n\n");
+                    }
+                }
+
+                new MaterialAlertDialogBuilder(SecurityAndPermissionsActivity.this)
+                        .setTitle("Lịch sử đăng nhập")
+                        .setMessage(message.toString())
+                        .setPositiveButton("Đóng", null)
+                        .show();
+            }
+
+            @Override
+            public void onError(String error) {
+                loadingDialog.dismiss();
+                Toast.makeText(SecurityAndPermissionsActivity.this,
+                        "Lỗi: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showEncryptionMigrationDialog() {
         new MaterialAlertDialogBuilder(this)
-                .setTitle("Lịch sử đăng nhập")
-                .setMessage("• Hôm nay, 14:30 - Windows PC\n  Hà Nội, Việt Nam\n\n" +
-                        "• Hôm qua, 09:15 - Android Phone\n  Hà Nội, Việt Nam\n\n" +
-                        "• 3 ngày trước, 20:00 - Android Phone\n  TP. HCM, Việt Nam")
-                .setPositiveButton("Đóng", null)
+                .setTitle("Mã hóa dữ liệu")
+                .setMessage("✅ Đã bật mã hóa dữ liệu!\n\n" +
+                        "Tất cả dữ liệu nhạy cảm mới sẽ được mã hóa bằng AES-256.\n\n" +
+                        "Bạn có muốn di chuyển dữ liệu hiện có sang kho lưu trữ được mã hóa không?\n\n" +
+                        "⚠️ Khuyến nghị: Nên di chuyển để bảo vệ tối đa dữ liệu của bạn.")
+                .setPositiveButton("Di chuyển ngay", (dialog, which) -> {
+                    // Migrate existing data
+                    encryptionManager.migrateToEncryptedStorage("SessionPrefs");
+                    Toast.makeText(this, "Đã di chuyển dữ liệu sang kho được mã hóa", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Để sau", (dialog, which) -> {
+                    Toast.makeText(this, "Chỉ dữ liệu mới sẽ được mã hóa", Toast.LENGTH_SHORT).show();
+                })
+                .setIcon(android.R.drawable.ic_lock_lock)
                 .show();
     }
 

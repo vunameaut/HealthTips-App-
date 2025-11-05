@@ -9,17 +9,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.vhn.doan.R;
+import com.vhn.doan.presentation.base.BaseActivity;
 import com.vhn.doan.presentation.home.HomeActivity;
+import com.vhn.doan.utils.SessionManager;
 
 /**
  * LoginActivity là màn hình đăng nhập của ứng dụng
  * Lớp này triển khai giao diện AuthView và sử dụng AuthPresenter
  * để xử lý logic đăng nhập theo mô hình MVP
  */
-public class LoginActivity extends AppCompatActivity implements AuthView {
+public class LoginActivity extends BaseActivity implements AuthView {
 
     // UI components
     private EditText editTextEmail;
@@ -32,16 +32,31 @@ public class LoginActivity extends AppCompatActivity implements AuthView {
     // Presenter
     private AuthPresenter authPresenter;
 
+    // Session Manager
+    private SessionManager sessionManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Khởi tạo SessionManager
+        sessionManager = new SessionManager(this);
+
         // Khởi tạo AuthPresenter
         authPresenter = new AuthPresenter(this, this);
 
+        // Load existing session
+        sessionManager.loadSession();
+
         // Kiểm tra người dùng đã đăng nhập chưa
-        if (authPresenter.isUserLoggedIn()) {
+        if (sessionManager.isUserLoggedIn() && sessionManager.autoCheckLoginState()) {
+            // Check if account is pending deletion
+            if (sessionManager.isPendingDeletion()) {
+                // Show warning and continue to home
+                Toast.makeText(this, "Tài khoản của bạn đang chờ xóa. Còn " +
+                        sessionManager.getFormattedRemainingTime(), Toast.LENGTH_LONG).show();
+            }
             // Nếu đã đăng nhập thì chuyển đến màn hình chính
             navigateToHomeActivity();
             return;
@@ -152,6 +167,12 @@ public class LoginActivity extends AppCompatActivity implements AuthView {
 
     @Override
     public void onLoginSuccess(String userId) {
+        // Save login state
+        sessionManager.saveLoginState(userId);
+
+        // Create new session
+        sessionManager.createSession();
+
         showMessage("Đăng nhập thành công");
         navigateToHomeActivity();
     }

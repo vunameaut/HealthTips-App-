@@ -4,9 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.vhn.doan.R;
+import com.vhn.doan.presentation.base.BaseActivity;
 import com.vhn.doan.presentation.settings.account.AccountManagementActivity;
 import com.vhn.doan.presentation.settings.account.SecurityAndPermissionsActivity;
 import com.vhn.doan.presentation.settings.content.NotificationSettingsActivity;
@@ -21,7 +20,7 @@ import com.vhn.doan.presentation.settings.support.SupportHelpActivity;
  * Activity chính cho "Cài đặt và quyền riêng tư"
  * Hiển thị các nhóm cài đặt: Tài khoản, Nội dung và hiển thị, Hỗ trợ và giới thiệu
  */
-public class SettingsAndPrivacyActivity extends AppCompatActivity {
+public class SettingsAndPrivacyActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -8,11 +8,11 @@ import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 
 import com.vhn.doan.R;
+import com.vhn.doan.presentation.base.BaseActivity;
 import com.vhn.doan.utils.FontSizeHelper;
 
 import android.widget.Toast;
@@ -20,7 +20,7 @@ import android.widget.Toast;
 /**
  * Activity cài đặt hiển thị
  */
-public class DisplaySettingsActivity extends AppCompatActivity {
+public class DisplaySettingsActivity extends BaseActivity {
 
     private SharedPreferences preferences;
 
@@ -135,8 +135,11 @@ public class DisplaySettingsActivity extends AppCompatActivity {
 
                 // Notify user
                 Toast.makeText(DisplaySettingsActivity.this,
-                    "Kích thước chữ sẽ được áp dụng khi khởi động lại ứng dụng",
+                    "Đang áp dụng kích thước chữ...",
                     Toast.LENGTH_SHORT).show();
+
+                // Recreate activity to apply font size immediately
+                recreate();
             }
         });
     }
