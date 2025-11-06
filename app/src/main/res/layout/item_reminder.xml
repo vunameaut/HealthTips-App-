@@ -5,173 +5,247 @@
     android:id="@+id/card_reminder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="8dp"
     android:clickable="true"
     android:focusable="true"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="?attr/colorOutlineVariant"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="0dp"
     app:cardBackgroundColor="?attr/colorSurface">
 
+    <!-- Main Container với padding tốt hơn -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="top"
-        android:minHeight="100dp">
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <!-- Left Icon & Status - Cố định kích thước để không đè lên -->
-        <RelativeLayout
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="4dp">
+        <!-- Header Section: Icon + Title + Switch -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <!-- Icon Container với kích thước cố định -->
-            <LinearLayout
+            <!-- Icon Container với gradient background -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/icon_container"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_centerInParent="true"
-                android:background="@drawable/circle_background_primary"
-                android:gravity="center"
-                android:elevation="2dp">
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginEnd="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="?attr/colorPrimaryContainer">
 
                 <ImageView
                     android:id="@+id/iv_reminder_icon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
                     android:src="@drawable/ic_alarm"
-                    android:tint="@color/white"
-                    app:tint="@color/white" />
+                    android:contentDescription="@string/reminder_title"
+                    app:tint="?attr/colorPrimary" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Title & Status -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/tv_reminder_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reminder_title_default"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    tools:text="Nhắc nhở uống thuốc huyết áp" />
+
+                <!-- Status Badge -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/status_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="@color/status_active">
+
+                    <TextView
+                        android:id="@+id/tv_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="4dp"
+                        android:text="@string/reminder_status_active"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        android:textSize="11sp"
+                        tools:text="Đang hoạt động" />
+
+                </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
 
-            <!-- Status Indicator - Vị trí cố định không đè lên icon -->
-            <View
-                android:id="@+id/view_status_indicator"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:background="@drawable/circle_background"
-                android:backgroundTint="@color/success_color"
-                android:visibility="visible" />
-
-        </RelativeLayout>
-
-        <!-- Content Area - Chiếm toàn bộ không gian còn lại -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginEnd="16dp"
-            android:minHeight="56dp"
-            android:gravity="center_vertical">
-
-            <!-- Title Row - Hàng riêng cho tiêu đề -->
-            <TextView
-                android:id="@+id/tv_reminder_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Nhắc nhở uống thuốc"
-                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                android:textColor="?attr/colorOnSurface"
-                android:textStyle="bold"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:lineSpacingExtra="2dp"
-                android:layout_marginBottom="6dp"
-                tools:text="Nhắc nhở uống thuốc huyết áp và vitamin D" />
-
-            <!-- DateTime Row - Hàng riêng cho ngày giờ -->
-            <TextView
-                android:id="@+id/tv_reminder_datetime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="08:00"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                android:textColor="?attr/colorPrimary"
-                android:background="@drawable/rounded_background_primary_light"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:minWidth="56dp"
-                android:gravity="center"
-                android:textStyle="bold"
-                android:layout_marginBottom="6dp"
-                tools:text="08:30" />
-
-            <!-- Description - Hiển thị đầy đủ với nhiều dòng hơn -->
-            <TextView
-                android:id="@+id/tv_reminder_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                android:text="Uống thuốc huyết áp theo chỉ định bác sĩ"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:maxLines="3"
-                android:ellipsize="end"
-                android:lineSpacingExtra="1dp"
-                android:visibility="visible"
-                tools:text="Uống thuốc huyết áp theo chỉ định bác sĩ. Nhớ uống cùng với bữa sáng để tránh tác dụng phụ" />
-
-            <!-- Repeat Type với background đẹp hơn -->
-            <TextView
-                android:id="@+id/tv_repeat_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hàng ngày"
-                android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-                android:textColor="?attr/colorSecondary"
-                android:background="@drawable/rounded_background_secondary_light"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
-                android:textStyle="bold"
-                tools:text="Hàng ngày" />
-
-        </LinearLayout>
-
-        <!-- Right Actions - Cố định chiều rộng để không bị lệch -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:minWidth="64dp">
-
-            <!-- Toggle Switch -->
+            <!-- Switch -->
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/sw_reminder_active"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:checked="true"
-                android:theme="@style/Theme.SwitchMaterial" />
+                android:layout_marginStart="8dp"
+                android:checked="true" />
 
-            <!-- Delete Button với kích thước cố định -->
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="?attr/colorOutlineVariant" />
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/tv_reminder_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/reminder_no_description"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:visibility="visible"
+            android:lineSpacingExtra="2dp"
+            tools:text="Uống thuốc huyết áp theo chỉ định bác sĩ. Lưu ý: Uống trước bữa sáng 30 phút." />
+
+        <!-- Info Section: Date, Time, Repeat -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:background="@drawable/rounded_background"
+            android:backgroundTint="?attr/colorSurfaceVariant"
+            android:padding="16dp">
+
+            <!-- Date & Time Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_schedule"
+                    android:contentDescription="@string/reminder_time"
+                    app:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/tv_reminder_datetime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/reminder_no_time"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    tools:text="Thứ Hai, 06/11/2025 - 08:30" />
+
+            </LinearLayout>
+
+            <!-- Repeat Type Row -->
+            <LinearLayout
+                android:id="@+id/repeat_chip_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_repeat"
+                    android:contentDescription="@string/reminder_repeat"
+                    app:tint="?attr/colorSecondary" />
+
+                <TextView
+                    android:id="@+id/tv_repeat_type"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/repeat_no_repeat"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp"
+                    tools:text="Lặp lại hàng ngày" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <!-- Edit Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit_reminder"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_edit"
+                android:textColor="?attr/colorPrimary"
+                app:icon="@drawable/ic_edit"
+                app:iconTint="?attr/colorPrimary"
+                app:iconGravity="start" />
+
+            <!-- Delete Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_delete_reminder"
                 style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:minWidth="40dp"
-                android:minHeight="40dp"
-                android:padding="8dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:insetLeft="0dp"
-                android:insetRight="0dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/btn_delete"
+                android:textColor="?attr/colorError"
                 app:icon="@drawable/ic_delete"
-                app:iconSize="16dp"
                 app:iconTint="?attr/colorError"
-                app:iconGravity="textStart"
-                app:iconPadding="0dp" />
+                app:iconGravity="start" />
 
         </LinearLayout>
+
+        <!-- Status Indicator Bar (Bottom) -->
+        <View
+            android:id="@+id/view_status_indicator"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_background"
+            android:backgroundTint="?attr/colorPrimary" />
 
     </LinearLayout>
 

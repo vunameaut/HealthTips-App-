@@ -62,7 +62,9 @@
     <string name="no_reminders_message">아직 알림을 만들지 않았습니다. 첫 번째 알림을 만들어 건강을 관리하세요!</string>
     <string name="create_first_reminder">첫 번째 알림 만들기</string>
     <string name="loading_reminders">알림 로딩 중...</string>
+    <string name="all">모두</string>
     <string name="active">활성</string>
+    <string name="inactive">비활성</string>
     <string name="reminder_options">알림 옵션</string>
     <string name="reminder_sound_label">알림 소리</string>
     <string name="vibrate">진동</string>
@@ -100,6 +102,8 @@
     <string name="error_occurred">오류가 발생했습니다</string>
     <string name="network_error">네트워크 오류</string>
     <string name="retry">다시 시도</string>
+    <string name="no_internet_connection">인터넷 연결 없음</string>
+    <string name="internet_connected">인터넷 연결됨</string>
 
     <!-- Liked videos strings -->
     <string name="liked_videos">좋아요한 동영상</string>
@@ -171,9 +175,11 @@
 
     <!-- Repeat type strings -->
     <string name="repeat_none">반복 안 함</string>
+    <string name="repeat_no_repeat">반복 안 함</string>
     <string name="repeat_daily">매일</string>
     <string name="repeat_weekly">매주</string>
     <string name="repeat_monthly">매월</string>
+    <string name="repeat_custom">사용자 지정</string>
 
     <!-- Notification strings -->
     <string name="notification_channel_name">건강 알림</string>
@@ -349,6 +355,18 @@
     <string name="reminder_snooze_duration">다시 알림 시간</string>
     <string name="reminder_vibrate">진동</string>
     <string name="reminder_alarm_style">알람 스타일</string>
+
+    <!-- Strings for Reminder Item -->
+    <string name="reminder_status_active">활성</string>
+    <string name="reminder_status_paused">일시정지</string>
+    <string name="reminder_no_title">제목 없는 알림</string>
+    <string name="reminder_no_description">설명 없음</string>
+    <string name="reminder_no_time">시간 미설정</string>
+    <string name="reminder_invalid_time">잘못된 시간</string>
+    <string name="reminder_repeat_prefix">반복 %s</string>
+    <string name="reminder_error_display">알림 표시 오류</string>
+    <string name="btn_edit">편집</string>
+    <string name="btn_delete">삭제</string>
 
     <!-- Strings for Sound Types -->
     <string name="sound_alarm">알람</string>

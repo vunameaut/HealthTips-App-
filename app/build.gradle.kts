@@ -172,4 +172,35 @@ dependencies {
 
     // Thêm Cloudinary Android SDK
     implementation("com.cloudinary:cloudinary-android:2.8.0")
+
+    // ===== PERFORMANCE OPTIMIZATION DEPENDENCIES =====
+
+    // 1. ViewModel & LiveData để giữ dữ liệu trong bộ nhớ
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-common-java8:2.6.2")
+
+    // SavedStateHandle cho ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2")
+
+    // 2. Room Database để cache dữ liệu cục bộ
+    implementation("androidx.room:room-runtime:2.6.0")
+    annotationProcessor("androidx.room:room-compiler:2.6.0")
+    // Room optional - RxJava3 support (nếu muốn dùng RxJava sau này)
+    implementation("androidx.room:room-rxjava3:2.6.0")
+
+    // 3. DataStore để thay thế SharedPreferences (hiện đại hơn)
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-preferences-rxjava3:1.0.0")
+
+    // 4. Retrofit + OkHttp Cache cho networking tối ưu
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // OkHttp đã có rồi, chỉ cần cấu hình cache
+
+    // 5. RxJava3 cho reactive programming (optional nhưng rất tốt cho performance)
+    implementation("io.reactivex.rxjava3:rxjava:3.1.8")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
+    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
 }

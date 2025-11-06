@@ -23,6 +23,7 @@ import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
 import com.vhn.doan.data.repository.FirebaseVideoRepositoryImpl;
 import com.vhn.doan.presentation.base.BaseFragment;
+import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 import com.vhn.doan.presentation.video.adapter.VideoAdapter;
 import com.vhn.doan.utils.EventBus;
 import com.vhn.doan.utils.SharedPreferencesHelper;
@@ -33,8 +34,11 @@ import java.util.Map;
 /**
  * VideoFragment hiển thị feed video short theo kiểu TikTok/Instagram Reels
  * Tuân theo kiến trúc MVP và kế thừa từ BaseFragment
+ * Implement FragmentVisibilityListener để kiểm soát video playback
  */
-public class VideoFragment extends BaseFragment implements VideoView {
+public class VideoFragment extends BaseFragment implements VideoView, FragmentVisibilityListener {
+
+    private static final String TAG = "VideoFragment";
 
     private RecyclerView recyclerView;
     private View loadingLayout;
@@ -52,6 +56,11 @@ public class VideoFragment extends BaseFragment implements VideoView {
 
     private Observer<Map<String, Boolean>> videoLikeObserver;
     private EventBus eventBus;
+
+    // Flag để kiểm soát video playback
+    private boolean isFragmentVisible = false;
+    private boolean isDataLoaded = false;
+    private boolean shouldAutoPlayWhenVisible = false;
 
     /**
      * Factory method để tạo instance mới
@@ -113,8 +122,9 @@ public class VideoFragment extends BaseFragment implements VideoView {
         // Đăng ký lắng nghe sự kiện thay đổi trạng thái like từ EventBus
         registerLikeStatusObserver();
 
-        // Load video feed
-        loadVideoFeed();
+        // QUAN TRỌNG: KHÔNG load video ở đây
+        // Video chỉ được load khi fragment được show thực sự (onFragmentVisible)
+        android.util.Log.d(TAG, "⚠️ VideoFragment view created but NOT loading videos yet");
     }
 
     private void setupRecyclerView() {
@@ -276,11 +286,17 @@ public class VideoFragment extends BaseFragment implements VideoView {
         if (getActivity() == null || !isAdded()) return;
 
         videoAdapter.updateVideos(videos);
+        isDataLoaded = true;
 
-        // Auto play first video sử dụng API mới
-        if (!videos.isEmpty()) {
+        // QUAN TRỌNG: CHỈ auto play nếu fragment đang visible
+        if (!videos.isEmpty() && isFragmentVisible) {
             currentVisiblePosition = 0;
             videoAdapter.playVideoAt(0, recyclerView);
+            android.util.Log.d(TAG, "▶️ Auto-playing first video because fragment is visible");
+        } else if (!videos.isEmpty()) {
+            // Nếu chưa visible, đánh dấu để phát sau khi visible
+            shouldAutoPlayWhenVisible = true;
+            android.util.Log.d(TAG, "⏸️ Videos loaded but fragment not visible - will auto-play when shown");
         }
     }
 
@@ -430,13 +446,16 @@ public class VideoFragment extends BaseFragment implements VideoView {
             presenter.checkLikeStatusForVisibleVideos();
         }
 
-        // Resume current video nếu có
-        if (currentVisiblePosition >= 0 && recyclerView != null) {
+        // QUAN TRỌNG: CHỈ resume video nếu fragment đang visible
+        if (isFragmentVisible && currentVisiblePosition >= 0 && recyclerView != null) {
             videoAdapter.playVideoAt(currentVisiblePosition, recyclerView);
+            android.util.Log.d(TAG, "▶️ Resumed video playback at position " + currentVisiblePosition);
+        } else {
+            android.util.Log.d(TAG, "⏸️ Fragment resumed but not visible - NOT playing video");
         }
 
-        // Giữ màn hình sáng khi fragment hiển thị
-        if (getActivity() != null) {
+        // Giữ màn hình sáng chỉ khi fragment visible
+        if (isFragmentVisible && getActivity() != null) {
             getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
@@ -495,5 +514,61 @@ public class VideoFragment extends BaseFragment implements VideoView {
      */
     public int getCurrentPosition() {
         return presenter != null ? presenter.getCurrentPosition() : 0;
+    }
+
+    // ============================================================
+    // FragmentVisibilityListener Implementation
+    // ============================================================
+
+    /**
+     * Được gọi khi fragment được hiển thị (visible to user)
+     * Đây là lúc load dữ liệu và phát video
+     */
+    @Override
+    public void onFragmentVisible() {
+        android.util.Log.d(TAG, "🟢 onFragmentVisible() called");
+        isFragmentVisible = true;
+
+        // Load dữ liệu lần đầu tiên khi fragment được show
+        if (!isDataLoaded) {
+            android.util.Log.d(TAG, "📥 Loading video feed for the first time...");
+            loadVideoFeed();
+        }
+        // Nếu đã có dữ liệu và đang đợi để phát
+        else if (shouldAutoPlayWhenVisible && videoAdapter != null) {
+            android.util.Log.d(TAG, "▶️ Playing first video after becoming visible");
+            videoAdapter.playVideoAt(currentVisiblePosition, recyclerView);
+            shouldAutoPlayWhenVisible = false;
+        }
+        // Resume video hiện tại nếu đã có dữ liệu
+        else if (isDataLoaded && currentVisiblePosition >= 0 && recyclerView != null) {
+            android.util.Log.d(TAG, "▶️ Resuming video at position " + currentVisiblePosition);
+            videoAdapter.playVideoAt(currentVisiblePosition, recyclerView);
+        }
+
+        // Giữ màn hình sáng
+        if (getActivity() != null) {
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    /**
+     * Được gọi khi fragment bị ẩn (hidden from user)
+     * Pause tất cả video
+     */
+    @Override
+    public void onFragmentHidden() {
+        android.util.Log.d(TAG, "🔴 onFragmentHidden() called - pausing all videos");
+        isFragmentVisible = false;
+
+        // Pause tất cả video khi fragment bị ẩn
+        if (videoAdapter != null) {
+            videoAdapter.pauseAllVideos();
+        }
+
+        // Cho phép màn hình tắt
+        if (getActivity() != null) {
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 }

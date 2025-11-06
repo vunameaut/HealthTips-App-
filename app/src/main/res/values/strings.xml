@@ -62,7 +62,9 @@
     <string name="no_reminders_message">Bạn chưa tạo nhắc nhở nào. Hãy tạo nhắc nhở đầu tiên để theo dõi sức khỏe của mình!</string>
     <string name="create_first_reminder">Tạo nhắc nhở đầu tiên</string>
     <string name="loading_reminders">Đang tải nhắc nhở...</string>
+    <string name="all">Tất cả</string>
     <string name="active">Hoạt động</string>
+    <string name="inactive">Không hoạt động</string>
     <string name="reminder_options">Tùy chọn nhắc nhở</string>
     <string name="reminder_sound_label">Âm thanh nhắc nhở</string>
     <string name="vibrate">Rung</string>
@@ -100,6 +102,8 @@
     <string name="error_occurred">Đã xảy ra lỗi</string>
     <string name="network_error">Lỗi kết nối mạng</string>
     <string name="retry">Thử lại</string>
+    <string name="no_internet_connection">Không có kết nối internet</string>
+    <string name="internet_connected">Đã kết nối internet</string>
 
     <!-- Các chuỗi cho video đã like -->
     <string name="liked_videos">Video đã thích</string>
@@ -169,11 +173,13 @@
     <string name="delete_reminder">Xóa nhắc nhở</string>
     <string name="no_reminders">Chưa có nhắc nhở nào</string>
 
-    <!-- Chuỗi cho loại lặp l���i -->
+    <!-- Chuỗi cho loại lặp lại -->
     <string name="repeat_none">Không lặp</string>
+    <string name="repeat_no_repeat">Không lặp lại</string>
     <string name="repeat_daily">Hàng ngày</string>
     <string name="repeat_weekly">Hàng tuần</string>
     <string name="repeat_monthly">Hàng tháng</string>
+    <string name="repeat_custom">Tùy chỉnh</string>
 
     <!-- Chuỗi cho notification -->
     <string name="notification_channel_name">Nhắc nhở sức khỏe</string>
@@ -349,6 +355,18 @@
     <string name="reminder_snooze_duration">Thời gian báo lại</string>
     <string name="reminder_vibrate">Rung</string>
     <string name="reminder_alarm_style">Kiểu báo thức</string>
+
+    <!-- Strings cho Reminder Item -->
+    <string name="reminder_status_active">Đang hoạt động</string>
+    <string name="reminder_status_paused">Tạm dừng</string>
+    <string name="reminder_no_title">Nhắc nhở không có tiêu đề</string>
+    <string name="reminder_no_description">Không có mô tả</string>
+    <string name="reminder_no_time">Chưa đặt thời gian</string>
+    <string name="reminder_invalid_time">Thời gian không hợp lệ</string>
+    <string name="reminder_repeat_prefix">Lặp lại %s</string>
+    <string name="reminder_error_display">Lỗi hiển thị nhắc nhở</string>
+    <string name="btn_edit">Chỉnh sửa</string>
+    <string name="btn_delete">Xóa</string>
 
     <!-- Strings cho Sound Types -->
     <string name="sound_alarm">Báo thức</string>

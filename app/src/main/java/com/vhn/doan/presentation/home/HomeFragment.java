@@ -29,6 +29,7 @@ import com.vhn.doan.data.repository.CategoryRepository;
 import com.vhn.doan.data.repository.CategoryRepositoryImpl;
 import com.vhn.doan.data.repository.HealthTipRepository;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
+import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 import com.vhn.doan.presentation.search.SearchActivity;
 import com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity;
 import com.vhn.doan.utils.Constants;
@@ -45,8 +46,9 @@ import java.util.List;
 /**
  * HomeFragment hiển thị trang chính của ứng dụng
  * Tuân thủ kiến trúc MVP và sử dụng HomePresenter để xử lý logic
+ * Implement FragmentVisibilityListener để quản lý lifecycle
  */
-public class HomeFragment extends Fragment implements HomeView {
+public class HomeFragment extends Fragment implements HomeView, FragmentVisibilityListener {
 
     // UI components
     private RecyclerView recyclerViewCategories;
@@ -818,5 +820,31 @@ public class HomeFragment extends Fragment implements HomeView {
                 }
             });
         }
+    }
+
+    // ============================================================
+    // FragmentVisibilityListener Implementation
+    // ============================================================
+
+    /**
+     * Được gọi khi fragment được hiển thị (visible to user)
+     */
+    @Override
+    public void onFragmentVisible() {
+        // HomeFragment luôn load dữ liệu ngay khi được tạo
+        // Khi được show lại, tiếp tục auto-scroll nếu có
+        if (isRecommendedTipsLoaded && recommendedTipsAdapter != null &&
+            recommendedTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
+            startAutoScrollForRecommended();
+        }
+    }
+
+    /**
+     * Được gọi khi fragment bị ẩn (hidden from user)
+     */
+    @Override
+    public void onFragmentHidden() {
+        // Dừng auto-scroll khi fragment bị ẩn để tiết kiệm tài nguyên
+        stopAutoScrollForRecommended();
     }
 }

@@ -212,6 +212,13 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
 
         boolean newStatus = !reminder.isActive();
 
+        // KIỂM TRA: Nếu đang bật lại reminder và thời gian đã qua
+        if (newStatus && isReminderExpired(reminder)) {
+            // Hiển thị dialog yêu cầu người dùng chỉnh lại thời gian
+            view.showExpiredReminderDialog(reminder);
+            return; // Không toggle, chờ người dùng chỉnh lại
+        }
+
         reminderRepository.toggleReminder(reminder.getId(), newStatus, new ReminderRepository.RepositoryCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
@@ -234,6 +241,26 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
                 }
             }
         });
+    }
+
+    /**
+     * Kiểm tra xem reminder đã qua thời gian chưa
+     */
+    private boolean isReminderExpired(Reminder reminder) {
+        if (reminder == null || reminder.getReminderTime() == null) {
+            return false;
+        }
+
+        long currentTime = System.currentTimeMillis();
+        long reminderTime = reminder.getReminderTime();
+
+        // Nếu là reminder lặp lại, cho phép bật (ReminderService sẽ tự động lên lịch lần tiếp theo)
+        if (reminder.getRepeatType() != com.vhn.doan.data.Reminder.RepeatType.NO_REPEAT) {
+            return false;
+        }
+
+        // Reminder một lần: kiểm tra đã qua chưa
+        return reminderTime < currentTime;
     }
 
     /**

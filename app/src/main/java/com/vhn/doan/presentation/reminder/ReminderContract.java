@@ -60,6 +60,12 @@ public interface ReminderContract {
          * Cập nhật số lượng nhắc nhở đang hoạt động
          */
         void updateActiveReminderCount(int activeCount);
+
+        /**
+         * Hiển thị dialog thông báo reminder đã qua thời gian
+         * và yêu cầu người dùng chỉnh lại
+         */
+        void showExpiredReminderDialog(Reminder reminder);
     }
 
     interface Presenter {

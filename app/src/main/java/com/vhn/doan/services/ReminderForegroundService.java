@@ -166,17 +166,22 @@ public class ReminderForegroundService extends Service {
 
     /**
      * Tạo notification channel cho foreground service
+     * Sử dụng IMPORTANCE_MIN để ẩn hoàn toàn notification
      */
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    "Dịch vụ nhắc nhở sức khỏe",
-                    NotificationManager.IMPORTANCE_LOW
+                    "Dịch vụ nền",
+                    NotificationManager.IMPORTANCE_MIN // Thay đổi từ LOW sang MIN để ẩn hoàn toàn
                 );
-                channel.setDescription("Dịch vụ chạy ngầm để đảm bảo nhắc nhở hoạt động");
+                channel.setDescription("Dịch vụ chạy ngầm");
                 channel.setShowBadge(false);
+                channel.setSound(null, null); // Không có âm thanh
+                channel.enableLights(false);
+                channel.enableVibration(false);
+                channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET); // Ẩn trên lockscreen
 
                 NotificationManager manager = getSystemService(NotificationManager.class);
                 if (manager != null) {
@@ -190,27 +195,18 @@ public class ReminderForegroundService extends Service {
     }
 
     /**
-     * Tạo notification cho foreground service
+     * Tạo notification ẩn cho foreground service
+     * Notification này sẽ không hiển thị cho người dùng
      */
     private Notification createForegroundNotification() {
-        Intent intent = new Intent(this, HomeActivity.class);
-        intent.putExtra("open_reminders", true);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Dịch vụ nhắc nhở đang hoạt động")
-            .setContentText("Đảm bảo bạn nhận được thông báo đúng giờ")
+            .setContentTitle("") // Để trống
+            .setContentText("") // Để trống
             .setSmallIcon(R.drawable.ic_notification_reminder)
-            .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+            .setPriority(NotificationCompat.PRIORITY_MIN) // PRIORITY_MIN để ẩn hoàn toàn
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET) // Ẩn trên tất cả màn hình
+            .setSilent(true) // Im lặng
             .build();
     }
 

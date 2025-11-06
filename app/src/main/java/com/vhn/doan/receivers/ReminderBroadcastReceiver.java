@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.PowerManager;
 
+import com.vhn.doan.R;
 import com.vhn.doan.data.Reminder;
 import com.vhn.doan.data.repository.ReminderRepository;
 import com.vhn.doan.data.repository.ReminderRepositoryImpl;
@@ -127,60 +128,195 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
 
     /**
      * Hiển thị full screen alarm activity
-     * Hoạt động cho cả khi app đang mở và khi app bị tắt
+     * CHIẾN LƯỢC MỚI: Hiển thị notification với fullScreenIntent + launch activity
      */
     private void showFullScreenAlarm(Context context, Reminder reminder) {
         try {
-            Log.d(TAG, "🚨 Launching AlarmActivity for: " + reminder.getTitle());
+            Log.d(TAG, "🚨 Hiển thị alarm cho: " + reminder.getTitle());
 
+            // Tạo intent cho AlarmActivity
             Intent alarmIntent = new Intent(context, AlarmActivity.class);
             alarmIntent.putExtra(AlarmActivity.EXTRA_REMINDER_ID, reminder.getId());
             alarmIntent.putExtra(AlarmActivity.EXTRA_TITLE, reminder.getTitle());
             alarmIntent.putExtra(AlarmActivity.EXTRA_MESSAGE, reminder.getDescription());
-
-            // Flags để hiển thị activity từ background
             alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                                 Intent.FLAG_ACTIVITY_CLEAR_TOP |
                                 Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-            // Trên Android 10+ (API 29+), cần thêm flag để hiển thị từ background
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                alarmIntent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            android.app.PendingIntent fullScreenPendingIntent = android.app.PendingIntent.getActivity(
+                context,
+                reminder.getId().hashCode(),
+                alarmIntent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE
+            );
+
+            // BƯỚC 1: Tạo HIGH priority notification channel
+            createHighPriorityAlarmChannel(context);
+
+            // BƯỚC 2: Tạo notification với fullScreenIntent
+            androidx.core.app.NotificationCompat.Builder builder =
+                new androidx.core.app.NotificationCompat.Builder(context, "alarm_channel_urgent")
+                    .setSmallIcon(R.drawable.ic_notification_reminder)
+                    .setContentTitle("⏰ NHẮC NHỞ: " + reminder.getTitle())
+                    .setContentText(reminder.getDescription())
+                    .setStyle(new androidx.core.app.NotificationCompat.BigTextStyle()
+                        .bigText(reminder.getDescription()))
+                    .setPriority(androidx.core.app.NotificationCompat.PRIORITY_MAX)
+                    .setCategory(androidx.core.app.NotificationCompat.CATEGORY_ALARM)
+                    .setAutoCancel(false)
+                    .setOngoing(true)
+                    .setVisibility(androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC)
+                    .setContentIntent(fullScreenPendingIntent)
+                    .setFullScreenIntent(fullScreenPendingIntent, true) // QUAN TRỌNG: fullScreenIntent
+                    // ÂM THANH + RUNG
+                    .setDefaults(androidx.core.app.NotificationCompat.DEFAULT_ALL)
+                    .setVibrate(new long[]{0, 1000, 500, 1000, 500, 1000});
+
+            // BƯỚC 3: Hiển thị notification
+            android.app.NotificationManager notificationManager =
+                (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (notificationManager != null) {
+                int notificationId = 9000 + reminder.getId().hashCode();
+                notificationManager.notify(notificationId, builder.build());
+                Log.d(TAG, "✅ Notification hiển thị với fullScreenIntent, ID: " + notificationId);
             }
 
-            context.startActivity(alarmIntent);
-            Log.d(TAG, "✅ AlarmActivity launched successfully");
+            // BƯỚC 4: Thử launch activity (sẽ work nếu app ở foreground)
+            try {
+                context.startActivity(alarmIntent);
+                Log.d(TAG, "✅ AlarmActivity launched");
+            } catch (Exception activityException) {
+                Log.w(TAG, "⚠️ Không thể launch activity từ background (expected behavior), notification sẽ handle việc này");
+            }
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Lỗi khi launch AlarmActivity", e);
-            // Fallback: hiển thị notification
+            Log.e(TAG, "❌ Lỗi khi hiển thị alarm", e);
+            // Final fallback: notification thường
             NotificationService notificationService = new NotificationService(context);
             notificationService.showReminderNotification(reminder);
         }
     }
 
     /**
+     * Tạo notification channel với độ ưu tiên CAO NHẤT cho alarm
+     */
+    private void createHighPriorityAlarmChannel(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                "alarm_channel_urgent",
+                "Báo thức khẩn cấp",
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            );
+            channel.setDescription("Thông báo báo thức toàn màn hình");
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
+            channel.setBypassDnd(true); // Bypass Do Not Disturb
+            channel.setSound(
+                android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM),
+                new android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            );
+
+            android.app.NotificationManager notificationManager =
+                (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+    }
+
+    /**
      * Hiển thị notification thường với âm thanh và rung
      * Sử dụng khi user không chọn alarm style
+     * CHIẾN LƯỢC: Giống showFullScreenAlarm nhưng không có overlay
      */
     private void showNotificationWithSound(Context context, Reminder reminder) {
         try {
-            Log.d(TAG, "🔔 Showing notification with sound and vibration");
+            Log.d(TAG, "🔔 Hiển thị notification thường với âm thanh");
 
-            NotificationService notificationService = new NotificationService(context);
+            // Tạo intent cho AlarmActivity (khi user tap notification)
+            Intent alarmIntent = new Intent(context, AlarmActivity.class);
+            alarmIntent.putExtra(AlarmActivity.EXTRA_REMINDER_ID, reminder.getId());
+            alarmIntent.putExtra(AlarmActivity.EXTRA_TITLE, reminder.getTitle());
+            alarmIntent.putExtra(AlarmActivity.EXTRA_MESSAGE, reminder.getDescription());
+            alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-            // Nếu có âm thanh tùy chỉnh, sử dụng method với sound URI
-            if (reminder.getSoundUri() != null && !reminder.getSoundUri().isEmpty()) {
-                notificationService.showReminderNotificationWithSound(reminder, reminder.getSoundUri());
-            } else {
-                // Sử dụng notification thường với âm thanh mặc định
-                notificationService.showReminderNotification(reminder);
+            android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(
+                context,
+                reminder.getId().hashCode(),
+                alarmIntent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE
+            );
+
+            // Tạo notification channel với HIGH priority
+            createHighPriorityNotificationChannel(context);
+
+            // Tạo notification với HIGH priority
+            androidx.core.app.NotificationCompat.Builder builder =
+                new androidx.core.app.NotificationCompat.Builder(context, "reminder_channel_high")
+                    .setSmallIcon(R.drawable.ic_notification_reminder)
+                    .setContentTitle("🔔 Nhắc nhở: " + reminder.getTitle())
+                    .setContentText(reminder.getDescription())
+                    .setStyle(new androidx.core.app.NotificationCompat.BigTextStyle()
+                        .bigText(reminder.getDescription()))
+                    .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(androidx.core.app.NotificationCompat.CATEGORY_REMINDER)
+                    .setAutoCancel(true) // Tự động dismiss khi tap
+                    .setOngoing(false) // Có thể swipe away
+                    .setVisibility(androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC)
+                    .setContentIntent(pendingIntent)
+                    // ÂM THANH + RUNG
+                    .setDefaults(androidx.core.app.NotificationCompat.DEFAULT_ALL)
+                    .setVibrate(new long[]{0, 500, 250, 500}); // Rung nhẹ hơn alarm
+
+            // Hiển thị notification
+            android.app.NotificationManager notificationManager =
+                (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (notificationManager != null) {
+                int notificationId = 8000 + reminder.getId().hashCode();
+                notificationManager.notify(notificationId, builder.build());
+                Log.d(TAG, "✅ Notification thường hiển thị, ID: " + notificationId);
             }
-
-            Log.d(TAG, "✅ Notification displayed successfully");
 
         } catch (Exception e) {
             Log.e(TAG, "❌ Lỗi khi hiển thị notification", e);
+        }
+    }
+
+    /**
+     * Tạo notification channel cho notification thường (không phải alarm)
+     */
+    private void createHighPriorityNotificationChannel(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                "reminder_channel_high",
+                "Nhắc nhở sức khỏe",
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            );
+            channel.setDescription("Thông báo nhắc nhở sức khỏe");
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
+            channel.setSound(
+                android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION),
+                new android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            );
+
+            android.app.NotificationManager notificationManager =
+                (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
 

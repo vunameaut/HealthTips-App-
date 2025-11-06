@@ -62,7 +62,9 @@
     <string name="no_reminders_message">まだリマインダーを作成していません。最初のリマインダーを作成して健康を追跡しましょう！</string>
     <string name="create_first_reminder">最初のリマインダーを作成</string>
     <string name="loading_reminders">リマインダーを読み込み中...</string>
+    <string name="all">すべて</string>
     <string name="active">アクティブ</string>
+    <string name="inactive">非アクティブ</string>
     <string name="reminder_options">リマインダーオプション</string>
     <string name="reminder_sound_label">リマインダーサウンド</string>
     <string name="vibrate">バイブレーション</string>
@@ -100,6 +102,8 @@
     <string name="error_occurred">エラーが発生しました</string>
     <string name="network_error">ネットワークエラー</string>
     <string name="retry">再試行</string>
+    <string name="no_internet_connection">インターネット接続がありません</string>
+    <string name="internet_connected">インターネットに接続されました</string>
 
     <!-- Liked videos strings -->
     <string name="liked_videos">いいねした動画</string>
@@ -171,9 +175,11 @@
 
     <!-- Repeat type strings -->
     <string name="repeat_none">繰り返しなし</string>
+    <string name="repeat_no_repeat">繰り返しなし</string>
     <string name="repeat_daily">毎日</string>
     <string name="repeat_weekly">毎週</string>
     <string name="repeat_monthly">毎月</string>
+    <string name="repeat_custom">カスタム</string>
 
     <!-- Notification strings -->
     <string name="notification_channel_name">健康リマインダー</string>
@@ -349,6 +355,18 @@
     <string name="reminder_snooze_duration">スヌーズ時間</string>
     <string name="reminder_vibrate">バイブレーション</string>
     <string name="reminder_alarm_style">アラームスタイル</string>
+
+    <!-- Strings for Reminder Item -->
+    <string name="reminder_status_active">アクティブ</string>
+    <string name="reminder_status_paused">一時停止</string>
+    <string name="reminder_no_title">タイトルなしのリマインダー</string>
+    <string name="reminder_no_description">説明なし</string>
+    <string name="reminder_no_time">時間未設定</string>
+    <string name="reminder_invalid_time">無効な時間</string>
+    <string name="reminder_repeat_prefix">繰り返し %s</string>
+    <string name="reminder_error_display">リマインダーの表示エラー</string>
+    <string name="btn_edit">編集</string>
+    <string name="btn_delete">削除</string>
 
     <!-- Strings for Sound Types -->
     <string name="sound_alarm">アラーム</string>

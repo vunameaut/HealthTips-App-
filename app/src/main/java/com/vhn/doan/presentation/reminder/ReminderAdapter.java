@@ -39,6 +39,7 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
         void onReminderClick(Reminder reminder);
         void onToggleClick(Reminder reminder);
         void onDeleteClick(Reminder reminder);
+        void onEditClick(Reminder reminder);
     }
 
     public ReminderAdapter(List<Reminder> reminders, OnReminderItemClickListener listener) {
@@ -304,9 +305,12 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
         private TextView tvDescription;
         private TextView tvDateTime;
         private TextView tvRepeatType;
+        private TextView tvStatus;
         private SwitchMaterial swActive;
         private MaterialButton btnDelete;
+        private MaterialButton btnEdit;
         private View statusIndicator;
+        private View statusBadge;
         private ImageView ivReminderIcon;
         private View iconContainer;
 
@@ -322,9 +326,12 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
                 tvDescription = itemView.findViewById(R.id.tv_reminder_description);
                 tvDateTime = itemView.findViewById(R.id.tv_reminder_datetime);
                 tvRepeatType = itemView.findViewById(R.id.tv_repeat_type);
+                tvStatus = itemView.findViewById(R.id.tv_status);
                 swActive = itemView.findViewById(R.id.sw_reminder_active);
                 btnDelete = itemView.findViewById(R.id.btn_delete_reminder);
+                btnEdit = itemView.findViewById(R.id.btn_edit_reminder);
                 statusIndicator = itemView.findViewById(R.id.view_status_indicator);
+                statusBadge = itemView.findViewById(R.id.status_badge);
                 ivReminderIcon = itemView.findViewById(R.id.iv_reminder_icon);
                 iconContainer = itemView.findViewById(R.id.icon_container);
 
@@ -332,7 +339,8 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
                 android.util.Log.d("ReminderAdapter", "🔍 View initialization: " +
                     "tvTitle=" + (tvTitle != null) +
                     ", tvDescription=" + (tvDescription != null) +
-                    ", tvDateTime=" + (tvDateTime != null));
+                    ", tvDateTime=" + (tvDateTime != null) +
+                    ", btnEdit=" + (btnEdit != null));
 
                 if (tvTitle == null) {
                     android.util.Log.e("ReminderAdapter", "❌ CRITICAL: tvTitle is null after findViewById!");
@@ -363,6 +371,19 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
                             Reminder reminder = reminders.get(position);
                             if (reminder != null) {
                                 listener.onToggleClick(reminder);
+                            }
+                        }
+                    });
+                }
+
+                if (btnEdit != null) {
+                    btnEdit.setOnClickListener(v -> {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION && listener != null &&
+                            position < reminders.size()) {
+                            Reminder reminder = reminders.get(position);
+                            if (reminder != null) {
+                                listener.onEditClick(reminder);
                             }
                         }
                     });
@@ -407,7 +428,7 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
                         tvTitle.setText(title.trim());
                         android.util.Log.d("ReminderAdapter", "✅ Title set: '" + title.trim() + "'");
                     } else {
-                        tvTitle.setText("Nhắc nhở không có tiêu đề");
+                        tvTitle.setText(context.getString(R.string.reminder_no_title));
                         android.util.Log.w("ReminderAdapter", "⚠️ Title is null or empty, using default");
                     }
 
@@ -432,7 +453,7 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
                         tvDescription.setVisibility(View.VISIBLE);
                         android.util.Log.d("ReminderAdapter", "✅ Description set: '" + description.trim() + "'");
                     } else {
-                        tvDescription.setText("Không có mô tả");
+                        tvDescription.setText(context.getString(R.string.reminder_no_description));
                         tvDescription.setVisibility(View.VISIBLE);
                         android.util.Log.d("ReminderAdapter", "📝 Description empty, showing default message");
                     }
@@ -444,17 +465,25 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
                 if (tvDateTime != null) {
                     try {
                         if (reminder.getReminderTime() != null && reminder.getReminderTime() > 0) {
-                            String formattedDate = dateTimeFormat.format(new Date(reminder.getReminderTime()));
+                            // Format: "Thứ Hai, 06/11/2025 - 08:30"
+                            SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE", new Locale("vi", "VN"));
+                            SimpleDateFormat fullFormat = new SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault());
+
+                            Date date = new Date(reminder.getReminderTime());
+                            String dayOfWeek = dayFormat.format(date);
+                            String fullDateTime = fullFormat.format(date);
+
+                            String formattedDate = dayOfWeek + ", " + fullDateTime;
                             tvDateTime.setText(formattedDate);
                             tvDateTime.setVisibility(View.VISIBLE);
                             android.util.Log.d("ReminderAdapter", "🕐 DateTime set: " + formattedDate);
                         } else {
-                            tvDateTime.setText("Chưa đặt thời gian");
+                            tvDateTime.setText(context.getString(R.string.reminder_no_time));
                             tvDateTime.setVisibility(View.VISIBLE);
                             android.util.Log.w("ReminderAdapter", "⚠️ ReminderTime is null or invalid");
                         }
                     } catch (Exception e) {
-                        tvDateTime.setText("Thời gian không hợp lệ");
+                        tvDateTime.setText(context.getString(R.string.reminder_invalid_time));
                         tvDateTime.setVisibility(View.VISIBLE);
                         android.util.Log.e("ReminderAdapter", "❌ Error formatting date: " + e.getMessage());
                     }
@@ -466,11 +495,25 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
                 if (tvRepeatType != null) {
                     int repeatType = reminder.getRepeatType();
                     String repeatTypeText = getRepeatTypeText(repeatType);
-                    tvRepeatType.setText(repeatTypeText);
+                    tvRepeatType.setText(context.getString(R.string.reminder_repeat_prefix, repeatTypeText.toLowerCase()));
                     tvRepeatType.setVisibility(View.VISIBLE);
                     android.util.Log.d("ReminderAdapter", "🔄 RepeatType set: " + repeatTypeText);
                 } else {
                     android.util.Log.w("ReminderAdapter", "⚠️ tvRepeatType is null");
+                }
+
+                // Set status badge
+                if (tvStatus != null && statusBadge != null) {
+                    if (reminder.isActive()) {
+                        tvStatus.setText(context.getString(R.string.reminder_status_active));
+                        statusBadge.setBackgroundTintList(
+                            ContextCompat.getColorStateList(context, R.color.status_active));
+                    } else {
+                        tvStatus.setText(context.getString(R.string.reminder_status_paused));
+                        statusBadge.setBackgroundTintList(
+                            ContextCompat.getColorStateList(context, R.color.status_inactive));
+                    }
+                    statusBadge.setVisibility(View.VISIBLE);
                 }
 
                 // Set active state với cải thiện
@@ -505,7 +548,7 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
 
                 // Fallback: Hiển thị thông tin cơ bản nếu có lỗi
                 if (tvTitle != null) {
-                    tvTitle.setText("Lỗi hiển thị nhắc nhở");
+                    tvTitle.setText(itemView.getContext().getString(R.string.reminder_error_display));
                     tvTitle.setVisibility(View.VISIBLE);
                 }
             }
@@ -515,24 +558,22 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
             try {
                 boolean isActive = reminder.isActive();
 
-                // Update status indicator
+                // Update status indicator bar (bottom)
                 if (statusIndicator != null) {
                     if (isActive) {
                         statusIndicator.setBackgroundTintList(
-                            ContextCompat.getColorStateList(context, R.color.success_color));
-                        statusIndicator.setVisibility(View.VISIBLE);
+                            ContextCompat.getColorStateList(context, R.color.status_active));
                     } else {
                         statusIndicator.setBackgroundTintList(
-                            ContextCompat.getColorStateList(context, R.color.error_color));
-                        statusIndicator.setVisibility(View.VISIBLE);
+                            ContextCompat.getColorStateList(context, R.color.status_inactive));
                     }
                 }
 
-                // Update icon container
+                // Update icon container background
                 if (iconContainer != null) {
                     if (isActive) {
                         iconContainer.setBackgroundTintList(
-                            ContextCompat.getColorStateList(context, R.color.primary_color));
+                            ContextCompat.getColorStateList(context, R.color.primary_container));
                     } else {
                         iconContainer.setBackgroundTintList(
                             ContextCompat.getColorStateList(context, R.color.surface_variant));
@@ -541,18 +582,18 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
 
                 // Update icon
                 if (ivReminderIcon != null) {
-                    ivReminderIcon.setImageResource(isActive ? R.drawable.ic_alarm : R.drawable.ic_alarm_off);
                     if (isActive) {
+                        ivReminderIcon.setImageResource(R.drawable.ic_alarm);
                         ivReminderIcon.setImageTintList(
-                            ContextCompat.getColorStateList(context, R.color.white));
+                            ContextCompat.getColorStateList(context, R.color.primary_color));
                     } else {
+                        ivReminderIcon.setImageResource(R.drawable.ic_alarm_off);
                         ivReminderIcon.setImageTintList(
                             ContextCompat.getColorStateList(context, R.color.on_surface_variant));
                     }
                 }
 
-                // QUAN TRỌNG: Cải thiện text alpha để đảm bảo title luôn rõ ràng
-                // Title luôn được hiển thị rõ ràng, chỉ description và datetime bị mờ nhẹ khi inactive
+                // Cải thiện text visibility - Title luôn rõ ràng
                 if (isActive) {
                     // Khi active: tất cả text đều rõ ràng
                     if (tvTitle != null) tvTitle.setAlpha(1.0f);
@@ -563,12 +604,12 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
                     android.util.Log.d("ReminderAdapter", "🔆 Visual state: ACTIVE - all text visible");
                 } else {
                     // Khi inactive: Title vẫn rõ, chỉ các thông tin phụ bị mờ nhẹ
-                    if (tvTitle != null) tvTitle.setAlpha(0.9f); // Title vẫn rõ ràng 90%
-                    if (tvDescription != null) tvDescription.setAlpha(0.7f); // Mô tả mờ hơn
-                    if (tvDateTime != null) tvDateTime.setAlpha(0.8f); // Thời gian mờ nhẹ
-                    if (tvRepeatType != null) tvRepeatType.setAlpha(0.8f); // Repeat type mờ nhẹ
+                    if (tvTitle != null) tvTitle.setAlpha(1.0f); // Title luôn rõ 100%
+                    if (tvDescription != null) tvDescription.setAlpha(0.75f); // Mô tả mờ hơn
+                    if (tvDateTime != null) tvDateTime.setAlpha(0.85f); // Thời gian mờ nhẹ
+                    if (tvRepeatType != null) tvRepeatType.setAlpha(0.85f); // Repeat type mờ nhẹ
 
-                    android.util.Log.d("ReminderAdapter", "🔅 Visual state: INACTIVE - title still visible, details dimmed");
+                    android.util.Log.d("ReminderAdapter", "🔅 Visual state: INACTIVE - title visible, details dimmed");
                 }
 
             } catch (Exception e) {

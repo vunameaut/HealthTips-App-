@@ -62,7 +62,9 @@
     <string name="no_reminders_message">您还没有创建任何提醒。创建第一个提醒来跟踪您的健康！</string>
     <string name="create_first_reminder">创建第一个提醒</string>
     <string name="loading_reminders">加载提醒中...</string>
+    <string name="all">全部</string>
     <string name="active">活跃</string>
+    <string name="inactive">未激活</string>
     <string name="reminder_options">提醒选项</string>
     <string name="reminder_sound_label">提醒铃声</string>
     <string name="vibrate">振动</string>
@@ -100,6 +102,8 @@
     <string name="error_occurred">发生错误</string>
     <string name="network_error">网络错误</string>
     <string name="retry">重试</string>
+    <string name="no_internet_connection">没有网络连接</string>
+    <string name="internet_connected">已连接到互联网</string>
 
     <!-- Liked videos strings -->
     <string name="liked_videos">点赞的视频</string>
@@ -171,9 +175,11 @@
 
     <!-- Repeat type strings -->
     <string name="repeat_none">不重复</string>
+    <string name="repeat_no_repeat">不重复</string>
     <string name="repeat_daily">每日</string>
     <string name="repeat_weekly">每周</string>
     <string name="repeat_monthly">每月</string>
+    <string name="repeat_custom">自定义</string>
 
     <!-- Notification strings -->
     <string name="notification_channel_name">健康提醒</string>
@@ -349,6 +355,18 @@
     <string name="reminder_snooze_duration">稍后提醒时长</string>
     <string name="reminder_vibrate">振动</string>
     <string name="reminder_alarm_style">闹钟样式</string>
+
+    <!-- Strings for Reminder Item -->
+    <string name="reminder_status_active">进行中</string>
+    <string name="reminder_status_paused">已暂停</string>
+    <string name="reminder_no_title">无标题提醒</string>
+    <string name="reminder_no_description">无描述</string>
+    <string name="reminder_no_time">未设置时间</string>
+    <string name="reminder_invalid_time">无效时间</string>
+    <string name="reminder_repeat_prefix">重复 %s</string>
+    <string name="reminder_error_display">显示提醒时出错</string>
+    <string name="btn_edit">编辑</string>
+    <string name="btn_delete">删除</string>
 
     <!-- Strings for Sound Types -->
     <string name="sound_alarm">闹钟</string>

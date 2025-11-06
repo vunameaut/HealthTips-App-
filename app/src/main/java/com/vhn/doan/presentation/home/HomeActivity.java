@@ -13,6 +13,7 @@ import com.google.android.material.navigation.NavigationBarView;
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.auth.LoginActivity;
 import com.vhn.doan.presentation.base.BaseActivity;
+import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 import com.vhn.doan.presentation.chat.ChatListFragment;
 import com.vhn.doan.presentation.chat.NewChatFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
@@ -32,6 +33,21 @@ public class HomeActivity extends BaseActivity {
     private BottomNavigationView bottomNavigationView;
     private AuthManager authManager;
     private ReminderManager reminderManager;
+
+    // Cache Fragments để sử dụng show/hide thay vì replace
+    private HomeFragment homeFragment;
+    private ChatListFragment chatListFragment;
+    private ReminderFragment reminderFragment;
+    private VideoFragment videoFragment;
+    private ProfileFragment profileFragment;
+    private Fragment currentFragment;
+
+    // Flag để theo dõi fragment đã được hiển thị thực sự chưa
+    private boolean isHomeFragmentEverShown = false;
+    private boolean isChatFragmentEverShown = false;
+    private boolean isReminderFragmentEverShown = false;
+    private boolean isVideoFragmentEverShown = false;
+    private boolean isProfileFragmentEverShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +79,72 @@ public class HomeActivity extends BaseActivity {
 
         // Mặc định hiển thị HomeFragment khi khởi động
         if (savedInstanceState == null) {
-            loadFragment(new HomeFragment());
+            initializeFragments();
+            showFragment(homeFragment);
+        } else {
+            // Restore fragments sau configuration change
+            restoreFragments();
         }
+    }
+
+    /**
+     * Restore fragments sau configuration change (như screen rotation)
+     */
+    private void restoreFragments() {
+        homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("HOME");
+        chatListFragment = (ChatListFragment) getSupportFragmentManager().findFragmentByTag("CHAT");
+        reminderFragment = (ReminderFragment) getSupportFragmentManager().findFragmentByTag("REMINDER");
+        videoFragment = (VideoFragment) getSupportFragmentManager().findFragmentByTag("VIDEO");
+        profileFragment = (ProfileFragment) getSupportFragmentManager().findFragmentByTag("PROFILE");
+
+        // Tìm fragment hiện tại đang visible
+        if (homeFragment != null && homeFragment.isVisible()) {
+            currentFragment = homeFragment;
+        } else if (chatListFragment != null && chatListFragment.isVisible()) {
+            currentFragment = chatListFragment;
+        } else if (reminderFragment != null && reminderFragment.isVisible()) {
+            currentFragment = reminderFragment;
+        } else if (videoFragment != null && videoFragment.isVisible()) {
+            currentFragment = videoFragment;
+        } else if (profileFragment != null && profileFragment.isVisible()) {
+            currentFragment = profileFragment;
+        }
+
+        Log.d(TAG, "Fragments restored after configuration change");
+    }
+
+    /**
+     * Khởi tạo tất cả fragments một lần duy nhất
+     * Chỉ HomeFragment được hiển thị và load dữ liệu ban đầu
+     * Các fragment khác được add nhưng ẩn, chỉ load dữ liệu khi được show lần đầu
+     */
+    private void initializeFragments() {
+        homeFragment = HomeFragment.newInstance();
+        chatListFragment = ChatListFragment.newInstance();
+        reminderFragment = ReminderFragment.newInstance();
+        videoFragment = VideoFragment.newInstance();
+        profileFragment = ProfileFragment.newInstance();
+
+        // Thêm tất cả fragments vào container và hide tất cả trừ home
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_container, homeFragment, "HOME")
+                .add(R.id.fragment_container, chatListFragment, "CHAT")
+                .add(R.id.fragment_container, reminderFragment, "REMINDER")
+                .add(R.id.fragment_container, videoFragment, "VIDEO")
+                .add(R.id.fragment_container, profileFragment, "PROFILE")
+                .hide(chatListFragment)
+                .hide(reminderFragment)
+                .hide(videoFragment)
+                .hide(profileFragment)
+                .commit();
+
+        currentFragment = homeFragment;
+
+        // Đánh dấu HomeFragment đã được show
+        isHomeFragmentEverShown = true;
+        notifyFragmentVisible(homeFragment);
+
+        Log.d(TAG, "✅ All fragments initialized. Only HomeFragment is visible and active.");
     }
 
     @Override
@@ -108,35 +188,92 @@ public class HomeActivity extends BaseActivity {
                 int itemId = item.getItemId();
 
                 if (itemId == R.id.nav_home) {
-                    fragment = HomeFragment.newInstance();
+                    fragment = homeFragment;
                 } else if (itemId == R.id.nav_chat) {
-                    // Kích hoạt ChatListFragment - Danh sách cuộc trò chuyện với AI
-                    fragment = ChatListFragment.newInstance();
+                    fragment = chatListFragment;
                 } else if (itemId == R.id.nav_reminders) {
-                    // Kích hoạt ReminderFragment
-                    fragment = ReminderFragment.newInstance();
+                    fragment = reminderFragment;
                 } else if (itemId == R.id.nav_videos) {
-                    // Kích hoạt VideoFragment - chức năng video ngắn
-                    fragment = VideoFragment.newInstance();
+                    fragment = videoFragment;
                 } else if (itemId == R.id.nav_profile) {
-                    // Sử dụng ProfileFragment - chức năng yêu thích đã được tích hợp vào đây
-                    fragment = ProfileFragment.newInstance();
+                    fragment = profileFragment;
                 }
 
-                return loadFragment(fragment);
+                return showFragment(fragment);
             }
         });
     }
 
-    private boolean loadFragment(Fragment fragment) {
-        if (fragment != null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
+    /**
+     * Hiển thị fragment sử dụng show/hide pattern
+     * Giữ nguyên trạng thái của fragment khi chuyển đổi
+     * Thông báo cho fragment khi được show/hide
+     */
+    private boolean showFragment(Fragment fragment) {
+        if (fragment != null && fragment != currentFragment) {
+            // Thông báo fragment cũ bị ẩn
+            notifyFragmentHidden(currentFragment);
+
+            // Chuyển đổi fragment
+            getSupportFragmentManager().beginTransaction()
+                    .hide(currentFragment)
+                    .show(fragment)
                     .commit();
+
+            Fragment previousFragment = currentFragment;
+            currentFragment = fragment;
+
+            // Đánh dấu fragment đã được show lần đầu và thông báo
+            markFragmentAsShown(fragment);
+            notifyFragmentVisible(fragment);
+
+            Log.d(TAG, "🔄 Switched from " + previousFragment.getClass().getSimpleName() +
+                      " to " + fragment.getClass().getSimpleName());
             return true;
         }
         return false;
+    }
+
+    /**
+     * Đánh dấu fragment đã được show lần đầu
+     */
+    private void markFragmentAsShown(Fragment fragment) {
+        if (fragment == homeFragment && !isHomeFragmentEverShown) {
+            isHomeFragmentEverShown = true;
+            Log.d(TAG, "📍 HomeFragment shown for the first time");
+        } else if (fragment == chatListFragment && !isChatFragmentEverShown) {
+            isChatFragmentEverShown = true;
+            Log.d(TAG, "📍 ChatFragment shown for the first time");
+        } else if (fragment == reminderFragment && !isReminderFragmentEverShown) {
+            isReminderFragmentEverShown = true;
+            Log.d(TAG, "📍 ReminderFragment shown for the first time");
+        } else if (fragment == videoFragment && !isVideoFragmentEverShown) {
+            isVideoFragmentEverShown = true;
+            Log.d(TAG, "📍 VideoFragment shown for the first time - NOW it can start loading");
+        } else if (fragment == profileFragment && !isProfileFragmentEverShown) {
+            isProfileFragmentEverShown = true;
+            Log.d(TAG, "📍 ProfileFragment shown for the first time");
+        }
+    }
+
+    /**
+     * Thông báo cho fragment khi được hiển thị
+     */
+    private void notifyFragmentVisible(Fragment fragment) {
+        if (fragment instanceof FragmentVisibilityListener) {
+            ((FragmentVisibilityListener) fragment).onFragmentVisible();
+            Log.d(TAG, "🔔 Notified " + fragment.getClass().getSimpleName() + " onFragmentVisible");
+        }
+    }
+
+    /**
+     * Thông báo cho fragment khi bị ẩn
+     */
+    private void notifyFragmentHidden(Fragment fragment) {
+        if (fragment instanceof FragmentVisibilityListener) {
+            ((FragmentVisibilityListener) fragment).onFragmentHidden();
+            Log.d(TAG, "🔕 Notified " + fragment.getClass().getSimpleName() + " onFragmentHidden");
+        }
     }
 
     // Phương thức để hiển thị bottom navigation

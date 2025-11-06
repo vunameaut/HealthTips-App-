@@ -62,7 +62,9 @@
     <string name="no_reminders_message">You haven\'t created any reminders. Create your first one to track your health!</string>
     <string name="create_first_reminder">Create First Reminder</string>
     <string name="loading_reminders">Loading Reminders...</string>
+    <string name="all">All</string>
     <string name="active">Active</string>
+    <string name="inactive">Inactive</string>
     <string name="reminder_options">Reminder Options</string>
     <string name="reminder_sound_label">Reminder Sound</string>
     <string name="vibrate">Vibrate</string>
@@ -100,6 +102,8 @@
     <string name="error_occurred">An Error Occurred</string>
     <string name="network_error">Network Error</string>
     <string name="retry">Retry</string>
+    <string name="no_internet_connection">No Internet Connection</string>
+    <string name="internet_connected">Internet Connected</string>
 
     <!-- Liked videos strings -->
     <string name="liked_videos">Liked Videos</string>
@@ -171,9 +175,11 @@
 
     <!-- Repeat type strings -->
     <string name="repeat_none">No Repeat</string>
+    <string name="repeat_no_repeat">No Repeat</string>
     <string name="repeat_daily">Daily</string>
     <string name="repeat_weekly">Weekly</string>
     <string name="repeat_monthly">Monthly</string>
+    <string name="repeat_custom">Custom</string>
 
     <!-- Notification strings -->
     <string name="notification_channel_name">Health Reminders</string>
@@ -349,6 +355,18 @@
     <string name="reminder_snooze_duration">Snooze Duration</string>
     <string name="reminder_vibrate">Vibrate</string>
     <string name="reminder_alarm_style">Alarm Style</string>
+
+    <!-- Strings for Reminder Item -->
+    <string name="reminder_status_active">Active</string>
+    <string name="reminder_status_paused">Paused</string>
+    <string name="reminder_no_title">Untitled Reminder</string>
+    <string name="reminder_no_description">No description</string>
+    <string name="reminder_no_time">No time set</string>
+    <string name="reminder_invalid_time">Invalid time</string>
+    <string name="reminder_repeat_prefix">Repeat %s</string>
+    <string name="reminder_error_display">Error displaying reminder</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_delete">Delete</string>
 
     <!-- Strings for Sound Types -->
     <string name="sound_alarm">Alarm</string>

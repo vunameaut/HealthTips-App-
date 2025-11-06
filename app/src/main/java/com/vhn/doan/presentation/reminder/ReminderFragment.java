@@ -391,24 +391,65 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
             emptyStateView = view.findViewById(R.id.layout_empty_state);
             loadingView = view.findViewById(R.id.layout_loading);
 
-            // Setup Debug Button với null check
-            com.google.android.material.button.MaterialButton btnDebug = view.findViewById(R.id.btn_debug_notifications);
-            if (btnDebug != null) {
-                btnDebug.setOnClickListener(v -> openDebugActivity());
-            }
-
             // Setup Sort Button với null check
             com.google.android.material.button.MaterialButton btnSort = view.findViewById(R.id.btn_sort_reminders);
             if (btnSort != null) {
                 btnSort.setOnClickListener(v -> showSortDialog());
             }
 
-            // ĐÃ BỎ TẤT CẢ CÁC NÚT THÊM NHẮC NHỞ VÀ CÀI ĐẶT - CHỈ SỬ DỤNG FAB
+            // Setup Filter Chips
+            setupFilterChips(view);
+
+            // Setup Button "Thêm nhắc nhở đầu tiên" trong empty state
+            com.google.android.material.button.MaterialButton btnAddFirst = view.findViewById(R.id.btn_add_first_reminder);
+            if (btnAddFirst != null) {
+                btnAddFirst.setOnClickListener(v -> {
+                    if (presenter != null) {
+                        presenter.createReminder();
+                    }
+                });
+            }
 
             android.util.Log.d("ReminderFragment", "✅ Views initialized successfully");
         } catch (Exception e) {
             android.util.Log.e("ReminderFragment", "❌ Error initializing views: " + e.getMessage());
             showError("Lỗi khởi tạo giao diện: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Setup filter chips (Tất cả, Hoạt động, Không hoạt động)
+     */
+    private void setupFilterChips(View view) {
+        com.google.android.material.chip.Chip chipAll = view.findViewById(R.id.chip_all);
+        com.google.android.material.chip.Chip chipActive = view.findViewById(R.id.chip_active);
+        com.google.android.material.chip.Chip chipInactive = view.findViewById(R.id.chip_inactive);
+
+        if (chipAll != null) {
+            chipAll.setOnClickListener(v -> {
+                showActiveOnly = false;
+                if (presenter != null) {
+                    presenter.loadReminders(); // Load tất cả
+                }
+            });
+        }
+
+        if (chipActive != null) {
+            chipActive.setOnClickListener(v -> {
+                showActiveOnly = true;
+                if (presenter != null) {
+                    presenter.filterReminders(true); // Chỉ hiển thị active
+                }
+            });
+        }
+
+        if (chipInactive != null) {
+            chipInactive.setOnClickListener(v -> {
+                showActiveOnly = false;
+                if (presenter != null) {
+                    presenter.filterReminders(false); // Chỉ hiển thị inactive
+                }
+            });
         }
     }
 
@@ -438,6 +479,13 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
                 public void onDeleteClick(Reminder reminder) {
                     if (presenter != null && reminder != null) {
                         presenter.deleteReminder(reminder);
+                    }
+                }
+
+                @Override
+                public void onEditClick(Reminder reminder) {
+                    if (presenter != null && reminder != null) {
+                        presenter.editReminder(reminder);
                     }
                 }
             });
@@ -1108,6 +1156,41 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
                 }
             })
             .setNegativeButton("Hủy", null)
+            .show();
+    }
+
+    @Override
+    public void showExpiredReminderDialog(Reminder reminder) {
+        if (getContext() == null) return;
+
+        // Format thời gian để hiển thị
+        java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("HH:mm - dd/MM/yyyy", java.util.Locale.getDefault());
+        String expiredTime = dateFormat.format(new java.util.Date(reminder.getReminderTime()));
+
+        new AlertDialog.Builder(getContext())
+            .setTitle("⚠️ Nhắc nhở đã qua thời gian")
+            .setMessage("Nhắc nhở \"" + reminder.getTitle() + "\" có thời gian đã qua:\n\n" +
+                       "⏰ " + expiredTime + "\n\n" +
+                       "Vui lòng chỉnh lại thời gian mới để bật nhắc nhở này.")
+            .setPositiveButton("Chỉnh sửa ngay", (dialog, which) -> {
+                if (presenter != null) {
+                    // Mở màn hình chỉnh sửa để người dùng cập nhật thời gian
+                    presenter.editReminder(reminder);
+                }
+            })
+            .setNegativeButton("Để sau", (dialog, which) -> {
+                // Refresh lại item để đảm bảo switch về trạng thái cũ (không bật)
+                if (adapter != null) {
+                    adapter.updateReminder(reminder);
+                }
+            })
+            .setOnCancelListener(dialog -> {
+                // Refresh lại item khi user nhấn back
+                if (adapter != null) {
+                    adapter.updateReminder(reminder);
+                }
+            })
+            .setCancelable(true)
             .show();
     }
 

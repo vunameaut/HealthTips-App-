@@ -6,7 +6,8 @@
       "Bash(gradlew:*)",
       "Bash(./gradlew.bat:*)",
       "Bash(mkdir:*)",
-      "Bash(sort:*)"
+      "Bash(sort:*)",
+      "Bash(gradlew.bat clean assembleDebug)"
     ],
     "deny": [],
     "ask": []

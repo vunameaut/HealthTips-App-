@@ -2,16 +2,23 @@ package com.vhn.doan.presentation.base;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.lifecycle.Observer;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.vhn.doan.R;
 import com.vhn.doan.utils.FontSizeHelper;
 import com.vhn.doan.utils.LocaleHelper;
+import com.vhn.doan.utils.NetworkMonitor;
 import com.vhn.doan.utils.SessionManager;
 
 /**
@@ -21,6 +28,9 @@ import com.vhn.doan.utils.SessionManager;
 public abstract class BaseActivity extends AppCompatActivity implements BaseView {
 
     protected SessionManager sessionManager;
+    protected NetworkMonitor networkMonitor;
+    private Snackbar networkSnackbar;
+    private boolean wasConnected = true;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -46,6 +56,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
         // Khởi tạo SessionManager
         sessionManager = new SessionManager(this);
 
+        // Khởi tạo NetworkMonitor
+        networkMonitor = NetworkMonitor.getInstance(this);
+        setupNetworkMonitoring();
+
         initializeActivity();
     }
 
@@ -55,6 +69,20 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
         // Cập nhật thời gian hoạt động cuối cùng
         if (sessionManager != null && sessionManager.isUserLoggedIn()) {
             sessionManager.updateLastActive();
+        }
+
+        // Bắt đầu theo dõi network
+        if (networkMonitor != null) {
+            networkMonitor.startMonitoring();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Ẩn snackbar khi pause
+        if (networkSnackbar != null && networkSnackbar.isShown()) {
+            networkSnackbar.dismiss();
         }
     }
 
@@ -141,9 +169,122 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
         // Hiển thị thông báo thông thường
     }
 
+    /**
+     * Thiết lập theo dõi kết nối mạng
+     */
+    private void setupNetworkMonitoring() {
+        networkMonitor.getConnectionStatus().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isConnected) {
+                handleNetworkChange(isConnected);
+            }
+        });
+    }
+
+    /**
+     * Xử lý thay đổi kết nối mạng
+     */
+    private void handleNetworkChange(boolean isConnected) {
+        if (!isConnected && wasConnected) {
+            // Mất kết nối
+            showNoInternetSnackbar();
+            onNetworkDisconnected();
+        } else if (isConnected && !wasConnected) {
+            // Khôi phục kết nối
+            hideNoInternetSnackbar();
+            onNetworkConnected();
+        }
+        wasConnected = isConnected;
+    }
+
+    /**
+     * Hiển thị Snackbar thông báo mất kết nối
+     */
+    private void showNoInternetSnackbar() {
+        View rootView = findViewById(android.R.id.content);
+        if (rootView != null) {
+            networkSnackbar = Snackbar.make(
+                    rootView,
+                    getString(R.string.no_internet_connection),
+                    Snackbar.LENGTH_INDEFINITE
+            );
+
+            // Tùy chỉnh màu sắc
+            View snackbarView = networkSnackbar.getView();
+            snackbarView.setBackgroundColor(Color.parseColor("#D32F2F")); // Màu đỏ
+            networkSnackbar.setTextColor(Color.WHITE);
+
+            // Thêm action để retry
+            networkSnackbar.setAction(getString(R.string.retry), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (networkMonitor.isConnectedNow()) {
+                        hideNoInternetSnackbar();
+                        onNetworkConnected();
+                    }
+                }
+            });
+            networkSnackbar.setActionTextColor(Color.YELLOW);
+
+            networkSnackbar.show();
+        }
+    }
+
+    /**
+     * Ẩn Snackbar thông báo mất kết nối
+     */
+    private void hideNoInternetSnackbar() {
+        if (networkSnackbar != null && networkSnackbar.isShown()) {
+            networkSnackbar.dismiss();
+            networkSnackbar = null;
+
+            // Hiển thị thông báo ngắn khi đã kết nối lại
+            View rootView = findViewById(android.R.id.content);
+            if (rootView != null) {
+                Snackbar reconnectedSnackbar = Snackbar.make(
+                        rootView,
+                        getString(R.string.internet_connected),
+                        Snackbar.LENGTH_SHORT
+                );
+                View snackbarView = reconnectedSnackbar.getView();
+                snackbarView.setBackgroundColor(Color.parseColor("#388E3C")); // Màu xanh
+                reconnectedSnackbar.setTextColor(Color.WHITE);
+                reconnectedSnackbar.show();
+            }
+        }
+    }
+
+    /**
+     * Callback khi mất kết nối mạng - override nếu cần xử lý riêng
+     */
+    protected void onNetworkDisconnected() {
+        // Override trong Activity con nếu cần
+    }
+
+    /**
+     * Callback khi kết nối lại mạng - override nếu cần xử lý riêng
+     */
+    protected void onNetworkConnected() {
+        // Override trong Activity con nếu cần
+    }
+
+    /**
+     * Kiểm tra kết nối mạng hiện tại
+     */
+    protected boolean isNetworkConnected() {
+        return networkMonitor != null && networkMonitor.isConnectedNow();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        // Cleanup Snackbar
+        if (networkSnackbar != null) {
+            networkSnackbar.dismiss();
+            networkSnackbar = null;
+        }
+
         // Cleanup resources nếu cần
     }
 }
