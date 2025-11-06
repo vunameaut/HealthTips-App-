@@ -78,6 +78,13 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
         return reminders != null ? reminders.size() : 0;
     }
 
+    /**
+     * Lấy danh sách reminders hiện tại
+     */
+    public List<Reminder> getReminders() {
+        return reminders != null ? reminders : new ArrayList<>();
+    }
+
     public void updateReminders(List<Reminder> newReminders) {
         try {
             if (this.reminders == null) {

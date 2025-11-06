@@ -71,6 +71,9 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
                     allReminders.clear();
                     allReminders.addAll(reminders);
 
+                    // ✅ THÊM: Tự động kiểm tra và tắt nhắc nhở đã hết hạn
+                    autoDisableExpiredReminders();
+
                     applyFiltersAndSearch();
 
                     // CẬP NHẬT SỐ LƯỢNG NHẮC NHỞ ĐANG HOẠT ĐỘNG
@@ -638,5 +641,87 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
      */
     public int getTotalReminderCount() {
         return allReminders.size();
+    }
+
+    /**
+     * ✅ THÊM: Tự động kiểm tra và tắt nhắc nhở đã hết hạn
+     * - Kiểm tra tất cả reminders
+     * - Nếu reminder đã qua thời gian và không lặp lại → tắt đi
+     * - Update vào database
+     */
+    private void autoDisableExpiredReminders() {
+        long currentTime = System.currentTimeMillis();
+        List<Reminder> expiredReminders = new ArrayList<>();
+
+        android.util.Log.d("ReminderPresenter", "🔍 Kiểm tra reminders đã hết hạn...");
+
+        for (Reminder reminder : allReminders) {
+            // Chỉ kiểm tra những reminder đang active
+            if (reminder.isActive()) {
+                Long reminderTime = reminder.getReminderTime();
+                int repeatType = reminder.getRepeatType();
+
+                // Kiểm tra điều kiện:
+                // 1. Có thời gian reminder
+                // 2. Thời gian đã qua
+                // 3. Không lặp lại (NO_REPEAT)
+                if (reminderTime != null && reminderTime < currentTime) {
+                    if (repeatType == Reminder.RepeatType.NO_REPEAT) {
+                        android.util.Log.d("ReminderPresenter", "⏰ Tìm thấy reminder đã hết hạn: " +
+                            reminder.getTitle() + " (ID: " + reminder.getId() + ")");
+                        expiredReminders.add(reminder);
+                    }
+                }
+            }
+        }
+
+        // Nếu có reminders đã hết hạn, tắt chúng đi
+        if (!expiredReminders.isEmpty()) {
+            android.util.Log.d("ReminderPresenter", "📝 Tìm thấy " + expiredReminders.size() +
+                " reminders đã hết hạn, đang tắt...");
+
+            for (Reminder reminder : expiredReminders) {
+                disableExpiredReminder(reminder);
+            }
+        } else {
+            android.util.Log.d("ReminderPresenter", "✅ Không có reminder nào đã hết hạn");
+        }
+    }
+
+    /**
+     * Tắt một reminder đã hết hạn
+     */
+    private void disableExpiredReminder(Reminder reminder) {
+        // Cập nhật trạng thái local trước
+        reminder.setActive(false);
+        reminder.setUpdatedAt(System.currentTimeMillis());
+
+        android.util.Log.d("ReminderPresenter", "🔄 Đang tắt reminder đã hết hạn: " + reminder.getTitle());
+
+        // Cập nhật vào database
+        reminderRepository.updateReminder(reminder, new ReminderRepository.RepositoryCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                android.util.Log.d("ReminderPresenter", "✅ Đã tắt reminder trong database: " + reminder.getTitle());
+
+                // Hủy alarm nếu có
+                android.content.Context context = getContextFromView();
+                if (context != null) {
+                    try {
+                        ReminderService reminderService = new ReminderService(context);
+                        reminderService.cancelReminder(reminder.getId());
+                        android.util.Log.d("ReminderPresenter", "✅ Đã hủy alarm cho reminder: " + reminder.getTitle());
+                    } catch (Exception e) {
+                        android.util.Log.e("ReminderPresenter", "❌ Lỗi khi hủy alarm: " + e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                android.util.Log.e("ReminderPresenter", "❌ Lỗi khi tắt reminder trong database: " + error);
+                // Vẫn giữ trạng thái local là inactive để hiển thị đúng trong UI
+            }
+        });
     }
 }

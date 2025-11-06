@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -116,6 +117,18 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // IMPORTANT: Refresh lại danh sách mỗi khi quay lại fragment
+        // Đảm bảo UI luôn sync với database (đặc biệt sau khi dismiss alarm)
+        // Auto-disable expired reminders sẽ được gọi tự động trong loadReminders()
+        android.util.Log.d("ReminderFragment", "🔄 onResume: Force refresh danh sách và auto-check expired reminders");
+        if (presenter != null) {
+            presenter.refreshReminders();
+        }
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
 
@@ -199,24 +212,28 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
                 android.util.Log.d("ReminderFragment", "✅ Đã hiển thị thông báo tự động tắt");
             }
 
-            // QUAN TRỌNG: Force refresh ngay lập tức
-            android.util.Log.d("ReminderFragment", "🔄 Bắt đầu force refresh presenter...");
+            // FIX: Không refresh ngay từ Firebase vì có thể chưa sync
+            // Chỉ update UI local, để onResume() hoặc handleForceRefresh() xử lý refresh từ Firebase
+            android.util.Log.d("ReminderFragment", "🔄 Chỉ update UI local, không refresh từ Firebase ngay");
 
-            // Refresh danh sách để cập nhật UI
-            if (presenter != null) {
-                presenter.refreshReminders();
-                android.util.Log.d("ReminderFragment", "✅ Đã gọi presenter.refreshReminders()");
-            } else {
-                android.util.Log.e("ReminderFragment", "❌ Presenter is null!");
-            }
-
-            // Force update adapter ngay lập tức
+            // Force update adapter ngay lập tức với data local đã update
             if (adapter != null) {
                 android.util.Log.d("ReminderFragment", "🔄 Force notify adapter...");
                 adapter.notifyDataSetChanged();
                 android.util.Log.d("ReminderFragment", "✅ Đã gọi adapter.notifyDataSetChanged()");
             } else {
                 android.util.Log.e("ReminderFragment", "❌ Adapter is null!");
+            }
+
+            // Delay refresh từ Firebase để đảm bảo sync
+            if (presenter != null) {
+                new Handler().postDelayed(() -> {
+                    if (isAdded() && presenter != null) {
+                        android.util.Log.d("ReminderFragment", "🔄 Bắt đầu refresh từ Firebase sau khi dismiss...");
+                        presenter.refreshReminders();
+                        android.util.Log.d("ReminderFragment", "✅ Đã gọi presenter.refreshReminders() sau delay");
+                    }
+                }, 1500); // Đợi 1500ms để Firebase sync
             }
 
         } catch (Exception e) {
@@ -226,26 +243,23 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
 
     /**
      * Xử lý broadcast force refresh danh sách
+     * SIMPLIFIED: Chỉ đơn giản refresh lại danh sách
+     * Auto-disable logic sẽ tự động xử lý việc tắt reminders đã hết hạn
      */
     private void handleForceRefresh(Intent intent) {
         try {
             String refreshReason = intent.getStringExtra("refresh_reason");
-            android.util.Log.d("ReminderFragment", "🔄 Force refresh UI - Lý do: " + refreshReason);
+            String reminderId = intent.getStringExtra("reminder_id");
+            android.util.Log.d("ReminderFragment", "🔄 Force refresh UI - Lý do: " + refreshReason + ", ID: " + reminderId);
 
-            // Force refresh danh sách nhắc nhở ngay lập tức
+            // Đơn giản chỉ cần refresh - auto-disable sẽ tự động xử lý
             if (presenter != null) {
+                android.util.Log.d("ReminderFragment", "🔄 Refresh ngay - auto-disable sẽ tự động check và tắt expired reminders");
                 presenter.refreshReminders();
-                android.util.Log.d("ReminderFragment", "✅ Đã trigger refresh presenter");
-            }
-
-            // Cập nhật UI ngay lập tức nếu có adapter
-            if (adapter != null) {
-                adapter.notifyDataSetChanged();
-                android.util.Log.d("ReminderFragment", "✅ Đã notify adapter update");
             }
 
         } catch (Exception e) {
-            android.util.Log.e("ReminderFragment", "❌ Lỗi khi force refresh: " + e.getMessage());
+            android.util.Log.e("ReminderFragment", "❌ Lỗi khi force refresh: " + e.getMessage(), e);
         }
     }
 
@@ -1157,6 +1171,38 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
     public void onCreateReminderClick() {
         if (presenter != null) {
             presenter.createReminder();
+        }
+    }
+
+    /**
+     * Update số lượng nhắc nhở active từ adapter ngay lập tức
+     * Dùng khi cần update count mà không cần load lại từ presenter
+     */
+    private void updateActiveCountFromAdapter() {
+        try {
+            if (adapter == null) {
+                android.util.Log.w("ReminderFragment", "⚠️ Adapter is null, cannot update count");
+                return;
+            }
+
+            List<Reminder> reminders = adapter.getReminders();
+            int activeCount = 0;
+            for (Reminder r : reminders) {
+                if (r != null && r.isActive()) {
+                    activeCount++;
+                }
+            }
+
+            // Cập nhật UI
+            TextView tvActiveCount = getView() != null ? getView().findViewById(R.id.tv_active_count) : null;
+            if (tvActiveCount != null) {
+                tvActiveCount.setText(String.valueOf(activeCount));
+                android.util.Log.d("ReminderFragment", "✅ Đã cập nhật count ngay lập tức: " + activeCount);
+            } else {
+                android.util.Log.w("ReminderFragment", "⚠️ TextView tv_active_count not found");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("ReminderFragment", "❌ Lỗi khi update count: " + e.getMessage(), e);
         }
     }
 

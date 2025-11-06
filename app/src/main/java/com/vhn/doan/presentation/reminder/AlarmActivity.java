@@ -259,8 +259,18 @@ public class AlarmActivity extends AppCompatActivity {
                             // Gửi broadcast để cập nhật UI danh sách nhắc nhở
                             sendReminderStatusBroadcast(reminder, "dismissed_by_user");
 
-                            // Đóng activity
-                            finish();
+                            // Gửi thêm broadcast REFRESH để force reload toàn bộ list
+                            Intent refreshIntent = new Intent("REMINDER_LIST_REFRESH");
+                            refreshIntent.putExtra("reminder_id", reminderId);
+                            refreshIntent.putExtra("refresh_reason", "reminder_dismissed");
+                            sendBroadcast(refreshIntent);
+                            Log.d(TAG, "📤 Đã gửi broadcast REMINDER_LIST_REFRESH");
+
+                            // Delay lớn hơn để đảm bảo database update và broadcast được xử lý
+                            // INCREASED: Tăng delay để Firebase kịp sync dữ liệu
+                            new Handler().postDelayed(() -> {
+                                finish();
+                            }, 1000); // 1000ms delay - đủ thời gian cho Firebase sync
                         }
 
                         @Override
@@ -354,7 +364,7 @@ public class AlarmActivity extends AppCompatActivity {
 
     /**
      * Lên lịch snooze với thời gian đã chọn
-     * FIXED: Lưu snooze state vào database để persistent
+     * FIXED: Xóa reminder hiện tại và tạo reminder mới cho snooze
      */
     private void scheduleSnooze(int minutes) {
         Log.d(TAG, "⏰ Lên lịch báo lại sau " + minutes + " phút");
@@ -396,33 +406,78 @@ public class AlarmActivity extends AppCompatActivity {
                     snoozeReminder.setCreatedAt(System.currentTimeMillis());
                     snoozeReminder.setUpdatedAt(System.currentTimeMillis());
 
-                    // Lưu vào database (PERSISTENT SNOOZE)
-                    reminderRepository.addReminder(snoozeReminder, new ReminderRepository.RepositoryCallback<String>() {
+                    // BƯỚC 1: XÓA REMINDER GỐC TRƯỚC
+                    Log.d(TAG, "🗑️ Xóa reminder gốc: " + originalReminder.getTitle());
+                    reminderRepository.deleteReminder(originalReminder.getId(), new ReminderRepository.RepositoryCallback<Void>() {
                         @Override
-                        public void onSuccess(String reminderId) {
-                            // Schedule alarm
-                            if (reminderService != null) {
-                                reminderService.scheduleReminder(snoozeReminder);
-                                Log.d(TAG, "✅ Đã lưu và lên lịch snooze sau " + minutes + " phút với ID: " + reminderId);
+                        public void onSuccess(Void result) {
+                            Log.d(TAG, "✅ Đã xóa reminder gốc");
 
-                                // Hiển thị thông báo
-                                runOnUiThread(() -> {
-                                    android.widget.Toast.makeText(AlarmActivity.this,
-                                            "Sẽ nhắc lại sau " + minutes + " phút",
-                                            android.widget.Toast.LENGTH_SHORT).show();
-                                });
+                            // Hủy alarm của reminder gốc
+                            if (reminderService != null) {
+                                reminderService.cancelReminder(originalReminder.getId());
+                                Log.d(TAG, "✅ Đã hủy alarm của reminder gốc");
                             }
-                            finish();
+
+                            // BƯỚC 2: TẠO VÀ LƯU SNOOZE REMINDER
+                            reminderRepository.addReminder(snoozeReminder, new ReminderRepository.RepositoryCallback<String>() {
+                                @Override
+                                public void onSuccess(String newReminderId) {
+                                    // Schedule alarm cho snooze
+                                    if (reminderService != null) {
+                                        reminderService.scheduleReminder(snoozeReminder);
+                                        Log.d(TAG, "✅ Đã lưu và lên lịch snooze sau " + minutes + " phút với ID: " + newReminderId);
+
+                                        // Gửi broadcast để refresh UI
+                                        Intent refreshIntent = new Intent("REMINDER_LIST_REFRESH");
+                                        refreshIntent.putExtra("reminder_id", originalReminder.getId());
+                                        refreshIntent.putExtra("refresh_reason", "reminder_snoozed");
+                                        sendBroadcast(refreshIntent);
+                                        Log.d(TAG, "📤 Đã gửi broadcast REMINDER_LIST_REFRESH");
+
+                                        // Hiển thị thông báo
+                                        runOnUiThread(() -> {
+                                            android.widget.Toast.makeText(AlarmActivity.this,
+                                                    "Sẽ nhắc lại sau " + minutes + " phút",
+                                                    android.widget.Toast.LENGTH_SHORT).show();
+                                        });
+                                    }
+                                    finish();
+                                }
+
+                                @Override
+                                public void onError(String error) {
+                                    Log.e(TAG, "❌ Lỗi khi lưu snooze reminder: " + error);
+                                    // Fallback: schedule without saving to database
+                                    if (reminderService != null) {
+                                        reminderService.scheduleReminder(snoozeReminder);
+                                    }
+                                    finish();
+                                }
+                            });
                         }
 
                         @Override
                         public void onError(String error) {
-                            Log.e(TAG, "❌ Lỗi khi lưu snooze reminder: " + error);
-                            // Fallback: schedule without saving to database
-                            if (reminderService != null) {
-                                reminderService.scheduleReminder(snoozeReminder);
-                            }
-                            finish();
+                            Log.e(TAG, "❌ Lỗi khi xóa reminder gốc: " + error);
+                            // Nếu không xóa được reminder gốc, vẫn tạo snooze reminder
+                            // (ít nhất người dùng vẫn được nhắc lại)
+                            reminderRepository.addReminder(snoozeReminder, new ReminderRepository.RepositoryCallback<String>() {
+                                @Override
+                                public void onSuccess(String reminderId) {
+                                    if (reminderService != null) {
+                                        reminderService.scheduleReminder(snoozeReminder);
+                                        Log.d(TAG, "⚠️ Đã tạo snooze reminder dù không xóa được reminder gốc");
+                                    }
+                                    finish();
+                                }
+
+                                @Override
+                                public void onError(String error2) {
+                                    Log.e(TAG, "❌ Lỗi khi lưu snooze reminder sau khi xóa thất bại: " + error2);
+                                    finish();
+                                }
+                            });
                         }
                     });
                 } else {
