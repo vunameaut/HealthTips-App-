@@ -68,51 +68,120 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
 
     /**
      * Xử lý khi nhắc nhở được kích hoạt
+     * FIXED: Phân biệt rõ ràng giữa notification thường và full screen alarm
      */
     private void handleReminderTrigger(Context context, Intent intent) {
-        Log.d(TAG, "handleReminderTrigger: Handling reminder trigger");
+        Log.d(TAG, "🚨 handleReminderTrigger: Bắt đầu xử lý reminder trigger");
         String reminderId = intent.getStringExtra("reminder_id");
         String title = intent.getStringExtra("title");
         String message = intent.getStringExtra("message");
 
         if (reminderId == null || title == null) {
-            Log.w(TAG, "handleReminderTrigger: reminderId or title is null");
+            Log.w(TAG, "⚠️ handleReminderTrigger: reminderId or title is null");
             return;
         }
 
-        Log.d(TAG, "handleReminderTrigger: Reminder ID: " + reminderId + ", Title: " + title);
+        Log.d(TAG, "📋 Reminder ID: " + reminderId + ", Title: " + title);
 
         // Kiểm tra reminder còn active không
         ReminderRepository repository = new ReminderRepositoryImpl();
         repository.getReminderById(reminderId, new ReminderRepository.RepositoryCallback<Reminder>() {
             @Override
             public void onSuccess(Reminder reminder) {
-                Log.d(TAG, "onSuccess: Fetched reminder from repository: " + reminder);
+                Log.d(TAG, "✅ Fetched reminder from repository: " + (reminder != null ? reminder.getTitle() : "null"));
+
                 if (reminder != null && reminder.isActive()) {
-                    Log.d(TAG, "onSuccess: Reminder is active, showing notification");
-                    // Hiển thị thông báo
-                    NotificationService notificationService = new NotificationService(context);
-                    notificationService.showReminderNotification(reminder);
+                    Log.d(TAG, "✅ Reminder is active, checking alarm style...");
+
+                    // PHÂN BIỆT: Full screen alarm vs Notification thường
+                    if (reminder.isAlarmStyle()) {
+                        // === FULL SCREEN ALARM ===
+                        Log.d(TAG, "🚨 Hiển thị FULL SCREEN ALARM");
+                        showFullScreenAlarm(context, reminder);
+                    } else {
+                        // === NOTIFICATION THƯỜNG + ÂM THANH + RUNG ===
+                        Log.d(TAG, "🔔 Hiển thị NOTIFICATION THƯỜNG với âm thanh và rung");
+                        showNotificationWithSound(context, reminder);
+                    }
 
                     // Lên lịch lặp lại nếu cần
                     if (reminder.getRepeatType() != Reminder.RepeatType.NO_REPEAT) {
-                        Log.d(TAG, "onSuccess: Scheduling next repeat");
+                        Log.d(TAG, "🔄 Scheduling next repeat");
                         ReminderService reminderService = new ReminderService(context);
                         reminderService.scheduleNextRepeat(reminder);
                     }
                 } else {
-                    Log.w(TAG, "onSuccess: Reminder is null or inactive");
+                    Log.w(TAG, "⚠️ Reminder is null or inactive, skipping notification");
                 }
             }
 
             @Override
             public void onError(String error) {
-                Log.e(TAG, "onError: Error fetching reminder from repository: " + error);
-                // Fallback: vẫn hiển thị thông báo
-                Log.d(TAG, "onError: Showing fallback notification");
+                Log.e(TAG, "❌ Error fetching reminder from repository: " + error);
+                // Fallback: hiển thị notification thường
+                Log.d(TAG, "🔔 Fallback: Showing basic notification");
                 NotificationService.showReminderNotification(context, title, message, reminderId);
             }
         });
+    }
+
+    /**
+     * Hiển thị full screen alarm activity
+     * Hoạt động cho cả khi app đang mở và khi app bị tắt
+     */
+    private void showFullScreenAlarm(Context context, Reminder reminder) {
+        try {
+            Log.d(TAG, "🚨 Launching AlarmActivity for: " + reminder.getTitle());
+
+            Intent alarmIntent = new Intent(context, AlarmActivity.class);
+            alarmIntent.putExtra(AlarmActivity.EXTRA_REMINDER_ID, reminder.getId());
+            alarmIntent.putExtra(AlarmActivity.EXTRA_TITLE, reminder.getTitle());
+            alarmIntent.putExtra(AlarmActivity.EXTRA_MESSAGE, reminder.getDescription());
+
+            // Flags để hiển thị activity từ background
+            alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+            // Trên Android 10+ (API 29+), cần thêm flag để hiển thị từ background
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                alarmIntent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            }
+
+            context.startActivity(alarmIntent);
+            Log.d(TAG, "✅ AlarmActivity launched successfully");
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi launch AlarmActivity", e);
+            // Fallback: hiển thị notification
+            NotificationService notificationService = new NotificationService(context);
+            notificationService.showReminderNotification(reminder);
+        }
+    }
+
+    /**
+     * Hiển thị notification thường với âm thanh và rung
+     * Sử dụng khi user không chọn alarm style
+     */
+    private void showNotificationWithSound(Context context, Reminder reminder) {
+        try {
+            Log.d(TAG, "🔔 Showing notification with sound and vibration");
+
+            NotificationService notificationService = new NotificationService(context);
+
+            // Nếu có âm thanh tùy chỉnh, sử dụng method với sound URI
+            if (reminder.getSoundUri() != null && !reminder.getSoundUri().isEmpty()) {
+                notificationService.showReminderNotificationWithSound(reminder, reminder.getSoundUri());
+            } else {
+                // Sử dụng notification thường với âm thanh mặc định
+                notificationService.showReminderNotification(reminder);
+            }
+
+            Log.d(TAG, "✅ Notification displayed successfully");
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Lỗi khi hiển thị notification", e);
+        }
     }
 
     /**

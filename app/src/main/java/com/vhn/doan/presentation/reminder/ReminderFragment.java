@@ -1051,22 +1051,33 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
 
     @Override
     public void showReminderDialog(Reminder reminder) {
-        ReminderDialog dialog = new ReminderDialog(getContext(), new ReminderDialog.OnReminderDialogListener() {
-            @Override
-            public void onReminderSaved(Reminder savedReminder) {
-                presenter.saveReminder(savedReminder);
-            }
+        // Sử dụng ReminderEditorActivity thay vì ReminderDialog
+        Intent intent = new Intent(getContext(), ReminderEditorActivity.class);
 
-            @Override
-            public void onReminderDeleted(String reminderId) {
-                // Xử lý xóa reminder nếu cần
-            }
-        });
-
-        if (reminder == null) {
-            dialog.showCreateDialog();
+        if (reminder != null) {
+            // Edit mode
+            intent.putExtra(ReminderEditorActivity.EXTRA_IS_EDIT_MODE, true);
+            intent.putExtra(ReminderEditorActivity.EXTRA_REMINDER_ID, reminder.getId());
         } else {
-            dialog.showEditDialog(reminder);
+            // Create mode
+            intent.putExtra(ReminderEditorActivity.EXTRA_IS_EDIT_MODE, false);
+        }
+
+        startActivityForResult(intent, REQUEST_CODE_REMINDER_EDITOR);
+    }
+
+    private static final int REQUEST_CODE_REMINDER_EDITOR = 1001;
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_REMINDER_EDITOR && resultCode == android.app.Activity.RESULT_OK) {
+            // Refresh danh sách sau khi lưu reminder
+            android.util.Log.d("ReminderFragment", "✅ Reminder đã được lưu, refresh danh sách");
+            if (presenter != null) {
+                presenter.refreshReminders();
+            }
         }
     }
 

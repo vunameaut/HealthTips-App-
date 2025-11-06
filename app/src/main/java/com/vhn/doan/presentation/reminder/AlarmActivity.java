@@ -311,31 +311,132 @@ public class AlarmActivity extends AppCompatActivity {
     }
 
     private void snoozeAlarm() {
-        Log.d(TAG, "⏰ Người dùng ấn Báo lại - Snooze 5 phút");
+        Log.d(TAG, "⏰ Người dùng ấn Báo lại - Hiển thị dialog chọn thời gian");
 
         stopAlarmSound();
         stopVibration();
 
-        // Lên lịch báo lại sau 5 phút
-        if (reminderId != null && title != null) {
-            long snoozeTime = System.currentTimeMillis() + (5 * 60 * 1000); // 5 phút
+        // Hiển thị dialog để người dùng chọn thời gian snooze
+        showSnoozeDialog();
+    }
 
-            // Tạo reminder mới cho snooze
-            Reminder snoozeReminder = new Reminder();
-            snoozeReminder.setId(reminderId + "_snooze_" + System.currentTimeMillis());
-            snoozeReminder.setTitle(title + " (Báo lại)");
-            snoozeReminder.setDescription(message);
-            snoozeReminder.setReminderTime(snoozeTime);
-            snoozeReminder.setActive(true);
-            snoozeReminder.setRepeatType(Reminder.RepeatType.NO_REPEAT); // Snooze không lặp lại
+    /**
+     * Hiển thị dialog để chọn thời gian báo lại
+     */
+    private void showSnoozeDialog() {
+        String[] snoozeOptions = {
+            "5 phút",
+            "10 phút",
+            "15 phút",
+            "30 phút"
+        };
 
-            if (reminderService != null) {
-                reminderService.scheduleReminder(snoozeReminder);
-                Log.d(TAG, "✅ Đã lên lịch snooze sau 5 phút");
-            }
+        int[] snoozeMinutes = {5, 10, 15, 30};
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Báo lại sau bao lâu?")
+                .setItems(snoozeOptions, (dialog, which) -> {
+                    int selectedMinutes = snoozeMinutes[which];
+                    scheduleSnooze(selectedMinutes);
+                })
+                .setNegativeButton("Hủy", (dialog, which) -> {
+                    // Người dùng hủy, quay lại alarm
+                    startAlarmSound();
+                    startVibration();
+                })
+                .setOnCancelListener(dialog -> {
+                    // Người dùng nhấn back, quay lại alarm
+                    startAlarmSound();
+                    startVibration();
+                })
+                .show();
+    }
+
+    /**
+     * Lên lịch snooze với thời gian đã chọn
+     * FIXED: Lưu snooze state vào database để persistent
+     */
+    private void scheduleSnooze(int minutes) {
+        Log.d(TAG, "⏰ Lên lịch báo lại sau " + minutes + " phút");
+
+        if (reminderId == null) {
+            Log.w(TAG, "⚠️ reminderId is null, cannot snooze");
+            finish();
+            return;
         }
 
-        finish();
+        // Tải reminder từ database để có đầy đủ thông tin
+        reminderRepository.getReminderById(reminderId, new ReminderRepository.RepositoryCallback<Reminder>() {
+            @Override
+            public void onSuccess(Reminder originalReminder) {
+                if (originalReminder != null) {
+                    long snoozeTime = System.currentTimeMillis() + (minutes * 60 * 1000);
+
+                    // Tạo reminder mới cho snooze và LƯU VÀO DATABASE
+                    Reminder snoozeReminder = new Reminder();
+                    // Generate unique ID for snooze reminder
+                    String snoozeId = "snooze_" + originalReminder.getId() + "_" + System.currentTimeMillis();
+                    snoozeReminder.setId(snoozeId);
+                    snoozeReminder.setUserId(originalReminder.getUserId());
+                    snoozeReminder.setTitle(originalReminder.getTitle() + " (Báo lại)");
+                    snoozeReminder.setDescription(originalReminder.getDescription());
+                    snoozeReminder.setReminderTime(snoozeTime);
+                    snoozeReminder.setActive(true);
+                    snoozeReminder.setRepeatType(Reminder.RepeatType.NO_REPEAT);
+
+                    // Copy alarm settings
+                    snoozeReminder.setSoundId(originalReminder.getSoundId());
+                    snoozeReminder.setSoundName(originalReminder.getSoundName());
+                    snoozeReminder.setSoundUri(originalReminder.getSoundUri());
+                    snoozeReminder.setVibrate(originalReminder.isVibrate());
+                    snoozeReminder.setAlarmStyle(originalReminder.isAlarmStyle());
+                    snoozeReminder.setVolume(originalReminder.getVolume());
+                    snoozeReminder.setSnoozeMinutes(originalReminder.getSnoozeMinutes());
+
+                    snoozeReminder.setCreatedAt(System.currentTimeMillis());
+                    snoozeReminder.setUpdatedAt(System.currentTimeMillis());
+
+                    // Lưu vào database (PERSISTENT SNOOZE)
+                    reminderRepository.addReminder(snoozeReminder, new ReminderRepository.RepositoryCallback<String>() {
+                        @Override
+                        public void onSuccess(String reminderId) {
+                            // Schedule alarm
+                            if (reminderService != null) {
+                                reminderService.scheduleReminder(snoozeReminder);
+                                Log.d(TAG, "✅ Đã lưu và lên lịch snooze sau " + minutes + " phút với ID: " + reminderId);
+
+                                // Hiển thị thông báo
+                                runOnUiThread(() -> {
+                                    android.widget.Toast.makeText(AlarmActivity.this,
+                                            "Sẽ nhắc lại sau " + minutes + " phút",
+                                            android.widget.Toast.LENGTH_SHORT).show();
+                                });
+                            }
+                            finish();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e(TAG, "❌ Lỗi khi lưu snooze reminder: " + error);
+                            // Fallback: schedule without saving to database
+                            if (reminderService != null) {
+                                reminderService.scheduleReminder(snoozeReminder);
+                            }
+                            finish();
+                        }
+                    });
+                } else {
+                    Log.w(TAG, "⚠️ Không tìm thấy reminder gốc");
+                    finish();
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "❌ Lỗi khi tải reminder: " + error);
+                finish();
+            }
+        });
     }
 
     private void stopAlarmSound() {

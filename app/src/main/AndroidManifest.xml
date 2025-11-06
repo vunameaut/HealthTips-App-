@@ -137,6 +137,14 @@
             android:turnScreenOn="true"
             android:excludeFromRecents="true" />
 
+        <!-- Activity tạo/chỉnh sửa reminder (Full screen) -->
+        <activity
+            android:name=".presentation.reminder.ReminderEditorActivity"
+            android:exported="false"
+            android:label="Tạo nhắc nhở"
+            android:theme="@style/Theme.Doan"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Settings and Privacy Activities -->
         <activity
             android:name=".presentation.settings.SettingsAndPrivacyActivity"
