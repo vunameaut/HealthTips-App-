@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modern Chat Header Gradient - Dark Mode -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#4a5fd8"
+        android:centerColor="#5a4ba2"
+        android:endColor="#764ba2"
+        android:angle="90"
+        android:type="linear" />
+</shape>

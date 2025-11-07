@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modern AI Avatar with gradient background -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <gradient
+        android:startColor="#667eea"
+        android:endColor="#764ba2"
+        android:angle="135"
+        android:type="linear" />
+    <stroke
+        android:color="#E3F2FD"
+        android:width="2dp" />
+</shape>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modern Chat Background with subtle pattern -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#FAFAFA"
+        android:endColor="#F5F5F5"
+        android:angle="90"
+        android:type="linear" />
+</shape>

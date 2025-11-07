@@ -35,7 +35,7 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
 
     // Views
     private RecyclerView rvConversations;
-    private com.google.android.material.floatingactionbutton.FloatingActionButton btnNewChat;
+    private com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton btnNewChat;
     private MaterialButton btnStartNewChat;
     private MaterialButton btnLoadMore;
     private View layoutLoading;

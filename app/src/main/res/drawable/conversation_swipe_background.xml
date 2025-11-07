@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Background when swiping conversation item -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#FF5252"
+        android:endColor="#E91E63"
+        android:angle="0"
+        android:type="linear" />
+    <corners android:radius="16dp" />
+</shape>

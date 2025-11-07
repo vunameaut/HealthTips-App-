@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modern User Message Background with vibrant gradient -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#667eea"
+        android:centerColor="#764ba2"
+        android:endColor="#667eea"
+        android:angle="45"
+        android:type="linear" />
+    <corners
+        android:topLeftRadius="20dp"
+        android:topRightRadius="20dp"
+        android:bottomLeftRadius="20dp"
+        android:bottomRightRadius="4dp" />
+</shape>

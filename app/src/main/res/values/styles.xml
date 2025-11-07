@@ -94,6 +94,13 @@
 
     <!-- Các style Typography đã được di chuyển sang typography.xml -->
 
+    <!-- Style cho Bottom Navigation Active Indicator -->
+    <style name="BottomNavActiveIndicatorModern" parent="">
+        <item name="android:width">64dp</item>
+        <item name="android:height">32dp</item>
+        <item name="cornerRadius">16dp</item>
+    </style>
+
     <!-- Theme đặc biệt cho AlarmActivity -->
     <style name="Theme.Doan.AlarmActivity" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/background_dark</item>

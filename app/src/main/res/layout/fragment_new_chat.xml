@@ -8,14 +8,16 @@
     android:background="?android:attr/colorBackground"
     android:fitsSystemWindows="true">
 
-    <!-- Header -->
-    <LinearLayout
+    <!-- Modern Header with Gradient -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp">
+        android:paddingTop="16dp"
+        android:paddingBottom="20dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="@drawable/chat_header_gradient_modern"
+        android:elevation="8dp">
 
         <ImageButton
             android:id="@+id/btn_back"
@@ -24,20 +26,37 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_back"
             android:contentDescription="Quay lại"
-            android:tint="@android:color/white" />
+            android:tint="@android:color/white"
+            android:layout_centerVertical="true" />
 
-        <TextView
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Cuộc trò chuyện mới"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center_vertical"
-            android:layout_marginStart="8dp" />
+            android:layout_toEndOf="@id/btn_back"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cuộc trò chuyện mới"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trợ lý AI sức khỏe của bạn"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:alpha="0.9"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <!-- Scrollable Content Area -->
     <ScrollView
@@ -54,38 +73,49 @@
             android:padding="32dp"
             android:minHeight="?android:attr/listPreferredItemHeight">
 
-            <!-- AI Avatar -->
+            <!-- Modern AI Avatar with gradient background -->
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_smart_toy"
+                android:background="@drawable/ai_avatar_background_modern"
+                android:padding="24dp"
+                android:layout_marginBottom="24dp"
+                android:contentDescription="AI Assistant"
+                app:tint="@android:color/white" />
 
             <!-- Welcome Message -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chào bạn! Tôi là trợ lý AI về sức khỏe"
-                android:textSize="20sp"
+                android:text="👋 Xin chào! Tôi là trợ lý AI"
+                android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginBottom="8dp"
                 android:gravity="center" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Hãy đặt câu hỏi về sức khỏe, dinh dưỡng, tập luyện hoặc bất kỳ vấn đề y tế nào bạn quan tâm."
+                android:text="Tôi ở đây để giúp bạn về sức khỏe, dinh dưỡng, tập luyện và các vấn đề y tế. Hãy đặt câu hỏi hoặc chọn gợi ý bên dưới!"
                 android:textSize="16sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:gravity="center"
                 android:layout_marginBottom="32dp"
-                android:lineSpacingExtra="4dp" />
+                android:lineSpacingExtra="4dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- Quick Question Examples -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Gợi ý câu hỏi:"
-                android:textSize="14sp"
+                android:text="💡 Gợi ý câu hỏi cho bạn"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginBottom="16dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -96,19 +126,39 @@
                     android:id="@+id/card_question_1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="2dp"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@android:color/white"
                     android:foreground="?attr/selectableItemBackground">
 
-                    <TextView
-                        android:id="@+id/tv_question_1"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="💪 Làm thế nào để tăng cường sức đề kháng?"
-                        android:padding="16dp"
-                        android:textSize="14sp"
-                        android:textColor="?android:attr/textColorPrimary" />
+                        android:orientation="horizontal"
+                        android:background="@drawable/suggestion_card_background"
+                        android:padding="18dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="💪"
+                            android:textSize="24sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_question_1"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Làm thế nào để tăng cường sức đề kháng?"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="?android:attr/textColorPrimary" />
+
+                    </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -116,19 +166,39 @@
                     android:id="@+id/card_question_2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="2dp"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@android:color/white"
                     android:foreground="?attr/selectableItemBackground">
 
-                    <TextView
-                        android:id="@+id/tv_question_2"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="🥗 Chế độ ăn nào tốt cho tim mạch?"
-                        android:padding="16dp"
-                        android:textSize="14sp"
-                        android:textColor="?android:attr/textColorPrimary" />
+                        android:orientation="horizontal"
+                        android:background="@drawable/suggestion_card_background"
+                        android:padding="18dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="🥗"
+                            android:textSize="24sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_question_2"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Chế độ ăn nào tốt cho tim mạch?"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="?android:attr/textColorPrimary" />
+
+                    </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -136,18 +206,38 @@
                     android:id="@+id/card_question_3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="2dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@android:color/white"
                     android:foreground="?attr/selectableItemBackground">
 
-                    <TextView
-                        android:id="@+id/tv_question_3"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="😴 Cách cải thiện chất lượng giấc ngủ?"
-                        android:padding="16dp"
-                        android:textSize="14sp"
-                        android:textColor="?android:attr/textColorPrimary" />
+                        android:orientation="horizontal"
+                        android:background="@drawable/suggestion_card_background"
+                        android:padding="18dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="😴"
+                            android:textSize="24sp"
+                            android:gravity="center"
+                            android:layout_marginEnd="12dp" />
+
+                        <TextView
+                            android:id="@+id/tv_question_3"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Cách cải thiện chất lượng giấc ngủ?"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="?android:attr/textColorPrimary" />
+
+                    </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -157,79 +247,100 @@
 
     </ScrollView>
 
-    <!-- Message Input Area -->
-    <LinearLayout
+    <!-- Modern Message Input Area -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:background="?android:attr/colorBackground"
-        android:elevation="8dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp"
+        android:background="@android:color/white"
+        android:elevation="12dp">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="0dp"
+            android:id="@+id/til_message"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            app:boxStrokeWidth="1dp"
-            app:boxCornerRadiusTopStart="24dp"
-            app:boxCornerRadiusTopEnd="24dp"
-            app:boxCornerRadiusBottomStart="24dp"
-            app:boxCornerRadiusBottomEnd="24dp"
+            android:layout_toStartOf="@id/btn_send_container"
+            android:layout_marginEnd="12dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
+            app:boxBackgroundColor="@android:color/transparent"
             app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_message_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nhập câu hỏi về sức khỏe..."
+                android:hint="💬 Nhập câu hỏi về sức khỏe..."
+                android:textColorHint="?android:attr/textColorSecondary"
                 android:maxLines="4"
                 android:inputType="textMultiLine|textCapSentences"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp" />
+                android:padding="16dp"
+                android:background="@drawable/chat_input_modern"
+                android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_send_message"
+        <FrameLayout
+            android:id="@+id/btn_send_container"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:layout_gravity="bottom"
-            app:icon="@drawable/ic_send"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:cornerRadius="28dp"
-            style="@style/Widget.Material3.Button.Icon"
-            android:contentDescription="Gửi tin nhắn" />
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true">
 
-    </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_send_message"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:icon="@drawable/ic_send"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconTint="@android:color/white"
+                app:cornerRadius="28dp"
+                android:backgroundTint="@android:color/transparent"
+                android:background="@drawable/send_button_gradient"
+                android:contentDescription="Gửi tin nhắn"
+                android:elevation="4dp" />
 
-    <!-- Status Messages -->
+        </FrameLayout>
+
+    </RelativeLayout>
+
+    <!-- Modern Status Messages -->
     <LinearLayout
         android:id="@+id/layout_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="?attr/colorSurfaceVariant"
+        android:padding="12dp"
+        android:background="@drawable/status_background"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:elevation="4dp"
         android:visibility="gone">
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progress_status"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginEnd="8dp"
-            android:layout_gravity="center_vertical" />
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="12dp"
+            android:indeterminate="true"
+            android:layout_gravity="center_vertical"
+            app:indicatorSize="24dp"
+            app:trackColor="?attr/colorSurfaceVariant"
+            app:indicatorColor="?attr/colorPrimary" />
 
         <TextView
             android:id="@+id/tv_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Đang tạo cuộc trò chuyện..."
-            android:textSize="12sp"
-            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"
             android:layout_gravity="center_vertical" />
 
     </LinearLayout>

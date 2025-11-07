@@ -146,19 +146,74 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         }).attach();
     }
 
+    private long lastToggleTime = 0;
+    private static final long TOGGLE_DEBOUNCE_MS = 1500; // 1.5 giây debounce
+
     private void toggleDarkMode() {
-        int currentNightMode = AppCompatDelegate.getDefaultNightMode();
-        if (currentNightMode == AppCompatDelegate.MODE_NIGHT_YES) {
-            // Đang ở chế độ tối, chuyển sang chế độ sáng
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        // Debounce để tránh click liên tục gây crash
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastToggleTime < TOGGLE_DEBOUNCE_MS) {
             if (getContext() != null) {
-                Toast.makeText(getContext(), "Đã chuyển sang chế độ sáng", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Vui lòng đợi...", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            // Đang ở chế độ sáng, chuyển sang chế độ tối
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            return; // Bỏ qua nếu click quá nhanh
+        }
+        lastToggleTime = currentTime;
+
+        if (getContext() == null) return;
+
+        try {
+            // Lấy SharedPreferences
+            android.content.SharedPreferences prefs = getContext().getSharedPreferences("DisplaySettings", android.content.Context.MODE_PRIVATE);
+
+            // Detect theme hiện tại từ system resources
+            int currentNightMode = getResources().getConfiguration().uiMode &
+                                   android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+            boolean isDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+
+            String newTheme;
+            int nightMode;
+            String message;
+
+            // Toggle: Nếu đang dark → light, nếu đang light → dark
+            if (isDarkMode) {
+                // Đang ở chế độ tối, chuyển sang sáng
+                newTheme = "light";
+                nightMode = AppCompatDelegate.MODE_NIGHT_NO;
+                message = "Đã chuyển sang chế độ sáng";
+            } else {
+                // Đang ở chế độ sáng, chuyển sang tối
+                newTheme = "dark";
+                nightMode = AppCompatDelegate.MODE_NIGHT_YES;
+                message = "Đã chuyển sang chế độ tối";
+            }
+
+            // Lưu vào SharedPreferences
+            prefs.edit().putString("theme_mode", newTheme).apply();
+
+            // Hiển thị thông báo trước khi recreate
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+
+            // Delay một chút rồi mới recreate để tránh crash
+            if (getActivity() != null) {
+                final android.app.Activity activity = getActivity();
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    if (activity != null && !activity.isFinishing()) {
+                        try {
+                            // Apply fade animation khi recreate
+                            activity.recreate();
+                            activity.overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        } catch (Exception e) {
+                            // Fallback: chỉ apply theme không recreate
+                            AppCompatDelegate.setDefaultNightMode(nightMode);
+                        }
+                    }
+                }, 300); // Delay 300ms
+            }
+
+        } catch (Exception e) {
             if (getContext() != null) {
-                Toast.makeText(getContext(), "Đã chuyển sang chế độ tối", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }

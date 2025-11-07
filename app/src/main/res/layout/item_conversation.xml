@@ -4,122 +4,155 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="12dp"
-    android:layout_marginVertical="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="?attr/colorSurface"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@android:color/transparent"
     android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:background="@drawable/conversation_card_background"
         android:padding="16dp">
 
-        <!-- Avatar/Icon (Removed) -->
+        <!-- AI Avatar with gradient -->
+        <ImageView
+            android:id="@+id/iv_conversation_avatar"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_smart_toy"
+            android:background="@drawable/conversation_avatar_gradient"
+            android:padding="14dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="AI Assistant"
+            app:tint="@android:color/white"
+            android:elevation="2dp"
+            android:layout_marginEnd="16dp"
+            android:layout_gravity="center_vertical" />
 
         <!-- Content -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical">
 
-            <!-- Title and Time Row -->
-            <LinearLayout
+            <!-- Title Row -->
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/tv_conversation_title"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="16sp"
+                    android:layout_toStartOf="@id/iv_pin_indicator"
+                    android:textSize="17sp"
                     android:textStyle="bold"
                     android:textColor="?android:attr/textColorPrimary"
-                    android:maxLines="2"
+                    android:maxLines="1"
                     android:ellipsize="end"
-                    android:lineSpacingExtra="2dp"
                     tools:text="Làm thế nào để giảm cân hiệu quả?" />
 
                 <!-- Pin Icon -->
                 <ImageView
                     android:id="@+id/iv_pin_indicator"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_pin"
                     android:tint="?attr/colorPrimary"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
                     android:visibility="gone"
                     android:contentDescription="Cuộc trò chuyện được ghim" />
+
+            </RelativeLayout>
+
+            <!-- Time with icon -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_clock"
+                    android:tint="?android:attr/textColorSecondary"
+                    android:alpha="0.7"
+                    android:layout_marginEnd="4dp" />
 
                 <TextView
                     android:id="@+id/tv_conversation_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
                     android:textColor="?android:attr/textColorSecondary"
-                    android:layout_marginStart="8dp"
+                    android:alpha="0.8"
                     tools:text="14:30" />
 
             </LinearLayout>
 
-            <!-- Last Message Row -->
-            <LinearLayout
+            <!-- Last Message Preview -->
+            <TextView
+                android:id="@+id/tv_last_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/tv_last_message"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="14sp"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:maxLines="2"
-                    android:ellipsize="end"
-                    android:lineSpacingExtra="2dp"
-                    tools:text="AI: Để giảm cân hiệu quả, bạn cần kết hợp chế độ ăn uống lành mạnh với việc tập thể dục đều đặn..." />
-
-                <!-- Message Count Badge -->
-                <TextView
-                    android:id="@+id/tv_message_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/circle_background_primary"
-                    android:textColor="@android:color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp"
-                    android:layout_marginStart="8dp"
-                    android:minWidth="24dp"
-                    android:gravity="center"
-                    android:visibility="gone"
-                    tools:text="5"
-                    tools:visibility="visible" />
-
-            </LinearLayout>
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:lineSpacingExtra="4dp"
+                android:alpha="0.9"
+                tools:text="AI: Để giảm cân hiệu quả, bạn cần kết hợp chế độ ăn uống lành mạnh với việc tập thể dục đều đặn..." />
 
         </LinearLayout>
 
-        <!-- Unread Indicator -->
-        <View
-            android:id="@+id/view_unread_indicator"
-            android:layout_width="8dp"
-            android:layout_height="8dp"
+        <!-- Right side indicators -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/circle_background_primary"
-            android:visibility="gone" />
+            android:layout_marginStart="12dp"
+            android:gravity="center">
+
+            <!-- Message Count Badge with gradient -->
+            <TextView
+                android:id="@+id/tv_message_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/unread_badge_gradient"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="6dp"
+                android:minWidth="28dp"
+                android:gravity="center"
+                android:elevation="2dp"
+                android:visibility="gone"
+                tools:text="5"
+                tools:visibility="visible" />
+
+            <!-- Unread Indicator Dot -->
+            <View
+                android:id="@+id/view_unread_indicator"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/unread_badge_gradient"
+                android:visibility="gone" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

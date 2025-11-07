@@ -392,7 +392,7 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
             loadingView = view.findViewById(R.id.layout_loading);
 
             // Setup Sort Button với null check
-            com.google.android.material.button.MaterialButton btnSort = view.findViewById(R.id.btn_sort_reminders);
+            android.widget.ImageButton btnSort = view.findViewById(R.id.btn_sort_reminders);
             if (btnSort != null) {
                 btnSort.setOnClickListener(v -> showSortDialog());
             }
@@ -755,8 +755,8 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
                 public void onAllPermissionsGranted() {
                     android.util.Log.d("ReminderFragment", "✅ Tất cả quyền đã được cấp");
                     // Khởi động foreground service để duy trì hoạt động
+                    // Không show toast để tránh duplicate khi recreate activity
                     com.vhn.doan.utils.ReminderPermissionHelper.startReminderService(requireContext());
-                    showSuccess("Hệ thống nhắc nhở đã sẵn sàng!");
                 }
 
                 @Override

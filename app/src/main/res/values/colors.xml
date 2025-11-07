@@ -12,18 +12,18 @@
     <!-- LIGHT MODE THEME COLORS - Màu chủ đề chế độ sáng -->
     <!-- =============================================== -->
 
-    <!-- Primary Colors -->
-    <color name="primary_color">#4CAF50</color>
-    <color name="primary_light">#81C784</color>
-    <color name="primary_dark">#2E7D32</color>
-    <color name="colorPrimary">#4CAF50</color>
-    <color name="colorPrimaryDark">#2E7D32</color>
+    <!-- Primary Colors - Modern Purple Gradient -->
+    <color name="primary_color">#667eea</color>
+    <color name="primary_light">#8b9eff</color>
+    <color name="primary_dark">#4a5fd8</color>
+    <color name="colorPrimary">#667eea</color>
+    <color name="colorPrimaryDark">#4a5fd8</color>
 
-    <!-- Secondary Colors -->
-    <color name="secondary_color">#2196F3</color>
-    <color name="secondary_light">#64B5F6</color>
-    <color name="secondary_dark">#1976D2</color>
-    <color name="colorAccent">#2196F3</color>
+    <!-- Secondary Colors - Pink Gradient -->
+    <color name="secondary_color">#f093fb</color>
+    <color name="secondary_light">#ff9ff3</color>
+    <color name="secondary_dark">#d66ce8</color>
+    <color name="colorAccent">#f093fb</color>
 
     <!-- =============================================== -->
     <!-- BACKGROUND COLORS -->
@@ -31,6 +31,8 @@
     <color name="backgroundColor">#FFFFFF</color>
     <color name="backgroundSecondary">#F5F5F5</color>
     <color name="background_light">#FFFFFF</color>
+    <color name="background_dark">#FFFFFF</color>
+    <color name="background_dark_alt">#F8F9FA</color>
     <color name="background_surface">#FFFFFF</color>
     <color name="background_container">#F8F9FA</color>
 
@@ -52,34 +54,34 @@
     <color name="primary_green_dark">#2E7D32</color>
 
     <!-- =============================================== -->
-    <!-- BUTTON COLORS -->
+    <!-- BUTTON COLORS - Modern Gradient -->
     <!-- =============================================== -->
-    <color name="primary_button_start">#4CAF50</color>
-    <color name="primary_button_end">#8BC34A</color>
+    <color name="primary_button_start">#667eea</color>
+    <color name="primary_button_end">#764ba2</color>
     <color name="primary_button_text">#FFFFFF</color>
 
-    <color name="secondary_button_start">#FF9800</color>
-    <color name="secondary_button_end">#FF5722</color>
+    <color name="secondary_button_start">#f093fb</color>
+    <color name="secondary_button_end">#f5576c</color>
     <color name="secondary_button_text">#FFFFFF</color>
 
-    <color name="tertiary_button_background">#E0E0E0</color>
-    <color name="tertiary_button_text">#424242</color>
+    <color name="tertiary_button_background">#F5F5F5</color>
+    <color name="tertiary_button_text">#212124</color>
 
     <!-- =============================================== -->
-    <!-- MATERIAL DESIGN 3 COLORS -->
+    <!-- MATERIAL DESIGN 3 COLORS - Light Theme -->
     <!-- =============================================== -->
-    <color name="primary_container">#E8F5E8</color>
-    <color name="secondary_container">#E3F2FD</color>
+    <color name="primary_container">#E8EAF6</color>
+    <color name="secondary_container">#FCE4EC</color>
     <color name="surface">#FFFFFF</color>
     <color name="surface_variant">#F5F5F5</color>
     <color name="text_primary">#212124</color>
-    <color name="text_secondary">#424242</color>
+    <color name="text_secondary">#5F5F6E</color>
     <color name="error">#F44336</color>
-    <color name="outline">#BDBDBD</color>
-    <color name="outline_variant">#E0E0E0</color>
-    <color name="on_surface">#1C1B1F</color>
-    <color name="on_surface_variant">#49454F</color>
-    <color name="on_secondary_container">#1A1C38</color>
+    <color name="outline">#E0E0E0</color>
+    <color name="outline_variant">#F0F0F0</color>
+    <color name="on_surface">#212124</color>
+    <color name="on_surface_variant">#5F5F6E</color>
+    <color name="on_secondary_container">#3D1E52</color>
 
     <!-- =============================================== -->
     <!-- STATUS COLORS -->
@@ -137,31 +139,31 @@
     <color name="border_color">#BDBDBD</color>
 
     <!-- =============================================== -->
-    <!-- BOTTOM NAVIGATION COLORS -->
+    <!-- BOTTOM NAVIGATION COLORS - Light Theme -->
     <!-- =============================================== -->
     <color name="bottom_nav_background">#FFFFFF</color>
-    <color name="bottom_nav_icon_selected">#4CAF50</color>
-    <color name="bottom_nav_icon_unselected">#757575</color>
-    <color name="bottom_nav_text_selected">#4CAF50</color>
-    <color name="bottom_nav_text_unselected">#757575</color>
-    <color name="bottom_nav_icon_color">#4CAF50</color>
+    <color name="bottom_nav_icon_selected">#667eea</color>
+    <color name="bottom_nav_icon_unselected">#9E9E9E</color>
+    <color name="bottom_nav_text_selected">#667eea</color>
+    <color name="bottom_nav_text_unselected">#9E9E9E</color>
+    <color name="bottom_nav_icon_color">#667eea</color>
     <color name="bottom_nav_background_dark">#212124</color>
 
     <!-- =============================================== -->
-    <!-- PROGRESS & LOADING COLORS -->
+    <!-- PROGRESS & LOADING COLORS - Light Theme -->
     <!-- =============================================== -->
-    <color name="progress_color">#4CAF50</color>
+    <color name="progress_color">#667eea</color>
     <color name="progress_background">#E0E0E0</color>
     <color name="loading_background">#F5F5F5</color>
-    <color name="progress_indicator_color">#4CAF50</color>
+    <color name="progress_indicator_color">#667eea</color>
     <color name="progress_track_color">#E0E0E0</color>
 
     <!-- =============================================== -->
-    <!-- CHIP COLORS -->
+    <!-- CHIP COLORS - Light Theme -->
     <!-- =============================================== -->
-    <color name="chip_background">#E8F5E8</color>
-    <color name="chip_text">#2E7D32</color>
-    <color name="chip_selected_background">#4CAF50</color>
+    <color name="chip_background">#E8EAF6</color>
+    <color name="chip_text">#4a5fd8</color>
+    <color name="chip_selected_background">#667eea</color>
     <color name="chip_selected_text">#FFFFFF</color>
 
     <!-- =============================================== -->
@@ -205,19 +207,24 @@
     <!-- MISC / OTHER -->
     <!-- =============================================== -->
     <color name="md_theme_dark_onPrimary">#FFFFFF</color>
-    <color name="pinned_conversation_background">#F0F0F0</color>
-    <color name="pinned_conversation_stroke">#4CAF50</color>
 
-    <!-- Alarm Colors -->
-    <color name="alarm_background_start">#1E3A8A</color>
-    <color name="alarm_background_end">#7C3AED</color>
+    <!-- Alarm Colors - Light Theme -->
+    <color name="alarm_background_start">#667eea</color>
+    <color name="alarm_background_end">#764ba2</color>
+
+    <!-- Pinned Conversation - Light Theme -->
+    <color name="pinned_conversation_background">#E8EAF6</color>
+    <color name="pinned_conversation_stroke">#667eea</color>
+
+    <!-- Card Background - Light Theme -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_border">#E0E0E0</color>
+    <color name="ripple_gray_color">#40606060</color>
 
     <!-- =============================================== -->
     <!-- CARD AND SECTION COLORS -->
     <!-- =============================================== -->
-    <color name="card_background">#2A2A2E</color>
-    <color name="card_border">#404040</color>
-    <color name="ripple_gray_color">#40606060</color>
+    <!-- Colors defined above for light theme -->
 
     <!-- =============================================== -->
     <!-- DARK MODE THEME COLORS - Màu chủ đề chế độ tối -->

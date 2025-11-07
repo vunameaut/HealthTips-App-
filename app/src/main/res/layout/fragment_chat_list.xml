@@ -1,152 +1,233 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/backgroundSecondary">
 
-    <!-- Load More Section -->
-    <LinearLayout
-        android:id="@+id/layout_load_more"
+    <!-- Modern Header with Gradient -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:visibility="gone"
-        android:layout_alignParentBottom="true">
+        android:elevation="8dp"
+        android:fitsSystemWindows="true">
 
-        <!-- Load More Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_load_more"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/view_more_conversations"
-            app:icon="@drawable/ic_refresh"
-            app:iconGravity="textStart"
-            style="@style/Widget.Material3.Button.TextButton" />
-
-        <!-- Loading More Indicator -->
         <LinearLayout
-            android:id="@+id/layout_loading_more"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="16dp"
-            android:visibility="gone">
+            android:orientation="vertical"
+            android:background="@drawable/chat_list_header_gradient"
+            android:paddingTop="16dp"
+            android:paddingBottom="24dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
 
-            <ProgressBar
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginEnd="8dp" />
+            <!-- Header Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💬 Trò chuyện với AI"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/loading"
-                android:textSize="14sp"
-                android:textColor="?android:attr/textColorSecondary" />
-        </LinearLayout>
-    </LinearLayout>
+                android:text="Lịch sử cuộc trò chuyện của bạn"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:alpha="0.9"
+                android:layout_marginTop="4dp" />
 
-    <!-- Content Area -->
-    <FrameLayout
+        </LinearLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layout_load_more">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Load More Section -->
+        <LinearLayout
+            android:id="@+id/layout_load_more"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Load More Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_load_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/view_more_conversations"
+                app:icon="@drawable/ic_refresh"
+                app:iconGravity="textStart"
+                style="@style/Widget.Material3.Button.TextButton" />
+
+            <!-- Loading More Indicator -->
+            <LinearLayout
+                android:id="@+id/layout_loading_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="12dp"
+                    android:indeterminate="true"
+                    app:indicatorSize="24dp"
+                    app:trackColor="?attr/colorSurfaceVariant"
+                    app:indicatorColor="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/loading"
+                    android:textSize="14sp"
+                    android:textColor="?android:attr/textColorSecondary" />
+            </LinearLayout>
+        </LinearLayout>
 
         <!-- Conversations RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_conversations"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="32dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:layout_height="0dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="80dp"
             android:clipToPadding="false"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/layout_load_more"
             tools:listitem="@layout/item_conversation" />
 
-        <!-- Loading State -->
+        <!-- Modern Loading State -->
         <LinearLayout
             android:id="@+id/layout_loading"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:orientation="vertical"
             android:gravity="center"
-            android:visibility="gone">
+            android:padding="32dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-            <ProgressBar
+            <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="24dp"
+                android:indeterminate="true"
+                app:indicatorSize="56dp"
+                app:trackColor="?attr/colorSurfaceVariant"
+                app:indicatorColor="?attr/colorPrimary" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/loading_reminders"
-                android:textSize="16sp"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary" />
         </LinearLayout>
 
-        <!-- Empty State -->
+        <!-- Modern Empty State -->
         <LinearLayout
             android:id="@+id/layout_empty"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="32dp"
-            android:visibility="gone">
+            android:padding="40dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_chat"
-                android:layout_marginBottom="16dp"
-                android:tint="?android:attr/textColorSecondary" />
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/ic_smart_toy"
+                android:background="@drawable/ai_avatar_background_modern"
+                android:padding="32dp"
+                android:layout_marginBottom="32dp"
+                android:contentDescription="AI Assistant"
+                app:tint="@android:color/white"
+                android:elevation="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/no_conversations"
-                android:textSize="18sp"
+                android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/chat_ai_greeting"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textColor="?android:attr/textColorSecondary"
-                android:gravity="center" />
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="32dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_start_new_chat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
                 android:text="@string/start_conversation"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                android:textSize="16sp"
                 app:icon="@drawable/ic_add"
-                style="@style/Widget.Material3.Button" />
+                app:iconSize="24dp"
+                app:cornerRadius="28dp"
+                style="@style/Widget.Material3.Button.ElevatedButton" />
         </LinearLayout>
-    </FrameLayout>
 
-    <!-- Floating New Chat Button (bottom-right corner, lowered) -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_new_chat"
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Modern Floating New Chat Button -->
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="20dp"
-        android:src="@drawable/ic_chat"
-        app:backgroundTint="?attr/colorPrimary"
-        app:tint="@android:color/white"
-        android:contentDescription="@string/new_conversation_desc" />
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:background="@drawable/fab_new_chat_gradient"
+        android:elevation="8dp"
+        android:padding="0dp">
 
-</RelativeLayout>
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/btn_new_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trò chuyện mới"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:icon="@drawable/ic_add"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp"
+            app:backgroundTint="@android:color/transparent"
+            app:elevation="0dp"
+            android:contentDescription="@string/new_conversation_desc" />
+
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

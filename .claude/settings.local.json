@@ -7,7 +7,14 @@
       "Bash(./gradlew.bat:*)",
       "Bash(mkdir:*)",
       "Bash(sort:*)",
-      "Bash(gradlew.bat clean assembleDebug)"
+      "Bash(gradlew.bat clean assembleDebug)",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(\"D:\\app\\HealthTips-App-\\gradlew.bat\" assembleDebug)",
+      "Bash(adb shell:*)",
+      "Bash(nul)",
+      "Bash(dir /b \"D:\\app\\HealthTips-App-\\app\\src\\main\\res\\layout\")",
+      "Bash(findstr:*)",
+      "Bash(\"D:\\app\\HealthTips-App-\\gradlew.bat\" clean assembleDebug)"
     ],
     "deny": [],
     "ask": []

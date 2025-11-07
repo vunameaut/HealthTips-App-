@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light"
+    android:background="@color/backgroundSecondary"
     tools:context=".presentation.reminder.ReminderFragment">
 
     <!-- AppBar Layout -->
@@ -12,26 +12,24 @@
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:elevation="0dp"
-        android:fitsSystemWindows="true"
-        app:elevation="0dp">
+        android:elevation="8dp"
+        android:fitsSystemWindows="true">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/transparent"
-            android:paddingTop="8dp"
-            app:layout_scrollFlags="scroll|enterAlways">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/reminder_header_gradient"
+            android:paddingTop="16dp"
+            android:paddingBottom="20dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingEnd="16dp"
-                tools:ignore="RtlSymmetry">
+                android:gravity="center_vertical">
 
                 <!-- Title Section -->
                 <LinearLayout
@@ -43,9 +41,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/health_reminders"
-                        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-                        android:textColor="?attr/colorOnBackground"
+                        android:text="⏰ Nhắc nhở sức khỏe"
+                        android:textColor="@android:color/white"
+                        android:textSize="28sp"
                         android:textStyle="bold" />
 
                     <LinearLayout
@@ -60,34 +58,38 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                            android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold" />
+                            android:textColor="@android:color/white"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:alpha="0.95" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:text="@string/active_reminders"
-                            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
+                            android:textColor="@android:color/white"
+                            android:textSize="15sp"
+                            android:alpha="0.9" />
 
                     </LinearLayout>
 
                 </LinearLayout>
 
                 <!-- Sort Button -->
-                <com.google.android.material.button.MaterialButton
+                <ImageButton
                     android:id="@+id/btn_sort_reminders"
-                    style="@style/Widget.Material3.Button.IconButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    app:icon="@drawable/ic_sort"
-                    app:iconTint="?attr/colorOnSurfaceVariant" />
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/search_button_background"
+                    android:contentDescription="Sắp xếp"
+                    android:src="@drawable/ic_sort"
+                    android:padding="10dp"
+                    app:tint="@android:color/white" />
 
             </LinearLayout>
 
-        </com.google.android.material.appbar.MaterialToolbar>
+        </LinearLayout>
 
         <!-- Filter Chips -->
         <HorizontalScrollView

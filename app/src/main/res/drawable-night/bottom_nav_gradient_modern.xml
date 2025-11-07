@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modern Bottom Navigation Background - Dark Mode -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Shadow -->
+    <item android:top="-8dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#00000000"
+                android:endColor="#40000000"
+                android:angle="270" />
+        </shape>
+    </item>
+    <!-- Main background with subtle gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#2A2A2E"
+                android:endColor="#1E1E1E"
+                android:angle="90" />
+            <corners
+                android:topLeftRadius="24dp"
+                android:topRightRadius="24dp" />
+        </shape>
+    </item>
+</layer-list>

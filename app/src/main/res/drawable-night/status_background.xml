@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modern Status Background with gradient -->
+<!-- Status Background - Dark Mode -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
-        android:startColor="#F5F5F5"
-        android:endColor="#FAFAFA"
+        android:startColor="#2A2A2E"
+        android:endColor="#2E2845"
         android:angle="135"
         android:type="linear" />
     <corners android:radius="24dp" />
-    <stroke android:color="#E8EAF6" android:width="1dp" />
+    <stroke android:color="#4A4A54" android:width="1dp" />
 </shape>
-

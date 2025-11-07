@@ -97,20 +97,53 @@ public class HomeActivity extends BaseActivity {
         videoFragment = (VideoFragment) getSupportFragmentManager().findFragmentByTag("VIDEO");
         profileFragment = (ProfileFragment) getSupportFragmentManager().findFragmentByTag("PROFILE");
 
-        // Tìm fragment hiện tại đang visible
+        Log.d(TAG, "🔄 Restored fragments - Home: " + (homeFragment != null) +
+                ", Chat: " + (chatListFragment != null) +
+                ", Reminder: " + (reminderFragment != null) +
+                ", Video: " + (videoFragment != null) +
+                ", Profile: " + (profileFragment != null));
+
+        // Tìm fragment hiện tại đang visible và ensure tất cả fragments khác bị ẩn
+        currentFragment = null;
+        int selectedItemId = R.id.nav_home; // default
+
         if (homeFragment != null && homeFragment.isVisible()) {
             currentFragment = homeFragment;
+            selectedItemId = R.id.nav_home;
+            Log.d(TAG, "✅ Home is visible");
         } else if (chatListFragment != null && chatListFragment.isVisible()) {
             currentFragment = chatListFragment;
+            selectedItemId = R.id.nav_chat;
+            Log.d(TAG, "✅ Chat is visible");
         } else if (reminderFragment != null && reminderFragment.isVisible()) {
             currentFragment = reminderFragment;
+            selectedItemId = R.id.nav_reminders;
+            Log.d(TAG, "✅ Reminder is visible");
         } else if (videoFragment != null && videoFragment.isVisible()) {
             currentFragment = videoFragment;
+            selectedItemId = R.id.nav_videos;
+            Log.d(TAG, "✅ Video is visible");
         } else if (profileFragment != null && profileFragment.isVisible()) {
             currentFragment = profileFragment;
+            selectedItemId = R.id.nav_profile;
+            Log.d(TAG, "✅ Profile is visible");
         }
 
-        Log.d(TAG, "Fragments restored after configuration change");
+        if (currentFragment == null) {
+            Log.w(TAG, "⚠️ No visible fragment found after restore, defaulting to Home");
+            currentFragment = homeFragment;
+            selectedItemId = R.id.nav_home;
+        }
+
+        // Post to make sure UI is ready
+        final int finalSelectedId = selectedItemId;
+        bottomNavigationView.post(() -> {
+            bottomNavigationView.setSelectedItemId(finalSelectedId);
+            Log.d(TAG, "🎯 Bottom nav synced to: " + finalSelectedId);
+        });
+
+        Log.d(TAG, "Fragments restored. Current: " +
+            (currentFragment != null ? currentFragment.getClass().getSimpleName() : "null"));
     }
 
     /**
@@ -211,14 +244,27 @@ public class HomeActivity extends BaseActivity {
      */
     private boolean showFragment(Fragment fragment) {
         if (fragment != null && fragment != currentFragment) {
+            Log.d(TAG, "🔄 Attempting to switch from " +
+                (currentFragment != null ? currentFragment.getClass().getSimpleName() : "null") +
+                " to " + fragment.getClass().getSimpleName());
+
             // Thông báo fragment cũ bị ẩn
             notifyFragmentHidden(currentFragment);
 
             // Chuyển đổi fragment
-            getSupportFragmentManager().beginTransaction()
-                    .hide(currentFragment)
-                    .show(fragment)
-                    .commit();
+            androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+            // Chỉ hide currentFragment nếu nó không null
+            if (currentFragment != null) {
+                transaction.hide(currentFragment);
+                Log.d(TAG, "  ➡️ Hiding: " + currentFragment.getClass().getSimpleName());
+            }
+
+            transaction.show(fragment);
+            Log.d(TAG, "  ➡️ Showing: " + fragment.getClass().getSimpleName());
+
+            // Sử dụng commitNow() để đảm bảo transaction được thực thi ngay lập tức
+            transaction.commitNow();
 
             Fragment previousFragment = currentFragment;
             currentFragment = fragment;
@@ -227,9 +273,12 @@ public class HomeActivity extends BaseActivity {
             markFragmentAsShown(fragment);
             notifyFragmentVisible(fragment);
 
-            Log.d(TAG, "🔄 Switched from " + previousFragment.getClass().getSimpleName() +
-                      " to " + fragment.getClass().getSimpleName());
+            Log.d(TAG, "✅ Switched successfully. Current fragment: " + currentFragment.getClass().getSimpleName());
             return true;
+        } else {
+            Log.d(TAG, "⚠️ showFragment skipped - fragment: " +
+                (fragment != null ? fragment.getClass().getSimpleName() : "null") +
+                ", currentFragment: " + (currentFragment != null ? currentFragment.getClass().getSimpleName() : "null"));
         }
         return false;
     }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ripple effect for conversation cards -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#20667eea">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="?android:attr/colorPrimary" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+</ripple>
