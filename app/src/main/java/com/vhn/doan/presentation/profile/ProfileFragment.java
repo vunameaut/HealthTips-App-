@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -39,7 +40,8 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
     private ProfileContract.Presenter presenter;
     private TextView profileName, profileUsername;
-    private ImageButton btnToggleTheme, btnMenu;
+    private SwitchCompat switchDarkMode;
+    private ImageButton btnMenu;
     private ImageView profileImage;
     private ProgressBar avatarUploadProgress;
     private TabLayout tabLayout;
@@ -108,27 +110,63 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         profileUsername = view.findViewById(R.id.profile_username);
         avatarUploadProgress = view.findViewById(R.id.avatar_upload_progress);
 
-        btnToggleTheme = view.findViewById(R.id.btn_toggle_theme);
+        switchDarkMode = view.findViewById(R.id.switchDarkMode);
         btnMenu = view.findViewById(R.id.btn_menu);
 
         // Thiết lập sự kiện click cho avatar để hiển thị dialog tùy chọn
         profileImage.setOnClickListener(v -> showAvatarOptionsDialog());
 
-        // Thiết lập sự kiện cho các nút khác
-        btnToggleTheme.setOnClickListener(v -> toggleDarkMode());
+        // Thiết lập sự kiện cho nút menu
         btnMenu.setOnClickListener(v -> showMenuOptions());
 
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
 
-        // Cập nhật icon theme ngay khi khởi tạo view
-        updateThemeIconBasedOnCurrentTheme();
+        // Load và set trạng thái switch dựa trên theme hiện tại
+        updateSwitchBasedOnCurrentTheme();
     }
 
     @Override
     protected void setupListeners() {
-        // Thiết lập listener cho các nút
-        btnToggleTheme.setOnClickListener(v -> toggleDarkMode());
+        // Thiết lập listener cho switch dark mode với animation mượt mà
+        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Chỉ xử lý khi user thực sự thay đổi, không phải khi set programmatically
+            if (!buttonView.isPressed()) {
+                return;
+            }
+
+            // Animation mượt mà khi chuyển đổi
+            buttonView.animate()
+                    .scaleX(0.92f)
+                    .scaleY(0.92f)
+                    .setDuration(100)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .withEndAction(() -> {
+                        buttonView.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(120)
+                                .setInterpolator(new android.view.animation.OvershootInterpolator())
+                                .start();
+                    })
+                    .start();
+
+            // Thêm hiệu ứng alpha cho transition
+            buttonView.animate()
+                    .alpha(0.85f)
+                    .setDuration(100)
+                    .withEndAction(() -> {
+                        buttonView.animate()
+                                .alpha(1.0f)
+                                .setDuration(100)
+                                .start();
+                    })
+                    .start();
+
+            toggleDarkMode(isChecked);
+        });
+
+        // Thiết lập listener cho nút menu
         btnMenu.setOnClickListener(v -> showMenuOptions());
     }
 
@@ -153,7 +191,7 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
     private long lastToggleTime = 0;
     private static final long TOGGLE_DEBOUNCE_MS = 500; // 500ms debounce
 
-    private void toggleDarkMode() {
+    private void toggleDarkMode(boolean isDarkMode) {
         // Debounce để tránh click liên tục
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastToggleTime < TOGGLE_DEBOUNCE_MS) {
@@ -161,56 +199,32 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         }
         lastToggleTime = currentTime;
 
-        if (getContext() == null || btnToggleTheme == null) return;
+        if (getContext() == null) return;
 
         try {
             // Lấy SharedPreferences
             android.content.SharedPreferences prefs = getContext().getSharedPreferences("DisplaySettings", android.content.Context.MODE_PRIVATE);
 
-            // Detect theme hiện tại từ system resources
-            int currentNightMode = getResources().getConfiguration().uiMode &
-                                   android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-            boolean isDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-
             String newTheme;
             int nightMode;
             String message;
 
-            // Toggle: Nếu đang dark → light, nếu đang light → dark
+            // Set theme dựa trên switch state
             if (isDarkMode) {
-                // Đang ở chế độ tối, chuyển sang sáng
-                newTheme = "light";
-                nightMode = AppCompatDelegate.MODE_NIGHT_NO;
-                message = "Đã chuyển sang chế độ sáng";
-            } else {
-                // Đang ở chế độ sáng, chuyển sang tối
+                // Bật chế độ tối
                 newTheme = "dark";
                 nightMode = AppCompatDelegate.MODE_NIGHT_YES;
                 message = "Đã chuyển sang chế độ tối";
+            } else {
+                // Tắt chế độ tối (chuyển sang sáng)
+                newTheme = "light";
+                nightMode = AppCompatDelegate.MODE_NIGHT_NO;
+                message = "Đã chuyển sang chế độ sáng";
             }
 
             // Lưu vào SharedPreferences
             prefs.edit().putString("theme_mode", newTheme).apply();
-
-            // Animation cho icon button - Rotate + Scale
-            btnToggleTheme.animate()
-                .rotation(180f)
-                .scaleX(0.7f)
-                .scaleY(0.7f)
-                .setDuration(200)
-                .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator())
-                .withEndAction(() -> {
-                    // Cập nhật icon sau khi animation xong
-                    updateThemeIcon(!isDarkMode);
-                    btnToggleTheme.setRotation(0f); // Reset rotation
-                    btnToggleTheme.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(200)
-                        .setInterpolator(new android.view.animation.OvershootInterpolator())
-                        .start();
-                })
-                .start();
+            prefs.edit().putBoolean("dark_mode", isDarkMode).apply();
 
             // Apply theme với animation mượt mà
             if (getActivity() != null && getView() != null) {
@@ -254,26 +268,10 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
     }
 
     /**
-     * Cập nhật icon theme button dựa trên chế độ hiện tại
-     * @param isDarkMode true nếu đang ở chế độ tối, false nếu chế độ sáng
+     * Cập nhật trạng thái switch dựa trên theme hiện tại của hệ thống
      */
-    private void updateThemeIcon(boolean isDarkMode) {
-        if (btnToggleTheme == null) return;
-
-        // Nếu đang dark mode → hiện icon mặt trăng
-        // Nếu đang light mode → hiện icon mặt trời
-        if (isDarkMode) {
-            btnToggleTheme.setImageResource(R.drawable.ic_moon);
-        } else {
-            btnToggleTheme.setImageResource(R.drawable.ic_sun);
-        }
-    }
-
-    /**
-     * Cập nhật icon theme dựa trên theme hiện tại của hệ thống
-     */
-    private void updateThemeIconBasedOnCurrentTheme() {
-        if (getContext() == null || btnToggleTheme == null) return;
+    private void updateSwitchBasedOnCurrentTheme() {
+        if (getContext() == null || switchDarkMode == null) return;
 
         try {
             // Detect theme hiện tại từ system resources
@@ -281,8 +279,8 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
                                    android.content.res.Configuration.UI_MODE_NIGHT_MASK;
             boolean isDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
-            // Cập nhật icon
-            updateThemeIcon(isDarkMode);
+            // Set switch state mà không trigger listener
+            switchDarkMode.setChecked(isDarkMode);
         } catch (Exception e) {
             // Ignore errors
         }
@@ -651,8 +649,8 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
             loadUserProfile();
         }
 
-        // Cập nhật icon theme để đảm bảo đúng khi quay lại
-        updateThemeIconBasedOnCurrentTheme();
+        // Cập nhật trạng thái switch theme để đảm bảo đúng khi quay lại
+        updateSwitchBasedOnCurrentTheme();
     }
 
     @Override
@@ -673,8 +671,8 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
             loadUserProfile();
         }
 
-        // Cập nhật icon theme khi fragment visible
-        updateThemeIconBasedOnCurrentTheme();
+        // Cập nhật trạng thái switch theme khi fragment visible
+        updateSwitchBasedOnCurrentTheme();
     }
 
     @Override

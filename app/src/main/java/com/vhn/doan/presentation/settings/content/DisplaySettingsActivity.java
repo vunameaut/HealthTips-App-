@@ -7,15 +7,13 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.SwitchCompat;
 
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.base.BaseActivity;
 import com.vhn.doan.utils.FontSizeHelper;
-
-import android.widget.Toast;
 
 /**
  * Activity cài đặt hiển thị
@@ -24,7 +22,6 @@ public class DisplaySettingsActivity extends BaseActivity {
 
     private SharedPreferences preferences;
 
-    private SwitchCompat switchDarkMode;
     private RadioGroup radioGroupTheme;
     private RadioButton rbSystemDefault, rbLightMode, rbDarkMode;
     private SeekBar seekBarFontSize;
@@ -47,7 +44,6 @@ public class DisplaySettingsActivity extends BaseActivity {
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        switchDarkMode = findViewById(R.id.switchDarkMode);
         radioGroupTheme = findViewById(R.id.radioGroupTheme);
         rbSystemDefault = findViewById(R.id.rbSystemDefault);
         rbLightMode = findViewById(R.id.rbLightMode);
@@ -58,9 +54,6 @@ public class DisplaySettingsActivity extends BaseActivity {
     }
 
     private void loadSettings() {
-        // Load dark mode setting
-        boolean isDarkMode = preferences.getBoolean("dark_mode", false);
-        switchDarkMode.setChecked(isDarkMode);
 
         // Load theme mode
         String themeMode = preferences.getString("theme_mode", "system");
@@ -84,39 +77,6 @@ public class DisplaySettingsActivity extends BaseActivity {
     }
 
     private void setupListeners() {
-        // Dark mode switch with smooth animation
-        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Animation mượt mà khi chuyển đổi
-            buttonView.animate()
-                    .scaleX(0.92f)
-                    .scaleY(0.92f)
-                    .setDuration(100)
-                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
-                    .withEndAction(() -> {
-                        buttonView.animate()
-                                .scaleX(1.0f)
-                                .scaleY(1.0f)
-                                .setDuration(120)
-                                .setInterpolator(new android.view.animation.OvershootInterpolator())
-                                .start();
-                    })
-                    .start();
-
-            // Thêm hiệu ứng alpha cho transition
-            buttonView.animate()
-                    .alpha(0.85f)
-                    .setDuration(100)
-                    .withEndAction(() -> {
-                        buttonView.animate()
-                                .alpha(1.0f)
-                                .setDuration(100)
-                                .start();
-                    })
-                    .start();
-
-            preferences.edit().putBoolean("dark_mode", isChecked).apply();
-            applyDarkMode(isChecked);
-        });
 
         // Theme mode radio group
         radioGroupTheme.setOnCheckedChangeListener((group, checkedId) -> {
@@ -170,13 +130,5 @@ public class DisplaySettingsActivity extends BaseActivity {
                 recreate();
             }
         });
-    }
-
-    private void applyDarkMode(boolean isDarkMode) {
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
     }
 }

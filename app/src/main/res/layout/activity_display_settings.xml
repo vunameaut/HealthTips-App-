@@ -74,63 +74,6 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Quick Dark Mode Toggle -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:contentDescription="Icon"
-                        android:src="@drawable/ic_dark_mode"
-                        app:tint="@color/primary_green" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dark_mode"
-                            android:textColor="@color/text_primary"
-                            android:textSize="15sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dark_mode_quick"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchDarkMode"
-                        android:layout_width="68dp"
-                        android:layout_height="36dp"
-                        android:thumb="@drawable/thumb_switch_custom"
-                        app:track="@drawable/track_switch_custom"
-                        android:switchMinWidth="68dp"
-                        android:elevation="3dp"
-                        app:thumbTint="@null"
-                        app:trackTint="@null"
-                        android:scaleX="1.0"
-                        android:scaleY="1.0" />
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="16dp"
-                    android:background="@color/divider_color" />
 
                 <!-- Theme Mode Selection -->
                 <TextView

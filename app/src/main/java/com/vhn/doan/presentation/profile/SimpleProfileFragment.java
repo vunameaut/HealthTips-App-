@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -32,8 +33,9 @@ import com.vhn.doan.presentation.settings.SettingsAndPrivacyActivity;
  */
 public class SimpleProfileFragment extends BaseFragment {
 
-    private TextView profileName, profileUsername, profileBio;
-    private ImageButton btnToggleTheme, btnMenu;
+    private TextView profileName, profileUsername;
+    private SwitchCompat switchDarkMode;
+    private ImageButton btnMenu;
     private ImageView profileImage;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
@@ -64,16 +66,56 @@ public class SimpleProfileFragment extends BaseFragment {
         profileName = view.findViewById(R.id.profile_name);
         profileUsername = view.findViewById(R.id.profile_username);
 
-        btnToggleTheme = view.findViewById(R.id.btn_toggle_theme);
+        switchDarkMode = view.findViewById(R.id.switchDarkMode);
         btnMenu = view.findViewById(R.id.btn_menu);
 
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
+
+        // Load và set trạng thái switch dựa trên theme hiện tại
+        updateSwitchBasedOnCurrentTheme();
     }
 
     @Override
     protected void setupListeners() {
-        btnToggleTheme.setOnClickListener(v -> toggleDarkMode());
+        // Thiết lập listener cho switch dark mode với animation mượt mà
+        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Chỉ xử lý khi user thực sự thay đổi, không phải khi set programmatically
+            if (!buttonView.isPressed()) {
+                return;
+            }
+
+            // Animation mượt mà khi chuyển đổi
+            buttonView.animate()
+                    .scaleX(0.92f)
+                    .scaleY(0.92f)
+                    .setDuration(100)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .withEndAction(() -> {
+                        buttonView.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(120)
+                                .setInterpolator(new android.view.animation.OvershootInterpolator())
+                                .start();
+                    })
+                    .start();
+
+            // Thêm hiệu ứng alpha cho transition
+            buttonView.animate()
+                    .alpha(0.85f)
+                    .setDuration(100)
+                    .withEndAction(() -> {
+                        buttonView.animate()
+                                .alpha(1.0f)
+                                .setDuration(100)
+                                .start();
+                    })
+                    .start();
+
+            toggleDarkMode(isChecked);
+        });
+
         btnMenu.setOnClickListener(v -> showMenuOptions());
     }
 
@@ -95,20 +137,101 @@ public class SimpleProfileFragment extends BaseFragment {
         }).attach();
     }
 
-    private void toggleDarkMode() {
-        int currentNightMode = AppCompatDelegate.getDefaultNightMode();
-        if (currentNightMode == AppCompatDelegate.MODE_NIGHT_YES) {
-            // Đang ở chế độ tối, chuyển sang chế độ sáng
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "Đã chuyển sang chế độ sáng", Toast.LENGTH_SHORT).show();
+    private long lastToggleTime = 0;
+    private static final long TOGGLE_DEBOUNCE_MS = 500; // 500ms debounce
+
+    private void toggleDarkMode(boolean isDarkMode) {
+        // Debounce để tránh click liên tục
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastToggleTime < TOGGLE_DEBOUNCE_MS) {
+            return;
+        }
+        lastToggleTime = currentTime;
+
+        if (getContext() == null) return;
+
+        try {
+            // Lấy SharedPreferences
+            android.content.SharedPreferences prefs = getContext().getSharedPreferences("DisplaySettings", android.content.Context.MODE_PRIVATE);
+
+            String newTheme;
+            int nightMode;
+            String message;
+
+            // Set theme dựa trên switch state
+            if (isDarkMode) {
+                // Bật chế độ tối
+                newTheme = "dark";
+                nightMode = AppCompatDelegate.MODE_NIGHT_YES;
+                message = "Đã chuyển sang chế độ tối";
+            } else {
+                // Tắt chế độ tối (chuyển sang sáng)
+                newTheme = "light";
+                nightMode = AppCompatDelegate.MODE_NIGHT_NO;
+                message = "Đã chuyển sang chế độ sáng";
             }
-        } else {
-            // Đang ở chế độ sáng, chuyển sang chế độ tối
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "Đã chuyển sang chế độ tối", Toast.LENGTH_SHORT).show();
+
+            // Lưu vào SharedPreferences
+            prefs.edit().putString("theme_mode", newTheme).apply();
+            prefs.edit().putBoolean("dark_mode", isDarkMode).apply();
+
+            // Apply theme với animation mượt mà
+            if (getActivity() != null && getView() != null) {
+                final View rootView = getActivity().findViewById(android.R.id.content);
+                final String toastMessage = message; // Capture message
+
+                // Fade out nhẹ - chỉ xuống 0.85 thay vì 0.3
+                rootView.animate()
+                    .alpha(0.85f)
+                    .setDuration(150)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .withEndAction(() -> {
+                        // Apply theme
+                        AppCompatDelegate.setDefaultNightMode(nightMode);
+
+                        // Fade in mượt mà
+                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                            if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
+                                rootView.animate()
+                                    .alpha(1f)
+                                    .setDuration(250)
+                                    .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                                    .withEndAction(() -> {
+                                        // Hiển thị thông báo sau khi chuyển xong
+                                        if (getContext() != null) {
+                                            Toast.makeText(getContext(), toastMessage, Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .start();
+                            }
+                        }, 50);
+                    })
+                    .start();
             }
+
+        } catch (Exception e) {
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Cập nhật trạng thái switch dựa trên theme hiện tại của hệ thống
+     */
+    private void updateSwitchBasedOnCurrentTheme() {
+        if (getContext() == null || switchDarkMode == null) return;
+
+        try {
+            // Detect theme hiện tại từ system resources
+            int currentNightMode = getResources().getConfiguration().uiMode &
+                                   android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+            boolean isDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+
+            // Set switch state mà không trigger listener
+            switchDarkMode.setChecked(isDarkMode);
+        } catch (Exception e) {
+            // Ignore errors
         }
     }
 
@@ -150,11 +273,9 @@ public class SimpleProfileFragment extends BaseFragment {
 
             profileName.setText(displayName != null ? displayName : "Người dùng");
             profileUsername.setText("@" + (email != null ? email.split("@")[0] : "user"));
-            profileBio.setText("Mô tả của người dùng chưa được cập nhật. Hãy thêm mô tả để mọi người biết thêm về bạn.");
         } else {
             profileName.setText("Chưa đăng nhập");
             profileUsername.setText("@guest");
-            profileBio.setText("Vui lòng đăng nhập để xem thông tin cá nhân");
         }
     }
 

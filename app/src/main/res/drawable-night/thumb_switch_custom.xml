@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Thumb when checked (Dark Mode - ON) trong Dark Theme -->
+    <item android:state_checked="true">
+        <layer-list>
+            <!-- Nền tối với viền -->
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#1E293B"/>
+                    <stroke
+                        android:width="2dp"
+                        android:color="#475569"/>
+                    <size
+                        android:width="32dp"
+                        android:height="32dp"/>
+                </shape>
+            </item>
+            <!-- Icon mặt trăng màu sáng -->
+            <item
+                android:width="20dp"
+                android:height="20dp"
+                android:gravity="center"
+                android:drawable="@drawable/ic_moon"/>
+        </layer-list>
+    </item>
+
+    <!-- Thumb when unchecked (Light Mode - OFF) trong Dark Theme -->
+    <item>
+        <layer-list>
+            <!-- Nền tối -->
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#334155"/>
+                    <size
+                        android:width="32dp"
+                        android:height="32dp"/>
+                </shape>
+            </item>
+            <!-- Icon mặt trời màu sáng -->
+            <item
+                android:width="20dp"
+                android:height="20dp"
+                android:gravity="center"
+                android:drawable="@drawable/ic_sun"/>
+        </layer-list>
+    </item>
+</selector>
+
