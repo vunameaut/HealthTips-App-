@@ -120,6 +120,9 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
+
+        // Cập nhật icon theme ngay khi khởi tạo view
+        updateThemeIconBasedOnCurrentTheme();
     }
 
     @Override
@@ -148,20 +151,17 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
     }
 
     private long lastToggleTime = 0;
-    private static final long TOGGLE_DEBOUNCE_MS = 1500; // 1.5 giây debounce
+    private static final long TOGGLE_DEBOUNCE_MS = 500; // 500ms debounce
 
     private void toggleDarkMode() {
-        // Debounce để tránh click liên tục gây crash
+        // Debounce để tránh click liên tục
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastToggleTime < TOGGLE_DEBOUNCE_MS) {
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "Vui lòng đợi...", Toast.LENGTH_SHORT).show();
-            }
-            return; // Bỏ qua nếu click quá nhanh
+            return;
         }
         lastToggleTime = currentTime;
 
-        if (getContext() == null) return;
+        if (getContext() == null || btnToggleTheme == null) return;
 
         try {
             // Lấy SharedPreferences
@@ -192,30 +192,99 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
             // Lưu vào SharedPreferences
             prefs.edit().putString("theme_mode", newTheme).apply();
 
-            // Hiển thị thông báo trước khi recreate
-            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            // Animation cho icon button - Rotate + Scale
+            btnToggleTheme.animate()
+                .rotation(180f)
+                .scaleX(0.7f)
+                .scaleY(0.7f)
+                .setDuration(200)
+                .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator())
+                .withEndAction(() -> {
+                    // Cập nhật icon sau khi animation xong
+                    updateThemeIcon(!isDarkMode);
+                    btnToggleTheme.setRotation(0f); // Reset rotation
+                    btnToggleTheme.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(200)
+                        .setInterpolator(new android.view.animation.OvershootInterpolator())
+                        .start();
+                })
+                .start();
 
-            // Delay một chút rồi mới recreate để tránh crash
-            if (getActivity() != null) {
-                final android.app.Activity activity = getActivity();
-                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                    if (activity != null && !activity.isFinishing()) {
-                        try {
-                            // Apply fade animation khi recreate
-                            activity.recreate();
-                            activity.overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                        } catch (Exception e) {
-                            // Fallback: chỉ apply theme không recreate
-                            AppCompatDelegate.setDefaultNightMode(nightMode);
-                        }
-                    }
-                }, 300); // Delay 300ms
+            // Apply theme với animation mượt mà
+            if (getActivity() != null && getView() != null) {
+                final View rootView = getActivity().findViewById(android.R.id.content);
+                final String toastMessage = message; // Capture message
+
+                // Fade out nhẹ - chỉ xuống 0.85 thay vì 0.3
+                rootView.animate()
+                    .alpha(0.85f)
+                    .setDuration(150)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .withEndAction(() -> {
+                        // Apply theme
+                        AppCompatDelegate.setDefaultNightMode(nightMode);
+
+                        // Fade in mượt mà
+                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                            if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
+                                rootView.animate()
+                                    .alpha(1f)
+                                    .setDuration(250)
+                                    .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                                    .withEndAction(() -> {
+                                        // Hiển thị thông báo sau khi chuyển xong
+                                        if (getContext() != null) {
+                                            Toast.makeText(getContext(), toastMessage, Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .start();
+                            }
+                        }, 50);
+                    })
+                    .start();
             }
 
         } catch (Exception e) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    /**
+     * Cập nhật icon theme button dựa trên chế độ hiện tại
+     * @param isDarkMode true nếu đang ở chế độ tối, false nếu chế độ sáng
+     */
+    private void updateThemeIcon(boolean isDarkMode) {
+        if (btnToggleTheme == null) return;
+
+        // Nếu đang dark mode → hiện icon mặt trăng
+        // Nếu đang light mode → hiện icon mặt trời
+        if (isDarkMode) {
+            btnToggleTheme.setImageResource(R.drawable.ic_moon);
+        } else {
+            btnToggleTheme.setImageResource(R.drawable.ic_sun);
+        }
+    }
+
+    /**
+     * Cập nhật icon theme dựa trên theme hiện tại của hệ thống
+     */
+    private void updateThemeIconBasedOnCurrentTheme() {
+        if (getContext() == null || btnToggleTheme == null) return;
+
+        try {
+            // Detect theme hiện tại từ system resources
+            int currentNightMode = getResources().getConfiguration().uiMode &
+                                   android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+            boolean isDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+
+            // Cập nhật icon
+            updateThemeIcon(isDarkMode);
+        } catch (Exception e) {
+            // Ignore errors
         }
     }
 
@@ -581,6 +650,9 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         } else {
             loadUserProfile();
         }
+
+        // Cập nhật icon theme để đảm bảo đúng khi quay lại
+        updateThemeIconBasedOnCurrentTheme();
     }
 
     @Override
@@ -600,6 +672,9 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         } else {
             loadUserProfile();
         }
+
+        // Cập nhật icon theme khi fragment visible
+        updateThemeIconBasedOnCurrentTheme();
     }
 
     @Override

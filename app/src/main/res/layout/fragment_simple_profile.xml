@@ -39,7 +39,7 @@
                     android:background="@drawable/search_button_background"
                     android:contentDescription="Chuyển đổi chế độ sáng/tối"
                     android:padding="10dp"
-                    android:src="@drawable/ic_theme_toggle"
+                    android:src="@drawable/ic_sun"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />

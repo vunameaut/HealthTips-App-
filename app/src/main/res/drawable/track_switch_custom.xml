@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Track when checked (Dark Mode - ON) -->
+    <item android:state_checked="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp"/>
+            <gradient
+                android:angle="0"
+                android:startColor="#111827"
+                android:centerColor="#0D1520"
+                android:endColor="#020817"
+                android:type="linear"/>
+            <size
+                android:width="68dp"
+                android:height="36dp"/>
+        </shape>
+    </item>
+
+    <!-- Track when unchecked (Light Mode - OFF) -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp"/>
+            <solid android:color="#F5F5F5"/>
+            <stroke
+                android:width="1dp"
+                android:color="#E0E0E0"/>
+            <size
+                android:width="68dp"
+                android:height="36dp"/>
+        </shape>
+    </item>
+</selector>

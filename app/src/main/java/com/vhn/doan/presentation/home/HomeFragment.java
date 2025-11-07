@@ -442,7 +442,13 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     @Override
     public void onResume() {
         super.onResume();
-        presenter.start(); // Tải dữ liệu khi Fragment được hiển thị
+
+        // Force reload nếu categories chưa được load (xảy ra khi recreate do theme change)
+        if (!isCategoriesLoaded) {
+            // Hiển thị skeleton loading trước khi load data
+            setupSkeletonLoading();
+            presenter.start(); // Tải dữ liệu khi Fragment được hiển thị
+        }
 
         // Lắng nghe thay đổi realtime từ Firebase
         presenter.listenToCategories();
@@ -492,6 +498,13 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
         // Tạm dừng auto-scroll khi Fragment không visible
         stopAutoScrollForRecommended();
+
+        // Reset loading flags để force reload khi resume (fix theme change issue)
+        isCategoriesLoaded = false;
+        isRecommendedTipsLoaded = false;
+        isLatestTipsLoaded = false;
+        isMostViewedTipsLoaded = false;
+        isMostLikedTipsLoaded = false;
     }
 
     @Override

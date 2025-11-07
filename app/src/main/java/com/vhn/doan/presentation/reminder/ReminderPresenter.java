@@ -214,9 +214,13 @@ public class ReminderPresenter extends BasePresenter<ReminderContract.View> impl
 
         // KIỂM TRA: Nếu đang bật lại reminder và thời gian đã qua
         if (newStatus && isReminderExpired(reminder)) {
-            // Hiển thị dialog yêu cầu người dùng chỉnh lại thời gian
+            // Auto set thời gian + 1 tiếng từ hiện tại
+            long oneHourLater = System.currentTimeMillis() + (60 * 60 * 1000);
+            reminder.setReminderTime(oneHourLater);
+
+            // Hiển thị dialog để người dùng chỉnh sửa thời gian (đã được set sẵn +1 tiếng)
             view.showExpiredReminderDialog(reminder);
-            return; // Không toggle, chờ người dùng chỉnh lại
+            return; // Không toggle, chờ người dùng xác nhận hoặc chỉnh lại
         }
 
         reminderRepository.toggleReminder(reminder.getId(), newStatus, new ReminderRepository.RepositoryCallback<Void>() {

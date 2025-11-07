@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Mặt trăng lưỡi liềm đơn giản và rõ ràng -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M21,12.79C20.84,12.83 20.68,12.87 20.5,12.89C18.43,13.19 16.44,12.13 15.45,10.34C14.46,8.55 14.64,6.32 15.91,4.72C16.13,4.47 16.36,4.24 16.61,4.03C13.94,3.03 10.88,3.67 8.83,5.72C6.18,8.37 5.79,12.43 7.66,15.54C9.53,18.65 13.36,20.08 16.85,19.06C18.62,18.54 20.16,17.43 21.21,15.94C21.72,14.38 21.56,13.54 21,12.79Z"/>
+
+    <!-- Ngôi sao lấp lánh 1 -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M19,2L18.5,3.5L17,4L18.5,4.5L19,6L19.5,4.5L21,4L19.5,3.5Z"/>
+
+    <!-- Ngôi sao lấp lánh 2 -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M17,7L16.7,7.7L16,8L16.7,8.3L17,9L17.3,8.3L18,8L17.3,7.7Z"/>
+
+    <!-- Ngôi sao lấp lánh 3 -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M21.5,8.5L21.2,9.2L20.5,9.5L21.2,9.8L21.5,10.5L21.8,9.8L22.5,9.5L21.8,9.2Z"/>
+</vector>

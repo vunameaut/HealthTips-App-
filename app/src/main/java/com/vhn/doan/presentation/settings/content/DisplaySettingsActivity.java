@@ -84,8 +84,36 @@ public class DisplaySettingsActivity extends BaseActivity {
     }
 
     private void setupListeners() {
-        // Dark mode switch
+        // Dark mode switch with smooth animation
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Animation mượt mà khi chuyển đổi
+            buttonView.animate()
+                    .scaleX(0.92f)
+                    .scaleY(0.92f)
+                    .setDuration(100)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .withEndAction(() -> {
+                        buttonView.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(120)
+                                .setInterpolator(new android.view.animation.OvershootInterpolator())
+                                .start();
+                    })
+                    .start();
+
+            // Thêm hiệu ứng alpha cho transition
+            buttonView.animate()
+                    .alpha(0.85f)
+                    .setDuration(100)
+                    .withEndAction(() -> {
+                        buttonView.animate()
+                                .alpha(1.0f)
+                                .setDuration(100)
+                                .start();
+                    })
+                    .start();
+
             preferences.edit().putBoolean("dark_mode", isChecked).apply();
             applyDarkMode(isChecked);
         });

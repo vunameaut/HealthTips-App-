@@ -129,7 +129,7 @@
                     android:layout_marginBottom="12dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
-                    app:cardBackgroundColor="@android:color/white"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
                     android:foreground="?attr/selectableItemBackground">
 
                     <LinearLayout
@@ -169,7 +169,7 @@
                     android:layout_marginBottom="12dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
-                    app:cardBackgroundColor="@android:color/white"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
                     android:foreground="?attr/selectableItemBackground">
 
                     <LinearLayout
@@ -208,7 +208,7 @@
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
-                    app:cardBackgroundColor="@android:color/white"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
                     android:foreground="?attr/selectableItemBackground">
 
                     <LinearLayout
@@ -255,7 +255,7 @@
         android:paddingEnd="16dp"
         android:paddingTop="12dp"
         android:paddingBottom="16dp"
-        android:background="@android:color/white"
+        android:background="?attr/colorSurface"
         android:elevation="12dp">
 
         <com.google.android.material.textfield.TextInputLayout

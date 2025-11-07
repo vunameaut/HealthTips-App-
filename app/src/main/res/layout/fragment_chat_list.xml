@@ -52,50 +52,52 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Load More Section -->
+        <!-- Load More Section - Chỉ hiển thị loading indicator -->
         <LinearLayout
             android:id="@+id/layout_load_more"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
+            android:padding="8dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <!-- Load More Button -->
+            <!-- Load More Button - Hidden, auto-load enabled -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_load_more"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/view_more_conversations"
+                android:visibility="gone"
                 app:icon="@drawable/ic_refresh"
                 app:iconGravity="textStart"
                 style="@style/Widget.Material3.Button.TextButton" />
 
-            <!-- Loading More Indicator -->
+            <!-- Loading More Indicator - Hiện khi auto-load -->
             <LinearLayout
                 android:id="@+id/layout_loading_more"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:padding="16dp"
+                android:padding="12dp"
                 android:visibility="gone">
 
                 <com.google.android.material.progressindicator.CircularProgressIndicator
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="12dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
                     android:indeterminate="true"
-                    app:indicatorSize="24dp"
+                    app:indicatorSize="20dp"
                     app:trackColor="?attr/colorSurfaceVariant"
                     app:indicatorColor="?attr/colorPrimary" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/loading"
-                    android:textSize="14sp"
+                    android:text="Đang tải thêm..."
+                    android:textSize="12sp"
+                    android:alpha="0.7"
                     android:textColor="?android:attr/textColorSecondary" />
             </LinearLayout>
         </LinearLayout>

@@ -31,6 +31,8 @@ import com.vhn.doan.utils.UserSessionManager;
 public class HomeActivity extends BaseActivity {
 
     private static final String TAG = "HomeActivity";
+    private static final String KEY_SELECTED_TAB = "selected_tab_id";
+
     private BottomNavigationView bottomNavigationView;
     private AuthManager authManager;
     private ReminderManager reminderManager;
@@ -86,14 +88,14 @@ public class HomeActivity extends BaseActivity {
         } else {
             // Restore fragments sau configuration change
             Log.d(TAG, "♻️ onCreate: RECREATING ACTIVITY (theme change/rotation) - Restoring fragments");
-            restoreFragments();
+            restoreFragments(savedInstanceState);
         }
     }
 
     /**
      * Restore fragments sau configuration change (như screen rotation hoặc theme change)
      */
-    private void restoreFragments() {
+    private void restoreFragments(Bundle savedInstanceState) {
         homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("HOME");
         chatListFragment = (ChatListFragment) getSupportFragmentManager().findFragmentByTag("CHAT");
         reminderFragment = (ReminderFragment) getSupportFragmentManager().findFragmentByTag("REMINDER");
@@ -106,34 +108,35 @@ public class HomeActivity extends BaseActivity {
                 ", Video: " + (videoFragment != null) +
                 ", Profile: " + (profileFragment != null));
 
-        // Tìm fragment hiện tại đang visible
-        currentFragment = null;
-        int selectedItemId = R.id.nav_home; // default
+        // LẤY TAB ĐÃ LƯU TỪ SAVEDINSTANCESTATE
+        int selectedItemId = savedInstanceState.getInt(KEY_SELECTED_TAB, R.id.nav_home);
+        Log.d(TAG, "📌 Restored selected tab ID: " + selectedItemId);
 
-        if (homeFragment != null && homeFragment.isVisible()) {
+        // Xác định currentFragment dựa trên selectedItemId đã lưu
+        currentFragment = null;
+        if (selectedItemId == R.id.nav_home) {
+            currentFragment = homeFragment;
+            Log.d(TAG, "✅ Restoring Home tab");
+        } else if (selectedItemId == R.id.nav_chat) {
+            currentFragment = chatListFragment;
+            Log.d(TAG, "✅ Restoring Chat tab");
+        } else if (selectedItemId == R.id.nav_reminders) {
+            currentFragment = reminderFragment;
+            Log.d(TAG, "✅ Restoring Reminder tab");
+        } else if (selectedItemId == R.id.nav_videos) {
+            currentFragment = videoFragment;
+            Log.d(TAG, "✅ Restoring Video tab");
+        } else if (selectedItemId == R.id.nav_profile) {
+            currentFragment = profileFragment;
+            Log.d(TAG, "✅ Restoring Profile tab");
+        } else {
             currentFragment = homeFragment;
             selectedItemId = R.id.nav_home;
-            Log.d(TAG, "✅ Home is visible");
-        } else if (chatListFragment != null && chatListFragment.isVisible()) {
-            currentFragment = chatListFragment;
-            selectedItemId = R.id.nav_chat;
-            Log.d(TAG, "✅ Chat is visible");
-        } else if (reminderFragment != null && reminderFragment.isVisible()) {
-            currentFragment = reminderFragment;
-            selectedItemId = R.id.nav_reminders;
-            Log.d(TAG, "✅ Reminder is visible");
-        } else if (videoFragment != null && videoFragment.isVisible()) {
-            currentFragment = videoFragment;
-            selectedItemId = R.id.nav_videos;
-            Log.d(TAG, "✅ Video is visible");
-        } else if (profileFragment != null && profileFragment.isVisible()) {
-            currentFragment = profileFragment;
-            selectedItemId = R.id.nav_profile;
-            Log.d(TAG, "✅ Profile is visible");
+            Log.w(TAG, "⚠️ Unknown tab ID, defaulting to Home");
         }
 
         if (currentFragment == null) {
-            Log.w(TAG, "⚠️ No visible fragment found after restore, defaulting to Home");
+            Log.w(TAG, "⚠️ No fragment found after restore, defaulting to Home");
             currentFragment = homeFragment;
             selectedItemId = R.id.nav_home;
         }
@@ -280,6 +283,16 @@ public class HomeActivity extends BaseActivity {
         notifyFragmentVisible(homeFragment);
 
         Log.d(TAG, "✅ All fragments initialized. Only HomeFragment is visible and active.");
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Lưu tab hiện tại trước khi recreate (theme change, rotation, etc.)
+        int selectedItemId = bottomNavigationView.getSelectedItemId();
+        outState.putInt(KEY_SELECTED_TAB, selectedItemId);
+        Log.d(TAG, "💾 Saving selected tab ID: " + selectedItemId);
     }
 
     @Override

@@ -17,8 +17,8 @@ import java.util.List;
 public class ChatListPresenter implements ChatListContract.Presenter {
 
     private static final String TAG = "ChatListPresenter";
-    private static final int DEFAULT_CONVERSATIONS_LIMIT = 8;
-    private static final int LOAD_MORE_CONVERSATIONS_LIMIT = 3;
+    private static final int DEFAULT_CONVERSATIONS_LIMIT = 15;
+    private static final int LOAD_MORE_CONVERSATIONS_LIMIT = 10;
 
     private final ChatRepository chatRepository;
     private final FirebaseAuth firebaseAuth;

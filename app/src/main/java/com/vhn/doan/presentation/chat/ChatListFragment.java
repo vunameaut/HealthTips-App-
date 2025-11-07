@@ -85,7 +85,8 @@ public class ChatListFragment extends Fragment implements ChatListContract.View,
 
     private void setupRecyclerView() {
         conversationAdapter = new ConversationAdapter();
-        rvConversations.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        rvConversations.setLayoutManager(layoutManager);
         rvConversations.setAdapter(conversationAdapter);
 
         conversationAdapter.setOnConversationClickListener(conversation -> {
@@ -96,6 +97,29 @@ public class ChatListFragment extends Fragment implements ChatListContract.View,
 
         // Thêm listener cho long click để hiển thị menu ngữ cảnh
         conversationAdapter.setOnConversationLongClickListener(this::showConversationContextMenu);
+
+        // Auto-load khi scroll gần cuối (giống Facebook, Instagram)
+        rvConversations.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                // Chỉ load khi scroll xuống
+                if (dy > 0) {
+                    int visibleItemCount = layoutManager.getChildCount();
+                    int totalItemCount = layoutManager.getItemCount();
+                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                    // Load khi còn 5 item nữa là đến cuối
+                    if ((visibleItemCount + firstVisibleItemPosition) >= (totalItemCount - 5)
+                        && firstVisibleItemPosition >= 0) {
+                        if (presenter != null) {
+                            presenter.onLoadMoreClicked();
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void setupListeners() {

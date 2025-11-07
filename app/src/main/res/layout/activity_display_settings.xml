@@ -113,8 +113,16 @@
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/switchDarkMode"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_width="68dp"
+                        android:layout_height="36dp"
+                        android:thumb="@drawable/thumb_switch_custom"
+                        app:track="@drawable/track_switch_custom"
+                        android:switchMinWidth="68dp"
+                        android:elevation="3dp"
+                        app:thumbTint="@null"
+                        app:trackTint="@null"
+                        android:scaleX="1.0"
+                        android:scaleY="1.0" />
 
                 </LinearLayout>
 
