@@ -408,6 +408,7 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
         // Xem tất cả danh mục
         textViewSeeAllCategories.setOnClickListener(v -> {
+            if (getActivity() == null || !isAdded()) return;
             CategoryFragment categoryFragment = CategoryFragment.newInstance();
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()

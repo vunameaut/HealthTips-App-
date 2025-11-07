@@ -235,6 +235,15 @@
     <string name="error_loading_videos">Không thể tải video. Vui lòng thử lại.</string>
     <string name="trending_videos">Video thịnh hành</string>
 
+    <!-- Định dạng thời gian cho video -->
+    <string name="years_ago">năm trước</string>
+    <string name="months_ago">tháng trước</string>
+    <string name="weeks_ago">tuần trước</string>
+    <string name="days_ago">ngày trước</string>
+    <string name="hours_ago">giờ trước</string>
+    <string name="minutes_ago">phút trước</string>
+    <string name="just_now">Vừa xong</string>
+
     <!-- Icon placeholders cho chức năng video ngắn -->
     <string name="ic_video_placeholder">ic_video_placeholder</string>
     <string name="ic_video_error">ic_video_error</string>
@@ -824,13 +833,6 @@
     <string name="duration_placeholder">0:30</string>
     <string name="views_placeholder">1.2K</string>
     <string name="views_count">lượt xem</string>
-    <string name="months_ago">tháng trước</string>
-    <string name="weeks_ago">tuần trước</string>
-    <string name="days_ago">ngày trước</string>
-    <string name="hours_ago">giờ trước</string>
-    <string name="minutes_ago">phút trước</string>
-    <string name="years_ago">năm trước</string>
-    <string name="just_now">Vừa xong</string>
 
     <!-- ========== Profile Strings ========== -->
     <string name="username_label">Tên Người Dùng</string>

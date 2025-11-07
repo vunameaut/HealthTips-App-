@@ -226,11 +226,18 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
         ShortVideo video = videos.get(position);
+
+        // Null safety check
+        if (video == null) {
+            android.util.Log.e("VideoAdapter", "Video at position " + position + " is null");
+            return;
+        }
+
         holder.bindMetadata(video);
 
         // Cấu hình PlayerView anti-flicker
         holder.playerView.setUseController(false);
-        holder.playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER);
+        holder.playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING);
         holder.playerView.setKeepContentOnPlayerReset(true);
         holder.playerView.setShutterBackgroundColor(Color.TRANSPARENT);
 
@@ -244,7 +251,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             holder.showPoster(state != Player.STATE_READY);
 
             // Chủ động yêu cầu kiểm tra trạng thái like khi video hiển thị
-            if (listener != null && video != null) {
+            if (listener != null) {
                 listener.onVideoVisible(position);
             }
         } else {
@@ -283,58 +290,68 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public void playVideoAt(int position, @NonNull RecyclerView recyclerView) {
         if (position < 0 || position >= getItemCount()) return;
 
-        ensureCurrentPlayer(recyclerView.getContext());
-        String url = getVideoUrl(videos.get(position));
+        try {
+            ensureCurrentPlayer(recyclerView.getContext());
+            String url = getVideoUrl(videos.get(position));
 
-        // Thông báo ngay lập tức khi video trở nên visible để cập nhật trạng thái like
-        if (listener != null) {
-            listener.onVideoVisible(position);
-        }
-
-        // 1) Nếu đã có player preload cho vị trí này -> handover sang player chính
-        ExoPlayer pre = preloadedPlayers.remove(position);
-        if (pre != null) {
-            // Giải phóng player chính cũ
-            if (currentPlayer != null) {
-                try { currentPlayer.release(); } catch (Exception ignore) {}
+            // Null/empty url check
+            if (url == null || url.isEmpty()) {
+                android.util.Log.e("VideoAdapter", "Video URL is null or empty at position " + position);
+                return;
             }
-            currentPlayer = pre;
-            attachMainPlayerListener(); // gắn listener cho player chính mới
-            currentPlayer.setPlayWhenReady(true);
-            currentPlayer.setVolume(1f); // phát bình thường
 
-        } else {
-            // 2) Dùng player chính hiện tại:
-            // - Nếu media giống nhau -> (nếu config REPLAY) thì seek về 0
-            // - Nếu khác -> set media mới + prepare
-            boolean same = false;
-            if (currentPlayer.getMediaItemCount() > 0) {
-                MediaItem cur = currentPlayer.getCurrentMediaItem();
-                if (cur != null && cur.localConfiguration != null && cur.localConfiguration.uri != null) {
-                    same = url.equals(cur.localConfiguration.uri.toString());
+            // Thông báo ngay lập tức khi video trở nên visible để cập nhật trạng thái like
+            if (listener != null) {
+                listener.onVideoVisible(position);
+            }
+
+            // 1) Nếu đã có player preload cho vị trí này -> handover sang player chính
+            ExoPlayer pre = preloadedPlayers.remove(position);
+            if (pre != null) {
+                // Giải phóng player chính cũ
+                if (currentPlayer != null) {
+                    try { currentPlayer.release(); } catch (Exception ignore) {}
+                }
+                currentPlayer = pre;
+                attachMainPlayerListener(); // gắn listener cho player chính mới
+                currentPlayer.setPlayWhenReady(true);
+                currentPlayer.setVolume(1f); // phát bình thường
+
+            } else {
+                // 2) Dùng player chính hiện tại:
+                // - Nếu media giống nhau -> (nếu config REPLAY) thì seek về 0
+                // - Nếu khác -> set media mới + prepare
+                boolean same = false;
+                if (currentPlayer.getMediaItemCount() > 0) {
+                    MediaItem cur = currentPlayer.getCurrentMediaItem();
+                    if (cur != null && cur.localConfiguration != null && cur.localConfiguration.uri != null) {
+                        same = url.equals(cur.localConfiguration.uri.toString());
+                    }
+                }
+                if (same) {
+                    if (REPLAY_ON_REVISIT) currentPlayer.seekTo(0);
+                    currentPlayer.setPlayWhenReady(true);
+                } else {
+                    currentPlayer.stop();
+                    currentPlayer.clearMediaItems();
+                    currentPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(url)), /*resetPosition=*/true);
+                    currentPlayer.prepare();
+                    currentPlayer.setPlayWhenReady(true);
                 }
             }
-            if (same) {
-                if (REPLAY_ON_REVISIT) currentPlayer.seekTo(0);
-                currentPlayer.setPlayWhenReady(true);
-            } else {
-                currentPlayer.stop();
-                currentPlayer.clearMediaItems();
-                currentPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(url)), /*resetPosition=*/true);
-                currentPlayer.prepare();
-                currentPlayer.setPlayWhenReady(true);
-            }
+
+            // 3) Cập nhật UI holder mới
+            int previous = currentPlayingPosition;
+            currentPlayingPosition = position;
+
+            if (previous != RecyclerView.NO_POSITION) notifyItemChanged(previous);
+            notifyItemChanged(position);
+
+            // 4) Gọi preload vòng quanh
+            preloadAround(position);
+        } catch (Exception e) {
+            android.util.Log.e("VideoAdapter", "Error playing video at position " + position, e);
         }
-
-        // 3) Cập nhật UI holder mới
-        int previous = currentPlayingPosition;
-        currentPlayingPosition = position;
-
-        if (previous != RecyclerView.NO_POSITION) notifyItemChanged(previous);
-        notifyItemChanged(position);
-
-        // 4) Gọi preload vòng quanh
-        preloadAround(position);
     }
 
     /**
@@ -384,13 +401,25 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         for (int i = 1; i <= PRELOAD_AHEAD; i++) {
             int next = anchorPosition + i;
             if (next < getItemCount() && !preloadedPlayers.containsKey(next)) {
-                String url = getVideoUrl(videos.get(next));
-                preloadedPlayers.put(next, createPreloadPlayer(url));
+                try {
+                    String url = getVideoUrl(videos.get(next));
+                    if (url != null && !url.isEmpty()) {
+                        preloadedPlayers.put(next, createPreloadPlayer(url));
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("VideoAdapter", "Error preloading video at position " + next, e);
+                }
             }
             int prev = anchorPosition - i;
             if (prev >= 0 && !preloadedPlayers.containsKey(prev)) {
-                String url = getVideoUrl(videos.get(prev));
-                preloadedPlayers.put(prev, createPreloadPlayer(url));
+                try {
+                    String url = getVideoUrl(videos.get(prev));
+                    if (url != null && !url.isEmpty()) {
+                        preloadedPlayers.put(prev, createPreloadPlayer(url));
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("VideoAdapter", "Error preloading video at position " + prev, e);
+                }
             }
         }
     }
@@ -590,6 +619,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         }
 
         void bindMetadata(ShortVideo video) {
+            if (video == null) {
+                android.util.Log.e("VideoAdapter", "bindMetadata called with null video");
+                return;
+            }
+
             titleTextView.setText(video.getTitle() != null ? video.getTitle() : "");
 
             // Caption + "Xem thêm"

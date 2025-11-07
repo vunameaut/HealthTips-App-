@@ -34,6 +34,7 @@ import com.vhn.doan.data.repository.ReminderRepositoryImpl;
 import com.vhn.doan.utils.UserSessionManager;
 import com.vhn.doan.utils.PermissionHelper;
 import com.vhn.doan.presentation.base.BaseFragment;
+import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 import com.vhn.doan.services.NotificationService;
 import com.vhn.doan.services.ReminderService;
 
@@ -43,7 +44,7 @@ import java.util.List;
 /**
  * Fragment hiển thị danh sách nhắc nhở theo kiến trúc MVP
  */
-public class ReminderFragment extends BaseFragment implements ReminderContract.View {
+public class ReminderFragment extends BaseFragment implements ReminderContract.View, FragmentVisibilityListener {
 
     private ReminderPresenter presenter;
 
@@ -1344,5 +1345,20 @@ public class ReminderFragment extends BaseFragment implements ReminderContract.V
             android.util.Log.e("ReminderFragment", "❌ Lỗi khi tạo test data: " + e.getMessage(), e);
             showError("Lỗi khi tạo dữ liệu test: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void onFragmentVisible() {
+        // Được gọi khi fragment được hiển thị
+        // Tải lại danh sách reminder để cập nhật UI
+        if (presenter != null) {
+            presenter.loadReminders();
+        }
+    }
+
+    @Override
+    public void onFragmentHidden() {
+        // Được gọi khi fragment bị ẩn
+        // Có thể dừng các tác vụ đang chạy nếu cần
     }
 }

@@ -29,12 +29,13 @@ import com.vhn.doan.data.repository.UserRepositoryImpl;
 import com.vhn.doan.presentation.auth.LoginActivity;
 import com.vhn.doan.presentation.settings.SettingsAndPrivacyActivity;
 import com.vhn.doan.presentation.base.BaseFragment;
+import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 
 /**
  * Fragment hiển thị thông tin profile người dùng
  * Tuân thủ kiến trúc MVP pattern với Firebase Authentication
  */
-public class ProfileFragment extends BaseFragment implements ProfileContract.View {
+public class ProfileFragment extends BaseFragment implements ProfileContract.View, FragmentVisibilityListener {
 
     private ProfileContract.Presenter presenter;
     private TextView profileName, profileUsername;
@@ -579,6 +580,47 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
             presenter.refreshUserProfile();
         } else {
             loadUserProfile();
+        }
+    }
+
+    @Override
+    public void onFragmentVisible() {
+        // Được gọi khi fragment được hiển thị
+        // KHÔNG set visibility trực tiếp vì FragmentTransaction đã handle việc này
+        // Việc set visibility ở đây sẽ gây xung đột với FragmentTransaction
+
+        // Đảm bảo ViewPager2 được enable và có thể tương tác
+        if (viewPager != null) {
+            viewPager.setUserInputEnabled(true);
+        }
+
+        // Refresh profile khi fragment được hiển thị
+        if (presenter != null) {
+            presenter.refreshUserProfile();
+        } else {
+            loadUserProfile();
+        }
+    }
+
+    @Override
+    public void onFragmentHidden() {
+        // Được gọi khi fragment bị ẩn
+        // KHÔNG set visibility trực tiếp vì FragmentTransaction đã handle việc này
+
+        // CRITICAL: Vô hiệu hóa ViewPager2 để tránh child fragments vẫn active
+        if (viewPager != null) {
+            viewPager.setUserInputEnabled(false);
+
+            // IMPORTANT: Lưu current item và set về -1 để force detach child fragments
+            // Điều này đảm bảo child fragments (như LikedVideosFragment có video player)
+            // sẽ bị pause và không còn phát media
+            int savedCurrentItem = viewPager.getCurrentItem();
+            android.util.Log.d("ProfileFragment", "🛑 Hiding ProfileFragment - saving position " + savedCurrentItem);
+
+            // Tạm thời lưu position (có thể dùng để restore sau)
+            // viewPager.setCurrentItem(-1, false); // KHÔNG làm điều này vì sẽ gây crash
+
+            // Thay vào đó, chỉ vô hiệu hóa và ViewPager sẽ tự động pause child fragments
         }
     }
 }

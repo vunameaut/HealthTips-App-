@@ -23,13 +23,14 @@ import com.google.android.material.button.MaterialButton;
 import com.vhn.doan.R;
 import com.vhn.doan.data.Conversation;
 import com.vhn.doan.data.repository.ChatRepositoryImpl;
+import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 
 import java.util.List;
 
 /**
  * Fragment hiển thị danh sách các cuộc trò chuyện chat AI
  */
-public class ChatListFragment extends Fragment implements ChatListContract.View {
+public class ChatListFragment extends Fragment implements ChatListContract.View, FragmentVisibilityListener {
 
     private static final String TAG = "ChatListFragment";
 
@@ -418,5 +419,20 @@ public class ChatListFragment extends Fragment implements ChatListContract.View 
         if (presenter != null) {
             presenter.markConversationAsRead(conversation);
         }
+    }
+
+    @Override
+    public void onFragmentVisible() {
+        // Được gọi khi fragment được hiển thị
+        // Load lại dữ liệu nếu cần
+        if (presenter != null) {
+            presenter.loadConversations();
+        }
+    }
+
+    @Override
+    public void onFragmentHidden() {
+        // Được gọi khi fragment bị ẩn
+        // Có thể dừng các tác vụ đang chạy nếu cần
     }
 }

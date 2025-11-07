@@ -222,6 +222,12 @@
     <color name="ripple_gray_color">#40606060</color>
 
     <!-- =============================================== -->
+    <!-- VIDEO LIKE COLORS -->
+    <!-- =============================================== -->
+    <color name="like_color_active">#FF1744</color>
+    <color name="like_color_inactive">#757575</color>
+
+    <!-- =============================================== -->
     <!-- CARD AND SECTION COLORS -->
     <!-- =============================================== -->
     <!-- Colors defined above for light theme -->

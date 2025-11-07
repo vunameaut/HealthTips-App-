@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -79,16 +80,18 @@ public class HomeActivity extends BaseActivity {
 
         // Mặc định hiển thị HomeFragment khi khởi động
         if (savedInstanceState == null) {
+            Log.d(TAG, "🆕 onCreate: NEW ACTIVITY - Initializing fragments");
             initializeFragments();
             showFragment(homeFragment);
         } else {
             // Restore fragments sau configuration change
+            Log.d(TAG, "♻️ onCreate: RECREATING ACTIVITY (theme change/rotation) - Restoring fragments");
             restoreFragments();
         }
     }
 
     /**
-     * Restore fragments sau configuration change (như screen rotation)
+     * Restore fragments sau configuration change (như screen rotation hoặc theme change)
      */
     private void restoreFragments() {
         homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("HOME");
@@ -103,7 +106,7 @@ public class HomeActivity extends BaseActivity {
                 ", Video: " + (videoFragment != null) +
                 ", Profile: " + (profileFragment != null));
 
-        // Tìm fragment hiện tại đang visible và ensure tất cả fragments khác bị ẩn
+        // Tìm fragment hiện tại đang visible
         currentFragment = null;
         int selectedItemId = R.id.nav_home; // default
 
@@ -135,6 +138,105 @@ public class HomeActivity extends BaseActivity {
             selectedItemId = R.id.nav_home;
         }
 
+        // CRITICAL FIX: LUÔN LUÔN hide tất cả fragments trước, sau đó chỉ show currentFragment
+        // Điều này đảm bảo chỉ có 1 fragment visible sau khi recreate
+        androidx.fragment.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        // BƯỚC 1: Hide TẤT CẢ fragments (không quan tâm trạng thái hiện tại)
+        if (homeFragment != null) {
+            transaction.hide(homeFragment);
+            Log.d(TAG, "🔒 Hiding HomeFragment");
+        }
+        if (chatListFragment != null) {
+            transaction.hide(chatListFragment);
+            Log.d(TAG, "🔒 Hiding ChatListFragment");
+        }
+        if (reminderFragment != null) {
+            transaction.hide(reminderFragment);
+            Log.d(TAG, "🔒 Hiding ReminderFragment");
+        }
+        if (videoFragment != null) {
+            transaction.hide(videoFragment);
+            Log.d(TAG, "🔒 Hiding VideoFragment");
+        }
+        if (profileFragment != null) {
+            transaction.hide(profileFragment);
+            Log.d(TAG, "🔒 Hiding ProfileFragment");
+        }
+
+        // BƯỚC 2: Chỉ show currentFragment
+        if (currentFragment != null) {
+            transaction.show(currentFragment);
+            Log.d(TAG, "🔓 Showing ONLY " + currentFragment.getClass().getSimpleName());
+        }
+
+        // Commit ngay lập tức
+        transaction.commitNow();
+        Log.d(TAG, "✅ Fragment visibility forcefully corrected - ONLY 1 visible");
+
+        // BƯỚC 2.5: FORCE set View visibility để đảm bảo UI không bị chồng lên nhau
+        // Điều này rất quan trọng vì FragmentTransaction hide/show có thể không đủ
+        if (homeFragment != null && homeFragment.getView() != null) {
+            homeFragment.getView().setVisibility(homeFragment == currentFragment ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "🎨 HomeFragment View: " + (homeFragment == currentFragment ? "VISIBLE" : "GONE"));
+        }
+        if (chatListFragment != null && chatListFragment.getView() != null) {
+            chatListFragment.getView().setVisibility(chatListFragment == currentFragment ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "🎨 ChatListFragment View: " + (chatListFragment == currentFragment ? "VISIBLE" : "GONE"));
+        }
+        if (reminderFragment != null && reminderFragment.getView() != null) {
+            reminderFragment.getView().setVisibility(reminderFragment == currentFragment ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "🎨 ReminderFragment View: " + (reminderFragment == currentFragment ? "VISIBLE" : "GONE"));
+        }
+        if (videoFragment != null && videoFragment.getView() != null) {
+            videoFragment.getView().setVisibility(videoFragment == currentFragment ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "🎨 VideoFragment View: " + (videoFragment == currentFragment ? "VISIBLE" : "GONE"));
+        }
+        if (profileFragment != null && profileFragment.getView() != null) {
+            profileFragment.getView().setVisibility(profileFragment == currentFragment ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "🎨 ProfileFragment View: " + (profileFragment == currentFragment ? "VISIBLE" : "GONE"));
+        }
+
+        // BƯỚC 3: Notify tất cả fragments về trạng thái của chúng
+        if (homeFragment != null) {
+            if (homeFragment == currentFragment) {
+                notifyFragmentVisible(homeFragment);
+            } else {
+                notifyFragmentHidden(homeFragment);
+            }
+        }
+        if (chatListFragment != null) {
+            if (chatListFragment == currentFragment) {
+                notifyFragmentVisible(chatListFragment);
+            } else {
+                notifyFragmentHidden(chatListFragment);
+            }
+        }
+        if (reminderFragment != null) {
+            if (reminderFragment == currentFragment) {
+                notifyFragmentVisible(reminderFragment);
+            } else {
+                notifyFragmentHidden(reminderFragment);
+            }
+        }
+        if (videoFragment != null) {
+            if (videoFragment == currentFragment) {
+                notifyFragmentVisible(videoFragment);
+            } else {
+                notifyFragmentHidden(videoFragment);
+            }
+        }
+        if (profileFragment != null) {
+            if (profileFragment == currentFragment) {
+                notifyFragmentVisible(profileFragment);
+            } else {
+                notifyFragmentHidden(profileFragment);
+            }
+        }
+
+        // Mark current fragment as shown để update flags
+        markFragmentAsShown(currentFragment);
+
         // Post to make sure UI is ready
         final int finalSelectedId = selectedItemId;
         bottomNavigationView.post(() -> {
@@ -142,7 +244,7 @@ public class HomeActivity extends BaseActivity {
             Log.d(TAG, "🎯 Bottom nav synced to: " + finalSelectedId);
         });
 
-        Log.d(TAG, "Fragments restored. Current: " +
+        Log.d(TAG, "✅ Fragments restored. Current: " +
             (currentFragment != null ? currentFragment.getClass().getSimpleName() : "null"));
     }
 
@@ -268,6 +370,17 @@ public class HomeActivity extends BaseActivity {
 
             Fragment previousFragment = currentFragment;
             currentFragment = fragment;
+
+            // CRITICAL: Force set View visibility để đảm bảo UI thực sự được update
+            // Đây là lớp bảo vệ thêm để đảm bảo không có fragment nào bị chồng lên nhau
+            if (previousFragment != null && previousFragment.getView() != null) {
+                previousFragment.getView().setVisibility(android.view.View.GONE);
+                Log.d(TAG, "  🎨 Previous fragment View set to GONE: " + previousFragment.getClass().getSimpleName());
+            }
+            if (fragment.getView() != null) {
+                fragment.getView().setVisibility(android.view.View.VISIBLE);
+                Log.d(TAG, "  🎨 Current fragment View set to VISIBLE: " + fragment.getClass().getSimpleName());
+            }
 
             // Đánh dấu fragment đã được show lần đầu và thông báo
             markFragmentAsShown(fragment);

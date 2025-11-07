@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="#000000">
 
     <!-- Video RecyclerView (Vertical Scrolling) -->
     <androidx.recyclerview.widget.RecyclerView
@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/loading_videos_text"
-                android:textColor="@android:color/white"
+                android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:layout_marginBottom="16dp"
                 android:shadowColor="#80000000"
@@ -75,14 +75,13 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:src="@drawable/ic_video_off"
-            android:tint="@android:color/white"
             android:alpha="0.6" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/no_videos_title"
-            android:textColor="@android:color/white"
+            android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp" />
@@ -91,7 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/no_videos_desc"
-            android:textColor="@android:color/white"
+            android:textColor="#FFFFFF"
             android:textSize="14sp"
             android:alpha="0.8"
             android:gravity="center"
@@ -103,7 +102,7 @@
             android:layout_height="wrap_content"
             android:text="@string/try_again_action"
             android:backgroundTint="@color/primary_color"
-            android:textColor="@android:color/white"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="24dp" />
 
     </LinearLayout>
