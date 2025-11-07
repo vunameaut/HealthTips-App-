@@ -240,22 +240,18 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
                         // Apply theme
                         AppCompatDelegate.setDefaultNightMode(nightMode);
 
-                        // Fade in mượt mà
+                        // Đợi một chút để theme được set, sau đó recreate Activity
                         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                             if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
-                                rootView.animate()
-                                    .alpha(1f)
-                                    .setDuration(250)
-                                    .setInterpolator(new android.view.animation.AccelerateInterpolator())
-                                    .withEndAction(() -> {
-                                        // Hiển thị thông báo sau khi chuyển xong
-                                        if (getContext() != null) {
-                                            Toast.makeText(getContext(), toastMessage, Toast.LENGTH_SHORT).show();
-                                        }
-                                    })
-                                    .start();
+                                // Recreate Activity để áp dụng theme
+                                getActivity().recreate();
+
+                                // Hiển thị thông báo
+                                if (getContext() != null) {
+                                    Toast.makeText(getContext(), toastMessage, Toast.LENGTH_SHORT).show();
+                                }
                             }
-                        }, 50);
+                        }, 150);
                     })
                     .start();
             }

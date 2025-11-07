@@ -95,7 +95,16 @@ public class DisplaySettingsActivity extends BaseActivity {
             }
 
             preferences.edit().putString("theme_mode", themeMode).apply();
+
+            // Áp dụng theme và recreate activity để UI cập nhật
             AppCompatDelegate.setDefaultNightMode(nightMode);
+
+            // Đợi một chút để theme được set, sau đó recreate
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (!isFinishing()) {
+                    recreate();
+                }
+            }, 100);
         });
 
         // Font size seekbar

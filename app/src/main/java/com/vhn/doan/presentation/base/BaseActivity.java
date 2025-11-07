@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -85,6 +84,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
             networkSnackbar.dismiss();
         }
     }
+
 
     /**
      * Áp dụng theme mode từ SharedPreferences
