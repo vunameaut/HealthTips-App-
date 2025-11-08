@@ -15,7 +15,8 @@
       "Bash(dir /b \"D:\\app\\HealthTips-App-\\app\\src\\main\\res\\layout\")",
       "Bash(findstr:*)",
       "Bash(\"D:\\app\\HealthTips-App-\\gradlew.bat\" clean assembleDebug)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(test -f \"D:\\app\\HealthTips-App-\\nul\")"
     ],
     "deny": [],
     "ask": []
