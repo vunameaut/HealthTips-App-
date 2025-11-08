@@ -245,9 +245,20 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
             String title = healthTip.getTitle();
             titleTextView.setText(title != null ? title : "Không có tiêu đề");
 
-            // Thiết lập tóm tắt - sử dụng getContent() thay vì getSummary() và kiểm tra null
-            String content = healthTip.getContent();
-            summaryTextView.setText(content != null ? content : "Không có nội dung");
+            // Thiết lập tóm tắt - ưu tiên sử dụng excerpt, nếu không có thì dùng content
+            String summary = healthTip.getExcerpt();
+
+            // Nếu không có excerpt, fallback về content
+            if (summary == null || summary.isEmpty()) {
+                summary = healthTip.getContent();
+                // Cắt nội dung nếu quá dài
+                if (summary != null && summary.length() > 100) {
+                    summary = summary.substring(0, 100) + "...";
+                }
+            }
+
+            // Hiển thị tóm tắt hoặc placeholder
+            summaryTextView.setText(summary != null && !summary.isEmpty() ? summary : "Không có mô tả");
 
             // Thiết lập ngày - kiểm tra createdAt > 0 thay vì != null vì là primitive long
             if (healthTip.getCreatedAt() > 0) {

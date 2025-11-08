@@ -19,17 +19,18 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/home_header_gradient"
-            android:paddingTop="16dp"
-            android:paddingBottom="24dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp">
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            app:layout_scrollFlags="scroll|enterAlways|snap">
 
             <!-- Header với App Name và Search -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layoutHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="8dp">
+                android:paddingBottom="4dp">
 
                 <TextView
                     android:id="@+id/textViewAppName"
@@ -37,7 +38,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
                     android:textColor="@android:color/white"
-                    android:textSize="28sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -62,9 +63,9 @@
                 android:layout_height="wrap_content"
                 android:text="Khám phá mẹo sức khỏe hữu ích"
                 android:textColor="@android:color/white"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 android:alpha="0.9"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 

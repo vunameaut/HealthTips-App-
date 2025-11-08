@@ -91,11 +91,13 @@ public class ChatListPresenter implements ChatListContract.Presenter {
                             view.showLoadMoreButton(false);
                         } else {
                             view.hideEmptyState();
-                            view.showConversations(conversations);
 
                             // Cập nhật state cho phân trang
                             conversationsList.clear();
                             conversationsList.addAll(conversations);
+
+                            // Sắp xếp: pinned lên đầu, sau đó theo thời gian
+                            sortConversationsWithPinnedFirst();
 
                             if (!conversations.isEmpty()) {
                                 lastConversationTime = conversations.get(conversations.size() - 1).getLastMessageTime();
@@ -151,10 +153,12 @@ public class ChatListPresenter implements ChatListContract.Presenter {
                         view.hideLoadingMore();
 
                         if (conversations != null && !conversations.isEmpty()) {
-                            view.addMoreConversations(conversations);
-
                             // Cập nhật state
                             conversationsList.addAll(conversations);
+
+                            // Sắp xếp: pinned lên đầu, sau đó theo thời gian
+                            sortConversationsWithPinnedFirst();
+
                             lastConversationTime = conversations.get(conversations.size() - 1).getLastMessageTime();
 
                             // Kiểm tra xem còn thêm cuộc trò chuyện không
@@ -564,15 +568,19 @@ public class ChatListPresenter implements ChatListContract.Presenter {
 
     /**
      * Sắp xếp danh sách cuộc trò chuyện với các cuộc trò chuyện được ghim lên đầu
+     * Trong mỗi nhóm (pinned và non-pinned), sắp xếp theo thời gian tin nhắn cuối (mới nhất lên đầu)
      */
     private void sortConversationsWithPinnedFirst() {
         conversationsList.sort((c1, c2) -> {
+            // Ưu tiên: Pinned conversations lên đầu
             if (c1.isPinned() && !c2.isPinned()) {
-                return -1;
+                return -1; // c1 (pinned) lên trước c2 (not pinned)
             } else if (!c1.isPinned() && c2.isPinned()) {
-                return 1;
+                return 1; // c2 (pinned) lên trước c1 (not pinned)
             } else {
-                return 0;
+                // Cả hai cùng trạng thái pinned hoặc cùng không pinned
+                // Sắp xếp theo thời gian tin nhắn cuối cùng (mới nhất lên đầu)
+                return Long.compare(c2.getLastMessageTime(), c1.getLastMessageTime());
             }
         });
 
