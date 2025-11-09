@@ -34,6 +34,9 @@ public class ShortVideoDeserializer {
             video.setCldPublicId(getStringValue(snapshot, "cldPublicId", ""));
             video.setStatus(getStringValue(snapshot, "status", "ready"));
 
+            // 🎯 FIX: Parse videoUrl để hỗ trợ offline mode
+            video.setVideoUrl(getStringValue(snapshot, "videoUrl", null));
+
             // Parse thumbnail fields từ Firebase
             video.setThumbnailUrl(getStringValue(snapshot, "thumbnailUrl", ""));
             video.setThumb(getStringValue(snapshot, "thumb", "")); // Thêm parse field thumb

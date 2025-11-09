@@ -50,10 +50,23 @@ public interface HealthTipDao {
     LiveData<List<HealthTipEntity>> getAllHealthTips();
 
     /**
+     * Lấy tất cả health tips (synchronous - không phải LiveData)
+     * Dùng cho offline-first strategy
+     */
+    @Query("SELECT * FROM health_tips ORDER BY created_at DESC")
+    List<HealthTipEntity> getAllHealthTipsSync();
+
+    /**
      * Lấy health tips theo category
      */
     @Query("SELECT * FROM health_tips WHERE category_id = :categoryId ORDER BY created_at DESC")
     LiveData<List<HealthTipEntity>> getHealthTipsByCategory(String categoryId);
+
+    /**
+     * Lấy health tips theo category (synchronous)
+     */
+    @Query("SELECT * FROM health_tips WHERE category_id = :categoryId ORDER BY created_at DESC")
+    List<HealthTipEntity> getHealthTipsByCategorySync(String categoryId);
 
     /**
      * Lấy health tips được recommend (sorted by score)
@@ -78,6 +91,18 @@ public interface HealthTipDao {
      */
     @Query("SELECT * FROM health_tips ORDER BY view_count DESC LIMIT :limit")
     LiveData<List<HealthTipEntity>> getMostViewedHealthTips(int limit);
+
+    /**
+     * Lấy health tips xem nhiều nhất (synchronous)
+     */
+    @Query("SELECT * FROM health_tips ORDER BY view_count DESC LIMIT :limit")
+    List<HealthTipEntity> getMostViewedHealthTipsSync(int limit);
+
+    /**
+     * Lấy health tips mới nhất (synchronous)
+     */
+    @Query("SELECT * FROM health_tips ORDER BY created_at DESC LIMIT :limit")
+    List<HealthTipEntity> getLatestHealthTipsSync(int limit);
 
     /**
      * Lấy health tips thích nhiều nhất
@@ -145,4 +170,25 @@ public interface HealthTipDao {
      */
     @Query("UPDATE health_tips SET like_count = :likeCount WHERE id = :id")
     void updateLikeCount(String id, int likeCount);
+
+    /**
+     * Đếm số lượng health tips trong cache (synchronous)
+     * Dùng cho CacheManager
+     */
+    @Query("SELECT COUNT(*) FROM health_tips")
+    int getHealthTipCountSync();
+
+    /**
+     * Xóa N items cũ nhất (LRU cleanup)
+     * Sử dụng cached_at để xác định items cũ nhất
+     */
+    @Query("DELETE FROM health_tips WHERE id IN (SELECT id FROM health_tips ORDER BY cached_at ASC LIMIT :count)")
+    void deleteOldestItems(int count);
+
+    /**
+     * Update cached_at timestamp (cho LRU tracking)
+     * Gọi khi user xem/access một tip
+     */
+    @Query("UPDATE health_tips SET cached_at = :timestamp WHERE id = :id")
+    void updateCachedAt(String id, long timestamp);
 }

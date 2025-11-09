@@ -57,7 +57,7 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
     public HealthTipAdapter(Context context, HealthTipClickListener listener) {
         this.context = context;
         this.listener = listener;
-        this.favoriteRepository = new FavoriteRepositoryImpl();
+        this.favoriteRepository = new FavoriteRepositoryImpl(context);
         this.firebaseAuth = FirebaseAuth.getInstance();
         this.favoriteHealthTipIds = new HashSet<>();
 

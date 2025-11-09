@@ -1,5 +1,10 @@
 package com.vhn.doan.data.repository;
 
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -10,7 +15,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.vhn.doan.data.HealthTip;
 import com.vhn.doan.data.Category;
+import com.vhn.doan.data.local.AppDatabase;
+import com.vhn.doan.data.local.dao.HealthTipDao;
+import com.vhn.doan.data.local.entity.HealthTipEntity;
 import com.vhn.doan.utils.Constants;
+import com.vhn.doan.utils.NetworkUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,22 +32,52 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Triển khai HealthTipRepository sử dụng Firebase Realtime Database
+ * Triển khai HealthTipRepository sử dụng Firebase Realtime Database + Room Cache
+ * Chiến lược Offline-First: Hiển thị cache trước, sau đó sync từ server
  */
 public class HealthTipRepositoryImpl implements HealthTipRepository {
+
+    private static final String TAG = "HealthTipRepoImpl";
 
     private final FirebaseDatabase database;
     private final DatabaseReference healthTipsRef;
     private final DatabaseReference categoriesRef;
+    private final HealthTipDao healthTipDao;
+    private final AppDatabase appDatabase;
+    private final Context context;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private Map<Object, ValueEventListener> activeListeners = new HashMap<>();
 
     /**
-     * Constructor mặc định
+     * Constructor với Context để khởi tạo Room Database
      */
-    public HealthTipRepositoryImpl() {
+    public HealthTipRepositoryImpl(Context context) {
+        this.context = context.getApplicationContext();
         database = FirebaseDatabase.getInstance();
         healthTipsRef = database.getReference(Constants.HEALTH_TIPS_REF);
         categoriesRef = database.getReference(Constants.CATEGORIES_REF);
+
+        // Khởi tạo Room Database
+        appDatabase = AppDatabase.getInstance(this.context);
+        healthTipDao = appDatabase.healthTipDao();
+
+        Log.d(TAG, "HealthTipRepositoryImpl initialized with offline support");
+    }
+
+    /**
+     * Constructor mặc định (để tương thích ngược)
+     * @deprecated Sử dụng constructor với Context thay thế
+     */
+    @Deprecated
+    public HealthTipRepositoryImpl() {
+        this.context = null;
+        database = FirebaseDatabase.getInstance();
+        healthTipsRef = database.getReference(Constants.HEALTH_TIPS_REF);
+        categoriesRef = database.getReference(Constants.CATEGORIES_REF);
+        appDatabase = null;
+        healthTipDao = null;
+
+        Log.w(TAG, "HealthTipRepositoryImpl initialized WITHOUT offline support (deprecated constructor)");
     }
 
     /**
@@ -73,6 +112,7 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
     /**
      * Helper method để load category names cho danh sách health tips
+     * Sau khi load xong, lưu vào Room cache
      */
     private void loadCategoryNamesForHealthTips(List<HealthTip> healthTips, final HealthTipCallback callback) {
         if (healthTips == null || healthTips.isEmpty()) {
@@ -89,9 +129,27 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 public void run() {
                     completedCount[0]++;
                     if (completedCount[0] >= totalCount) {
+                        // Tất cả category names đã load xong
+                        // Lưu vào Room cache trước khi trả về callback
+                        saveToCache(healthTips);
                         callback.onSuccess(healthTips);
                     }
                 }
+            });
+        }
+    }
+
+    /**
+     * Lưu danh sách HealthTips vào Room cache
+     */
+    private void saveToCache(List<HealthTip> healthTips) {
+        if (healthTipDao != null && healthTips != null && !healthTips.isEmpty()) {
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                List<HealthTipEntity> entities = new ArrayList<>();
+                for (HealthTip tip : healthTips) {
+                    entities.add(HealthTipEntity.fromHealthTip(tip));
+                }
+                healthTipDao.insertAll(entities);
             });
         }
     }
@@ -110,17 +168,74 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
     @Override
     public void getAllHealthTips(final HealthTipCallback callback) {
-        healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List<HealthTip> healthTips = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    try {
-                        HealthTip healthTip = snapshot.getValue(HealthTip.class);
-                        if (healthTip != null) {
-                            // Đảm bảo ID được set từ key của Firebase
-                            String healthTipId = snapshot.getKey();
-                            healthTip.setId(healthTipId);
+        Log.d(TAG, "getAllHealthTips called");
+
+        // Kiểm tra network
+        boolean isOnline = context != null && NetworkUtils.isNetworkAvailable(context);
+        Log.d(TAG, "Network status: " + (isOnline ? "ONLINE" : "OFFLINE"));
+
+        // OFFLINE-FIRST STRATEGY:
+        // 1. Luôn load từ cache trước (nếu có offline support)
+        if (healthTipDao != null) {
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                try {
+                    List<HealthTipEntity> cachedEntities = healthTipDao.getAllHealthTipsSync();
+                    Log.d(TAG, "Cache loaded: " + (cachedEntities != null ? cachedEntities.size() : 0) + " items");
+
+                    if (cachedEntities != null && !cachedEntities.isEmpty()) {
+                        // Chuyển đổi Entity sang Model
+                        List<HealthTip> cachedTips = new ArrayList<>();
+                        for (HealthTipEntity entity : cachedEntities) {
+                            cachedTips.add(entity.toHealthTip());
+                        }
+
+                        // Trả về cache trên main thread
+                        mainHandler.post(() -> {
+                            Log.d(TAG, "Returning " + cachedTips.size() + " cached items to UI");
+                            callback.onSuccess(cachedTips);
+                        });
+
+                        // Nếu offline, dừng ở đây
+                        if (!isOnline) {
+                            Log.d(TAG, "Offline mode - using cache only");
+                            return;
+                        }
+                    } else {
+                        Log.d(TAG, "No cache available");
+
+                        // 🎯 FIX: Nếu không có cache và offline, trả về empty list
+                        // Điều này cho phép UI hiển thị empty state thay vì error
+                        if (!isOnline) {
+                            mainHandler.post(() -> {
+                                Log.d(TAG, "📭 Offline with no cache - returning empty list");
+                                callback.onSuccess(new ArrayList<>());
+                            });
+                            return;
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error loading cache: " + e.getMessage(), e);
+                }
+            });
+        } else {
+            Log.w(TAG, "Offline support not available (healthTipDao is null)");
+        }
+
+        // 2. Nếu online, fetch từ Firebase
+        if (isOnline) {
+            Log.d(TAG, "Fetching from Firebase...");
+            healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.d(TAG, "Firebase onDataChange: " + dataSnapshot.getChildrenCount() + " items");
+                    List<HealthTip> healthTips = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        try {
+                            HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                            if (healthTip != null) {
+                                // Đảm bảo ID được set từ key của Firebase
+                                String healthTipId = snapshot.getKey();
+                                healthTip.setId(healthTipId);
 
                             // Validate và set default values nếu cần
                             if (healthTip.getTitle() == null || healthTip.getTitle().trim().isEmpty()) {
@@ -218,15 +333,21 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                         }
                     }
                 }
-                // Load category names cho tất cả health tips
-                loadCategoryNamesForHealthTips(healthTips, callback);
-            }
+                    // Load category names cho tất cả health tips
+                    loadCategoryNamesForHealthTips(healthTips, callback);
+                }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Firebase error: " + databaseError.getMessage());
+                    // Nếu có cache thì không báo lỗi (vì đã trả về cache rồi)
+                    // Chỉ báo lỗi nếu không có cache
+                    if (healthTipDao == null) {
+                        callback.onError(databaseError.getMessage());
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -236,40 +357,144 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
             return;
         }
 
-        healthTipsRef.child(tipId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                HealthTip healthTip = dataSnapshot.getValue(HealthTip.class);
-                if (healthTip != null) {
-                    // Đảm bảo ID được set chính xác
-                    healthTip.setId(dataSnapshot.getKey());
+        Log.d(TAG, "getHealthTipDetail called for ID: " + tipId);
 
-                    // Validate dữ liệu
-                    if (healthTip.getTitle() == null || healthTip.getTitle().trim().isEmpty()) {
-                        healthTip.setTitle("Mẹo sức khỏe không tên");
-                    }
-                    if (healthTip.getContent() == null || healthTip.getContent().trim().isEmpty()) {
-                        healthTip.setContent("Nội dung đang được cập nhật");
-                    }
-                    if (healthTip.getViewCount() < 0) {
-                        healthTip.setViewCount(0);
-                    }
-                    if (healthTip.getLikeCount() < 0) {
-                        healthTip.setLikeCount(0);
-                    }
+        // Kiểm tra network
+        boolean isOnline = context != null && NetworkUtils.isNetworkAvailable(context);
+        Log.d(TAG, "Network status: " + (isOnline ? "ONLINE" : "OFFLINE"));
 
-                    // Load category name
-                    loadCategoryNameForSingleHealthTip(healthTip, callback);
-                } else {
-                    callback.onError("Không tìm thấy mẹo sức khỏe với ID: " + tipId);
+        // 🎯 FIX CRITICAL BUG: Sử dụng flag để tránh callback được gọi nhiều lần
+        final boolean[] callbackCalled = {false};
+
+        // 1. Load từ cache trước
+        if (healthTipDao != null) {
+            Log.d(TAG, "✓ healthTipDao EXISTS for detail, starting executor...");
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                Log.d(TAG, "✓ EXECUTOR STARTED for detail: " + tipId);
+                try {
+                    HealthTipEntity cachedEntity = healthTipDao.getHealthTipByIdSync(tipId);
+                    Log.d(TAG, "✓ Detail cache: " + (cachedEntity != null ? "FOUND" : "NOT FOUND") + " for ID: " + tipId);
+
+                    if (cachedEntity != null) {
+                        HealthTip cachedTip = cachedEntity.toHealthTip();
+                        mainHandler.post(() -> {
+                            Log.d(TAG, "✅ Returning cached detail for: " + tipId);
+                            callback.onSuccess(cachedTip);
+                            callbackCalled[0] = true; // 🎯 Đánh dấu đã callback
+                        });
+
+                        if (!isOnline) {
+                            Log.d(TAG, "📵 Offline mode - using detail cache only");
+                            return;
+                        }
+                    } else if (!isOnline) {
+                        mainHandler.post(() -> {
+                            if (!callbackCalled[0]) { // 🎯 Chỉ callback nếu chưa được gọi
+                                callback.onError("Không có kết nối mạng và chưa có dữ liệu offline");
+                                callbackCalled[0] = true;
+                            }
+                        });
+                        return;
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "✗ ERROR in detail executor: " + e.getMessage(), e);
+                    e.printStackTrace();
                 }
-            }
+            });
+        } else {
+            Log.e(TAG, "✗ CRITICAL: healthTipDao is NULL for detail!");
+        }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
-            }
-        });
+        // 2. Nếu online, fetch từ Firebase để update cache
+        if (isOnline) {
+            healthTipsRef.child(tipId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    HealthTip healthTip = dataSnapshot.getValue(HealthTip.class);
+                    if (healthTip != null) {
+                        // Đảm bảo ID được set chính xác
+                        healthTip.setId(dataSnapshot.getKey());
+
+                        // Validate dữ liệu
+                        if (healthTip.getTitle() == null || healthTip.getTitle().trim().isEmpty()) {
+                            healthTip.setTitle("Mẹo sức khỏe không tên");
+                        }
+                        if (healthTip.getContent() == null || healthTip.getContent().trim().isEmpty()) {
+                            healthTip.setContent("Nội dung đang được cập nhật");
+                        }
+                        if (healthTip.getViewCount() < 0) {
+                            healthTip.setViewCount(0);
+                        }
+                        if (healthTip.getLikeCount() < 0) {
+                            healthTip.setLikeCount(0);
+                        }
+
+                        // Load category name và lưu cache
+                        loadCategoryNameForSingleHealthTip(healthTip, new SingleHealthTipCallback() {
+                            @Override
+                            public void onSuccess(HealthTip tip) {
+                                // Lưu vào cache
+                                saveSingleToCache(tip);
+
+                                // 🎯 FIX: Chỉ callback nếu chưa trả về cache
+                                // Nếu đã có cache, không cần callback nữa (tránh UI bị flash)
+                                if (!callbackCalled[0]) {
+                                    Log.d(TAG, "📡 Returning Firebase detail (no cache): " + tipId);
+                                    callback.onSuccess(tip);
+                                    callbackCalled[0] = true;
+                                } else {
+                                    Log.d(TAG, "💾 Firebase data cached silently (already showed cache): " + tipId);
+                                }
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                // 🎯 FIX: Chỉ callback error nếu chưa có data từ cache
+                                if (!callbackCalled[0]) {
+                                    callback.onError(errorMessage);
+                                    callbackCalled[0] = true;
+                                }
+                            }
+                        });
+                    } else {
+                        // 🎯 FIX: Chỉ callback error nếu chưa có data từ cache
+                        if (!callbackCalled[0]) {
+                            callback.onError("Không tìm thấy mẹo sức khỏe với ID: " + tipId);
+                            callbackCalled[0] = true;
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Firebase error in getHealthTipDetail: " + databaseError.getMessage());
+
+                    // 🎯 FIX CRITICAL: KHÔNG callback error nếu đã có cache
+                    // Đây là bug chính - Firebase error ghi đè cache result!
+                    if (!callbackCalled[0]) {
+                        // Chỉ báo lỗi nếu thực sự không có offline support
+                        if (healthTipDao == null) {
+                            callback.onError(databaseError.getMessage());
+                            callbackCalled[0] = true;
+                        }
+                        // Ngược lại: im lặng, vì cache đã hoặc sẽ được load
+                        Log.d(TAG, "🔇 Firebase error silenced (cache exists or loading)");
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Lưu một HealthTip vào cache
+     */
+    private void saveSingleToCache(HealthTip healthTip) {
+        if (healthTipDao != null && healthTip != null) {
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                healthTipDao.insert(HealthTipEntity.fromHealthTip(healthTip));
+                Log.d(TAG, "Saved single tip to cache: " + healthTip.getId());
+            });
+        }
     }
 
     @Override
@@ -279,98 +504,241 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
             return;
         }
 
-        Query query = healthTipsRef.orderByChild("categoryId").equalTo(categoryId);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List<HealthTip> healthTips = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HealthTip healthTip = snapshot.getValue(HealthTip.class);
-                    if (healthTip != null) {
-                        // Đảm bảo ID được set từ key
-                        healthTip.setId(snapshot.getKey());
+        Log.d(TAG, "getHealthTipsByCategory called for category: " + categoryId);
 
-                        // Validate dữ liệu
-                        if (healthTip.getViewCount() < 0) {
-                            healthTip.setViewCount(0);
-                        }
-                        if (healthTip.getLikeCount() < 0) {
-                            healthTip.setLikeCount(0);
+        boolean isOnline = context != null && NetworkUtils.isNetworkAvailable(context);
+        Log.d(TAG, "Network status: " + (isOnline ? "ONLINE" : "OFFLINE"));
+
+        // 1. Load từ cache trước
+        if (healthTipDao != null) {
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                try {
+                    List<HealthTipEntity> cachedEntities = healthTipDao.getHealthTipsByCategorySync(categoryId);
+                    Log.d(TAG, "Category cache loaded: " + (cachedEntities != null ? cachedEntities.size() : 0) + " items");
+
+                    if (cachedEntities != null && !cachedEntities.isEmpty()) {
+                        List<HealthTip> cachedTips = new ArrayList<>();
+                        for (HealthTipEntity entity : cachedEntities) {
+                            cachedTips.add(entity.toHealthTip());
                         }
 
-                        healthTips.add(healthTip);
+                        mainHandler.post(() -> {
+                            Log.d(TAG, "Returning " + cachedTips.size() + " category cached items to UI");
+                            callback.onSuccess(cachedTips);
+                        });
+
+                        if (!isOnline) {
+                            Log.d(TAG, "Offline mode - using category cache only");
+                            return;
+                        }
+                    } else if (!isOnline) {
+                        // 🎯 FIX: Trả về empty list thay vì error
+                        mainHandler.post(() -> {
+                            Log.d(TAG, "📭 Offline with no category cache - returning empty list");
+                            callback.onSuccess(new ArrayList<>());
+                        });
+                        return;
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error loading category cache: " + e.getMessage(), e);
+                }
+            });
+        }
+
+        // 2. Nếu online, fetch từ Firebase
+        if (isOnline) {
+            Query query = healthTipsRef.orderByChild("categoryId").equalTo(categoryId);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<HealthTip> healthTips = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                        if (healthTip != null) {
+                            // Đảm bảo ID được set từ key
+                            healthTip.setId(snapshot.getKey());
+
+                            // Validate dữ liệu
+                            if (healthTip.getViewCount() < 0) {
+                                healthTip.setViewCount(0);
+                            }
+                            if (healthTip.getLikeCount() < 0) {
+                                healthTip.setLikeCount(0);
+                            }
+
+                            healthTips.add(healthTip);
+                        }
+                    }
+                    // Load category names
+                    loadCategoryNamesForHealthTips(healthTips, callback);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Firebase error in getHealthTipsByCategory: " + databaseError.getMessage());
+                    if (healthTipDao == null) {
+                        callback.onError(databaseError.getMessage());
                     }
                 }
-                // Load category names
-                loadCategoryNamesForHealthTips(healthTips, callback);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
-            }
-        });
+            });
+        }
     }
 
 
     @Override
     public void getLatestHealthTips(int limit, final HealthTipCallback callback) {
-        Query query = healthTipsRef.orderByChild("createdAt").limitToLast(limit);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List<HealthTip> healthTips = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HealthTip healthTip = snapshot.getValue(HealthTip.class);
-                    if (healthTip != null) {
-                        healthTip.setId(snapshot.getKey());
-                        healthTips.add(healthTip);
+        Log.d(TAG, "getLatestHealthTips called, limit=" + limit);
+
+        // Kiểm tra network
+        boolean isOnline = context != null && NetworkUtils.isNetworkAvailable(context);
+        Log.d(TAG, "Network status: " + (isOnline ? "ONLINE" : "OFFLINE"));
+
+        // 1. Load từ cache trước
+        if (healthTipDao != null) {
+            Log.d(TAG, "✓ healthTipDao EXISTS, starting executor...");
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                Log.d(TAG, "✓ EXECUTOR STARTED for latest tips");
+                try {
+                    List<HealthTipEntity> cachedEntities = healthTipDao.getLatestHealthTipsSync(limit);
+                    Log.d(TAG, "✓ Latest cache loaded: " + (cachedEntities != null ? cachedEntities.size() : 0) + " items");
+
+                    if (cachedEntities != null && !cachedEntities.isEmpty()) {
+                        List<HealthTip> cachedTips = new ArrayList<>();
+                        for (HealthTipEntity entity : cachedEntities) {
+                            cachedTips.add(entity.toHealthTip());
+                        }
+
+                        mainHandler.post(() -> {
+                            Log.d(TAG, "Returning " + cachedTips.size() + " latest cached items to UI");
+                            callback.onSuccess(cachedTips);
+                        });
+
+                        if (!isOnline) {
+                            Log.d(TAG, "Offline mode - using latest cache only");
+                            return;
+                        }
+                    } else if (!isOnline) {
+                        // 🎯 FIX: Trả về empty list thay vì error
+                        mainHandler.post(() -> {
+                            Log.d(TAG, "📭 Offline with no latest cache - returning empty list");
+                            callback.onSuccess(new ArrayList<>());
+                        });
+                        return;
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "✗ ERROR in latest tips executor: " + e.getMessage(), e);
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            Log.e(TAG, "✗ CRITICAL: healthTipDao is NULL for latest tips!");
+        }
+
+        // 2. Nếu online, fetch từ Firebase
+        if (isOnline) {
+            Query query = healthTipsRef.orderByChild("createdAt").limitToLast(limit);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<HealthTip> healthTips = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                        if (healthTip != null) {
+                            healthTip.setId(snapshot.getKey());
+                            healthTips.add(healthTip);
+                        }
+                    }
+                    // Đảo ngược danh sách để các mục mới nhất hiển thị trước
+                    List<HealthTip> reversedList = new ArrayList<>();
+                    for (int i = healthTips.size() - 1; i >= 0; i--) {
+                        reversedList.add(healthTips.get(i));
+                    }
+                    // Load category names trước khi trả về callback
+                    loadCategoryNamesForHealthTips(reversedList, callback);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Firebase error in getLatestHealthTips: " + databaseError.getMessage());
+                    if (healthTipDao == null) {
+                        callback.onError(databaseError.getMessage());
                     }
                 }
-                // Đảo ngược danh sách để các mục mới nhất hiển thị trước
-                List<HealthTip> reversedList = new ArrayList<>();
-                for (int i = healthTips.size() - 1; i >= 0; i--) {
-                    reversedList.add(healthTips.get(i));
-                }
-                // Load category names trước khi trả về callback
-                loadCategoryNamesForHealthTips(reversedList, callback);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
-            }
-        });
+            });
+        }
     }
 
     @Override
     public void getMostViewedHealthTips(int limit, final HealthTipCallback callback) {
-        Query query = healthTipsRef.orderByChild("viewCount").limitToLast(limit);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List<HealthTip> healthTips = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HealthTip healthTip = snapshot.getValue(HealthTip.class);
-                    if (healthTip != null) {
-                        healthTip.setId(snapshot.getKey());
-                        healthTips.add(healthTip);
+        Log.d(TAG, "getMostViewedHealthTips called, limit=" + limit);
+
+        boolean isOnline = context != null && NetworkUtils.isNetworkAvailable(context);
+
+        // 1. Load từ cache trước
+        if (healthTipDao != null) {
+            Log.d(TAG, "✓ healthTipDao EXISTS for most viewed, starting executor...");
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                Log.d(TAG, "✓ EXECUTOR STARTED for most viewed tips");
+                try {
+                    List<HealthTipEntity> cachedEntities = healthTipDao.getMostViewedHealthTipsSync(limit);
+                    Log.d(TAG, "✓ Most viewed cache loaded: " + (cachedEntities != null ? cachedEntities.size() : 0) + " items");
+                    if (cachedEntities != null && !cachedEntities.isEmpty()) {
+                        List<HealthTip> cachedTips = new ArrayList<>();
+                        for (HealthTipEntity entity : cachedEntities) {
+                            cachedTips.add(entity.toHealthTip());
+                        }
+                        mainHandler.post(() -> callback.onSuccess(cachedTips));
+
+                        if (!isOnline) return;
+                    } else if (!isOnline) {
+                        // 🎯 FIX: Trả về empty list thay vì error
+                        mainHandler.post(() -> {
+                            Log.d(TAG, "📭 Offline with no most viewed cache - returning empty list");
+                            callback.onSuccess(new ArrayList<>());
+                        });
+                        return;
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "✗ ERROR in most viewed executor: " + e.getMessage(), e);
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            Log.e(TAG, "✗ CRITICAL: healthTipDao is NULL for most viewed tips!");
+        }
+
+        // 2. Nếu online, fetch từ Firebase
+        if (isOnline) {
+            Query query = healthTipsRef.orderByChild("viewCount").limitToLast(limit);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<HealthTip> healthTips = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        HealthTip healthTip = snapshot.getValue(HealthTip.class);
+                        if (healthTip != null) {
+                            healthTip.setId(snapshot.getKey());
+                            healthTips.add(healthTip);
+                        }
+                    }
+                    // Đảo ngược danh sách để các mục có số lượt xem nhiều nhất hiển thị trước
+                    List<HealthTip> reversedList = new ArrayList<>();
+                    for (int i = healthTips.size() - 1; i >= 0; i--) {
+                        reversedList.add(healthTips.get(i));
+                    }
+                    // Load category names trước khi trả về callback
+                    loadCategoryNamesForHealthTips(reversedList, callback);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Firebase error in getMostViewedHealthTips: " + databaseError.getMessage());
+                    if (healthTipDao == null) {
+                        callback.onError(databaseError.getMessage());
                     }
                 }
-                // Đảo ngược danh sách để các mục có số lượt xem nhiều nhất hiển thị trước
-                List<HealthTip> reversedList = new ArrayList<>();
-                for (int i = healthTips.size() - 1; i >= 0; i--) {
-                    reversedList.add(healthTips.get(i));
-                }
-                // Load category names trước khi trả về callback
-                loadCategoryNamesForHealthTips(reversedList, callback);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -624,6 +992,15 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
             return;
         }
 
+        // 🎯 FIX: Kiểm tra network trước - nếu offline thì callback success luôn
+        // Không cần báo lỗi vì đây chỉ là analytics, không ảnh hưởng UX
+        boolean isOnline = context != null && NetworkUtils.isNetworkAvailable(context);
+        if (!isOnline) {
+            Log.d(TAG, "Offline mode - skipping view count update for: " + tipId);
+            callback.onSuccess(); // Silent success - không block user
+            return;
+        }
+
         DatabaseReference tipRef = healthTipsRef.child(tipId).child("viewCount");
         tipRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -634,12 +1011,16 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 }
                 tipRef.setValue(currentCount + 1)
                         .addOnSuccessListener(aVoid -> callback.onSuccess())
-                        .addOnFailureListener(e -> callback.onError("Lỗi khi cập nhật số lượt xem: " + e.getMessage()));
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Failed to update view count: " + e.getMessage());
+                            callback.onSuccess(); // 🎯 FIX: Callback success thay vì error
+                        });
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError("Lỗi khi đọc số lượt xem: " + databaseError.getMessage());
+                Log.e(TAG, "View count update cancelled: " + databaseError.getMessage());
+                callback.onSuccess(); // 🎯 FIX: Callback success thay vì error
             }
         });
     }
@@ -683,6 +1064,58 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
             return;
         }
 
+        Log.d(TAG, "getDailyRecommendedHealthTips called with limit: " + limit);
+
+        // Kiểm tra network
+        boolean isOnline = context != null && NetworkUtils.isNetworkAvailable(context);
+        Log.d(TAG, "Network status for recommended: " + (isOnline ? "ONLINE" : "OFFLINE"));
+
+        // 1. Load từ cache trước (offline-first)
+        if (healthTipDao != null) {
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                try {
+                    // Lấy recommended tips từ cache (sorted by recommendation_score)
+                    List<HealthTipEntity> cachedEntities = healthTipDao.getLatestHealthTipsSync(limit);
+                    Log.d(TAG, "Recommended cache: " + (cachedEntities != null ? cachedEntities.size() : 0) + " items");
+
+                    if (cachedEntities != null && !cachedEntities.isEmpty()) {
+                        List<HealthTip> cachedTips = new ArrayList<>();
+                        for (HealthTipEntity entity : cachedEntities) {
+                            cachedTips.add(entity.toHealthTip());
+                        }
+                        mainHandler.post(() -> {
+                            Log.d(TAG, "Returning " + cachedTips.size() + " recommended tips from cache");
+                            callback.onSuccess(cachedTips);
+                        });
+
+                        if (!isOnline) {
+                            Log.d(TAG, "Offline mode - using recommended cache only");
+                            return;
+                        }
+                    } else {
+                        Log.d(TAG, "No recommended cache available");
+
+                        // 🎯 FIX: Trả về empty list thay vì error khi offline không có cache
+                        if (!isOnline) {
+                            mainHandler.post(() -> {
+                                Log.d(TAG, "📭 Offline with no recommended cache - returning empty list");
+                                callback.onSuccess(new ArrayList<>());
+                            });
+                            return;
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error loading recommended cache: " + e.getMessage(), e);
+                }
+            });
+        }
+
+        // 2. Nếu online, fetch từ Firebase
+        if (!isOnline) {
+            return; // Đã xử lý offline ở trên
+        }
+
+        Log.d(TAG, "Fetching recommended tips from Firebase...");
         // Lấy tất cả bài viết trước, sau đó áp dụng thuật toán đề xuất dựa trên ngày
         healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

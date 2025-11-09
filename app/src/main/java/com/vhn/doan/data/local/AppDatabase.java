@@ -6,7 +6,9 @@ import android.util.Log;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
+import com.vhn.doan.data.local.Converters;
 import com.vhn.doan.data.local.dao.CategoryDao;
 import com.vhn.doan.data.local.dao.HealthTipDao;
 import com.vhn.doan.data.local.dao.VideoDao;
@@ -27,9 +29,10 @@ import java.util.concurrent.Executors;
         CategoryEntity.class,
         VideoEntity.class
     },
-    version = 1,
+    version = 3,
     exportSchema = false
 )
+@TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String TAG = "AppDatabase";

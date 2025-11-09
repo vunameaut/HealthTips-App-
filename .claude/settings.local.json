@@ -16,7 +16,9 @@
       "Bash(findstr:*)",
       "Bash(\"D:\\app\\HealthTips-App-\\gradlew.bat\" clean assembleDebug)",
       "Bash(dir:*)",
-      "Bash(test -f \"D:\\app\\HealthTips-App-\\nul\")"
+      "Bash(test -f \"D:\\app\\HealthTips-App-\\nul\")",
+      "Bash(del \"D:\\app\\HealthTips-App-\\app\\src\\main\\java\\com\\vhn\\doan\\data\\local\\HealthTipEntity.java\")",
+      "Bash(del \"D:\\app\\HealthTips-App-\\app\\src\\main\\java\\com\\vhn\\doan\\data\\local\\HealthTipDao.java\")"
     ],
     "deny": [],
     "ask": []

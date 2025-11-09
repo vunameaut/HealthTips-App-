@@ -56,8 +56,8 @@ public class FavoritePostsFragment extends BaseFragment implements FavoriteView 
         // Khởi tạo presenter với repositories
         presenter = new FavoritePresenter(
                 requireContext(),
-                new FavoriteRepositoryImpl(),
-                new HealthTipRepositoryImpl()
+                new FavoriteRepositoryImpl(requireContext()),
+                new HealthTipRepositoryImpl(requireContext())
         );
     }
 

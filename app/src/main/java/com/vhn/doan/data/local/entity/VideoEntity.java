@@ -33,6 +33,9 @@ public class VideoEntity {
     @ColumnInfo(name = "video_url")
     private String videoUrl;
 
+    @ColumnInfo(name = "cld_public_id")
+    private String cldPublicId;
+
     @ColumnInfo(name = "thumbnail_url")
     private String thumbnailUrl;
 
@@ -129,6 +132,14 @@ public class VideoEntity {
 
     public void setVideoUrl(String videoUrl) {
         this.videoUrl = videoUrl;
+    }
+
+    public String getCldPublicId() {
+        return cldPublicId;
+    }
+
+    public void setCldPublicId(String cldPublicId) {
+        this.cldPublicId = cldPublicId;
     }
 
     public String getThumbnailUrl() {

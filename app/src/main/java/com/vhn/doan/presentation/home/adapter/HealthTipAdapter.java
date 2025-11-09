@@ -1,6 +1,7 @@
 package com.vhn.doan.presentation.home.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.vhn.doan.R;
 import com.vhn.doan.data.HealthTip;
+import com.vhn.doan.data.local.CacheManager;
 import com.vhn.doan.data.repository.FavoriteRepository;
 import com.vhn.doan.data.repository.FavoriteRepositoryImpl;
 
@@ -55,7 +57,7 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
         this.context = context;
         this.healthTips = healthTips;
         this.listener = listener;
-        this.favoriteRepository = new FavoriteRepositoryImpl();
+        this.favoriteRepository = new FavoriteRepositoryImpl(context);
         this.firebaseAuth = FirebaseAuth.getInstance();
         this.favoriteHealthTipIds = new HashSet<>();
 
@@ -90,6 +92,10 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
         HealthTip healthTip = healthTips.get(position);
         boolean isFavorite = favoriteHealthTipIds.contains(healthTip.getId());
         holder.bind(healthTip, listener, isFavorite, this);
+
+        // 🎯 CACHE NGAY KHI USER SCROLL QUA! (Giống TikTok/Facebook)
+        // Cache passive - user không cần làm gì, chỉ cần nhìn thấy item
+        CacheManager.getInstance(context).cacheHealthTipImmediately(healthTip);
     }
 
     @Override

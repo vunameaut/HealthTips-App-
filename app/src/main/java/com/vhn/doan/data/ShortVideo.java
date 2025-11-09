@@ -42,6 +42,9 @@ public class ShortVideo implements Serializable {
     @PropertyName("cldVersion")
     private Long cldVersion; // Thay đổi từ long thành Long
 
+    @PropertyName("videoUrl")
+    private String videoUrl; // 🎯 NEW: Lưu trữ video URL trực tiếp cho offline mode
+
     @PropertyName("thumbnailUrl")
     private String thumbnailUrl;
 
@@ -315,23 +318,56 @@ public class ShortVideo implements Serializable {
 
     // Additional methods for video URL generation
     public String getVideoUrl() {
-        if (cldPublicId != null) {
-            return "https://res.cloudinary.com/healthtips/video/upload/" + cldPublicId;
+        // 🎯 FIX: Ưu tiên cldPublicId để generate URL (cho online mode)
+        // Chỉ dùng videoUrl cache khi không có cldPublicId
+        if (cldPublicId != null && !cldPublicId.isEmpty()) {
+            // Generate URL từ Cloudinary public ID
+            // 🔧 FIX: Kiểm tra xem public ID đã có extension chưa
+            String url;
+            if (cldPublicId.endsWith(".mp4") || cldPublicId.endsWith(".mov") ||
+                cldPublicId.endsWith(".avi") || cldPublicId.endsWith(".webm")) {
+                // Public ID đã có extension
+                url = "https://res.cloudinary.com/dazo6ypwt/video/upload/" + cldPublicId;
+            } else {
+                // Thêm .mp4 extension
+                url = "https://res.cloudinary.com/dazo6ypwt/video/upload/" + cldPublicId + ".mp4";
+            }
+
+            android.util.Log.d("ShortVideo", "🎬 Generated URL from cldPublicId: " + url + " (publicId: " + cldPublicId + ")");
+            return url;
         }
+
+        // Fallback: Sử dụng videoUrl từ cache (cho offline mode)
+        if (videoUrl != null && !videoUrl.isEmpty()) {
+            android.util.Log.d("ShortVideo", "📦 Using cached videoUrl: " + videoUrl);
+            return videoUrl;
+        }
+
+        android.util.Log.w("ShortVideo", "⚠️ No video URL available for video " + id);
         return null;
     }
 
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
     public String getOptimizedVideoUrl() {
-        if (cldPublicId != null) {
-            return "https://res.cloudinary.com/healthtips/video/upload/q_auto,f_auto/" + cldPublicId;
+        if (cldPublicId != null && !cldPublicId.isEmpty()) {
+            String url = "https://res.cloudinary.com/dazo6ypwt/video/upload/q_auto,f_auto/" + cldPublicId;
+            android.util.Log.d("ShortVideo", "🎯 Optimized URL: " + url);
+            return url;
         }
+        android.util.Log.w("ShortVideo", "⚠️ No cldPublicId for optimization");
         return null;
     }
 
     public String getThumbnailUrlFromCloudinary() {
-        if (cldPublicId != null) {
-            return "https://res.cloudinary.com/healthtips/video/upload/so_0,w_300,h_200,c_fill/" + cldPublicId + ".jpg";
+        if (cldPublicId != null && !cldPublicId.isEmpty()) {
+            String url = "https://res.cloudinary.com/dazo6ypwt/video/upload/so_0,w_300,h_200,c_fill/" + cldPublicId + ".jpg";
+            android.util.Log.d("ShortVideo", "🖼️ Thumbnail URL: " + url);
+            return url;
         }
+        android.util.Log.d("ShortVideo", "📷 Using fallback thumbnailUrl: " + thumbnailUrl);
         return thumbnailUrl;
     }
 

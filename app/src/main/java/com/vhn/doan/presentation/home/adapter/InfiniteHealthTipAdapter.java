@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.vhn.doan.R;
 import com.vhn.doan.data.HealthTip;
 import com.vhn.doan.data.ContentBlock;
+import com.vhn.doan.data.local.CacheManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,6 +69,9 @@ public class InfiniteHealthTipAdapter extends RecyclerView.Adapter<InfiniteHealt
         HealthTip healthTip = originalHealthTips.get(realPosition);
 
         holder.bind(healthTip, clickListener);
+
+        // 🎯 CACHE NGAY KHI USER SCROLL QUA! (Recommended tips)
+        CacheManager.getInstance(context).cacheHealthTipImmediately(healthTip);
     }
 
     @Override

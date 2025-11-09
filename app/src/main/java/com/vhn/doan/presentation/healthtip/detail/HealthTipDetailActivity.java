@@ -25,6 +25,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ContentBlock;
 import com.vhn.doan.data.HealthTip;
+import com.vhn.doan.data.local.CacheManager;
 import com.vhn.doan.data.repository.FavoriteRepository;
 import com.vhn.doan.data.repository.FavoriteRepositoryImpl;
 import com.vhn.doan.data.repository.HealthTipRepository;
@@ -96,9 +97,12 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
             return;
         }
 
+        // 🎯 UPDATE ACCESS TIME KHI USER XEM CHI TIẾT (LRU tracking)
+        CacheManager.getInstance(this).updateAccessTime(healthTipId);
+
         // Khởi tạo presenter
-        HealthTipRepository repository = new HealthTipRepositoryImpl();
-        FavoriteRepository favoriteRepository = new FavoriteRepositoryImpl();
+        HealthTipRepository repository = new HealthTipRepositoryImpl(this);
+        FavoriteRepository favoriteRepository = new FavoriteRepositoryImpl(this);
         UserSessionManager userSessionManager = new UserSessionManager(this);
         presenter = new HealthTipDetailPresenterImpl(repository, favoriteRepository, userSessionManager);
         presenter.attachView(this);

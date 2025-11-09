@@ -6,6 +6,13 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.vhn.doan.data.HealthTip;
+import com.vhn.doan.data.local.Converters;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Room Entity cho HealthTip - Cache local database
@@ -18,6 +25,7 @@ import androidx.room.PrimaryKey;
         @Index(value = "created_at")
     }
 )
+@TypeConverters(Converters.class)
 public class HealthTipEntity {
     @PrimaryKey
     @NonNull
@@ -26,6 +34,9 @@ public class HealthTipEntity {
 
     @ColumnInfo(name = "title")
     private String title;
+
+    @ColumnInfo(name = "content")
+    private String content;
 
     @ColumnInfo(name = "excerpt")
     private String excerpt;
@@ -57,6 +68,43 @@ public class HealthTipEntity {
     @ColumnInfo(name = "recommendation_score")
     private int recommendationScore;
 
+    // Các trường bổ sung để support offline mode đầy đủ
+    @ColumnInfo(name = "content_blocks")
+    private List<Map<String, Object>> contentBlocks;
+
+    @ColumnInfo(name = "tags")
+    private List<String> tags;
+
+    @ColumnInfo(name = "author")
+    private String author;
+
+    @ColumnInfo(name = "status")
+    private String status;
+
+    @ColumnInfo(name = "published_at")
+    private Long publishedAt;
+
+    @ColumnInfo(name = "updated_at")
+    private Long updatedAt;
+
+    @ColumnInfo(name = "is_feature")
+    private Boolean isFeature;
+
+    @ColumnInfo(name = "is_pinned")
+    private Boolean isPinned;
+
+    @ColumnInfo(name = "seo_title")
+    private String seoTitle;
+
+    @ColumnInfo(name = "seo_description")
+    private String seoDescription;
+
+    @ColumnInfo(name = "scheduled_at")
+    private Long scheduledAt;
+
+    @ColumnInfo(name = "slug")
+    private String slug;
+
     @ColumnInfo(name = "cached_at")
     private long cachedAt; // Thời điểm cache vào DB
 
@@ -83,6 +131,74 @@ public class HealthTipEntity {
         this.isLiked = isLiked;
         this.recommendationScore = recommendationScore;
         this.cachedAt = System.currentTimeMillis();
+    }
+
+    /**
+     * Tạo HealthTipEntity từ HealthTip model
+     */
+    @Ignore
+    public static HealthTipEntity fromHealthTip(HealthTip healthTip) {
+        HealthTipEntity entity = new HealthTipEntity();
+        entity.setId(healthTip.getId());
+        entity.setTitle(healthTip.getTitle());
+        entity.setContent(healthTip.getContent());
+        entity.setExcerpt(healthTip.getExcerpt());
+        entity.setCategoryId(healthTip.getCategoryId());
+        entity.setCategoryName(healthTip.getCategoryName());
+        entity.setViewCount(healthTip.getViewCount() != null ? healthTip.getViewCount() : 0);
+        entity.setLikeCount(healthTip.getLikeCount() != null ? healthTip.getLikeCount() : 0);
+        entity.setImageUrl(healthTip.getImageUrl());
+        entity.setCreatedAt(healthTip.getCreatedAt() != null ? healthTip.getCreatedAt() : System.currentTimeMillis());
+        entity.setFavorite(healthTip.isFavorite());
+        entity.setLiked(healthTip.isLiked());
+        entity.setRecommendationScore(healthTip.getRecommendationScore() != null ? healthTip.getRecommendationScore() : 0);
+        entity.setContentBlocks(healthTip.getContentBlocks());
+        entity.setTags(healthTip.getTags());
+        entity.setAuthor(healthTip.getAuthor());
+        entity.setStatus(healthTip.getStatus());
+        entity.setPublishedAt(healthTip.getPublishedAt());
+        entity.setUpdatedAt(healthTip.getUpdatedAt());
+        entity.setIsFeature(healthTip.getIsFeature());
+        entity.setIsPinned(healthTip.getIsPinned());
+        entity.setSeoTitle(healthTip.getSeoTitle());
+        entity.setSeoDescription(healthTip.getSeoDescription());
+        entity.setScheduledAt(healthTip.getScheduledAt());
+        entity.setSlug(healthTip.getSlug());
+        entity.setCachedAt(System.currentTimeMillis());
+        return entity;
+    }
+
+    /**
+     * Chuyển đổi Entity thành HealthTip model
+     */
+    public HealthTip toHealthTip() {
+        HealthTip healthTip = new HealthTip();
+        healthTip.setId(this.id);
+        healthTip.setTitle(this.title);
+        healthTip.setContent(this.content);
+        healthTip.setExcerpt(this.excerpt);
+        healthTip.setCategoryId(this.categoryId);
+        healthTip.setCategoryName(this.categoryName);
+        healthTip.setViewCount(this.viewCount);
+        healthTip.setLikeCount(this.likeCount);
+        healthTip.setImageUrl(this.imageUrl);
+        healthTip.setCreatedAt(this.createdAt);
+        healthTip.setFavorite(this.isFavorite);
+        healthTip.setLiked(this.isLiked);
+        healthTip.setRecommendationScore(this.recommendationScore);
+        healthTip.setContentBlocks(this.contentBlocks);
+        healthTip.setTags(this.tags);
+        healthTip.setAuthor(this.author);
+        healthTip.setStatus(this.status);
+        healthTip.setPublishedAt(this.publishedAt);
+        healthTip.setUpdatedAt(this.updatedAt);
+        healthTip.setIsFeature(this.isFeature);
+        healthTip.setIsPinned(this.isPinned);
+        healthTip.setSeoTitle(this.seoTitle);
+        healthTip.setSeoDescription(this.seoDescription);
+        healthTip.setScheduledAt(this.scheduledAt);
+        healthTip.setSlug(this.slug);
+        return healthTip;
     }
 
     // Getters and Setters
@@ -189,5 +305,109 @@ public class HealthTipEntity {
 
     public void setCachedAt(long cachedAt) {
         this.cachedAt = cachedAt;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public List<Map<String, Object>> getContentBlocks() {
+        return contentBlocks;
+    }
+
+    public void setContentBlocks(List<Map<String, Object>> contentBlocks) {
+        this.contentBlocks = contentBlocks;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Long publishedAt) {
+        this.publishedAt = publishedAt;
+    }
+
+    public Long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Long updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Boolean getIsFeature() {
+        return isFeature;
+    }
+
+    public void setIsFeature(Boolean isFeature) {
+        this.isFeature = isFeature;
+    }
+
+    public Boolean getIsPinned() {
+        return isPinned;
+    }
+
+    public void setIsPinned(Boolean isPinned) {
+        this.isPinned = isPinned;
+    }
+
+    public String getSeoTitle() {
+        return seoTitle;
+    }
+
+    public void setSeoTitle(String seoTitle) {
+        this.seoTitle = seoTitle;
+    }
+
+    public String getSeoDescription() {
+        return seoDescription;
+    }
+
+    public void setSeoDescription(String seoDescription) {
+        this.seoDescription = seoDescription;
+    }
+
+    public Long getScheduledAt() {
+        return scheduledAt;
+    }
+
+    public void setScheduledAt(Long scheduledAt) {
+        this.scheduledAt = scheduledAt;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 }

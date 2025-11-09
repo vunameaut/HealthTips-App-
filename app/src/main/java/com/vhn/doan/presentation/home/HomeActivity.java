@@ -22,6 +22,7 @@ import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.presentation.video.VideoFragment;
 import com.vhn.doan.services.AuthManager;
 import com.vhn.doan.services.ReminderManager;
+import com.vhn.doan.utils.SyncScheduler;
 import com.vhn.doan.utils.UserSessionManager;
 
 /**
@@ -76,6 +77,10 @@ public class HomeActivity extends BaseActivity {
         // Khởi động ReminderForegroundService
         reminderManager.startReminderService(this);
         Log.d(TAG, "ReminderForegroundService đã được khởi động từ HomeActivity");
+
+        // Schedule periodic sync cho offline mode
+        SyncScheduler.scheduleHealthTipSync(this);
+        Log.d(TAG, "Health tip sync scheduled for offline mode");
 
         // Khởi tạo và thiết lập BottomNavigationView
         setupBottomNavigation();

@@ -59,7 +59,7 @@ public class AllHealthTipsActivity extends AppCompatActivity implements HealthTi
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        repository = new HealthTipRepositoryImpl();
+        repository = new HealthTipRepositoryImpl(this);
 
         // Lấy mode từ Intent và thiết lập tiêu đề
         String mode = getIntent().getStringExtra(EXTRA_MODE);

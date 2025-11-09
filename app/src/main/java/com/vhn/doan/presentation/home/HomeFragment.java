@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +40,7 @@ import com.vhn.doan.presentation.home.adapter.HealthTipAdapter;
 import com.vhn.doan.presentation.home.adapter.CategorySkeletonAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipSkeletonAdapter;
 import com.vhn.doan.presentation.category.CategoryFragment;
+import com.vhn.doan.utils.NetworkMonitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,8 @@ import java.util.List;
  * Implement FragmentVisibilityListener để quản lý lifecycle
  */
 public class HomeFragment extends Fragment implements HomeView, FragmentVisibilityListener {
+
+    private static final String TAG = "HomeFragment";
 
     // UI components
     private RecyclerView recyclerViewCategories;
@@ -82,6 +86,10 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     // Presenter
     private HomePresenter presenter;
 
+    // Network Monitor để theo dõi trạng thái mạng
+    private NetworkMonitor networkMonitor;
+    private boolean wasOffline = false; // Flag để theo dõi trạng thái offline trước đó
+
     // Loading state flags
     private boolean isCategoriesLoaded = false;
     private boolean isRecommendedTipsLoaded = false;
@@ -114,10 +122,17 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
         // Khởi tạo repositories
         CategoryRepository categoryRepository = new CategoryRepositoryImpl();
-        HealthTipRepository healthTipRepository = new HealthTipRepositoryImpl();
+        HealthTipRepository healthTipRepository = new HealthTipRepositoryImpl(requireContext());
 
         // Khởi tạo presenter
         presenter = new HomePresenter(requireContext(), categoryRepository, healthTipRepository);
+
+        // Khởi tạo NetworkMonitor để theo dõi trạng thái mạng
+        networkMonitor = NetworkMonitor.getInstance(requireContext());
+        networkMonitor.startMonitoring();
+
+        // Observe network status changes
+        setupNetworkObserver();
     }
 
     @Override
@@ -554,22 +569,28 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
     @Override
     public void showLatestHealthTips(List<HealthTip> healthTips) {
+        Log.d(TAG, "showLatestHealthTips called with " + (healthTips != null ? healthTips.size() : 0) + " items");
         // Thay thế skeleton adapter bằng real adapter với data
         if (!isLatestTipsLoaded) {
+            Log.d(TAG, "Setting latest tips adapter for first time");
             recyclerViewLatestTips.setAdapter(latestTipsAdapter);
             isLatestTipsLoaded = true;
         }
         latestTipsAdapter.updateHealthTips(healthTips);
+        Log.d(TAG, "Latest tips adapter updated");
     }
 
     @Override
     public void showMostViewedHealthTips(List<HealthTip> healthTips) {
+        Log.d(TAG, "showMostViewedHealthTips called with " + (healthTips != null ? healthTips.size() : 0) + " items");
         // Thay thế skeleton adapter bằng real adapter với data
         if (!isMostViewedTipsLoaded) {
+            Log.d(TAG, "Setting most viewed tips adapter for first time");
             recyclerViewMostViewedTips.setAdapter(mostViewedTipsAdapter);
             isMostViewedTipsLoaded = true;
         }
         mostViewedTipsAdapter.updateHealthTips(healthTips);
+        Log.d(TAG, "Most viewed tips adapter updated");
     }
 
     @Override
@@ -592,6 +613,40 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     }
 
     /**
+     * Thiết lập observer cho network status
+     */
+    private void setupNetworkObserver() {
+        if (networkMonitor != null) {
+            networkMonitor.getConnectionStatus().observe(this, isConnected -> {
+                if (isConnected != null) {
+                    Log.d(TAG, "🌐 Network status changed: " + (isConnected ? "ONLINE" : "OFFLINE"));
+
+                    if (isConnected) {
+                        // Có mạng trở lại
+                        hideOfflineMode();
+
+                        // Nếu trước đó đang offline, hiển thị thông báo đã có mạng
+                        if (wasOffline) {
+                            showMessage("✅ Đã kết nối lại mạng");
+                            wasOffline = false;
+
+                            // Reload dữ liệu để sync với server
+                            if (presenter != null) {
+                                presenter.start();
+                            }
+                        }
+                    } else {
+                        // Mất mạng
+                        showOfflineMode();
+                        wasOffline = true;
+                        showMessage("⚠️ Đang ở chế độ ngoại tuyến");
+                    }
+                }
+            });
+        }
+    }
+
+    /**
      * DEPRECATED: Các phương thức kiểm tra data không còn cần thiết
      */
     @Deprecated
@@ -607,7 +662,18 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
     @Override
     public void showOfflineMode() {
-        layoutOfflineMode.setVisibility(View.VISIBLE);
+        if (layoutOfflineMode != null) {
+            layoutOfflineMode.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Ẩn thông báo offline mode
+     */
+    public void hideOfflineMode() {
+        if (layoutOfflineMode != null) {
+            layoutOfflineMode.setVisibility(View.GONE);
+        }
     }
 
     @Override

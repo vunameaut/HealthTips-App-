@@ -37,6 +37,12 @@ public interface VideoDao {
     LiveData<List<VideoEntity>> getAllVideos();
 
     /**
+     * Lấy tất cả videos (synchronous, for offline cache)
+     */
+    @Query("SELECT * FROM videos ORDER BY upload_date DESC")
+    List<VideoEntity> getAllVideosSync();
+
+    /**
      * Lấy videos được like
      */
     @Query("SELECT * FROM videos WHERE is_liked = 1 ORDER BY upload_date DESC")

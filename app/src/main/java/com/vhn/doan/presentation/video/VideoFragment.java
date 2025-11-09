@@ -21,12 +21,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
-import com.vhn.doan.data.repository.FirebaseVideoRepositoryImpl;
+import com.vhn.doan.data.repository.OfflineVideoRepositoryImpl;
 import com.vhn.doan.presentation.base.BaseFragment;
 import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 import com.vhn.doan.presentation.video.adapter.VideoAdapter;
 import com.vhn.doan.utils.EventBus;
 import com.vhn.doan.utils.SharedPreferencesHelper;
+import com.vhn.doan.utils.NetworkMonitor;
 
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,11 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
     private Observer<Map<String, Boolean>> videoLikeObserver;
     private EventBus eventBus;
 
+    // Network Monitor để theo dõi trạng thái mạng
+    private NetworkMonitor networkMonitor;
+    private boolean wasOffline = false;
+
+
     // Flag để kiểm soát video playback
     private boolean isFragmentVisible = false;
     private boolean isDataLoaded = false;
@@ -79,13 +85,17 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
         // Khởi tạo EventBus
         eventBus = EventBus.getInstance();
 
-        // Sử dụng FirebaseVideoRepositoryImpl để lấy dữ liệu thực từ Firebase
-        presenter = new VideoPresenter(new FirebaseVideoRepositoryImpl());
+        // Sử dụng OfflineVideoRepositoryImpl để hỗ trợ offline mode (TikTok style)
+        presenter = new VideoPresenter(new OfflineVideoRepositoryImpl(requireContext()));
         presenter.attachView(this);
 
         // Khởi tạo adapter
         videoAdapter = new VideoAdapter();
         setupVideoAdapterListener();
+
+        // Khởi tạo NetworkMonitor để theo dõi trạng thái mạng
+        networkMonitor = NetworkMonitor.getInstance(requireContext());
+        networkMonitor.startMonitoring();
     }
 
     @Nullable
@@ -113,6 +123,9 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Setup network observer để theo dõi trạng thái mạng
+        setupNetworkObserver();
 
         setupRecyclerView();
 
@@ -271,6 +284,38 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
         // Đăng ký lắng nghe sự kiện từ EventBus
         eventBus.getVideoLikeStatusLiveData().observe(getViewLifecycleOwner(), videoLikeObserver);
     }
+
+    /**
+     * Thiết lập observer cho network status
+     */
+    private void setupNetworkObserver() {
+        if (networkMonitor != null) {
+            networkMonitor.getConnectionStatus().observe(getViewLifecycleOwner(), isConnected -> {
+                if (isConnected != null) {
+                    android.util.Log.d(TAG, "🌐 Network status changed: " + (isConnected ? "ONLINE" : "OFFLINE"));
+
+                    if (isConnected) {
+                        // Có mạng trở lại
+                        if (wasOffline) {
+                            showMessage("✅ Đã kết nối lại mạng - Videos sẽ được cập nhật");
+                            wasOffline = false;
+
+                            // Reload video feed để sync với server
+                            if (isFragmentVisible && presenter != null) {
+                                android.util.Log.d(TAG, "📡 Reloading videos after network restored");
+                                loadVideoFeed();
+                            }
+                        }
+                    } else {
+                        // Mất mạng
+                        wasOffline = true;
+                        showMessage("⚠️ Đang ở chế độ ngoại tuyến - Chỉ xem được videos đã cache");
+                    }
+                }
+            });
+        }
+    }
+
 
     @Override
     public void onDestroy() {

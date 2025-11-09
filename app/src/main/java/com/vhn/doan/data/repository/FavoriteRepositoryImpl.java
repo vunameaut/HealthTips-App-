@@ -1,5 +1,7 @@
 package com.vhn.doan.data.repository;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,8 +26,18 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
     private final HealthTipRepository healthTipRepository;
 
     /**
-     * Constructor mặc định
+     * Constructor với Context (khuyến nghị sử dụng)
      */
+    public FavoriteRepositoryImpl(Context context) {
+        database = FirebaseDatabase.getInstance();
+        healthTipRepository = new HealthTipRepositoryImpl(context);
+    }
+
+    /**
+     * Constructor mặc định (để tương thích ngược)
+     * @deprecated Sử dụng constructor với Context thay thế
+     */
+    @Deprecated
     public FavoriteRepositoryImpl() {
         database = FirebaseDatabase.getInstance();
         healthTipRepository = new HealthTipRepositoryImpl();

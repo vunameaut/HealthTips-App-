@@ -83,17 +83,15 @@ public class HomePresenter {
 
     /**
      * Tải dữ liệu cho trang chủ
+     * NOTE: KHÔNG check network ở đây nữa - để Repository tự xử lý offline/online
      */
     private void loadHomeData() {
-        if (!isNetworkAvailable()) {
-            if (view != null) {
-                view.showOfflineMode();
-                view.showLoading(false);
-                view.showError("Không có kết nối internet. Đang hiển thị dữ liệu offline.");
-            }
-            return;
+        // Kiểm tra offline mode để hiển thị indicator (optional)
+        if (!isNetworkAvailable() && view != null) {
+            view.showOfflineMode();
         }
 
+        // Luôn gọi repository - repository sẽ tự xử lý offline/online
         // Tải danh mục hoạt động
         categoryRepository.getCategoriesByActiveStatus(true, new CategoryRepository.CategoryCallback() {
             @Override
@@ -254,21 +252,22 @@ public class HomePresenter {
      */
     public void onHealthTipSelected(HealthTip healthTip) {
         if (view != null) {
-            // Tăng lượt xem và chuyển đến trang chi tiết
+            // 🎯 FIX: NAVIGATE NGAY LẬP TỨC - không đợi updateViewCount
+            // Điều này đảm bảo offline mode hoạt động mượt mà
+            view.navigateToHealthTipDetail(healthTip);
+
+            // Tăng lượt xem trong background (không block UI)
+            // Nếu offline, sẽ fail nhưng không ảnh hưởng đến UX
             healthTipRepository.updateViewCount(healthTip.getId(), new HealthTipRepository.HealthTipOperationCallback() {
                 @Override
                 public void onSuccess() {
-                    if (view != null) {
-                        view.navigateToHealthTipDetail(healthTip);
-                    }
+                    // Silent success - không cần thông báo
                 }
 
                 @Override
                 public void onError(String errorMessage) {
-                    if (view != null) {
-                        // Vẫn chuyển đến trang chi tiết ngay cả khi không cập nhật được view count
-                        view.navigateToHealthTipDetail(healthTip);
-                    }
+                    // Silent fail - không cần thông báo (có thể do offline)
+                    android.util.Log.d("HomePresenter", "Failed to update view count (might be offline): " + errorMessage);
                 }
             });
         }

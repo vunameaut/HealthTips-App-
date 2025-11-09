@@ -3,6 +3,7 @@ package com.vhn.doan.presentation.video.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,9 +21,15 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
 import com.vhn.doan.R;
 import com.vhn.doan.data.ShortVideo;
+import com.vhn.doan.data.local.VideoCacheManager;
 import com.vhn.doan.utils.CloudinaryUrls;
 
 import java.text.SimpleDateFormat;
@@ -144,13 +151,43 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     private VideoViewHolder activeHolder;                  // holder đang gắn player
     private Context appContext;
 
+    // 🎯 VIDEO CACHE để hỗ trợ offline playback
+    private VideoCacheManager videoCacheManager;
+    private CacheDataSource.Factory cacheDataSourceFactory;
+
     private void ensureCurrentPlayer(Context context) {
         if (currentPlayer != null) return;
         appContext = context.getApplicationContext();
-        currentPlayer = new ExoPlayer.Builder(appContext).build();
+
+        // 🎯 Khởi tạo Video Cache Manager
+        if (videoCacheManager == null) {
+            videoCacheManager = VideoCacheManager.getInstance(appContext);
+
+            // Tạo CacheDataSourceFactory để ExoPlayer tự động cache
+            DataSource.Factory upstreamFactory = new DefaultDataSource.Factory(
+                appContext,
+                new DefaultHttpDataSource.Factory()
+                    .setUserAgent("HealthTipsApp/1.0")
+                    .setConnectTimeoutMs(30000)
+                    .setReadTimeoutMs(30000)
+            );
+
+            cacheDataSourceFactory = new CacheDataSource.Factory()
+                .setCache(videoCacheManager.getCache())
+                .setUpstreamDataSourceFactory(upstreamFactory)
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR); // Nếu cache lỗi thì fallback online
+        }
+
+        // Tạo ExoPlayer với cache support
+        currentPlayer = new ExoPlayer.Builder(appContext)
+            .setMediaSourceFactory(new DefaultMediaSourceFactory(cacheDataSourceFactory))
+            .build();
+
         currentPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
         currentPlayer.setPlayWhenReady(true);
         attachMainPlayerListener();
+
+        Log.d("VideoAdapter", "✅ Current player created with cache support");
     }
 
     private void attachMainPlayerListener() {
@@ -189,12 +226,38 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     private ExoPlayer createPreloadPlayer(String url) {
-        ExoPlayer p = new ExoPlayer.Builder(appContext != null ? appContext : lastKnownContext).build();
+        Context ctx = appContext != null ? appContext : lastKnownContext;
+
+        // 🎯 Đảm bảo cache factory đã được khởi tạo
+        if (cacheDataSourceFactory == null && ctx != null) {
+            videoCacheManager = VideoCacheManager.getInstance(ctx);
+
+            DataSource.Factory upstreamFactory = new DefaultDataSource.Factory(
+                ctx,
+                new DefaultHttpDataSource.Factory()
+                    .setUserAgent("HealthTipsApp/1.0")
+                    .setConnectTimeoutMs(30000)
+                    .setReadTimeoutMs(30000)
+            );
+
+            cacheDataSourceFactory = new CacheDataSource.Factory()
+                .setCache(videoCacheManager.getCache())
+                .setUpstreamDataSourceFactory(upstreamFactory)
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR);
+        }
+
+        // Tạo preload player với cache support
+        ExoPlayer p = new ExoPlayer.Builder(ctx)
+            .setMediaSourceFactory(new DefaultMediaSourceFactory(cacheDataSourceFactory))
+            .build();
+
         p.setRepeatMode(Player.REPEAT_MODE_ONE);
         p.setPlayWhenReady(false);      // preload -> không phát
         p.setVolume(0f);                // luôn mute trong preload
         p.setMediaItem(MediaItem.fromUri(Uri.parse(url)));
-        p.prepare();                    // sẵn sàng
+        p.prepare();                    // sẵn sàng - ExoPlayer sẽ tự cache!
+
+        Log.d("VideoAdapter", "📦 Preload player created with cache for: " + url);
         return p;
     }
 
@@ -755,9 +818,17 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     // ================== Helpers ==================
     private String getVideoUrl(ShortVideo v) {
-        if (v.getCldPublicId() != null && !v.getCldPublicId().isEmpty()) {
-            return CloudinaryUrls.mp4(v.getCldPublicId(), v.getCldVersion());
+        // 🎯 Sử dụng getVideoUrl() từ ShortVideo - nó đã có logic ưu tiên đúng
+        String url = v.getVideoUrl();
+
+        if (url != null && !url.isEmpty()) {
+            Log.d("VideoAdapter", "📹 Video URL: " + url);
+            return url;
         }
+
+        // Fallback cuối cùng nếu không có URL nào
+        Log.w("VideoAdapter", "⚠️ No video URL available for video " + v.getId() +
+              " - cldPublicId: " + v.getCldPublicId() + ", cached videoUrl: " + v.getVideoUrl());
         return "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
     }
 
