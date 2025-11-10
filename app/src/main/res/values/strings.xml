@@ -842,4 +842,24 @@
     <string name="favorite_articles_tab">Bài viết yêu thích</string>
     <string name="video_liked_tab">Video đã like</string>
 
+    <!-- ========== FCM Token Debug Strings ========== -->
+    <string name="menu_fcm_token_debug">🔧 FCM Token (Debug)</string>
+    <string name="fcm_icon_description">FCM Icon</string>
+    <string name="fcm_title">FCM Registration Token</string>
+    <string name="fcm_subtitle">Sử dụng token này để test push notifications</string>
+    <string name="fcm_status_waiting">Đang chờ...</string>
+    <string name="fcm_status_loading">Đang lấy FCM token...</string>
+    <string name="fcm_status_success">✅ Đã lấy token thành công!</string>
+    <string name="fcm_status_error">❌ Lỗi: Không thể lấy token</string>
+    <string name="fcm_token_label">Token:</string>
+    <string name="fcm_token_placeholder">Token sẽ hiển thị ở đây...</string>
+    <string name="fcm_btn_copy">📋 Copy Token</string>
+    <string name="fcm_btn_refresh">🔄 Refresh Token</string>
+    <string name="fcm_instructions_title">📝 Hướng dẫn test thông báo:</string>
+    <string name="fcm_instructions_content">1. Copy token bằng nút phía trên\n\n2. Vào Firebase Console → Messaging\n\n3. Tạo chiến dịch mới → Test on device\n\n4. Dán token vào ô \'Add an FCM registration token\'\n\n5. Nhấn Test để gửi thông báo</string>
+    <string name="fcm_toast_ready">Token đã sẵn sàng! Bấm Copy để sao chép</string>
+    <string name="fcm_toast_copied">✅ Đã copy token vào clipboard!\nBạn có thể dán vào Firebase Console để test.</string>
+    <string name="fcm_toast_no_token">Không có token để copy!</string>
+    <string name="fcm_error_details">Chi tiết lỗi:\n%1$s</string>
+
 </resources>

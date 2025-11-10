@@ -12,6 +12,7 @@ firebaseAuth = "23.2.1"
 firebaseStorage = "21.0.2"
 firebaseDatabase = "21.0.0"
 core = "1.16.0"
+firebaseMessaging = "25.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -25,6 +26,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 core = { group = "androidx.core", name = "core", version.ref = "core" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

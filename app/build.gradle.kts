@@ -138,6 +138,7 @@ dependencies {
 
     implementation("androidx.work:work-runtime:2.9.0")
     implementation(libs.core)
+    implementation(libs.firebase.messaging)
 
     // Thêm thư viện Desugaring để hỗ trợ tính năng Java 8+ trên các thiết bị cũ
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
