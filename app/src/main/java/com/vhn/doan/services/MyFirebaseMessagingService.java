@@ -10,180 +10,196 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.vhn.doan.R;
-import com.vhn.doan.presentation.home.HomeActivity;
+
+import java.util.Map;
 
 /**
  * Service để xử lý Firebase Cloud Messaging (FCM)
- * - Nhận và xử lý push notifications
- * - Lưu FCM token để gửi thông báo targeted
+ * - Nhận và xử lý push notifications với Deep Linking
+ * - Lưu FCM token vào Firebase Database
+ * - Hỗ trợ nhiều loại notifications: comment reply, new health tip, new video, etc.
  */
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FCMService";
-    private static final String CHANNEL_ID = "health_tips_fcm_channel";
-    private static final String CHANNEL_NAME = "Thông báo HealthTips";
-    private static final String CHANNEL_DESCRIPTION = "Nhận thông báo về mẹo sức khỏe mới, cập nhật từ AI";
+    private static final String CHANNEL_ID = "health_tips_notifications";
+
+    // Notification types
+    public static final String TYPE_COMMENT_REPLY = "comment_reply";
+    public static final String TYPE_NEW_HEALTH_TIP = "new_health_tip";
+    public static final String TYPE_NEW_VIDEO = "new_video";
+    public static final String TYPE_COMMENT_LIKE = "comment_like";
+    public static final String TYPE_HEALTH_TIP_RECOMMENDATION = "health_tip_recommendation";
 
     @Override
     public void onCreate() {
         super.onCreate();
-        // Tạo notification channel khi service được khởi tạo
         createNotificationChannel();
     }
 
-    /**
-     * Được gọi khi có FCM token mới
-     * Token này dùng để gửi notification cho device cụ thể
-     */
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        Log.d(TAG, "FCM Token mới: " + token);
+        Log.d(TAG, "New FCM Token: " + token);
 
-        // TODO: Gửi token này lên Firebase Database để lưu lại
-        // Bạn sẽ cần token này để gửi thông báo cho user cụ thể
-        sendTokenToServer(token);
+        // Lưu token vào Firebase Database
+        saveFCMTokenToDatabase(token);
     }
 
-    /**
-     * Được gọi khi nhận được push notification từ Firebase
-     */
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
         super.onMessageReceived(message);
 
-        Log.d(TAG, "Nhận được message từ: " + message.getFrom());
+        Log.d(TAG, "Message received from: " + message.getFrom());
 
-        // Kiểm tra xem message có data payload không
+        // Xử lý data payload
         if (!message.getData().isEmpty()) {
-            Log.d(TAG, "Message data payload: " + message.getData());
-            // Xử lý data payload nếu cần
-            handleDataPayload(message.getData());
-        }
-
-        // Kiểm tra xem message có notification payload không
-        if (message.getNotification() != null) {
-            String title = message.getNotification().getTitle();
-            String body = message.getNotification().getBody();
-            Log.d(TAG, "Message Notification - Title: " + title + ", Body: " + body);
-
-            // Hiển thị notification
-            showNotification(title, body);
+            Map<String, String> data = message.getData();
+            Log.d(TAG, "Message data payload: " + data);
+            handleNotificationData(data);
         }
     }
 
     /**
-     * Xử lý data payload từ FCM message
+     * Xử lý data payload và hiển thị notification phù hợp
      */
-    private void handleDataPayload(java.util.Map<String, String> data) {
-        // Ví dụ: Xử lý các loại notification khác nhau
+    private void handleNotificationData(Map<String, String> data) {
         String type = data.get("type");
+        String title = data.get("title");
+        String body = data.get("body");
 
-        if (type != null) {
-            switch (type) {
-                case "new_health_tip":
-                    // Có mẹo sức khỏe mới
-                    String tipTitle = data.get("tip_title");
-                    showNotification("Mẹo sức khỏe mới!", tipTitle);
-                    break;
-
-                case "ai_response":
-                    // AI đã trả lời câu hỏi
-                    showNotification("AI đã trả lời", "Bấm để xem câu trả lời của bạn");
-                    break;
-
-                case "daily_tip":
-                    // Mẹo sức khỏe hàng ngày
-                    String dailyTip = data.get("message");
-                    showNotification("Mẹo sức khỏe hôm nay", dailyTip);
-                    break;
-
-                default:
-                    Log.d(TAG, "Unknown notification type: " + type);
-                    break;
-            }
+        if (type == null || title == null || body == null) {
+            Log.w(TAG, "Invalid notification data");
+            return;
         }
+
+        Intent intent = createDeepLinkIntent(type, data);
+        showNotification(title, body, intent);
     }
 
     /**
-     * Hiển thị notification lên thanh trạng thái
+     * Tạo Intent cho deep linking dựa trên notification type
      */
-    private void showNotification(String title, String body) {
-        // Tạo intent để mở HomeActivity khi click vào notification
-        Intent intent = new Intent(this, HomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    private Intent createDeepLinkIntent(String type, Map<String, String> data) {
+        // Import DeepLinkHandlerActivity - sẽ tạo trong bước tiếp theo
+        Intent intent = new Intent(this, com.vhn.doan.presentation.deeplink.DeepLinkHandlerActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
+        // Thêm notification type
+        intent.putExtra("notification_type", type);
+
+        // Thêm data tùy theo type
+        switch (type) {
+            case TYPE_COMMENT_REPLY:
+                intent.putExtra("video_id", data.get("videoId"));
+                intent.putExtra("parent_comment_id", data.get("parentCommentId"));
+                intent.putExtra("reply_comment_id", data.get("replyCommentId"));
+                intent.putExtra("sender_name", data.get("senderName"));
+                intent.putExtra("reply_text", data.get("replyText"));
+                break;
+
+            case TYPE_NEW_HEALTH_TIP:
+                intent.putExtra("health_tip_id", data.get("healthTipId"));
+                intent.putExtra("category_id", data.get("categoryId"));
+                break;
+
+            case TYPE_NEW_VIDEO:
+                intent.putExtra("video_id", data.get("videoId"));
+                break;
+
+            case TYPE_COMMENT_LIKE:
+                intent.putExtra("video_id", data.get("videoId"));
+                intent.putExtra("comment_id", data.get("commentId"));
+                intent.putExtra("sender_name", data.get("senderName"));
+                break;
+
+            case TYPE_HEALTH_TIP_RECOMMENDATION:
+                intent.putExtra("tips", data.get("tips"));
+                intent.putExtra("tips_count", data.get("tipsCount"));
+                break;
+        }
+
+        return intent;
+    }
+
+    /**
+     * Hiển thị notification với PendingIntent
+     */
+    private void showNotification(String title, String body, Intent intent) {
         PendingIntent pendingIntent = PendingIntent.getActivity(
             this,
-            0,
+            (int) System.currentTimeMillis(),
             intent,
             PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Tạo notification builder
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification_reminder) // Sử dụng icon có sẵn
-            .setContentTitle(title != null ? title : "HealthTips")
-            .setContentText(body != null ? body : "")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification_reminder)
+            .setContentTitle(title)
+            .setContentText(body)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
-            .setStyle(new NotificationCompat.BigTextStyle()
-                .bigText(body != null ? body : ""));
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(body));
 
-        // Lấy NotificationManager và hiển thị
         NotificationManager notificationManager =
             (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         if (notificationManager != null) {
-            // Sử dụng timestamp làm notification ID để mỗi notification là unique
             int notificationId = (int) System.currentTimeMillis();
-            notificationManager.notify(notificationId, notificationBuilder.build());
-            Log.d(TAG, "Đã hiển thị notification: " + title);
+            notificationManager.notify(notificationId, builder.build());
+            Log.d(TAG, "Notification displayed: " + title);
         }
     }
 
     /**
-     * Tạo Notification Channel cho Android 8.0+ (API 26+)
-     * Bắt buộc phải có để hiển thị notification trên Android 8.0+
+     * Tạo Notification Channel (Required cho Android 8.0+)
      */
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
-                CHANNEL_NAME,
+                "Thông báo HealthTips",
                 NotificationManager.IMPORTANCE_HIGH
             );
-            channel.setDescription(CHANNEL_DESCRIPTION);
+            channel.setDescription("Nhận thông báo về bình luận, bài viết mới");
             channel.enableLights(true);
             channel.enableVibration(true);
             channel.setShowBadge(true);
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel);
-                Log.d(TAG, "Notification Channel đã được tạo: " + CHANNEL_ID);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+                Log.d(TAG, "Notification Channel created: " + CHANNEL_ID);
             }
         }
     }
 
     /**
-     * Gửi FCM token lên server để lưu trữ
-     * Token này sẽ được dùng để gửi notification cho user cụ thể
+     * Lưu FCM token vào Firebase Database
      */
-    private void sendTokenToServer(String token) {
-        // TODO: Implement logic để lưu token lên Firebase Database
-        // Ví dụ:
-        // FirebaseDatabase.getInstance()
-        //     .getReference("users")
-        //     .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-        //     .child("fcmToken")
-        //     .setValue(token);
+    private void saveFCMTokenToDatabase(String token) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser() != null
+            ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+            : null;
 
-        Log.d(TAG, "Cần implement logic lưu token lên server");
-        Log.d(TAG, "Token: " + token);
+        if (userId != null) {
+            FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(userId)
+                .child("fcmToken")
+                .setValue(token)
+                .addOnSuccessListener(aVoid ->
+                    Log.d(TAG, "FCM token saved successfully"))
+                .addOnFailureListener(e ->
+                    Log.e(TAG, "Failed to save FCM token", e));
+        } else {
+            Log.w(TAG, "User not logged in, cannot save FCM token");
+        }
     }
 }

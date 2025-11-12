@@ -3,6 +3,8 @@ package com.vhn.doan.presentation.video;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -56,6 +58,9 @@ public class SingleVideoPlayerActivity extends AppCompatActivity {
         setupActionBar();
         setupVideoPlayerFragment();
         setupBackButton();
+
+        // Xử lý deep link từ notification
+        handleDeepLinkExtras();
     }
 
     private void setupFullscreen() {
@@ -146,6 +151,50 @@ public class SingleVideoPlayerActivity extends AppCompatActivity {
         // Giải phóng resources khi destroy
         if (videoPlayerFragment != null) {
             videoPlayerFragment.releasePlayer();
+        }
+    }
+
+    /**
+     * Xử lý extras từ deep link notification
+     */
+    private void handleDeepLinkExtras() {
+        Intent intent = getIntent();
+
+        // Kiểm tra xem có yêu cầu mở comments không
+        boolean shouldOpenComments = intent.getBooleanExtra("open_comments", false);
+        String scrollToCommentId = intent.getStringExtra("scroll_to_comment");
+        String highlightReplyId = intent.getStringExtra("highlight_reply");
+
+        if (shouldOpenComments) {
+            // Delay một chút để video load xong
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                openCommentsWithScroll(scrollToCommentId, highlightReplyId);
+            }, 800);
+        }
+    }
+
+    /**
+     * Mở comments bottom sheet và scroll đến comment cụ thể
+     */
+    private void openCommentsWithScroll(String commentId, String highlightReplyId) {
+        if (videoPlayerFragment != null) {
+            String videoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
+            if (videoId != null) {
+                CommentBottomSheetFragment commentSheet =
+                    CommentBottomSheetFragment.newInstance(videoId);
+
+                // Truyền thông tin scroll và highlight
+                Bundle args = new Bundle();
+                if (commentId != null) {
+                    args.putString("scroll_to_comment_id", commentId);
+                }
+                if (highlightReplyId != null) {
+                    args.putString("highlight_reply_id", highlightReplyId);
+                }
+                commentSheet.setArguments(args);
+
+                commentSheet.show(getSupportFragmentManager(), "CommentBottomSheet");
+            }
         }
     }
 }

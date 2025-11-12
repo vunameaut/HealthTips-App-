@@ -18,7 +18,9 @@
       "Bash(dir:*)",
       "Bash(test -f \"D:\\app\\HealthTips-App-\\nul\")",
       "Bash(del \"D:\\app\\HealthTips-App-\\app\\src\\main\\java\\com\\vhn\\doan\\data\\local\\HealthTipEntity.java\")",
-      "Bash(del \"D:\\app\\HealthTips-App-\\app\\src\\main\\java\\com\\vhn\\doan\\data\\local\\HealthTipDao.java\")"
+      "Bash(del \"D:\\app\\HealthTips-App-\\app\\src\\main\\java\\com\\vhn\\doan\\data\\local\\HealthTipDao.java\")",
+      "Bash(powershell -Command \"Get-Content ''D:\\app\\HealthTips-App-\\thongbao.md'' | Select-Object -Last 100\")",
+      "Bash(powershell -Command:*)"
     ],
     "deny": [],
     "ask": []

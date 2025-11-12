@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test Notifications"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test các loại notifications với Vercel API"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="24dp" />
+
+        <!-- FCM Token Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. FCM Token (Copy để test)"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_get_fcm_token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lấy FCM Token"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tv_fcm_token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nhấn nút trên để lấy FCM Token"
+            android:textSize="12sp"
+            android:padding="12dp"
+            android:background="#F0F0F0"
+            android:fontFamily="monospace"
+            android:textIsSelectable="true"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Input Fields -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2. Nhập Test Data"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Video ID"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_video_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Comment ID"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_comment_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Health Tip ID"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_health_tip_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Test Buttons -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3. Test Notifications"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_test_comment_reply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test: Comment Reply"
+            android:backgroundTint="#4CAF50"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_test_new_health_tip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test: New Health Tip (Broadcast)"
+            android:backgroundTint="#2196F3"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_test_recommendation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test: Add to Recommendation Queue"
+            android:backgroundTint="#FF9800"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Instructions -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hướng dẫn:"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. Lấy FCM Token và copy\n2. Nhập Video/Comment/Health Tip IDs từ Firebase\n3. Nhấn nút test tương ứng\n4. Kiểm tra notification xuất hiện\n5. Tap vào notification để test deep linking"
+            android:textSize="12sp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="#666666" />
+
+    </LinearLayout>
+</ScrollView>

@@ -14,7 +14,7 @@ import com.vhn.doan.presentation.settings.content.DisplaySettingsActivity;
 import com.vhn.doan.presentation.settings.content.TermsPolicyActivity;
 import com.vhn.doan.presentation.settings.support.ReportIssueActivity;
 import com.vhn.doan.presentation.settings.support.SupportHelpActivity;
-import com.vhn.doan.presentation.settings.support.SupportHelpActivity;
+import com.vhn.doan.presentation.debug.TestNotificationActivity;
 
 /**
  * Activity chính cho "Cài đặt và quyền riêng tư"
@@ -63,5 +63,9 @@ public class SettingsAndPrivacyActivity extends BaseActivity {
 
         findViewById(R.id.layoutTermsPolicy).setOnClickListener(v ->
             startActivity(new Intent(this, TermsPolicyActivity.class)));
+
+        // Phần Debug & Testing
+        findViewById(R.id.layoutTestNotifications).setOnClickListener(v ->
+            startActivity(new Intent(this, TestNotificationActivity.class)));
     }
 }

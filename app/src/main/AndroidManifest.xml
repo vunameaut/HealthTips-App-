@@ -108,6 +108,22 @@
             android:exported="false"
             android:theme="@style/Theme.VideoPlayer" />
 
+        <!-- DeepLinkHandlerActivity: Xử lý deep linking từ notifications -->
+        <activity
+            android:name=".presentation.deeplink.DeepLinkHandlerActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:launchMode="singleTask"
+            android:taskAffinity="">
+            <!-- Theme transparent để user không thấy activity này -->
+        </activity>
+
+        <!-- RecommendedTipsActivity: Hiển thị danh sách bài đề xuất -->
+        <activity
+            android:name=".presentation.deeplink.RecommendedTipsActivity"
+            android:exported="false"
+            android:label="Bài viết đề xuất" />
+
         <!-- Màn hình chỉnh sửa thông tin cá nhân -->
         <activity
             android:name=".presentation.profile.EditProfileActivity"
@@ -125,6 +141,12 @@
             android:name=".presentation.debug.FCMTokenActivity"
             android:exported="true"
             android:label="FCM Token - Test Push Notifications" />
+
+        <!-- Test Notification Activity để test deep linking -->
+        <activity
+            android:name=".presentation.debug.TestNotificationActivity"
+            android:exported="true"
+            android:label="Test Notifications" />
 
         <!-- Activity chọn âm thanh cho reminder -->
         <activity

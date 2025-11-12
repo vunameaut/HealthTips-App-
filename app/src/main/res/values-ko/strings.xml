@@ -322,6 +322,11 @@
     <string name="support_help_desc">지원 및 안내 받기</string>
     <string name="terms_policy_desc">이용 약관 및 정책 보기</string>
 
+    <!-- Debug & Testing Section -->
+    <string name="debug_testing_section">🧪 디버그 및 테스트</string>
+    <string name="test_notifications">알림 테스트</string>
+    <string name="test_notifications_desc">댓글 답글 및 건강 팁 알림 테스트</string>
+
     <!-- Missing strings for Snooze Options -->
     <string name="snooze_5_min">5분</string>
     <string name="snooze_10_min">10분</string>

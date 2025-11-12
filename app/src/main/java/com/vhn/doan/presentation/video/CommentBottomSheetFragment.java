@@ -2,6 +2,8 @@ package com.vhn.doan.presentation.video;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -150,6 +152,9 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
         setupRecyclerView();
         setupListeners();
         loadComments();
+
+        // Xử lý scroll từ deep link
+        handleScrollToComment();
     }
 
     private void initViews(View view) {
@@ -581,6 +586,63 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
         if (getContext() != null) {
             Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Scroll đến comment cụ thể từ notification
+     */
+    private void handleScrollToComment() {
+        Bundle args = getArguments();
+        if (args == null) return;
+
+        String scrollToCommentId = args.getString("scroll_to_comment_id");
+        String highlightReplyId = args.getString("highlight_reply_id");
+
+        if (scrollToCommentId != null) {
+            // Delay để đảm bảo RecyclerView đã load xong
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                scrollToCommentAndExpand(scrollToCommentId, highlightReplyId);
+            }, 600);
+        }
+    }
+
+    /**
+     * Scroll đến comment và expand replies nếu cần
+     */
+    private void scrollToCommentAndExpand(String commentId, String highlightReplyId) {
+        // Tìm position của comment
+        int position = findCommentPosition(commentId);
+
+        if (position != -1) {
+            // Scroll đến comment
+            commentsRecyclerView.smoothScrollToPosition(position);
+
+            // Nếu có reply cần highlight, expand replies
+            if (highlightReplyId != null) {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    // Expand replies của comment này
+                    commentAdapter.expandReplies(commentId);
+
+                    // TODO: Highlight specific reply sau khi expand
+                    // commentAdapter.highlightReply(highlightReplyId);
+                }, 800);
+            }
+        }
+    }
+
+    /**
+     * Tìm position của comment trong adapter
+     */
+    private int findCommentPosition(String commentId) {
+        if (commentAdapter == null) return -1;
+
+        for (int i = 0; i < commentAdapter.getItemCount(); i++) {
+            VideoComment comment = commentAdapter.getCommentAt(i);
+            if (comment != null && comment.getId().equals(commentId)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override

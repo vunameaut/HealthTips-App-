@@ -331,6 +331,11 @@
     <string name="support_help_desc">Nhận hỗ trợ và hướng dẫn</string>
     <string name="terms_policy_desc">Xem điều khoản sử dụng và chính sách</string>
 
+    <!-- Phần Debug & Testing -->
+    <string name="debug_testing_section">🧪 Debug &amp; Testing</string>
+    <string name="test_notifications">Test Notifications</string>
+    <string name="test_notifications_desc">Test Comment Reply và Health Tip notifications</string>
+
     <!-- Strings bị thiếu cho Snooze Options -->
     <string name="snooze_5_min">5 phút</string>
     <string name="snooze_10_min">10 phút</string>

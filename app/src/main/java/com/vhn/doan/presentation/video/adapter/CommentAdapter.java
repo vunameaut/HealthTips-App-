@@ -152,6 +152,23 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         android.util.Log.d("CommentAdapter", "Force expanding replies for comment: " + commentId);
     }
 
+    /**
+     * Mở rộng replies cho một comment (alias cho forceExpandReplies)
+     */
+    public void expandReplies(String commentId) {
+        forceExpandReplies(commentId);
+    }
+
+    /**
+     * Lấy comment tại position cụ thể
+     */
+    public VideoComment getCommentAt(int position) {
+        if (position >= 0 && position < comments.size()) {
+            return comments.get(position);
+        }
+        return null;
+    }
+
     @NonNull
     @Override
     public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -1,0 +1,215 @@
+package com.vhn.doan.presentation.deeplink;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity;
+import com.vhn.doan.presentation.video.SingleVideoPlayerActivity;
+import com.vhn.doan.services.MyFirebaseMessagingService;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+/**
+ * Activity trung gian để xử lý deep linking từ notifications
+ * Activity này sẽ parse notification data và điều hướng đến màn hình phù hợp
+ */
+public class DeepLinkHandlerActivity extends AppCompatActivity {
+
+    private static final String TAG = "DeepLinkHandler";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Không cần setContentView vì đây là transparent activity
+
+        Intent receivedIntent = getIntent();
+        if (receivedIntent != null) {
+            handleDeepLink(receivedIntent);
+        } else {
+            finish();
+        }
+    }
+
+    /**
+     * Xử lý deep link dựa trên notification type
+     */
+    private void handleDeepLink(Intent intent) {
+        String notificationType = intent.getStringExtra("notification_type");
+
+        if (notificationType == null) {
+            Log.w(TAG, "No notification type found");
+            finish();
+            return;
+        }
+
+        Log.d(TAG, "Handling deep link for type: " + notificationType);
+
+        switch (notificationType) {
+            case MyFirebaseMessagingService.TYPE_COMMENT_REPLY:
+                handleCommentReplyNotification(intent);
+                break;
+
+            case MyFirebaseMessagingService.TYPE_NEW_HEALTH_TIP:
+                handleNewHealthTipNotification(intent);
+                break;
+
+            case MyFirebaseMessagingService.TYPE_NEW_VIDEO:
+                handleNewVideoNotification(intent);
+                break;
+
+            case MyFirebaseMessagingService.TYPE_COMMENT_LIKE:
+                handleCommentLikeNotification(intent);
+                break;
+
+            case MyFirebaseMessagingService.TYPE_HEALTH_TIP_RECOMMENDATION:
+                handleHealthTipRecommendation(intent);
+                break;
+
+            default:
+                Log.w(TAG, "Unknown notification type: " + notificationType);
+                finish();
+        }
+    }
+
+    /**
+     * Xử lý thông báo reply comment
+     * Mở video và scroll đến comment được reply
+     */
+    private void handleCommentReplyNotification(Intent sourceIntent) {
+        String videoId = sourceIntent.getStringExtra("video_id");
+        String parentCommentId = sourceIntent.getStringExtra("parent_comment_id");
+        String replyCommentId = sourceIntent.getStringExtra("reply_comment_id");
+
+        if (videoId == null) {
+            Log.w(TAG, "Missing video_id for comment reply");
+            finish();
+            return;
+        }
+
+        // Tạo Intent để mở SingleVideoPlayerActivity
+        Intent videoIntent = new Intent(this, SingleVideoPlayerActivity.class);
+        videoIntent.putExtra("video_id", videoId);
+        videoIntent.putExtra("open_comments", true); // Flag để tự động mở comments
+        videoIntent.putExtra("scroll_to_comment", parentCommentId); // Scroll đến comment
+        videoIntent.putExtra("highlight_reply", replyCommentId); // Highlight reply mới
+        videoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(videoIntent);
+        finish();
+    }
+
+    /**
+     * Xử lý thông báo bài viết sức khỏe mới
+     */
+    private void handleNewHealthTipNotification(Intent sourceIntent) {
+        String healthTipId = sourceIntent.getStringExtra("health_tip_id");
+
+        if (healthTipId == null) {
+            Log.w(TAG, "Missing health_tip_id");
+            finish();
+            return;
+        }
+
+        // Tạo Intent để mở HealthTipDetailActivity
+        Intent detailIntent = new Intent(this, HealthTipDetailActivity.class);
+        detailIntent.putExtra("health_tip_id", healthTipId);
+        detailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(detailIntent);
+        finish();
+    }
+
+    /**
+     * Xử lý thông báo recommendations (1-2 bài được đề xuất)
+     */
+    private void handleHealthTipRecommendation(Intent sourceIntent) {
+        String tipsJson = sourceIntent.getStringExtra("tips");
+
+        if (tipsJson == null) {
+            Log.w(TAG, "Missing tips data");
+            finish();
+            return;
+        }
+
+        try {
+            // Parse JSON array của tips
+            JSONArray tipsArray = new JSONArray(tipsJson);
+
+            if (tipsArray.length() == 1) {
+                // Nếu chỉ 1 bài → Mở luôn detail
+                JSONObject tip = tipsArray.getJSONObject(0);
+                String tipId = tip.getString("healthTipId");
+
+                Intent detailIntent = new Intent(this, HealthTipDetailActivity.class);
+                detailIntent.putExtra("health_tip_id", tipId);
+                detailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                startActivity(detailIntent);
+            } else {
+                // Nếu 2 bài → Mở danh sách recommendations
+                // TODO: Tạo RecommendedTipsActivity để hiển thị danh sách
+                Intent listIntent = new Intent(this, RecommendedTipsActivity.class);
+                listIntent.putExtra("tips_json", tipsJson);
+                listIntent.putExtra("title", "Bài viết đề xuất cho bạn");
+                listIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                startActivity(listIntent);
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "Error parsing tips JSON", e);
+        }
+
+        finish();
+    }
+
+    /**
+     * Xử lý thông báo video mới
+     */
+    private void handleNewVideoNotification(Intent sourceIntent) {
+        String videoId = sourceIntent.getStringExtra("video_id");
+
+        if (videoId == null) {
+            Log.w(TAG, "Missing video_id");
+            finish();
+            return;
+        }
+
+        // Tạo Intent để mở SingleVideoPlayerActivity
+        Intent videoIntent = new Intent(this, SingleVideoPlayerActivity.class);
+        videoIntent.putExtra("video_id", videoId);
+        videoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(videoIntent);
+        finish();
+    }
+
+    /**
+     * Xử lý thông báo like comment
+     */
+    private void handleCommentLikeNotification(Intent sourceIntent) {
+        String videoId = sourceIntent.getStringExtra("video_id");
+        String commentId = sourceIntent.getStringExtra("comment_id");
+
+        if (videoId == null || commentId == null) {
+            Log.w(TAG, "Missing data for comment like notification");
+            finish();
+            return;
+        }
+
+        // Mở video và highlight comment được like
+        Intent videoIntent = new Intent(this, SingleVideoPlayerActivity.class);
+        videoIntent.putExtra("video_id", videoId);
+        videoIntent.putExtra("open_comments", true);
+        videoIntent.putExtra("scroll_to_comment", commentId);
+        videoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(videoIntent);
+        finish();
+    }
+}

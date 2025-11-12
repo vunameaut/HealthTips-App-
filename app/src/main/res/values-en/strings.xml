@@ -322,6 +322,11 @@
     <string name="support_help_desc">Get support and guidance</string>
     <string name="terms_policy_desc">View terms of use and policies</string>
 
+    <!-- Debug & Testing Section -->
+    <string name="debug_testing_section">🧪 Debug &amp; Testing</string>
+    <string name="test_notifications">Test Notifications</string>
+    <string name="test_notifications_desc">Test Comment Reply and Health Tip notifications</string>
+
     <!-- Missing strings for Snooze Options -->
     <string name="snooze_5_min">5 minutes</string>
     <string name="snooze_10_min">10 minutes</string>

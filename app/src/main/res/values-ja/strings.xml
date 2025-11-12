@@ -322,6 +322,11 @@
     <string name="support_help_desc">サポートとガイダンスを取得</string>
     <string name="terms_policy_desc">利用規約とポリシーを表示</string>
 
+    <!-- Debug & Testing Section -->
+    <string name="debug_testing_section">🧪 デバッグとテスト</string>
+    <string name="test_notifications">通知をテスト</string>
+    <string name="test_notifications_desc">コメント返信とヘルスティップ通知をテスト</string>
+
     <!-- Missing strings for Snooze Options -->
     <string name="snooze_5_min">5分</string>
     <string name="snooze_10_min">10分</string>

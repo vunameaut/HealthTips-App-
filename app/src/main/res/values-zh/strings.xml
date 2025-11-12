@@ -322,6 +322,11 @@
     <string name="support_help_desc">获取支持和指导</string>
     <string name="terms_policy_desc">查看使用条款和政策</string>
 
+    <!-- Debug & Testing Section -->
+    <string name="debug_testing_section">🧪 调试与测试</string>
+    <string name="test_notifications">测试通知</string>
+    <string name="test_notifications_desc">测试评论回复和健康提示通知</string>
+
     <!-- Missing strings for Snooze Options -->
     <string name="snooze_5_min">5分钟</string>
     <string name="snooze_10_min">10分钟</string>
