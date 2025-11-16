@@ -28,6 +28,7 @@ import com.vhn.doan.data.Reminder;
 import com.vhn.doan.data.repository.ReminderRepository;
 import com.vhn.doan.data.repository.ReminderRepositoryImpl;
 import com.vhn.doan.services.ReminderService;
+import com.vhn.doan.utils.AnalyticsManager;
 import com.vhn.doan.utils.UserSessionManager;
 
 import java.text.SimpleDateFormat;
@@ -87,6 +88,7 @@ public class ReminderEditorActivity extends AppCompatActivity {
     private ReminderRepository reminderRepository;
     private ReminderService reminderService;
     private UserSessionManager userSessionManager;
+    private AnalyticsManager analyticsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +99,7 @@ public class ReminderEditorActivity extends AppCompatActivity {
         reminderRepository = new ReminderRepositoryImpl();
         reminderService = new ReminderService(this);
         userSessionManager = new UserSessionManager(this);
+        analyticsManager = AnalyticsManager.getInstance(this);
         selectedDateTime = Calendar.getInstance();
         dateFormat = new SimpleDateFormat("EEEE, dd/MM/yyyy", Locale.getDefault());
         timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
@@ -439,6 +442,12 @@ public class ReminderEditorActivity extends AppCompatActivity {
                         reminderService.scheduleReminder(reminder);
                     }
 
+                    // 📊 Log Analytics Event: Tạo nhắc nhở
+                    if (analyticsManager != null) {
+                        String repeatTypeName = getRepeatTypeName(reminder.getRepeatType());
+                        analyticsManager.logReminderCreated(repeatTypeName);
+                    }
+
                     showSuccess("Đã tạo nhắc nhở");
                     setResult(RESULT_OK);
                     finish();
@@ -478,5 +487,18 @@ public class ReminderEditorActivity extends AppCompatActivity {
 
     private void showError(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Lấy tên loại lặp lại từ repeat type index
+     */
+    private String getRepeatTypeName(int repeatType) {
+        switch (repeatType) {
+            case 0: return "no_repeat";
+            case 1: return "daily";
+            case 2: return "weekly";
+            case 3: return "monthly";
+            default: return "unknown";
+        }
     }
 }

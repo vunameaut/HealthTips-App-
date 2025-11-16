@@ -30,6 +30,7 @@ import com.vhn.doan.data.repository.FavoriteRepository;
 import com.vhn.doan.data.repository.FavoriteRepositoryImpl;
 import com.vhn.doan.data.repository.HealthTipRepository;
 import com.vhn.doan.data.repository.HealthTipRepositoryImpl;
+import com.vhn.doan.utils.AnalyticsManager;
 import com.vhn.doan.utils.UserSessionManager;
 
 import java.text.SimpleDateFormat;
@@ -66,8 +67,12 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     // Presenter
     private HealthTipDetailPresenter presenter;
 
+    // Analytics
+    private AnalyticsManager analyticsManager;
+
     // Data
     private String healthTipId;
+    private HealthTip currentHealthTip;
     private boolean isLiked = false;
     private boolean isFavorite = false;
 
@@ -80,6 +85,34 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         return intent;
     }
 
+    /**
+     * Xử lý deep link từ Intent
+     * Hỗ trợ format: healthtips://tip/{tipId}
+     * @param intent Intent chứa deep link
+     * @return tipId từ deep link, hoặc null nếu không hợp lệ
+     */
+    private String handleDeepLink(Intent intent) {
+        if (intent == null || intent.getData() == null) {
+            return null;
+        }
+
+        android.net.Uri uri = intent.getData();
+
+        // Kiểm tra scheme và host
+        if (!"healthtips".equals(uri.getScheme()) || !"tip".equals(uri.getHost())) {
+            return null;
+        }
+
+        // Lấy tipId từ path
+        // Format: healthtips://tip/{tipId}
+        String path = uri.getPath();
+        if (path != null && path.startsWith("/")) {
+            return path.substring(1); // Bỏ dấu "/" ở đầu
+        }
+
+        return null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,8 +121,13 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         // Khởi tạo UI components
         initViews();
 
-        // Lấy healthTipId từ Intent
+        // Lấy healthTipId từ Intent (hỗ trợ cả deep link và intent thường)
         healthTipId = getIntent().getStringExtra(EXTRA_HEALTH_TIP_ID);
+
+        // Kiểm tra xem có phải deep link không
+        if (healthTipId == null || healthTipId.isEmpty()) {
+            healthTipId = handleDeepLink(getIntent());
+        }
 
         if (healthTipId == null || healthTipId.isEmpty()) {
             showError("ID bài viết không hợp lệ");
@@ -99,6 +137,9 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
         // 🎯 UPDATE ACCESS TIME KHI USER XEM CHI TIẾT (LRU tracking)
         CacheManager.getInstance(this).updateAccessTime(healthTipId);
+
+        // Khởi tạo Analytics Manager
+        analyticsManager = AnalyticsManager.getInstance(this);
 
         // Khởi tạo presenter
         HealthTipRepository repository = new HealthTipRepositoryImpl(this);
@@ -251,6 +292,9 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
     @Override
     public void displayHealthTipDetails(HealthTip healthTip) {
+        // Lưu healthTip hiện tại
+        this.currentHealthTip = healthTip;
+
         // Hiển thị thông tin chi tiết
         textViewTitle.setText(healthTip.getTitle());
         textViewTitle.setVisibility(View.VISIBLE);
@@ -320,6 +364,15 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
         // Hiển thị nội dung với animation
         showContentViewsWithAnimation();
+
+        // 📊 Log Analytics Event: Xem chi tiết health tip
+        if (analyticsManager != null) {
+            analyticsManager.logViewHealthTip(
+                    healthTipId,
+                    healthTip.getTitle(),
+                    healthTip.getCategoryName()
+            );
+        }
     }
 
     /**
@@ -436,8 +489,16 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     public void updateFavoriteStatus(boolean isFavorite) {
         if (isFavorite) {
             fabFavorite.setImageResource(R.drawable.ic_favorite);
+            // 📊 Log Analytics Event: Thêm vào yêu thích
+            if (analyticsManager != null && currentHealthTip != null) {
+                analyticsManager.logTipFavorite(healthTipId, currentHealthTip.getTitle());
+            }
         } else {
             fabFavorite.setImageResource(R.drawable.ic_favorite_border);
+            // 📊 Log Analytics Event: Bỏ khỏi yêu thích
+            if (analyticsManager != null && currentHealthTip != null) {
+                analyticsManager.logTipUnfavorite(healthTipId, currentHealthTip.getTitle());
+            }
         }
     }
 
@@ -447,9 +508,17 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         if (isLiked) {
             buttonLike.setText("❤️ Đã thích");
             buttonLike.setTextColor(getResources().getColor(R.color.primary_button_start));
+            // 📊 Log Analytics Event: Like tip
+            if (analyticsManager != null && currentHealthTip != null) {
+                analyticsManager.logTipLike(healthTipId, currentHealthTip.getTitle());
+            }
         } else {
             buttonLike.setText("🤍 Thích");
             buttonLike.setTextColor(getResources().getColor(R.color.text_secondary));
+            // 📊 Log Analytics Event: Unlike tip
+            if (analyticsManager != null && currentHealthTip != null) {
+                analyticsManager.logTipUnlike(healthTipId, currentHealthTip.getTitle());
+            }
         }
     }
 
@@ -469,6 +538,11 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_TEXT, content);
         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_tip)));
+
+        // 📊 Log Analytics Event: Share tip
+        if (analyticsManager != null && currentHealthTip != null) {
+            analyticsManager.logTipShare(healthTipId, currentHealthTip.getTitle());
+        }
     }
 
     @Override

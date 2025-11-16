@@ -25,6 +25,7 @@ import com.vhn.doan.data.repository.OfflineVideoRepositoryImpl;
 import com.vhn.doan.presentation.base.BaseFragment;
 import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 import com.vhn.doan.presentation.video.adapter.VideoAdapter;
+import com.vhn.doan.utils.AnalyticsManager;
 import com.vhn.doan.utils.EventBus;
 import com.vhn.doan.utils.SharedPreferencesHelper;
 import com.vhn.doan.utils.NetworkMonitor;
@@ -55,6 +56,9 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
     // Firebase Authentication
     private FirebaseAuth firebaseAuth;
 
+    // Analytics
+    private AnalyticsManager analyticsManager;
+
     private Observer<Map<String, Boolean>> videoLikeObserver;
     private EventBus eventBus;
 
@@ -81,6 +85,9 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
 
         // Khởi tạo Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance();
+
+        // Khởi tạo Analytics Manager
+        analyticsManager = AnalyticsManager.getInstance(requireContext());
 
         // Khởi tạo EventBus
         eventBus = EventBus.getInstance();
@@ -167,6 +174,13 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
                             videoAdapter.playVideoAt(position, recyclerView);
                             presenter.incrementViewCount(position);
 
+                            // 📊 Log Analytics Event: Xem video
+                            List<ShortVideo> videos = videoAdapter.getVideos();
+                            if (analyticsManager != null && videos != null && position < videos.size()) {
+                                ShortVideo video = videos.get(position);
+                                analyticsManager.logVideoView(video.getId(), video.getTitle(), position);
+                            }
+
                             // Kiểm tra và cập nhật trạng thái like của video hiện tại
                             presenter.checkLikeStatusForVideo(position);
                         }
@@ -185,12 +199,22 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
 
             @Override
             public void onLikeClick(ShortVideo video, int position) {
+                // 📊 Log Analytics Event: Like video
+                if (analyticsManager != null && video != null) {
+                    analyticsManager.logVideoLike(video.getId(), video.getTitle());
+                }
+
                 // Gọi presenter để xử lý like/unlike
                 presenter.toggleLike(position);
             }
 
             @Override
             public void onShareClick(ShortVideo video, int position) {
+                // 📊 Log Analytics Event: Share video
+                if (analyticsManager != null && video != null) {
+                    analyticsManager.logVideoShare(video.getId(), video.getTitle());
+                }
+
                 // Gọi presenter để xử lý share
                 presenter.onShareClick(position);
             }
@@ -460,11 +484,27 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
 
-            String shareText = "Xem video: " + video.getTitle() + "\n" +
-                             video.getCaption() + "\n\n" +
-                             "Chia sẻ từ HealthTips App";
+            // Tạo nội dung share với deep link
+            StringBuilder shareText = new StringBuilder();
+            shareText.append("🎥 ").append(video.getTitle()).append("\n\n");
 
-            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+            // Thêm caption nếu có
+            if (video.getCaption() != null && !video.getCaption().isEmpty()) {
+                // Giới hạn caption tối đa 150 ký tự
+                String caption = video.getCaption();
+                if (caption.length() > 150) {
+                    shareText.append(caption.substring(0, 150)).append("...");
+                } else {
+                    shareText.append(caption);
+                }
+                shareText.append("\n\n");
+            }
+
+            // Thêm deep link để mở video trong app
+            shareText.append("📱 Mở trong app: healthtips://video/").append(video.getId());
+            shareText.append("\n\n💚 Tải app HealthTips để xem thêm video sức khỏe hữu ích!");
+
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText.toString());
             startActivity(Intent.createChooser(shareIntent, "Chia sẻ video"));
 
         } catch (Exception e) {

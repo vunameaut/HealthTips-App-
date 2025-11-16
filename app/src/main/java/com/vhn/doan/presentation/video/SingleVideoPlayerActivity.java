@@ -91,6 +91,11 @@ public class SingleVideoPlayerActivity extends AppCompatActivity {
         String videoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
         ShortVideo videoObject = (ShortVideo) getIntent().getSerializableExtra(EXTRA_VIDEO_OBJECT);
 
+        // Kiểm tra xem có phải deep link từ share không
+        if (videoId == null) {
+            videoId = handleShareDeepLink(getIntent());
+        }
+
         if (videoId != null) {
             // Nếu có video object đầy đủ, truyền nó vào fragment
             if (videoObject != null) {
@@ -111,6 +116,34 @@ public class SingleVideoPlayerActivity extends AppCompatActivity {
         if (btnBackVideo != null) {
             btnBackVideo.setOnClickListener(v -> onBackPressed());
         }
+    }
+
+    /**
+     * Xử lý deep link từ share video
+     * Hỗ trợ format: healthtips://video/{videoId}
+     * @param intent Intent chứa deep link
+     * @return videoId từ deep link, hoặc null nếu không hợp lệ
+     */
+    private String handleShareDeepLink(Intent intent) {
+        if (intent == null || intent.getData() == null) {
+            return null;
+        }
+
+        android.net.Uri uri = intent.getData();
+
+        // Kiểm tra scheme và host
+        if (!"healthtips".equals(uri.getScheme()) || !"video".equals(uri.getHost())) {
+            return null;
+        }
+
+        // Lấy videoId từ path
+        // Format: healthtips://video/{videoId}
+        String path = uri.getPath();
+        if (path != null && path.startsWith("/")) {
+            return path.substring(1); // Bỏ dấu "/" ở đầu
+        }
+
+        return null;
     }
 
     @Override

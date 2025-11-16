@@ -214,11 +214,31 @@ public class HealthTipDetailPresenterImpl implements HealthTipDetailPresenter {
             return;
         }
 
-        String shareText = "Chia sẻ mẹo sức khỏe: " + currentHealthTip.getTitle() + "\n\n" +
-                          currentHealthTip.getContent() + "\n\nTải app để xem thêm nhiều mẹo sức khỏe hữu ích!";
+        // Tạo nội dung share với deep link
+        StringBuilder shareText = new StringBuilder();
+        shareText.append("🌟 ").append(currentHealthTip.getTitle()).append("\n\n");
+
+        // Thêm excerpt hoặc một phần nội dung ngắn gọn
+        String excerpt = currentHealthTip.getExcerpt();
+        if (excerpt != null && !excerpt.isEmpty()) {
+            shareText.append(excerpt);
+        } else {
+            // Nếu không có excerpt, lấy 200 ký tự đầu của content
+            String content = currentHealthTip.getContent();
+            if (content != null && !content.isEmpty()) {
+                if (content.length() > 200) {
+                    shareText.append(content.substring(0, 200)).append("...");
+                } else {
+                    shareText.append(content);
+                }
+            }
+        }
+
+        shareText.append("\n\n📱 Mở trong app: healthtips://tip/").append(tipId);
+        shareText.append("\n\n💚 Tải app HealthTips để xem thêm nhiều mẹo sức khỏe hữu ích!");
 
         if (isViewAttached()) {
-            view.shareContent(shareText);
+            view.shareContent(shareText.toString());
         }
     }
 

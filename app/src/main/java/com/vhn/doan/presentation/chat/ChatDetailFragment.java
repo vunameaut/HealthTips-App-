@@ -23,6 +23,7 @@ import com.vhn.doan.R;
 import com.vhn.doan.data.ChatMessage;
 import com.vhn.doan.data.repository.ChatRepositoryImpl;
 import com.vhn.doan.presentation.home.HomeActivity;
+import com.vhn.doan.utils.AnalyticsManager;
 
 import java.util.List;
 
@@ -52,6 +53,7 @@ public class ChatDetailFragment extends Fragment implements ChatDetailContract.V
     private ChatAdapter chatAdapter;
     private LinearLayoutManager layoutManager;
     private ChatDetailContract.Presenter presenter;
+    private AnalyticsManager analyticsManager;
 
     // Arguments
     private String conversationId;
@@ -86,6 +88,12 @@ public class ChatDetailFragment extends Fragment implements ChatDetailContract.V
         initViews(view);
         setupRecyclerView();
         setupListeners();
+
+        // Khởi tạo Analytics Manager
+        if (getContext() != null) {
+            analyticsManager = AnalyticsManager.getInstance(getContext());
+        }
+
         initPresenter();
         presenter.attachView(this);
         presenter.initialize(conversationId, conversationTitle);
@@ -149,6 +157,11 @@ public class ChatDetailFragment extends Fragment implements ChatDetailContract.V
         String message = etMessageInput.getText() != null ? etMessageInput.getText().toString().trim() : "";
 
         if (!TextUtils.isEmpty(message)) {
+            // 📊 Log Analytics Event: Gửi tin nhắn chat AI
+            if (analyticsManager != null && conversationId != null) {
+                analyticsManager.logAiChatMessage(conversationId, message.length());
+            }
+
             if (presenter != null) {
                 presenter.sendMessage(message);
             }

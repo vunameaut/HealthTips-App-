@@ -75,8 +75,21 @@
 
         <activity
             android:name=".presentation.healthtip.detail.HealthTipDetailActivity"
-            android:exported="false"
-            android:theme="@style/Theme.HealthTipDetail" />
+            android:exported="true"
+            android:theme="@style/Theme.HealthTipDetail">
+            <!-- Deep Link Support: Cho phép mở app từ link chia sẻ -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Custom URL scheme: healthtips://tip/{tipId} -->
+                <data
+                    android:scheme="healthtips"
+                    android:host="tip"
+                    android:pathPattern="/.*" />
+            </intent-filter>
+        </activity>
 
         <!-- Activity Test cho giao diện mới -->
         <activity
@@ -99,8 +112,21 @@
         <!-- SingleVideoPlayerActivity: Phát video đơn lẻ từ search results -->
         <activity
             android:name=".presentation.video.SingleVideoPlayerActivity"
-            android:exported="false"
-            android:theme="@style/Theme.VideoPlayer" />
+            android:exported="true"
+            android:theme="@style/Theme.VideoPlayer">
+            <!-- Deep Link Support: Cho phép mở video từ link chia sẻ -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Custom URL scheme: healthtips://video/{videoId} -->
+                <data
+                    android:scheme="healthtips"
+                    android:host="video"
+                    android:pathPattern="/.*" />
+            </intent-filter>
+        </activity>
 
         <!-- LikedVideosPlayerActivity: Phát video đã like với khả năng lướt -->
         <activity

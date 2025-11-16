@@ -28,6 +28,7 @@ import com.vhn.doan.data.repository.SearchRepositoryImpl;
 import com.vhn.doan.presentation.healthtip.detail.HealthTipDetailActivity;
 import com.vhn.doan.presentation.video.SingleVideoPlayerActivity;
 import com.vhn.doan.presentation.video.VideoActivity;
+import com.vhn.doan.utils.AnalyticsManager;
 import com.vhn.doan.utils.FirebaseAuthHelper;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
     private ViewPager2 viewPagerSearch;
 
     private SearchContract.Presenter mPresenter;
+    private AnalyticsManager analyticsManager;
     private SearchHistoryAdapter historyAdapter;
     private List<SearchHistory> searchHistoryList = new ArrayList<>();
     private List<SearchHistory> displayedHistoryList = new ArrayList<>();
@@ -83,6 +85,9 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
 
         // Khởi tạo các view
         initViews();
+
+        // Khởi tạo Analytics Manager
+        analyticsManager = AnalyticsManager.getInstance(this);
 
         // Khởi tạo presenter
         FirebaseAuthHelper authHelper = new FirebaseAuthHelper();
@@ -266,6 +271,11 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
         if (keyword != null && !keyword.isEmpty()) {
             // Ẩn bàn phím ảo khi thực hiện tìm kiếm
             hideKeyboard();
+
+            // 📊 Log Analytics Event: Tìm kiếm
+            if (analyticsManager != null) {
+                analyticsManager.logSearch(keyword, null);
+            }
 
             // Thực hiện tìm kiếm
             mPresenter.search(keyword);
