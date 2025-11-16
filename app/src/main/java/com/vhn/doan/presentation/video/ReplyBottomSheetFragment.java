@@ -3,6 +3,7 @@ package com.vhn.doan.presentation.video;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import com.vhn.doan.data.VideoComment;
 import com.vhn.doan.data.repository.FirebaseVideoRepositoryImpl;
 import com.vhn.doan.data.repository.VideoRepository;
 import com.vhn.doan.utils.SharedPreferencesHelper;
+import com.vhn.doan.utils.VercelApiHelper;
 
 /**
  * Bottom Sheet Fragment để trả lời bình luận
@@ -229,6 +231,27 @@ public class ReplyBottomSheetFragment extends BottomSheetDialogFragment {
                     if (replyAddedListener != null) {
                         replyAddedListener.onReplyAdded(reply, parentCommentId);
                     }
+
+                    // Gửi thông báo đến người được reply
+                    VercelApiHelper.getInstance(getContext())
+                        .sendCommentReplyNotification(
+                            videoId,
+                            parentCommentId,
+                            reply.getId(),
+                            currentUserId,
+                            new VercelApiHelper.ApiCallback() {
+                                @Override
+                                public void onSuccess(org.json.JSONObject response) {
+                                    Log.d("ReplyBottomSheet", "Notification sent successfully: " + response.toString());
+                                }
+
+                                @Override
+                                public void onError(String error) {
+                                    Log.e("ReplyBottomSheet", "Failed to send notification: " + error);
+                                    // Không hiển thị lỗi cho user vì reply đã thành công
+                                }
+                            }
+                        );
 
                     showSuccess("Đã gửi câu trả lời");
                     dismiss();
