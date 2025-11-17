@@ -41,12 +41,22 @@ public class RecommendedTipsActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate started");
+
         setContentView(R.layout.activity_recommended_tips);
+        Log.d(TAG, "Layout set");
 
         setupActionBar();
+        Log.d(TAG, "ActionBar setup complete");
+
         setupRecyclerView();
+        Log.d(TAG, "RecyclerView setup complete");
+
         parseIntentData();
+        Log.d(TAG, "Intent data parsed, tipIds count: " + tipIds.size());
+
         loadRecommendedTips();
+        Log.d(TAG, "loadRecommendedTips called");
     }
 
     private void setupActionBar() {
@@ -68,27 +78,36 @@ public class RecommendedTipsActivity extends AppCompatActivity
 
     private void parseIntentData() {
         String tipsJson = getIntent().getStringExtra("tips_json");
+        Log.d(TAG, "parseIntentData - tips_json: " + tipsJson);
 
         if (tipsJson != null) {
             try {
                 JSONArray tipsArray = new JSONArray(tipsJson);
+                Log.d(TAG, "JSON array length: " + tipsArray.length());
 
                 for (int i = 0; i < tipsArray.length(); i++) {
                     JSONObject tipObj = tipsArray.getJSONObject(i);
                     String tipId = tipObj.getString("healthTipId");
                     tipIds.add(tipId);
+                    Log.d(TAG, "Added tip ID: " + tipId);
                 }
 
                 Log.d(TAG, "Parsed " + tipIds.size() + " tip IDs from notification");
             } catch (JSONException e) {
                 Log.e(TAG, "Error parsing tips JSON", e);
+                Log.e(TAG, "JSON content: " + tipsJson);
                 showError("Lỗi xử lý dữ liệu");
             }
+        } else {
+            Log.w(TAG, "tips_json is null!");
         }
     }
 
     private void loadRecommendedTips() {
+        Log.d(TAG, "loadRecommendedTips - tipIds.size: " + tipIds.size());
+
         if (tipIds.isEmpty()) {
+            Log.w(TAG, "No tips to load!");
             showError("Không có bài viết nào");
             return;
         }
@@ -97,6 +116,7 @@ public class RecommendedTipsActivity extends AppCompatActivity
         int[] loadedCount = {0};
 
         for (String tipId : tipIds) {
+            Log.d(TAG, "Loading tip: " + tipId);
             healthTipRepository.getHealthTipDetail(tipId, new HealthTipRepository.SingleHealthTipCallback() {
                 @Override
                 public void onSuccess(HealthTip healthTip) {

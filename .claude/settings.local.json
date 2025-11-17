@@ -21,7 +21,8 @@
       "Bash(del \"D:\\app\\HealthTips-App-\\app\\src\\main\\java\\com\\vhn\\doan\\data\\local\\HealthTipDao.java\")",
       "Bash(powershell -Command \"Get-Content ''D:\\app\\HealthTips-App-\\thongbao.md'' | Select-Object -Last 100\")",
       "Bash(powershell -Command:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(adb install:*)"
     ],
     "deny": [],
     "ask": []

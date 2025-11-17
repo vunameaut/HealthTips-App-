@@ -119,8 +119,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 break;
 
             case TYPE_HEALTH_TIP_RECOMMENDATION:
-                intent.putExtra("tips", data.get("tips"));
+                // DeepLinkHandlerActivity expect "tips_json" key
+                String tipsJson = data.get("tips");
+                intent.putExtra("tips_json", tipsJson);
+                intent.putExtra("tips", tipsJson); // Backward compatibility
                 intent.putExtra("tips_count", data.get("tipsCount"));
+                Log.d(TAG, "Recommendation notification data: tips=" + tipsJson);
                 break;
         }
 

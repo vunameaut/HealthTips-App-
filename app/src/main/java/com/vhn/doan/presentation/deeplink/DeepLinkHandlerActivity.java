@@ -131,6 +131,9 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
     private void handleHealthTipRecommendation(Intent sourceIntent) {
         String tipsJson = sourceIntent.getStringExtra("tips");
 
+        Log.d(TAG, "handleHealthTipRecommendation called");
+        Log.d(TAG, "tips from intent: " + tipsJson);
+
         if (tipsJson == null) {
             Log.w(TAG, "Missing tips data");
             finish();
@@ -140,11 +143,14 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
         try {
             // Parse JSON array của tips
             JSONArray tipsArray = new JSONArray(tipsJson);
+            Log.d(TAG, "Parsed JSON array with " + tipsArray.length() + " tips");
 
             if (tipsArray.length() == 1) {
                 // Nếu chỉ 1 bài → Mở luôn detail
                 JSONObject tip = tipsArray.getJSONObject(0);
                 String tipId = tip.getString("healthTipId");
+
+                Log.d(TAG, "Opening detail for single tip: " + tipId);
 
                 Intent detailIntent = new Intent(this, HealthTipDetailActivity.class);
                 detailIntent.putExtra("health_tip_id", tipId);
@@ -152,8 +158,9 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
 
                 startActivity(detailIntent);
             } else {
-                // Nếu 2 bài → Mở danh sách recommendations
-                // TODO: Tạo RecommendedTipsActivity để hiển thị danh sách
+                // Nếu nhiều bài → Mở danh sách recommendations
+                Log.d(TAG, "Opening RecommendedTipsActivity for " + tipsArray.length() + " tips");
+
                 Intent listIntent = new Intent(this, RecommendedTipsActivity.class);
                 listIntent.putExtra("tips_json", tipsJson);
                 listIntent.putExtra("title", "Bài viết đề xuất cho bạn");
@@ -163,6 +170,7 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
             }
         } catch (JSONException e) {
             Log.e(TAG, "Error parsing tips JSON", e);
+            Log.e(TAG, "JSON content was: " + tipsJson);
         }
 
         finish();
