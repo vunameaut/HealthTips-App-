@@ -126,7 +126,8 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
     }
 
     /**
-     * Xử lý thông báo recommendations (1-2 bài được đề xuất)
+     * Xử lý thông báo recommendations
+     * Luôn mở bài viết đầu tiên (hoặc bài có score cao nhất)
      */
     private void handleHealthTipRecommendation(Intent sourceIntent) {
         String tipsJson = sourceIntent.getStringExtra("tips");
@@ -145,29 +146,23 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
             JSONArray tipsArray = new JSONArray(tipsJson);
             Log.d(TAG, "Parsed JSON array with " + tipsArray.length() + " tips");
 
-            if (tipsArray.length() == 1) {
-                // Nếu chỉ 1 bài → Mở luôn detail
-                JSONObject tip = tipsArray.getJSONObject(0);
-                String tipId = tip.getString("healthTipId");
-
-                Log.d(TAG, "Opening detail for single tip: " + tipId);
-
-                Intent detailIntent = new Intent(this, HealthTipDetailActivity.class);
-                detailIntent.putExtra("health_tip_id", tipId);
-                detailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                startActivity(detailIntent);
-            } else {
-                // Nếu nhiều bài → Mở danh sách recommendations
-                Log.d(TAG, "Opening RecommendedTipsActivity for " + tipsArray.length() + " tips");
-
-                Intent listIntent = new Intent(this, RecommendedTipsActivity.class);
-                listIntent.putExtra("tips_json", tipsJson);
-                listIntent.putExtra("title", "Bài viết đề xuất cho bạn");
-                listIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                startActivity(listIntent);
+            if (tipsArray.length() == 0) {
+                Log.w(TAG, "Empty tips array");
+                finish();
+                return;
             }
+
+            // Luôn mở bài đầu tiên (bài có score cao nhất từ recommendation engine)
+            JSONObject firstTip = tipsArray.getJSONObject(0);
+            String tipId = firstTip.getString("healthTipId");
+
+            Log.d(TAG, "Opening detail for recommended tip: " + tipId);
+
+            Intent detailIntent = new Intent(this, HealthTipDetailActivity.class);
+            detailIntent.putExtra("health_tip_id", tipId);
+            detailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            startActivity(detailIntent);
         } catch (JSONException e) {
             Log.e(TAG, "Error parsing tips JSON", e);
             Log.e(TAG, "JSON content was: " + tipsJson);
