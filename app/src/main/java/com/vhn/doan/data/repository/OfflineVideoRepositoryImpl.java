@@ -270,6 +270,18 @@ public class OfflineVideoRepositoryImpl implements VideoRepository {
     }
 
     @Override
+    public void trackVideoView(String videoId, String userId) {
+        // Delegate to Firebase repo
+        firebaseRepo.trackVideoView(videoId, userId);
+    }
+
+    @Override
+    public void trackVideoInteraction(String videoId, String userId, String interactionType, long watchTimeMs) {
+        // Delegate to Firebase repo
+        firebaseRepo.trackVideoInteraction(videoId, userId, interactionType, watchTimeMs);
+    }
+
+    @Override
     public void cleanup() {
         // Delegate to Firebase repo để cleanup listeners
         firebaseRepo.cleanup();

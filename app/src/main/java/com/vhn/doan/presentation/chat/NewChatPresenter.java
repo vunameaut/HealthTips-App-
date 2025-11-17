@@ -11,6 +11,7 @@ import com.vhn.doan.data.ChatMessage;
 import com.vhn.doan.data.Conversation;
 import com.vhn.doan.data.repository.ChatRepository;
 import com.vhn.doan.data.repository.RepositoryCallback;
+import com.vhn.doan.utils.PersonalizedQuestionHelper;
 
 import java.lang.reflect.Type;
 import java.util.Calendar;
@@ -200,44 +201,28 @@ public class NewChatPresenter implements NewChatContract.Presenter {
 
     @Override
     public void loadSuggestedQuestions() {
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null) {
-            if (isViewAttached()) {
-                view.hideLoadingSuggestedQuestions();
-                // Sử dụng câu hỏi mặc định nếu người dùng chưa đăng nhập
-                setDefaultSuggestedQuestions();
-            }
-            return;
-        }
-
-        String userId = currentUser.getUid();
         if (isViewAttached()) {
             view.showLoadingSuggestedQuestions();
         }
 
-        // Lấy dữ liệu từ userPreferences trong Firebase
-        chatRepository.getUserPreferences(userId, new RepositoryCallback<List<String>>() {
+        // Sử dụng PersonalizedQuestionHelper để generate câu hỏi cá nhân hóa
+        // dựa trên favorite categories và viewing history
+        PersonalizedQuestionHelper.generatePersonalizedQuestions(new PersonalizedQuestionHelper.QuestionCallback() {
             @Override
-            public void onSuccess(List<String> keywords) {
+            public void onQuestionsGenerated(List<String> questions) {
+                Log.d(TAG, "Generated " + questions.size() + " personalized questions");
                 if (isViewAttached()) {
                     view.hideLoadingSuggestedQuestions();
-
-                    if (keywords != null && !keywords.isEmpty()) {
-                        // Tạo câu hỏi gợi ý dựa trên từ khóa người dùng
-                        List<String> suggestedQuestions = generateQuestionsFromKeywords(keywords);
-                        view.updateSuggestedQuestions(suggestedQuestions);
-                    } else {
-                        // Sử dụng câu hỏi mặc định nếu không có từ khóa
-                        setDefaultSuggestedQuestions();
-                    }
+                    view.updateSuggestedQuestions(questions);
                 }
             }
 
             @Override
             public void onError(String error) {
-                Log.e(TAG, "Failed to load user preferences: " + error);
+                Log.e(TAG, "Error generating personalized questions: " + error);
                 if (isViewAttached()) {
                     view.hideLoadingSuggestedQuestions();
+                    // Fallback to default questions
                     setDefaultSuggestedQuestions();
                 }
             }

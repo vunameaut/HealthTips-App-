@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.vhn.doan.data.Category;
 import com.vhn.doan.data.HealthTip;
 import com.vhn.doan.data.repository.CategoryRepository;
@@ -148,22 +150,47 @@ public class HomePresenter {
             }
         });
 
-        // Tải mẹo đề xuất cho người dùng (chỉ 10 bài phù hợp cho hôm nay)
-        healthTipRepository.getTodayRecommendedHealthTips(HEALTH_TIP_LIMIT, new HealthTipRepository.HealthTipCallback() {
-            @Override
-            public void onSuccess(java.util.List<HealthTip> healthTips) {
-                if (view != null) {
-                    view.showRecommendedHealthTips(healthTips);
-                }
-            }
+        // Tải mẹo đề xuất CÁ NHÂN HÓA cho người dùng
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            // Người dùng đã đăng nhập → Sử dụng personalized recommendations
+            healthTipRepository.getPersonalizedRecommendations(
+                currentUser.getUid(),
+                HEALTH_TIP_LIMIT,
+                new HealthTipRepository.HealthTipCallback() {
+                    @Override
+                    public void onSuccess(java.util.List<HealthTip> healthTips) {
+                        if (view != null) {
+                            view.showRecommendedHealthTips(healthTips);
+                        }
+                    }
 
-            @Override
-            public void onError(String errorMessage) {
-                if (view != null) {
-                    view.showError("Không thể tải mẹo đề xuất: " + errorMessage);
+                    @Override
+                    public void onError(String errorMessage) {
+                        if (view != null) {
+                            // Không hiển thị lỗi cho user, đã fallback trong repository
+                        }
+                    }
                 }
-            }
-        });
+            );
+        } else {
+            // Chưa đăng nhập → Dùng generic recommendations
+            healthTipRepository.getTodayRecommendedHealthTips(HEALTH_TIP_LIMIT, new HealthTipRepository.HealthTipCallback() {
+                @Override
+                public void onSuccess(java.util.List<HealthTip> healthTips) {
+                    if (view != null) {
+                        view.showRecommendedHealthTips(healthTips);
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (view != null) {
+                        view.showError("Không thể tải mẹo đề xuất: " + errorMessage);
+                    }
+                }
+            });
+        }
 
         // Tải mẹo được thích nhiều nhất
         healthTipRepository.getMostLikedHealthTips(HEALTH_TIP_LIMIT, new HealthTipRepository.HealthTipCallback() {

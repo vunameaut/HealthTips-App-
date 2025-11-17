@@ -204,6 +204,26 @@ public interface VideoRepository {
      */
     void listenToCommentReplies(String videoId, String parentCommentId, CommentsCallback callback);
 
+    // ==================== PERSONALIZATION & TRACKING ====================
+
+    /**
+     * 🎯 Track video view for TikTok-style personalization
+     * Lưu video vào danh sách đã xem để không hiển thị lại
+     * @param videoId ID của video
+     * @param userId ID của người dùng
+     */
+    void trackVideoView(String videoId, String userId);
+
+    /**
+     * 🎯 Track user interaction for learning algorithm
+     * Lưu tương tác để cải thiện đề xuất
+     * @param videoId ID của video
+     * @param userId ID của người dùng
+     * @param interactionType Loại tương tác: "view", "like", "comment", "share"
+     * @param watchTimeMs Thời gian xem (milliseconds)
+     */
+    void trackVideoInteraction(String videoId, String userId, String interactionType, long watchTimeMs);
+
     // ==================== CLEANUP OPERATIONS ====================
 
     /**

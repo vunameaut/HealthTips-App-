@@ -232,6 +232,9 @@ public class VideoPresenter extends BasePresenter<VideoView> {
 
                 // Gửi sự kiện đồng bộ trạng thái like cho toàn ứng dụng
                 eventBus.updateVideoLikeStatus(video.getId(), true);
+
+                // 🎯 NEW: Track like interaction for learning
+                videoRepository.trackVideoInteraction(video.getId(), currentUserId, "like", 0);
             }
 
             @Override
@@ -420,6 +423,11 @@ public class VideoPresenter extends BasePresenter<VideoView> {
                 // Bỏ qua lỗi view count, không ảnh hưởng đến trải nghiệm người dùng
             }
         });
+
+        // 🎯 NEW: Track video view for TikTok-style personalization
+        if (currentUserId != null && !currentUserId.isEmpty()) {
+            videoRepository.trackVideoView(video.getId(), currentUserId);
+        }
     }
 
     /**

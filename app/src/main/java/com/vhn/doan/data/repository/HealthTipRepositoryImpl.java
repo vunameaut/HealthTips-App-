@@ -20,6 +20,7 @@ import com.vhn.doan.data.local.dao.HealthTipDao;
 import com.vhn.doan.data.local.entity.HealthTipEntity;
 import com.vhn.doan.utils.Constants;
 import com.vhn.doan.utils.NetworkUtils;
+import com.vhn.doan.utils.VercelApiHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -857,6 +858,96 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
                 callback.onError(databaseError.getMessage());
             }
         });
+    }
+
+    @Override
+    public void getPersonalizedRecommendations(String userId, int limit, final HealthTipCallback callback) {
+        if (userId == null || userId.trim().isEmpty()) {
+            Log.w(TAG, "UserId is null, falling back to generic recommendations");
+            getRecommendedHealthTips(limit, callback);
+            return;
+        }
+
+        Log.d(TAG, "Getting personalized recommendations for user: " + userId);
+
+        // Gọi API recommendation từ backend
+        VercelApiHelper.getInstance(context).getPersonalizedRecommendations(
+            userId,
+            limit,
+            "hybrid", // Sử dụng hybrid algorithm (content + collaborative + trending)
+            new VercelApiHelper.ApiCallback() {
+                @Override
+                public void onSuccess(org.json.JSONObject response) {
+                    try {
+                        // Parse response
+                        org.json.JSONArray recommendationsArray = response.getJSONArray("recommendations");
+                        Log.d(TAG, "Received " + recommendationsArray.length() + " personalized recommendations");
+
+                        List<String> tipIds = new ArrayList<>();
+                        for (int i = 0; i < recommendationsArray.length(); i++) {
+                            org.json.JSONObject rec = recommendationsArray.getJSONObject(i);
+                            String healthTipId = rec.getString("healthTipId");
+                            tipIds.add(healthTipId);
+                        }
+
+                        // Load chi tiết các tips từ Firebase
+                        loadHealthTipsByIds(tipIds, callback);
+                    } catch (org.json.JSONException e) {
+                        Log.e(TAG, "Error parsing recommendations response", e);
+                        // Fallback to generic recommendations
+                        mainHandler.post(() -> getRecommendedHealthTips(limit, callback));
+                    }
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Error getting personalized recommendations: " + error);
+                    // Fallback to generic recommendations
+                    mainHandler.post(() -> getRecommendedHealthTips(limit, callback));
+                }
+            }
+        );
+    }
+
+    /**
+     * Load chi tiết health tips theo danh sách IDs
+     */
+    private void loadHealthTipsByIds(List<String> tipIds, final HealthTipCallback callback) {
+        if (tipIds.isEmpty()) {
+            mainHandler.post(() -> callback.onSuccess(new ArrayList<>()));
+            return;
+        }
+
+        List<HealthTip> loadedTips = new ArrayList<>();
+        final int[] loadedCount = {0};
+
+        for (String tipId : tipIds) {
+            healthTipsRef.child(tipId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    HealthTip tip = snapshot.getValue(HealthTip.class);
+                    if (tip != null) {
+                        tip.setId(snapshot.getKey());
+                        loadedTips.add(tip);
+                    }
+
+                    loadedCount[0]++;
+                    if (loadedCount[0] == tipIds.size()) {
+                        // Đã load xong tất cả, load category names và trả về
+                        loadCategoryNamesForHealthTips(loadedTips, callback);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    Log.e(TAG, "Error loading tip: " + tipId + " - " + error.getMessage());
+                    loadedCount[0]++;
+                    if (loadedCount[0] == tipIds.size()) {
+                        loadCategoryNamesForHealthTips(loadedTips, callback);
+                    }
+                }
+            });
+        }
     }
 
     @Override

@@ -54,11 +54,14 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
             return;
         }
 
-        // Dữ li���u tạm để collect từ 3 sources
+        // Dữ liệu tạm để collect từ 6 sources
         final List<ShortVideo> allVideos = new ArrayList<>();
         final Map<String, Boolean> userPreferences = new HashMap<>();
+        final List<String> favoriteCategories = new ArrayList<>();
         final List<String> trendingVideoIds = new ArrayList<>();
-        final CountDownLatch latch = new CountDownLatch(3);
+        final Map<String, Long> watchedVideoIds = new HashMap<>(); // 🎯 Watched videos with timestamp
+        final java.util.Set<String> likedVideoIds = new java.util.HashSet<>(); // 🎯 Liked videos
+        final CountDownLatch latch = new CountDownLatch(6); // Tăng lên 6
 
         // 1. Lấy tất cả videos có status == "ready"
         videosRef.orderByChild("status").equalTo("ready")
@@ -120,6 +123,32 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
             latch.countDown();
         }
 
+        // 🎯 NEW: Lấy favorite categories của user
+        if (userId != null && !userId.isEmpty()) {
+            usersRef.child(userId).child("favoriteCategories")
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (DataSnapshot categorySnapshot : dataSnapshot.getChildren()) {
+                                    String categoryName = categorySnapshot.getValue(String.class);
+                                    if (categoryName != null && !categoryName.isEmpty()) {
+                                        favoriteCategories.add(categoryName);
+                                    }
+                                }
+                            }
+                            latch.countDown();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            latch.countDown();
+                        }
+                    });
+        } else {
+            latch.countDown();
+        }
+
         // 3. Lấy trending videos cho country
         if (country != null && !country.isEmpty()) {
             trendingVideosRef.child(country)
@@ -157,12 +186,85 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
             latch.countDown();
         }
 
+        // 🎯 Lấy danh sách videos đã xem của user
+        if (userId != null && !userId.isEmpty()) {
+            usersRef.child(userId).child("watchedVideos")
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (DataSnapshot watchedSnapshot : dataSnapshot.getChildren()) {
+                                    String videoId = watchedSnapshot.getKey();
+                                    Long timestamp = watchedSnapshot.getValue(Long.class);
+                                    if (videoId != null && timestamp != null) {
+                                        watchedVideoIds.put(videoId, timestamp);
+                                    }
+                                }
+                                android.util.Log.d("VideoRepository", "Loaded " + watchedVideoIds.size() + " watched videos for user");
+                            }
+                            latch.countDown();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            android.util.Log.e("VideoRepository", "Error loading watched videos", databaseError.toException());
+                            latch.countDown();
+                        }
+                    });
+        } else {
+            latch.countDown();
+        }
+
+        // 🎯 NEW: Lấy danh sách videos đã like của user
+        if (userId != null && !userId.isEmpty()) {
+            videosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    int likeCount = 0;
+                    for (DataSnapshot videoSnapshot : dataSnapshot.getChildren()) {
+                        String videoId = videoSnapshot.getKey();
+                        if (videoId != null) {
+                            // Check if user liked this video
+                            DataSnapshot likesSnapshot = videoSnapshot.child(Constants.VIDEO_LIKES_REF).child(userId);
+                            if (likesSnapshot.exists()) {
+                                likedVideoIds.add(videoId);
+                                likeCount++;
+                            }
+                        }
+                    }
+                    android.util.Log.d("VideoRepository", "Loaded " + likeCount + " liked videos for user");
+                    latch.countDown();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    android.util.Log.e("VideoRepository", "Error loading liked videos", databaseError.toException());
+                    latch.countDown();
+                }
+            });
+        } else {
+            latch.countDown();
+        }
+
         // Chờ tất cả requests hoàn thành và sắp xếp kết quả
         new Thread(() -> {
             try {
                 // Timeout sau 10 giây
                 if (latch.await(10, TimeUnit.SECONDS)) {
-                    List<ShortVideo> sortedVideos = sortVideosByPreferences(allVideos, userPreferences, trendingVideoIds);
+                    // 🎯 Filter and sort videos with TikTok-style algorithm
+                    List<ShortVideo> sortedVideos = filterAndSortVideosSmartly(
+                        allVideos,
+                        userPreferences,
+                        favoriteCategories,
+                        trendingVideoIds,
+                        watchedVideoIds,
+                        likedVideoIds
+                    );
+
+                    android.util.Log.d("VideoRepository", "Total videos: " + allVideos.size() +
+                        ", Watched: " + watchedVideoIds.size() +
+                        ", Liked: " + likedVideoIds.size() +
+                        ", Final feed: " + sortedVideos.size());
 
                     // Đảm bảo callback được gọi trên Main UI Thread
                     android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
@@ -208,50 +310,159 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
     }
 
     /**
-     * Sắp xếp videos theo thứ tự ưu tiên:
-     * 1. Tags khớp với preferences
-     * 2. Upload date mới nhất
-     * 3. View count cao nhất
-     * 4. Like count cao nhất
+     * 🎯 TikTok-STYLE ALGORITHM: Filter and sort videos intelligently
+     *
+     * Strategy:
+     * 1. Filter out watched AND liked videos (unless all videos are filtered - then recycle)
+     * 2. Categorize videos into groups: Favorite, Trending, Diverse
+     * 3. Mix groups intelligently to prevent boredom
+     * 4. Sort within each group by engagement metrics
      */
-    private List<ShortVideo> sortVideosByPreferences(List<ShortVideo> videos,
-                                                    Map<String, Boolean> userPreferences,
-                                                    List<String> trendingVideoIds) {
-        Collections.sort(videos, new Comparator<ShortVideo>() {
+    private List<ShortVideo> filterAndSortVideosSmartly(
+            List<ShortVideo> videos,
+            Map<String, Boolean> userPreferences,
+            List<String> favoriteCategories,
+            List<String> trendingVideoIds,
+            Map<String, Long> watchedVideoIds,
+            java.util.Set<String> likedVideoIds) {
+
+        // Step 1: Filter watched AND liked videos
+        List<ShortVideo> availableVideos = new ArrayList<>();
+        for (ShortVideo video : videos) {
+            // Loại bỏ video đã xem HOẶC đã like
+            if (!watchedVideoIds.containsKey(video.getId()) && !likedVideoIds.contains(video.getId())) {
+                availableVideos.add(video);
+            }
+        }
+
+        // 🎯 RECYCLING LOGIC: If no available videos, allow all videos again
+        if (availableVideos.isEmpty() && !videos.isEmpty()) {
+            android.util.Log.d("VideoRepository", "All videos watched/liked! Recycling all videos...");
+            availableVideos = new ArrayList<>(videos);
+        }
+
+        // Step 2: Categorize videos into groups
+        List<ShortVideo> favoriteVideos = new ArrayList<>();
+        List<ShortVideo> trendingVideos = new ArrayList<>();
+        List<ShortVideo> diverseVideos = new ArrayList<>();
+
+        for (ShortVideo video : availableVideos) {
+            boolean isFavorite = isFavoriteCategory(video, favoriteCategories) ||
+                               calculateTagMatchScore(video, userPreferences) > 0;
+            boolean isTrending = trendingVideoIds.contains(video.getId());
+
+            if (isFavorite) {
+                favoriteVideos.add(video);
+            } else if (isTrending) {
+                trendingVideos.add(video);
+            } else {
+                diverseVideos.add(video);
+            }
+        }
+
+        // Step 3: Sort each group by engagement
+        Comparator<ShortVideo> engagementComparator = new Comparator<ShortVideo>() {
             @Override
             public int compare(ShortVideo v1, ShortVideo v2) {
-                // 1. Ưu tiên videos có tags khớp với preferences
-                int matchScore1 = calculateTagMatchScore(v1, userPreferences);
-                int matchScore2 = calculateTagMatchScore(v2, userPreferences);
-
-                if (matchScore1 != matchScore2) {
-                    return Integer.compare(matchScore2, matchScore1); // Descending
-                }
-
-                // 2. Ưu tiên trending videos
-                boolean isTrending1 = trendingVideoIds.contains(v1.getId());
-                boolean isTrending2 = trendingVideoIds.contains(v2.getId());
-
-                if (isTrending1 != isTrending2) {
-                    return Boolean.compare(isTrending2, isTrending1); // Trending first
-                }
-
-                // 3. Upload date mới nhất
-                if (v1.getUploadDate() != v2.getUploadDate()) {
-                    return Long.compare(v2.getUploadDate(), v1.getUploadDate()); // Descending
-                }
-
-                // 4. View count cao nhất
-                if (v1.getViewCount() != v2.getViewCount()) {
-                    return Long.compare(v2.getViewCount(), v1.getViewCount()); // Descending
-                }
-
-                // 5. Like count cao nhất
-                return Long.compare(v2.getLikeCount(), v1.getLikeCount()); // Descending
+                // Calculate engagement score
+                double score1 = calculateEngagementScore(v1, userPreferences, favoriteCategories, trendingVideoIds);
+                double score2 = calculateEngagementScore(v2, userPreferences, favoriteCategories, trendingVideoIds);
+                return Double.compare(score2, score1); // Higher score first
             }
-        });
+        };
 
-        return videos;
+        Collections.sort(favoriteVideos, engagementComparator);
+        Collections.sort(trendingVideos, engagementComparator);
+        Collections.sort(diverseVideos, engagementComparator);
+
+        // Step 4: 🎯 SMART MIXING to prevent boredom (like TikTok)
+        // Pattern: 2 favorites → 1 trending → 1 diverse → repeat
+        List<ShortVideo> finalFeed = new ArrayList<>();
+        int favIndex = 0, trendIndex = 0, divIndex = 0;
+        int pattern = 0;
+
+        while (favIndex < favoriteVideos.size() ||
+               trendIndex < trendingVideos.size() ||
+               divIndex < diverseVideos.size()) {
+
+            // Add 2 favorite videos
+            if (pattern == 0 || pattern == 1) {
+                if (favIndex < favoriteVideos.size()) {
+                    finalFeed.add(favoriteVideos.get(favIndex++));
+                }
+            }
+            // Add 1 trending video
+            else if (pattern == 2) {
+                if (trendIndex < trendingVideos.size()) {
+                    finalFeed.add(trendingVideos.get(trendIndex++));
+                } else if (favIndex < favoriteVideos.size()) {
+                    // Fallback to favorite if no trending
+                    finalFeed.add(favoriteVideos.get(favIndex++));
+                }
+            }
+            // Add 1 diverse video
+            else if (pattern == 3) {
+                if (divIndex < diverseVideos.size()) {
+                    finalFeed.add(diverseVideos.get(divIndex++));
+                } else if (favIndex < favoriteVideos.size()) {
+                    // Fallback to favorite if no diverse
+                    finalFeed.add(favoriteVideos.get(favIndex++));
+                }
+            }
+
+            pattern = (pattern + 1) % 4; // Cycle through pattern
+        }
+
+        android.util.Log.d("VideoRepository", "Smart mix - Favorites: " + favoriteVideos.size() +
+            ", Trending: " + trendingVideos.size() +
+            ", Diverse: " + diverseVideos.size() +
+            ", Final: " + finalFeed.size());
+
+        return finalFeed;
+    }
+
+    /**
+     * Calculate engagement score for a video based on multiple factors
+     */
+    private double calculateEngagementScore(ShortVideo video,
+                                           Map<String, Boolean> userPreferences,
+                                           List<String> favoriteCategories,
+                                           List<String> trendingVideoIds) {
+        double score = 0.0;
+
+        // Factor 1: Favorite category (high weight)
+        if (isFavoriteCategory(video, favoriteCategories)) {
+            score += 100.0;
+        }
+
+        // Factor 2: Tag matching (medium-high weight)
+        int tagMatches = calculateTagMatchScore(video, userPreferences);
+        score += tagMatches * 20.0;
+
+        // Factor 3: Trending status (medium weight)
+        if (trendingVideoIds.contains(video.getId())) {
+            score += 50.0;
+        }
+
+        // Factor 4: Engagement metrics (normalized)
+        // Like ratio (likes / views) - max 30 points
+        if (video.getViewCount() > 0) {
+            double likeRatio = (double) video.getLikeCount() / video.getViewCount();
+            score += Math.min(likeRatio * 1000, 30.0);
+        }
+
+        // Factor 5: View count (logarithmic scale) - max 20 points
+        if (video.getViewCount() > 0) {
+            score += Math.min(Math.log10(video.getViewCount()) * 5, 20.0);
+        }
+
+        // Factor 6: Recency (newer videos get boost) - max 15 points
+        long daysSinceUpload = (System.currentTimeMillis() - video.getUploadDate()) / (1000 * 60 * 60 * 24);
+        if (daysSinceUpload < 7) {
+            score += (7 - daysSinceUpload) * 2.0; // New videos get more points
+        }
+
+        return score;
     }
 
     /**
@@ -279,6 +490,31 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
         }
 
         return matchCount;
+    }
+
+    /**
+     * 🎯 NEW: Kiểm tra video có thuộc favorite category không
+     */
+    private boolean isFavoriteCategory(ShortVideo video, List<String> favoriteCategories) {
+        if (video == null || video.getCategoryId() == null ||
+            favoriteCategories == null || favoriteCategories.isEmpty()) {
+            return false;
+        }
+
+        // Lấy category ID/name từ video và check xem có trong favoriteCategories không
+        String videoCategoryId = video.getCategoryId();
+
+        // So sánh với favorite categories (case-insensitive)
+        for (String favCategory : favoriteCategories) {
+            if (favCategory != null &&
+                (favCategory.equalsIgnoreCase(videoCategoryId) ||
+                 videoCategoryId.toLowerCase().contains(favCategory.toLowerCase()) ||
+                 favCategory.toLowerCase().contains(videoCategoryId.toLowerCase()))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -784,6 +1020,54 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                 }
             }
         });
+    }
+
+    /**
+     * 🎯 NEW: Track video view for personalization
+     * Lưu video vào danh sách đã xem của user để không hiển thị lại
+     */
+    public void trackVideoView(String videoId, String userId) {
+        if (videoId == null || videoId.isEmpty() || userId == null || userId.isEmpty()) {
+            return;
+        }
+
+        // Lưu timestamp khi user xem video
+        DatabaseReference watchedRef = usersRef.child(userId).child("watchedVideos").child(videoId);
+        watchedRef.setValue(com.google.firebase.database.ServerValue.TIMESTAMP)
+            .addOnSuccessListener(aVoid -> {
+                android.util.Log.d("VideoRepository", "Tracked view for video: " + videoId);
+            })
+            .addOnFailureListener(e -> {
+                android.util.Log.e("VideoRepository", "Failed to track view for video: " + videoId, e);
+            });
+    }
+
+    /**
+     * 🎯 NEW: Track user interaction with video for learning
+     * Lưu các tương tác (like, comment, watch time) để cải thiện đề xuất
+     */
+    public void trackVideoInteraction(String videoId, String userId, String interactionType, long watchTimeMs) {
+        if (videoId == null || videoId.isEmpty() || userId == null || userId.isEmpty()) {
+            return;
+        }
+
+        Map<String, Object> interaction = new HashMap<>();
+        interaction.put("timestamp", com.google.firebase.database.ServerValue.TIMESTAMP);
+        interaction.put("type", interactionType); // "view", "like", "comment", "share"
+        interaction.put("watchTimeMs", watchTimeMs);
+
+        DatabaseReference interactionRef = usersRef.child(userId)
+            .child("videoInteractions")
+            .child(videoId)
+            .push();
+
+        interactionRef.setValue(interaction)
+            .addOnSuccessListener(aVoid -> {
+                android.util.Log.d("VideoRepository", "Tracked interaction (" + interactionType + ") for video: " + videoId);
+            })
+            .addOnFailureListener(e -> {
+                android.util.Log.e("VideoRepository", "Failed to track interaction for video: " + videoId, e);
+            });
     }
 
     // ==================== HELPER METHODS ====================

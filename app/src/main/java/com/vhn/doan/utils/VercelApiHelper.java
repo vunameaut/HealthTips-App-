@@ -18,18 +18,19 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Helper class để gọi Vercel API Backend cho notifications
- * Backend URL: https://healthtips-notify.vercel.app
+ * Helper class để gọi Vercel API Backend cho notifications & recommendations
+ * Backend URL: https://healthtips-admin.vercel.app
  */
 public class VercelApiHelper {
 
     private static final String TAG = "VercelApiHelper";
-    private static final String BASE_URL = "https://healthtips-notify.vercel.app";
+    private static final String BASE_URL = "https://healthtips-admin.vercel.app";
 
     // API Endpoints
     private static final String ENDPOINT_COMMENT_REPLY = "/api/send-comment-reply";
     private static final String ENDPOINT_NEW_HEALTH_TIP = "/api/send-new-health-tip";
     private static final String ENDPOINT_QUEUE_RECOMMENDATION = "/api/queue-recommendation";
+    private static final String ENDPOINT_GET_RECOMMENDATIONS = "/api/recommendations/generate-auto";
 
     private static VercelApiHelper instance;
     private final OkHttpClient httpClient;
@@ -128,6 +129,30 @@ public class VercelApiHelper {
             makePostRequest(ENDPOINT_QUEUE_RECOMMENDATION, payload, callback);
         } catch (JSONException e) {
             Log.e(TAG, "Error creating queue recommendation payload", e);
+            if (callback != null) {
+                callback.onError("Lỗi tạo dữ liệu: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Lấy personalized recommendations cho user
+     * @param userId ID của user
+     * @param limit Số lượng recommendations cần lấy
+     * @param algorithm Thuật toán: "content", "collaborative", "trending", hoặc "hybrid" (mặc định)
+     * @param callback Callback để nhận kết quả
+     */
+    public void getPersonalizedRecommendations(String userId, int limit, String algorithm, ApiCallback callback) {
+        try {
+            JSONObject payload = new JSONObject();
+            payload.put("userId", userId);
+            payload.put("limit", limit);
+            payload.put("sendNotification", false); // Không gửi notification khi load trang
+            payload.put("algorithm", algorithm != null ? algorithm : "hybrid");
+
+            makePostRequest(ENDPOINT_GET_RECOMMENDATIONS, payload, callback);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error creating recommendations payload", e);
             if (callback != null) {
                 callback.onError("Lỗi tạo dữ liệu: " + e.getMessage());
             }
