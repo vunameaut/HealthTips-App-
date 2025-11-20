@@ -508,8 +508,8 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
         // Force reload nếu categories chưa được load (xảy ra khi recreate do theme change)
         if (!isCategoriesLoaded) {
-            // Hiển thị skeleton loading trước khi load data
-            setupSkeletonLoading();
+            // KHÔNG gọi setupSkeletonLoading() ở đây vì đã được gọi trong onCreateView()
+            // Chỉ cần start presenter để load data
             presenter.start(); // Tải dữ liệu khi Fragment được hiển thị
         }
 
@@ -586,32 +586,61 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     // Triển khai các phương thức của HomeView với skeleton loading
     @Override
     public void showCategories(List<Category> categories) {
+        // Kiểm tra null để tránh crash khi recreate
+        if (categoryAdapter == null || recyclerViewCategories == null) {
+            Log.w(TAG, "showCategories: adapter or recyclerView is null, skipping");
+            return;
+        }
+
+        Log.d(TAG, "showCategories called with " + (categories != null ? categories.size() : 0) + " categories");
+        Log.d(TAG, "Current adapter: " + recyclerViewCategories.getAdapter());
+        Log.d(TAG, "isCategoriesLoaded: " + isCategoriesLoaded);
+
         // Thay thế skeleton adapter bằng real adapter với data
         if (!isCategoriesLoaded) {
+            Log.d(TAG, "First time loading - setting real adapter");
+            // Set adapter NGAY LẬP TỨC (không dùng post)
             recyclerViewCategories.setAdapter(categoryAdapter);
             isCategoriesLoaded = true;
         }
+
+        // Luôn update data (dù lần đầu hay lần sau)
+        Log.d(TAG, "Updating categories data");
         categoryAdapter.updateCategories(categories);
     }
 
     @Override
     public void showRecommendedHealthTips(List<HealthTip> healthTips) {
+        // Kiểm tra null để tránh crash
+        if (featuredTipsAdapter == null || recyclerViewFeaturedTips == null) {
+            Log.w(TAG, "showRecommendedHealthTips: adapter or recyclerView is null, skipping");
+            return;
+        }
+
+        Log.d(TAG, "showRecommendedHealthTips called with " + (healthTips != null ? healthTips.size() : 0) + " tips");
+        Log.d(TAG, "isFeaturedTipsLoaded: " + isFeaturedTipsLoaded);
+
         // Setup Featured Tips Carousel với auto-scroll
         if (!isFeaturedTipsLoaded) {
+            Log.d(TAG, "First time loading - setting featured tips adapter");
+            // Set adapter NGAY LẬP TỨC
             recyclerViewFeaturedTips.setAdapter(featuredTipsAdapter);
             isFeaturedTipsLoaded = true;
 
-            // Đặt vị trí bắt đầu ở giữa để tạo hiệu ứng vòng tròn
+            // Post scroll position và auto-scroll (cần đợi layout)
             recyclerViewFeaturedTips.post(() -> {
-                int startPosition = featuredTipsAdapter.getStartPosition();
-                recyclerViewFeaturedTips.scrollToPosition(startPosition);
-                currentFeaturedPosition = startPosition;
+                if (recyclerViewFeaturedTips != null && featuredTipsAdapter != null) {
+                    int startPosition = featuredTipsAdapter.getStartPosition();
+                    recyclerViewFeaturedTips.scrollToPosition(startPosition);
+                    currentFeaturedPosition = startPosition;
+                    startAutoScrollForFeatured();
+                }
             });
         }
-        featuredTipsAdapter.updateHealthTips(healthTips);
 
-        // Bắt đầu auto-scroll animation khi có dữ liệu
-        startAutoScrollForFeatured();
+        // Luôn update data
+        Log.d(TAG, "Updating featured tips data");
+        featuredTipsAdapter.updateHealthTips(healthTips);
     }
 
     @Override
