@@ -407,21 +407,24 @@ Chào bạn,
     ```
     * **Cảnh báo:** Đây là kỹ thuật phức tạp. Nếu chứng chỉ SSL trên server thay đổi (và bạn không cập nhật hash trong app), **app sẽ không thể kết nối API nữa**.
 
-### 3. Input Validation ⚠️
+### 3. Input Validation ✅ ĐÃ HOÀN THÀNH
 
 * **Giải thích:** Không bao giờ tin tưởng dữ liệu người dùng nhập vào (trong form đăng ký, chat, tìm kiếm). Phải kiểm tra (validate) để tránh lỗi và các cuộc tấn công (ví dụ: SQL Injection, XSS).
-* **Hướng dẫn chi tiết:**
-    * **Form Đăng nhập/Đăng ký:**
+* **Trạng thái:** ✅ **ĐÃ TRIỂN KHAI ĐẦY ĐỦ**
+* **Đã thực hiện:**
+    * **Form Đăng nhập/Đăng ký:** ✅
         * Kiểm tra `TextUtils.isEmpty(email)` trước khi xử lý.
         * Dùng `Patterns.EMAIL_ADDRESS.matcher(email).matches()` để kiểm tra email hợp lệ.
         * Kiểm tra độ dài mật khẩu `password.length() < 6`.
-    * **Chat AI:**
-        * Trước khi gửi message cho OpenAI, hãy "làm sạch" nó.
-        * Xóa các ký tự đặc biệt có thể gây lỗi.
-        * Giới hạn độ dài `message.substring(0, MAX_LENGTH)`.
-    * **Tìm kiếm:**
+    * **Chat AI:** ✅
+        * Làm sạch input với method `sanitizeInput()`.
+        * Xóa các ký tự đặc biệt nguy hiểm (HTML tags, script tags, ký tự điều khiển).
+        * Giới hạn độ dài tin nhắn `MAX_MESSAGE_LENGTH = 500` ký tự.
+        * Chuẩn hóa khoảng trắng.
+    * **Tìm kiếm:** ✅
         * Trim khoảng trắng `query.trim()`.
         * Kiểm tra rỗng.
+        * Giới hạn độ dài query `MAX_SEARCH_LENGTH = 100` ký tự.
 
 ### 4. Rate Limiting ❌
 

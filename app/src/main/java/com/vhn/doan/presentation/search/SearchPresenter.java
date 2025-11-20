@@ -17,6 +17,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     private final SearchRepository mSearchRepository;
     private final FirebaseAuthHelper mAuthHelper;
     private static final int SEARCH_HISTORY_LIMIT = 10;
+    private static final int MAX_SEARCH_LENGTH = 100; // Giới hạn độ dài query tìm kiếm
 
     public SearchPresenter(SearchRepository searchRepository, FirebaseAuthHelper authHelper) {
         mSearchRepository = searchRepository;
@@ -63,6 +64,7 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void search(String keyword) {
+        // 1. Kiểm tra rỗng
         if (keyword == null || keyword.trim().isEmpty()) {
             if (mView != null) {
                 mView.showError("Vui lòng nhập từ khóa tìm kiếm");
@@ -70,7 +72,18 @@ public class SearchPresenter implements SearchContract.Presenter {
             return;
         }
 
+        // 2. Trim khoảng trắng
         final String trimmedKeyword = keyword.trim();
+
+        // 3. Kiểm tra độ dài query
+        if (trimmedKeyword.length() > MAX_SEARCH_LENGTH) {
+            if (mView != null) {
+                mView.showError("Từ khóa tìm kiếm quá dài (tối đa " + MAX_SEARCH_LENGTH + " ký tự)");
+            }
+            return;
+        }
+
+        // 4. Hiển thị loading
         if (mView != null) {
             mView.showLoading(true);
         }

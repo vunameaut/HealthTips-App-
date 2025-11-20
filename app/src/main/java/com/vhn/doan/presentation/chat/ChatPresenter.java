@@ -16,6 +16,7 @@ import java.util.List;
 public class ChatPresenter implements ChatContract.Presenter {
 
     private static final String TAG = "ChatPresenter";
+    private static final int MAX_MESSAGE_LENGTH = 500; // Giới hạn độ dài tin nhắn tối đa
 
     private final ChatRepository chatRepository;
     private final FirebaseAuth firebaseAuth;
@@ -82,6 +83,7 @@ public class ChatPresenter implements ChatContract.Presenter {
 
     @Override
     public void sendMessage(String content) {
+        // 1. Kiểm tra rỗng
         if (content == null || content.trim().isEmpty()) {
             if (isViewAttached()) {
                 view.showSendMessageError("Vui lòng nhập nội dung tin nhắn");
@@ -89,6 +91,7 @@ public class ChatPresenter implements ChatContract.Presenter {
             return;
         }
 
+        // 2. Kiểm tra người dùng đã đăng nhập
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null) {
             if (isViewAttached()) {
@@ -97,7 +100,25 @@ public class ChatPresenter implements ChatContract.Presenter {
             return;
         }
 
+        // 3. Trim và làm sạch input
         String trimmedContent = content.trim();
+        String sanitizedContent = sanitizeInput(trimmedContent);
+
+        // 4. Kiểm tra sau khi làm sạch có còn nội dung không
+        if (sanitizedContent.isEmpty()) {
+            if (isViewAttached()) {
+                view.showSendMessageError("Nội dung tin nhắn không hợp lệ");
+            }
+            return;
+        }
+
+        // 5. Giới hạn độ dài tin nhắn
+        boolean isTruncated = false;
+        if (sanitizedContent.length() > MAX_MESSAGE_LENGTH) {
+            sanitizedContent = sanitizedContent.substring(0, MAX_MESSAGE_LENGTH);
+            isTruncated = true;
+        }
+
         long timestamp = System.currentTimeMillis();
         String userId = currentUser.getUid();
 
@@ -111,8 +132,8 @@ public class ChatPresenter implements ChatContract.Presenter {
         }
 
         // Hiển thị tin nhắn của người dùng ngay lập tức
-        ChatMessage userMessage = new ChatMessage(conversationId, userId, trimmedContent, true, timestamp);
-        String topic = chatRepository.extractTopic(trimmedContent);
+        ChatMessage userMessage = new ChatMessage(conversationId, userId, sanitizedContent, true, timestamp);
+        String topic = chatRepository.extractTopic(sanitizedContent);
         userMessage.setTopic(topic);
 
         if (isViewAttached()) {
@@ -120,10 +141,16 @@ public class ChatPresenter implements ChatContract.Presenter {
             view.clearMessageInput();
             view.scrollToLatestMessage();
             view.showSendingMessage();
+
+            // Hiển thị cảnh báo nếu tin nhắn bị cắt
+            if (isTruncated) {
+                view.showMessage("Tin nhắn quá dài, đã được rút gọn xuống " + MAX_MESSAGE_LENGTH + " ký tự");
+            }
         }
 
         // Lưu tin nhắn người dùng vào Firebase
         final String finalConversationId = conversationId;
+        final String finalSanitizedContent = sanitizedContent;
         chatRepository.saveChatMessage(userMessage, new RepositoryCallback<ChatMessage>() {
             @Override
             public void onSuccess(ChatMessage savedMessage) {
@@ -134,7 +161,7 @@ public class ChatPresenter implements ChatContract.Presenter {
                 }
 
                 // Gửi tin nhắn tới AI với lịch sử cuộc trò chuyện (tối đa 10 tin nhắn gần nhất)
-                chatRepository.sendMessageToAI(trimmedContent, finalConversationId, 10, new RepositoryCallback<String>() {
+                chatRepository.sendMessageToAI(finalSanitizedContent, finalConversationId, 10, new RepositoryCallback<String>() {
                     @Override
                     public void onSuccess(String aiResponse) {
                         Log.d(TAG, "AI response received: " + aiResponse);
@@ -228,5 +255,29 @@ public class ChatPresenter implements ChatContract.Presenter {
     @Override
     public void refreshMessages() {
         loadMessages();
+    }
+
+    /**
+     * Làm sạch input để tránh các ký tự đặc biệt gây lỗi hoặc tấn công injection
+     * @param input Chuỗi cần làm sạch
+     * @return Chuỗi đã được làm sạch
+     */
+    private String sanitizeInput(String input) {
+        if (input == null) {
+            return "";
+        }
+
+        // Xóa các ký tự nguy hiểm có thể gây lỗi hoặc injection
+        return input
+                // Xóa các thẻ HTML nguy hiểm
+                .replaceAll("<script[^>]*>.*?</script>", "")
+                .replaceAll("<[^>]+>", "")
+                // Xóa các ký tự đặc biệt nguy hiểm
+                .replaceAll("[<>\"'&]", "")
+                // Chuẩn hóa khoảng trắng (loại bỏ nhiều space liên tiếp)
+                .replaceAll("\\s+", " ")
+                // Loại bỏ các ký tự điều khiển không mong muốn
+                .replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "")
+                .trim();
     }
 }
