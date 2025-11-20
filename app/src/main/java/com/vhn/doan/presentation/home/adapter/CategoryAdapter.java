@@ -68,6 +68,14 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         // Thiết lập tên danh mục
         holder.textViewCategoryName.setText(category.getName());
 
+        // Hiển thị HOT badge nếu có nhiều bài viết (> 10)
+        int tipCount = category.getTipCount();
+        if (tipCount > 10) {
+            holder.badgeTrending.setVisibility(View.VISIBLE);
+        } else {
+            holder.badgeTrending.setVisibility(View.GONE);
+        }
+
         // Ưu tiên sử dụng iconUrl, fallback sang imageUrl
         String imageUrl = category.getIconUrl();
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
@@ -131,6 +139,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         CardView cardViewCategory;
         ImageView imageViewCategoryIcon;
         TextView textViewCategoryName;
+        TextView textViewArticleCount;
+        TextView badgeTrending;
 
         /**
          * Constructor cho ViewHolder
@@ -141,6 +151,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             cardViewCategory = itemView.findViewById(R.id.cardViewCategory);
             imageViewCategoryIcon = itemView.findViewById(R.id.imageViewCategoryIcon);
             textViewCategoryName = itemView.findViewById(R.id.textViewCategoryName);
+            textViewArticleCount = itemView.findViewById(R.id.textViewArticleCount);
+            badgeTrending = itemView.findViewById(R.id.badgeTrending);
         }
     }
 }

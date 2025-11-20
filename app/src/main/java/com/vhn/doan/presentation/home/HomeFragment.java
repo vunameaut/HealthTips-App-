@@ -275,16 +275,58 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
     /**
      * Setup greeting text dựa trên thời gian trong ngày
+     * Lấy tên người dùng từ Firebase Realtime Database
      */
     private void setupGreeting() {
+        if (textViewGreeting == null) return;
+
+        // Hiển thị greeting mặc định trước
+        updateGreetingText("Bạn");
+
+        // Lấy user info từ Firebase Realtime Database
+        com.google.firebase.auth.FirebaseUser currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            com.vhn.doan.data.repository.UserRepository userRepository = new com.vhn.doan.data.repository.UserRepositoryImpl();
+            userRepository.getUserByUid(currentUser.getUid(), new com.vhn.doan.data.repository.UserRepository.UserCallback() {
+                @Override
+                public void onSuccess(com.vhn.doan.data.User user) {
+                    if (!isAdded() || textViewGreeting == null) return;
+
+                    String userName = "Bạn"; // Default
+                    if (user != null) {
+                        String displayName = user.getDisplayName();
+                        if (displayName != null && !displayName.isEmpty()) {
+                            userName = displayName;
+                        } else {
+                            // Fallback to email
+                            String email = user.getEmail();
+                            if (email != null && !email.isEmpty()) {
+                                userName = email.split("@")[0];
+                            }
+                        }
+                    }
+                    updateGreetingText(userName);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    // Giữ nguyên greeting mặc định nếu có lỗi
+                    Log.w(TAG, "Cannot load user for greeting: " + errorMessage);
+                }
+            });
+        }
+    }
+
+    /**
+     * Update greeting text dựa trên thời gian và tên user
+     */
+    private void updateGreetingText(String userName) {
         if (textViewGreeting == null) return;
 
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         int hourOfDay = calendar.get(java.util.Calendar.HOUR_OF_DAY);
 
         String greetingText;
-        String userName = "Bạn"; // Có thể lấy từ UserSession nếu có
-
         if (hourOfDay >= 5 && hourOfDay < 12) {
             greetingText = "Chào buổi sáng, " + userName + "!";
         } else if (hourOfDay >= 12 && hourOfDay < 18) {

@@ -57,8 +57,12 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
     private TextView textViewViewCount;
     private TextView textViewLikeCount;
     private FloatingActionButton fabFavorite;
-    private Button buttonLike;
-    private Button buttonShare;
+    private View buttonLike;  // Changed to View for new layout
+    private View buttonShare; // Changed to View for new layout
+    private ImageView iconLike;
+    private TextView textLike;
+    private ImageView iconShare;
+    private TextView textShare;
     private ProgressBar progressBar;
     private TextView textViewAuthor;
     private TextView textViewPublishedDate;
@@ -183,6 +187,10 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
         fabFavorite = findViewById(R.id.fabFavorite);
         buttonLike = findViewById(R.id.buttonLike);
         buttonShare = findViewById(R.id.buttonShare);
+        iconLike = findViewById(R.id.iconLike);
+        textLike = findViewById(R.id.textLike);
+        iconShare = findViewById(R.id.iconShare);
+        textShare = findViewById(R.id.textShare);
         progressBar = findViewById(R.id.progressBar);
 
         // Khởi tạo các view mới
@@ -480,8 +488,8 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
      * Cập nhật text của nút thích
      */
     private void updateLikeButtonText() {
-        if (buttonLike != null) {
-            buttonLike.setText(isLiked ? R.string.unlike : R.string.like);
+        if (textLike != null) {
+            textLike.setText(isLiked ? R.string.unlike : R.string.like);
         }
     }
 
@@ -504,17 +512,27 @@ public class HealthTipDetailActivity extends AppCompatActivity implements Health
 
     @Override
     public void updateLikeStatus(boolean isLiked) {
-        // Thay đổi text của button thay vì image vì buttonLike là Button không phải ImageButton
+        // Update icon và text của button like
         if (isLiked) {
-            buttonLike.setText("❤️ Đã thích");
-            buttonLike.setTextColor(getResources().getColor(R.color.primary_button_start));
+            if (iconLike != null) {
+                iconLike.setImageResource(R.drawable.ic_thumb_up_filled);
+            }
+            if (textLike != null) {
+                textLike.setText("Đã thích");
+                textLike.setTextColor(getResources().getColor(R.color.accent));
+            }
             // 📊 Log Analytics Event: Like tip
             if (analyticsManager != null && currentHealthTip != null) {
                 analyticsManager.logTipLike(healthTipId, currentHealthTip.getTitle());
             }
         } else {
-            buttonLike.setText("🤍 Thích");
-            buttonLike.setTextColor(getResources().getColor(R.color.text_secondary));
+            if (iconLike != null) {
+                iconLike.setImageResource(R.drawable.ic_thumb_up);
+            }
+            if (textLike != null) {
+                textLike.setText("Thích");
+                textLike.setTextColor(getResources().getColor(R.color.text_primary));
+            }
             // 📊 Log Analytics Event: Unlike tip
             if (analyticsManager != null && currentHealthTip != null) {
                 analyticsManager.logTipUnlike(healthTipId, currentHealthTip.getTitle());

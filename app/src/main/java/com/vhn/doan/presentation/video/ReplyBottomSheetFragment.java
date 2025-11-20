@@ -68,6 +68,7 @@ public class ReplyBottomSheetFragment extends BottomSheetDialogFragment {
         args.putString(ARG_VIDEO_ID, videoId);
         args.putString(ARG_PARENT_COMMENT_ID, parentComment.getId());
         args.putString(ARG_PARENT_COMMENT_TEXT, parentComment.getText());
+        // Tạm thời dùng fallback, sẽ fetch real name khi hiển thị
         args.putString(ARG_PARENT_USER_NAME, "Người dùng " + parentComment.getUserId().substring(0, Math.min(6, parentComment.getUserId().length())));
         fragment.setArguments(args);
         return fragment;

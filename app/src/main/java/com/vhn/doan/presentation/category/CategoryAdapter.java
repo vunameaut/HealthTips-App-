@@ -78,12 +78,16 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         private final CardView cardViewCategory;
         private final ImageView imageViewCategoryIcon;
         private final TextView textViewCategoryName;
+        private final TextView textViewArticleCount;
+        private final TextView badgeTrending;
 
         CategoryViewHolder(@NonNull View itemView) {
             super(itemView);
             cardViewCategory = itemView.findViewById(R.id.cardViewCategory);
             imageViewCategoryIcon = itemView.findViewById(R.id.imageViewCategoryIcon);
             textViewCategoryName = itemView.findViewById(R.id.textViewCategoryName);
+            textViewArticleCount = itemView.findViewById(R.id.textViewArticleCount);
+            badgeTrending = itemView.findViewById(R.id.badgeTrending);
 
             cardViewCategory.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -99,6 +103,14 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
          */
         void bind(Category category) {
             textViewCategoryName.setText(category.getName());
+
+            // Hiển thị HOT badge nếu có nhiều bài viết (> 10)
+            int tipCount = category.getTipCount();
+            if (tipCount > 10) {
+                badgeTrending.setVisibility(View.VISIBLE);
+            } else {
+                badgeTrending.setVisibility(View.GONE);
+            }
 
             // Tải hình ảnh danh mục bằng Glide
             if (category.getIconUrl() != null && !category.getIconUrl().isEmpty()) {

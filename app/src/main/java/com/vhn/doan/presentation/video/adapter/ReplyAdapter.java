@@ -134,11 +134,54 @@ public class ReplyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
 
         public void bind(VideoComment reply, int position) {
-            // Set user name (có thể lấy từ User ID trong tương lai)
-            userName.setText("Người dùng " + reply.getUserId().substring(0, Math.min(6, reply.getUserId().length())));
-
             // Set reply text
             replyText.setText(reply.getText());
+
+            // Set default user name và avatar trước
+            userName.setText("Đang tải...");
+            userAvatar.setImageResource(R.drawable.ic_user_placeholder);
+
+            // Fetch user info từ Firebase Realtime Database
+            com.vhn.doan.data.repository.UserRepository userRepository = new com.vhn.doan.data.repository.UserRepositoryImpl();
+            userRepository.getUserByUid(reply.getUserId(), new com.vhn.doan.data.repository.UserRepository.UserCallback() {
+                @Override
+                public void onSuccess(com.vhn.doan.data.User user) {
+                    if (user != null) {
+                        // Update username
+                        String displayName = user.getDisplayName();
+                        if (displayName != null && !displayName.isEmpty()) {
+                            userName.setText(displayName);
+                        } else {
+                            String email = user.getEmail();
+                            if (email != null && !email.isEmpty()) {
+                                userName.setText(email.split("@")[0]);
+                            } else {
+                                userName.setText("Người dùng " + reply.getUserId().substring(0, Math.min(6, reply.getUserId().length())));
+                            }
+                        }
+
+                        // Load avatar với Glide
+                        if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
+                            com.bumptech.glide.Glide.with(itemView.getContext())
+                                    .load(user.getPhotoUrl())
+                                    .circleCrop()
+                                    .placeholder(R.drawable.ic_user_placeholder)
+                                    .error(R.drawable.ic_user_placeholder)
+                                    .into(userAvatar);
+                        } else {
+                            userAvatar.setImageResource(R.drawable.ic_user_placeholder);
+                        }
+                    } else {
+                        userName.setText("Người dùng " + reply.getUserId().substring(0, Math.min(6, reply.getUserId().length())));
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    // Fallback nếu không fetch được user
+                    userName.setText("Người dùng " + reply.getUserId().substring(0, Math.min(6, reply.getUserId().length())));
+                }
+            });
 
             // Set time
             replyTime.setText(formatReplyTime(reply.getCreatedAt()));

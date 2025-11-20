@@ -219,7 +219,7 @@
 
             </LinearLayout>
 
-            <!-- 7. CÁC NÚT HÀNH ĐỘNG -->
+            <!-- 7. CÁC NÚT HÀNH ĐỘNG - COMPACT -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -229,32 +229,92 @@
                 android:gravity="center">
 
                 <!-- Like Button -->
-                <Button
-                    android:id="@+id/buttonLike"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardLike"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_secondary_button"
-                    android:drawablePadding="8dp"
-                    android:text="@string/like_action"
-                    android:textColor="@color/text_primary"
-                    app:drawableStartCompat="@drawable/ic_thumb_up"
-                    app:drawableTint="@color/text_primary" />
+                    android:layout_marginEnd="6dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/surface"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:id="@+id/buttonLike"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:id="@+id/iconLike"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_thumb_up"
+                            android:layout_marginEnd="6dp"
+                            app:tint="@color/accent" />
+
+                        <TextView
+                            android:id="@+id/textLike"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/like_action"
+                            android:textColor="@color/text_primary"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- Share Button -->
-                <Button
-                    android:id="@+id/buttonShare"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardShare"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_secondary_button"
-                    android:drawablePadding="8dp"
-                    android:text="@string/share_action"
-                    android:textColor="@color/text_primary"
-                    app:drawableStartCompat="@drawable/ic_share"
-                    app:drawableTint="@color/text_primary" />
+                    android:layout_marginStart="6dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/surface"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:id="@+id/buttonShare"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:id="@+id/iconShare"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_share"
+                            android:layout_marginEnd="6dp"
+                            app:tint="@color/accent" />
+
+                        <TextView
+                            android:id="@+id/textShare"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/share_action"
+                            android:textColor="@color/text_primary"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
 
