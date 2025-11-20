@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -56,7 +57,7 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
     // UI components
     private RecyclerView recyclerViewCategories;
-    private RecyclerView recyclerViewRecommendedTips;
+    // private RecyclerView recyclerViewRecommendedTips; // Removed - replaced by Featured Card
     private RecyclerView recyclerViewLatestTips;
     private RecyclerView recyclerViewMostViewedTips;
     private RecyclerView recyclerViewMostLikedTips;
@@ -64,21 +65,21 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     private LinearLayout layoutOfflineMode;
     private ImageButton buttonSearch;
     private TextView textViewSeeAllCategories;
-    private TextView textViewSeeAllRecommended;
+    // private TextView textViewSeeAllRecommended; // Removed
     private TextView textViewSeeAllLatestTips;
     private TextView textViewSeeAllMostViewed;
     private TextView textViewSeeAllMostLiked;
 
     // Adapters - Real data
     private CategoryAdapter categoryAdapter;
-    private InfiniteHealthTipAdapter recommendedTipsAdapter; // Sử dụng InfiniteHealthTipAdapter cho đề xuất
+    private InfiniteHealthTipAdapter featuredTipsAdapter; // Featured tips carousel với auto-scroll
     private HealthTipAdapter latestTipsAdapter;
     private HealthTipAdapter mostViewedTipsAdapter;
     private HealthTipAdapter mostLikedTipsAdapter;
 
     // Skeleton Adapters
     private CategorySkeletonAdapter categorySkeletonAdapter;
-    private HealthTipSkeletonAdapter recommendedTipsSkeletonAdapter;
+    private HealthTipSkeletonAdapter featuredTipsSkeletonAdapter; // Featured tips skeleton
     private HealthTipSkeletonAdapter latestTipsSkeletonAdapter;
     private HealthTipSkeletonAdapter mostViewedTipsSkeletonAdapter;
     private HealthTipSkeletonAdapter mostLikedTipsSkeletonAdapter;
@@ -92,17 +93,17 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
     // Loading state flags
     private boolean isCategoriesLoaded = false;
-    private boolean isRecommendedTipsLoaded = false;
+    private boolean isFeaturedTipsLoaded = false; // Featured tips carousel
     private boolean isLatestTipsLoaded = false;
     private boolean isMostViewedTipsLoaded = false;
     private boolean isMostLikedTipsLoaded = false;
 
-    // Auto-scroll animation cho phần đề xuất
+    // Auto-scroll animation cho featured tips carousel
     private Handler autoScrollHandler;
     private Runnable autoScrollRunnable;
-    private int currentRecommendedPosition = 0;
+    private int currentFeaturedPosition = 0;
     private boolean isAutoScrolling = false;
-    private static final long AUTO_SCROLL_DELAY = 4000; // 4 giây
+    private static final long AUTO_SCROLL_DELAY = 7000; // 7 giây - tăng thời gian đợi
     private static final int INFINITE_SCROLL_MULTIPLIER = 1000; // Để tạo hiệu ứng vô hạn
 
     public HomeFragment() {
@@ -160,8 +161,8 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         // Thiết lập các sự kiện click
         setupClickListeners();
 
-        // Thiết lập touch listener cho auto-scroll animation
-        setupRecommendedTouchListener();
+        // Thiết lập touch listener cho auto-scroll animation - REMOVED
+        // setupRecommendedTouchListener();
 
         // Gắn presenter với view và bắt đầu tải dữ liệu
         presenter.attachView(this);
@@ -179,17 +180,12 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     }
 
     /**
-     * Hiển thị tất cả tiêu đề và nút "Xem tất cả"
+     * Hiển thị tất cả nút "Xem tất cả"
+     * (Section titles không còn cần thiết vì đã được tích hợp trong layout headers)
      */
     private void showAllTitlesAndSeeAll() {
-        if (textViewCategoriesTitle != null) textViewCategoriesTitle.setVisibility(View.VISIBLE);
-        if (textViewRecommendedTipsTitle != null) textViewRecommendedTipsTitle.setVisibility(View.VISIBLE);
-        if (textViewLatestTipsTitle != null) textViewLatestTipsTitle.setVisibility(View.VISIBLE);
-        if (textViewMostViewedTitle != null) textViewMostViewedTitle.setVisibility(View.VISIBLE);
-        if (textViewMostLikedTitle != null) textViewMostLikedTitle.setVisibility(View.VISIBLE);
-
         if (textViewSeeAllCategories != null) textViewSeeAllCategories.setVisibility(View.VISIBLE);
-        if (textViewSeeAllRecommended != null) textViewSeeAllRecommended.setVisibility(View.VISIBLE);
+        // if (textViewSeeAllRecommended != null) textViewSeeAllRecommended.setVisibility(View.VISIBLE); // Removed
         if (textViewSeeAllLatestTips != null) textViewSeeAllLatestTips.setVisibility(View.VISIBLE);
         if (textViewSeeAllMostViewed != null) textViewSeeAllMostViewed.setVisibility(View.VISIBLE);
         if (textViewSeeAllMostLiked != null) textViewSeeAllMostLiked.setVisibility(View.VISIBLE);
@@ -203,9 +199,9 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         categorySkeletonAdapter = new CategorySkeletonAdapter(requireContext(), 4);
         recyclerViewCategories.setAdapter(categorySkeletonAdapter);
 
-        // Skeleton cho Recommended Tips (3 items)
-        recommendedTipsSkeletonAdapter = new HealthTipSkeletonAdapter(requireContext(), 3);
-        recyclerViewRecommendedTips.setAdapter(recommendedTipsSkeletonAdapter);
+        // Skeleton cho Featured Tips (3 items) - Carousel
+        featuredTipsSkeletonAdapter = new HealthTipSkeletonAdapter(requireContext(), 3);
+        recyclerViewFeaturedTips.setAdapter(featuredTipsSkeletonAdapter);
 
         // Skeleton cho Latest Tips (3 items)
         latestTipsSkeletonAdapter = new HealthTipSkeletonAdapter(requireContext(), 3);
@@ -240,13 +236,19 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         // Data được cập nhật trực tiếp qua các phương thức show*Data()
     }
 
+    // UI components cho tính năng mới
+    private TextView textViewGreeting;
+    private View searchBarCard;
+    private ImageButton buttonNotification;
+    private RecyclerView recyclerViewFeaturedTips; // Featured tips carousel
+
     /**
      * Ánh xạ các thành phần UI từ layout
      */
     private void initViews(View view) {
         // RecyclerViews
         recyclerViewCategories = view.findViewById(R.id.recyclerViewCategories);
-        recyclerViewRecommendedTips = view.findViewById(R.id.recyclerViewRecommendedTips);
+        recyclerViewFeaturedTips = view.findViewById(R.id.recyclerViewFeaturedTips); // Featured carousel
         recyclerViewLatestTips = view.findViewById(R.id.recyclerViewLatestTips);
         recyclerViewMostViewedTips = view.findViewById(R.id.recyclerViewMostViewedTips);
         recyclerViewMostLikedTips = view.findViewById(R.id.recyclerViewMostLikedTips);
@@ -256,34 +258,44 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         layoutOfflineMode = view.findViewById(R.id.layoutOfflineMode);
         buttonSearch = view.findViewById(R.id.buttonSearch);
 
+        // Các thành phần UI mới
+        textViewGreeting = view.findViewById(R.id.textViewGreeting);
+        searchBarCard = view.findViewById(R.id.searchBarCard);
+        buttonNotification = view.findViewById(R.id.buttonNotification);
+
         // Buttons "Xem tất cả"
         textViewSeeAllCategories = view.findViewById(R.id.textViewSeeAllCategories);
-        textViewSeeAllRecommended = view.findViewById(R.id.textViewSeeAllRecommended);
         textViewSeeAllLatestTips = view.findViewById(R.id.textViewSeeAllLatestTips);
         textViewSeeAllMostViewed = view.findViewById(R.id.textViewSeeAllMostViewed);
         textViewSeeAllMostLiked = view.findViewById(R.id.textViewSeeAllMostLiked);
 
-        // Thêm các tiêu đề sections
-        initSectionTitles(view);
+        // Setup greeting text theo thời gian
+        setupGreeting();
     }
 
-    // UI components cho tiêu đề sections
-    private TextView textViewCategoriesTitle;
-    private TextView textViewRecommendedTipsTitle;
-    private TextView textViewLatestTipsTitle;
-    private TextView textViewMostViewedTitle;
-    private TextView textViewMostLikedTitle;
-
     /**
-     * Khởi tạo các tiêu đề sections
+     * Setup greeting text dựa trên thời gian trong ngày
      */
-    private void initSectionTitles(View view) {
-        // Tìm các TextView tiêu đề trong layout
-        textViewCategoriesTitle = view.findViewById(R.id.textViewCategoriesTitle);
-        textViewRecommendedTipsTitle = view.findViewById(R.id.textViewRecommendedTipsTitle);
-        textViewLatestTipsTitle = view.findViewById(R.id.textViewLatestTipsTitle);
-        textViewMostViewedTitle = view.findViewById(R.id.textViewMostViewedTitle);
-        textViewMostLikedTitle = view.findViewById(R.id.textViewMostLikedTitle);
+    private void setupGreeting() {
+        if (textViewGreeting == null) return;
+
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int hourOfDay = calendar.get(java.util.Calendar.HOUR_OF_DAY);
+
+        String greetingText;
+        String userName = "Bạn"; // Có thể lấy từ UserSession nếu có
+
+        if (hourOfDay >= 5 && hourOfDay < 12) {
+            greetingText = "Chào buổi sáng, " + userName + "!";
+        } else if (hourOfDay >= 12 && hourOfDay < 18) {
+            greetingText = "Chào buổi chiều, " + userName + "!";
+        } else if (hourOfDay >= 18 && hourOfDay < 22) {
+            greetingText = "Chào buổi tối, " + userName + "!";
+        } else {
+            greetingText = "Chào bạn, " + userName + "!";
+        }
+
+        textViewGreeting.setText(greetingText);
     }
 
     /**
@@ -306,10 +318,10 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
                 requireContext(), RecyclerView.HORIZONTAL, false);
         recyclerViewCategories.setLayoutManager(categoriesLayoutManager);
 
-        // Setup Layout Manager cho Recommended Tips
-        LinearLayoutManager recommendedTipsLayoutManager = new LinearLayoutManager(
+        // Setup Layout Manager cho Featured Tips (Carousel)
+        LinearLayoutManager featuredTipsLayoutManager = new LinearLayoutManager(
                 requireContext(), RecyclerView.HORIZONTAL, false);
-        recyclerViewRecommendedTips.setLayoutManager(recommendedTipsLayoutManager);
+        recyclerViewFeaturedTips.setLayoutManager(featuredTipsLayoutManager);
 
         // Setup Layout Manager cho Latest Tips
         LinearLayoutManager latestTipsLayoutManager = new LinearLayoutManager(
@@ -342,8 +354,8 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
                     }
                 });
 
-        // Khởi tạo Recommended Tips Adapter
-        recommendedTipsAdapter = new InfiniteHealthTipAdapter(
+        // Khởi tạo Featured Tips Adapter - Carousel với auto-scroll
+        featuredTipsAdapter = new InfiniteHealthTipAdapter(
                 requireContext(),
                 new ArrayList<>(),
                 new InfiniteHealthTipAdapter.HealthTipClickListener() {
@@ -356,7 +368,8 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
                     public void onFavoriteClick(HealthTip healthTip, boolean isFavorite) {
                         handleFavoriteClick(healthTip, isFavorite);
                     }
-                });
+                },
+                R.layout.item_featured_tip); // Sử dụng featured tip layout
 
         // Khởi tạo Latest Tips Adapter
         latestTipsAdapter = new HealthTipAdapter(
@@ -411,48 +424,83 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
      * Thiết lập các sự kiện click
      */
     private void setupClickListeners() {
-        // Nút tìm kiếm
-        buttonSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        // Nút tìm kiếm header
+        if (buttonSearch != null) {
+            buttonSearch.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Chuyển đến SearchActivity
+                    Intent intent = new Intent(requireContext(), SearchActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+
+        // Thanh tìm kiếm pill-shaped
+        if (searchBarCard != null) {
+            searchBarCard.setOnClickListener(v -> {
                 // Chuyển đến SearchActivity
                 Intent intent = new Intent(requireContext(), SearchActivity.class);
                 startActivity(intent);
-            }
-        });
+            });
+        }
+
+        // Nút thông báo
+        if (buttonNotification != null) {
+            buttonNotification.setOnClickListener(v -> {
+                // TODO: Navigate to Notification Activity
+                showMessage("Chức năng thông báo đang phát triển");
+            });
+        }
+
+        // Featured Tips carousel - touch listener để pause/resume auto-scroll
+        setupFeaturedTouchListener();
 
         // Xem tất cả danh mục
-        textViewSeeAllCategories.setOnClickListener(v -> {
-            if (getActivity() == null || !isAdded()) return;
-            CategoryFragment categoryFragment = CategoryFragment.newInstance();
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .hide(this)
-                    .add(R.id.fragment_container, categoryFragment)
-                    .addToBackStack(null)
-                    .commit();
-        });
+        if (textViewSeeAllCategories != null) {
+            textViewSeeAllCategories.setOnClickListener(v -> {
+                if (getActivity() == null || !isAdded()) return;
+                CategoryFragment categoryFragment = CategoryFragment.newInstance();
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .hide(this)
+                        .add(R.id.fragment_container, categoryFragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
 
-        // Xem tất cả mẹo được đề xuất
-        textViewSeeAllRecommended.setOnClickListener(v -> {
-            startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_RECOMMENDED));
-        });
+        // Xem tất cả mẹo được đề xuất - REMOVED
+        // if (textViewSeeAllRecommended != null) {
+        //     textViewSeeAllRecommended.setOnClickListener(v -> {
+        //         startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_RECOMMENDED));
+        //     });
+        // }
 
         // Xem tất cả mẹo mới nhất
-        textViewSeeAllLatestTips.setOnClickListener(v -> {
-            startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_LATEST));
-        });
+        if (textViewSeeAllLatestTips != null) {
+            textViewSeeAllLatestTips.setOnClickListener(v -> {
+                startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_LATEST));
+            });
+        }
 
         // Xem tất cả mẹo xem nhiều nhất
-        textViewSeeAllMostViewed.setOnClickListener(v -> {
-            startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_MOST_VIEWED));
-        });
+        if (textViewSeeAllMostViewed != null) {
+            textViewSeeAllMostViewed.setOnClickListener(v -> {
+                startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_MOST_VIEWED));
+            });
+        }
 
         // Xem tất cả mẹo được yêu thích nhất
-        textViewSeeAllMostLiked.setOnClickListener(v -> {
-            startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_MOST_LIKED));
-        });
+        if (textViewSeeAllMostLiked != null) {
+            textViewSeeAllMostLiked.setOnClickListener(v -> {
+                startActivity(AllHealthTipsActivity.createIntent(requireContext(), AllHealthTipsActivity.MODE_MOST_LIKED));
+            });
+        }
     }
+
+    // Featured Health Tip để hiển thị trong Featured Card
+    private HealthTip featuredHealthTip;
 
     @Override
     public void onResume() {
@@ -469,10 +517,10 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         presenter.listenToCategories();
         presenter.listenToLatestHealthTips();
 
-        // Tiếp tục auto-scroll nếu đã có dữ liệu
-        if (isRecommendedTipsLoaded && recommendedTipsAdapter != null &&
-            recommendedTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
-            startAutoScrollForRecommended();
+        // Tiếp tục auto-scroll cho Featured Tips nếu đã có dữ liệu
+        if (isFeaturedTipsLoaded && featuredTipsAdapter != null &&
+            featuredTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
+            startAutoScrollForFeatured();
         }
     }
 
@@ -489,15 +537,14 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
                 presenter.listenToLatestHealthTips();
             }
 
-            // Tiếp tục auto-scroll nếu đã có dữ liệu
-            if (isRecommendedTipsLoaded && recommendedTipsAdapter != null &&
-                recommendedTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
-                startAutoScrollForRecommended();
+            // Tiếp tục auto-scroll cho Featured Tips nếu có
+            if (isFeaturedTipsLoaded && featuredTipsAdapter != null &&
+                featuredTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
+                startAutoScrollForFeatured();
             }
         } else {
-            // Fragment bị ẩn (khi chuyển sang CategoryFragment)
-            // Dừng auto-scroll để tiết kiệm tài nguyên
-            stopAutoScrollForRecommended();
+            // Fragment bị ẩn - dừng auto-scroll
+            stopAutoScrollForFeatured();
 
             // Dừng các listener để tránh memory leak
             if (presenter != null) {
@@ -511,12 +558,12 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         super.onPause();
         presenter.stop(); // Dừng lắng nghe khi Fragment không được hiển thị
 
-        // Tạm dừng auto-scroll khi Fragment không visible
-        stopAutoScrollForRecommended();
+        // Tạm dừng auto-scroll cho Featured Tips
+        stopAutoScrollForFeatured();
 
         // Reset loading flags để force reload khi resume (fix theme change issue)
         isCategoriesLoaded = false;
-        isRecommendedTipsLoaded = false;
+        isFeaturedTipsLoaded = false; // Featured carousel
         isLatestTipsLoaded = false;
         isMostViewedTipsLoaded = false;
         isMostLikedTipsLoaded = false;
@@ -528,7 +575,7 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         presenter.detachView(); // Tách View khỏi Presenter
 
         // Dọn dẹp auto-scroll resources
-        stopAutoScrollForRecommended();
+        stopAutoScrollForFeatured();
         if (autoScrollHandler != null) {
             autoScrollHandler.removeCallbacksAndMessages(null);
             autoScrollHandler = null;
@@ -549,22 +596,22 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
     @Override
     public void showRecommendedHealthTips(List<HealthTip> healthTips) {
-        // Thay thế skeleton adapter bằng real adapter với data
-        if (!isRecommendedTipsLoaded) {
-            recyclerViewRecommendedTips.setAdapter(recommendedTipsAdapter);
-            isRecommendedTipsLoaded = true;
+        // Setup Featured Tips Carousel với auto-scroll
+        if (!isFeaturedTipsLoaded) {
+            recyclerViewFeaturedTips.setAdapter(featuredTipsAdapter);
+            isFeaturedTipsLoaded = true;
 
             // Đặt vị trí bắt đầu ở giữa để tạo hiệu ứng vòng tròn
-            recyclerViewRecommendedTips.post(() -> {
-                int startPosition = recommendedTipsAdapter.getStartPosition();
-                recyclerViewRecommendedTips.scrollToPosition(startPosition);
-                currentRecommendedPosition = startPosition;
+            recyclerViewFeaturedTips.post(() -> {
+                int startPosition = featuredTipsAdapter.getStartPosition();
+                recyclerViewFeaturedTips.scrollToPosition(startPosition);
+                currentFeaturedPosition = startPosition;
             });
         }
-        recommendedTipsAdapter.updateHealthTips(healthTips);
+        featuredTipsAdapter.updateHealthTips(healthTips);
 
         // Bắt đầu auto-scroll animation khi có dữ liệu
-        startAutoScrollForRecommended();
+        startAutoScrollForFeatured();
     }
 
     @Override
@@ -765,10 +812,10 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
      * @param isFavorite Trạng thái yêu thích mới
      */
     private void syncFavoriteStatusAcrossAdapters(String healthTipId, boolean isFavorite) {
-        // Đồng bộ cho adapter Recommended Tips
-        if (recommendedTipsAdapter != null) {
-            recommendedTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
-        }
+        // Đồng bộ cho adapter Recommended Tips - REMOVED
+        // if (recommendedTipsAdapter != null) {
+        //     recommendedTipsAdapter.updateFavoriteStatus(healthTipId, isFavorite);
+        // }
 
         // Đồng bộ cho adapter Latest Tips
         if (latestTipsAdapter != null) {
@@ -802,10 +849,14 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         }
     }
 
+    // ============================================================
+    // AUTO-SCROLL METHODS - Featured Tips Carousel
+    // ============================================================
+
     /**
-     * Bắt đầu animation tự động trượt cho phần đề xuất
+     * Bắt đầu animation tự động trượt cho Featured Tips carousel
      */
-    private void startAutoScrollForRecommended() {
+    private void startAutoScrollForFeatured() {
         if (isAutoScrolling) {
             return; // Đã đang chạy auto-scroll
         }
@@ -819,16 +870,16 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         autoScrollRunnable = new Runnable() {
             @Override
             public void run() {
-                if (recommendedTipsAdapter != null &&
-                    recommendedTipsAdapter.getItemCount() > 0 &&
-                    recyclerViewRecommendedTips != null &&
+                if (featuredTipsAdapter != null &&
+                    featuredTipsAdapter.getItemCount() > 0 &&
+                    recyclerViewFeaturedTips != null &&
                     isAdded()) {
 
                     // Tính toán vị trí tiếp theo
-                    int itemCount = recommendedTipsAdapter.getItemCount();
-                    currentRecommendedPosition = (currentRecommendedPosition + 1) % itemCount;
+                    int itemCount = featuredTipsAdapter.getItemCount();
+                    currentFeaturedPosition = (currentFeaturedPosition + 1) % itemCount;
 
-                    // Tạo smooth scroller với tốc độ vừa phải
+                    // Tạo smooth scroller
                     RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(requireContext()) {
                         @Override
                         protected int getHorizontalSnapPreference() {
@@ -837,14 +888,13 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
                         @Override
                         protected float calculateSpeedPerPixel(android.util.DisplayMetrics displayMetrics) {
-                            // Tốc độ vừa phải: 150ms per inch (mặc định là 25ms)
                             return 150f / displayMetrics.densityDpi;
                         }
                     };
 
                     // Scroll đến vị trí tiếp theo
-                    smoothScroller.setTargetPosition(currentRecommendedPosition);
-                    RecyclerView.LayoutManager layoutManager = recyclerViewRecommendedTips.getLayoutManager();
+                    smoothScroller.setTargetPosition(currentFeaturedPosition);
+                    RecyclerView.LayoutManager layoutManager = recyclerViewFeaturedTips.getLayoutManager();
                     if (layoutManager != null) {
                         layoutManager.startSmoothScroll(smoothScroller);
                     }
@@ -865,7 +915,7 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     /**
      * Dừng animation tự động trượt
      */
-    private void stopAutoScrollForRecommended() {
+    private void stopAutoScrollForFeatured() {
         isAutoScrolling = false;
         if (autoScrollHandler != null && autoScrollRunnable != null) {
             autoScrollHandler.removeCallbacks(autoScrollRunnable);
@@ -875,14 +925,14 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     /**
      * Thiết lập touch listener để tạm dừng auto-scroll khi người dùng tương tác
      */
-    private void setupRecommendedTouchListener() {
-        if (recyclerViewRecommendedTips != null) {
-            recyclerViewRecommendedTips.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
+    private void setupFeaturedTouchListener() {
+        if (recyclerViewFeaturedTips != null) {
+            recyclerViewFeaturedTips.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
                 @Override
                 public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull android.view.MotionEvent e) {
                     // Tạm dừng auto-scroll khi người dùng chạm vào
                     if (e.getAction() == android.view.MotionEvent.ACTION_DOWN) {
-                        stopAutoScrollForRecommended();
+                        stopAutoScrollForFeatured();
 
                         // Tiếp tục auto-scroll sau 6 giây không tương tác
                         if (autoScrollHandler != null) {
@@ -890,7 +940,7 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
                                 @Override
                                 public void run() {
                                     if (!isAutoScrolling && isAdded()) {
-                                        startAutoScrollForRecommended();
+                                        startAutoScrollForFeatured();
                                     }
                                 }
                             }, 6000); // 6 giây
@@ -912,10 +962,10 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     @Override
     public void onFragmentVisible() {
         // HomeFragment luôn load dữ liệu ngay khi được tạo
-        // Khi được show lại, tiếp tục auto-scroll nếu có
-        if (isRecommendedTipsLoaded && recommendedTipsAdapter != null &&
-            recommendedTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
-            startAutoScrollForRecommended();
+        // Tiếp tục auto-scroll cho Featured Tips khi fragment visible
+        if (isFeaturedTipsLoaded && featuredTipsAdapter != null &&
+            featuredTipsAdapter.getItemCount() > 0 && !isAutoScrolling) {
+            startAutoScrollForFeatured();
         }
     }
 
@@ -924,7 +974,7 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
      */
     @Override
     public void onFragmentHidden() {
-        // Dừng auto-scroll khi fragment bị ẩn để tiết kiệm tài nguyên
-        stopAutoScrollForRecommended();
+        // Dừng auto-scroll khi fragment bị ẩn
+        stopAutoScrollForFeatured();
     }
 }

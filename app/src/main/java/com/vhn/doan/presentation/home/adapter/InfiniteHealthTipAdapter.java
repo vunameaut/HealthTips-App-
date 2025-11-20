@@ -32,6 +32,7 @@ public class InfiniteHealthTipAdapter extends RecyclerView.Adapter<InfiniteHealt
     private Context context;
     private List<HealthTip> originalHealthTips; // Danh sách gốc
     private HealthTipClickListener clickListener;
+    private int layoutResourceId; // Custom layout resource ID
     private static final int INFINITE_MULTIPLIER = 1000; // Tạo rất nhiều items để scroll vô hạn
 
     /**
@@ -43,18 +44,26 @@ public class InfiniteHealthTipAdapter extends RecyclerView.Adapter<InfiniteHealt
     }
 
     /**
-     * Constructor
+     * Constructor mặc định - sử dụng item_health_tip layout
      */
     public InfiniteHealthTipAdapter(Context context, List<HealthTip> healthTips, HealthTipClickListener clickListener) {
+        this(context, healthTips, clickListener, R.layout.item_health_tip);
+    }
+
+    /**
+     * Constructor với custom layout
+     */
+    public InfiniteHealthTipAdapter(Context context, List<HealthTip> healthTips, HealthTipClickListener clickListener, int layoutResourceId) {
         this.context = context;
         this.originalHealthTips = new ArrayList<>(healthTips);
         this.clickListener = clickListener;
+        this.layoutResourceId = layoutResourceId;
     }
 
     @NonNull
     @Override
     public HealthTipViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_health_tip, parent, false);
+        View view = LayoutInflater.from(context).inflate(layoutResourceId, parent, false);
         return new HealthTipViewHolder(view);
     }
 
