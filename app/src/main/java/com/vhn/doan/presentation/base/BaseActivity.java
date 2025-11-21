@@ -2,6 +2,7 @@ package com.vhn.doan.presentation.base;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -44,6 +45,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        // Khóa màn hình chỉ ở chế độ dọc
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         // Áp dụng theme mode trước khi super.onCreate()
         applyThemeMode();
 
