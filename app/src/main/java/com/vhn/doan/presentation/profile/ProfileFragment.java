@@ -292,17 +292,11 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
 
         // Khởi tạo các view trong BottomSheetDialog
         LinearLayout layoutSettings = bottomSheetView.findViewById(R.id.layout_settings);
-        LinearLayout layoutFcmToken = bottomSheetView.findViewById(R.id.layout_fcm_token);
         LinearLayout layoutLogout = bottomSheetView.findViewById(R.id.layout_logout);
 
         // Thiết lập sự kiện click cho các tùy chọn
         layoutSettings.setOnClickListener(v -> {
             openSettings();
-            bottomSheetDialog.dismiss();
-        });
-
-        layoutFcmToken.setOnClickListener(v -> {
-            openFCMTokenActivity();
             bottomSheetDialog.dismiss();
         });
 
@@ -319,12 +313,6 @@ public class ProfileFragment extends BaseFragment implements ProfileContract.Vie
         if (getContext() != null) {
             Intent intent = new Intent(getContext(), SettingsAndPrivacyActivity.class);
             startActivity(intent);
-        }
-    }
-
-    private void openFCMTokenActivity() {
-        if (getContext() != null) {
-            com.vhn.doan.utils.FCMTokenLauncher.launch(getContext());
         }
     }
 

@@ -156,30 +156,6 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Debug Activity -->
-        <activity
-            android:name=".presentation.debug.ReminderTestActivity"
-            android:exported="true"
-            android:label="Debug Thông Báo" />
-
-        <!-- FCM Token Activity để test push notifications -->
-        <activity
-            android:name=".presentation.debug.FCMTokenActivity"
-            android:exported="true"
-            android:label="FCM Token - Test Push Notifications" />
-
-        <!-- Test Notification Activity để test deep linking -->
-        <activity
-            android:name=".presentation.debug.TestNotificationActivity"
-            android:exported="true"
-            android:label="Test Notifications" />
-
-        <!-- Test Crashlytics Activity để test Firebase Crashlytics -->
-        <activity
-            android:name=".presentation.debug.CrashlyticsTestActivity"
-            android:exported="true"
-            android:label="Test Crashlytics" />
-
         <!-- Activity chọn âm thanh cho reminder -->
         <activity
             android:name=".presentation.reminder.SoundSelectionActivity"
