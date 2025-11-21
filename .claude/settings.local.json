@@ -27,7 +27,11 @@
       "Bash(vercel:*)",
       "Bash(cat:*)",
       "Bash(del .temp_private_key.txt)",
-      "Bash(printf:*)"
+      "Bash(printf:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(del:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
