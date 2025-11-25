@@ -42,6 +42,8 @@ import com.vhn.doan.presentation.home.adapter.CategorySkeletonAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipSkeletonAdapter;
 import com.vhn.doan.presentation.category.CategoryFragment;
 import com.vhn.doan.utils.NetworkMonitor;
+import com.vhn.doan.data.repository.NotificationHistoryRepositoryImpl;
+import com.vhn.doan.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,6 +168,9 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
 
         // Gắn presenter với view và bắt đầu tải dữ liệu
         presenter.attachView(this);
+
+        // Load số lượng thông báo chưa đọc
+        loadUnreadNotificationCount();
     }
 
     /**
@@ -240,6 +245,7 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     private TextView textViewGreeting;
     private View searchBarCard;
     private ImageButton buttonNotification;
+    private TextView badgeNotificationCount; // Badge cho số lượng thông báo chưa đọc
     private RecyclerView recyclerViewFeaturedTips; // Featured tips carousel
 
     /**
@@ -262,6 +268,7 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         textViewGreeting = view.findViewById(R.id.textViewGreeting);
         searchBarCard = view.findViewById(R.id.searchBarCard);
         buttonNotification = view.findViewById(R.id.buttonNotification);
+        badgeNotificationCount = view.findViewById(R.id.badgeNotificationCount);
 
         // Buttons "Xem tất cả"
         textViewSeeAllCategories = view.findViewById(R.id.textViewSeeAllCategories);
@@ -490,8 +497,8 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         // Nút thông báo
         if (buttonNotification != null) {
             buttonNotification.setOnClickListener(v -> {
-                // TODO: Navigate to Notification Activity
-                showMessage("Chức năng thông báo đang phát triển");
+                Intent intent = new Intent(requireContext(), com.vhn.doan.presentation.notification.NotificationHistoryActivity.class);
+                startActivity(intent);
             });
         }
 
@@ -990,6 +997,48 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         isAutoScrolling = false;
         if (autoScrollHandler != null && autoScrollRunnable != null) {
             autoScrollHandler.removeCallbacks(autoScrollRunnable);
+        }
+    }
+
+    /**
+     * Load và hiển thị số lượng thông báo chưa đọc trên badge
+     */
+    private void loadUnreadNotificationCount() {
+        try {
+            SessionManager sessionManager = new SessionManager(requireContext());
+            String userId = sessionManager.getCurrentUserId();
+
+            if (userId == null || userId.isEmpty()) {
+                // Không có user ID, ẩn badge
+                if (badgeNotificationCount != null) {
+                    badgeNotificationCount.setVisibility(View.GONE);
+                }
+                return;
+            }
+
+            NotificationHistoryRepositoryImpl repository =
+                NotificationHistoryRepositoryImpl.getInstance(requireContext());
+
+            repository.getUnreadCount(userId).observe(getViewLifecycleOwner(), count -> {
+                if (badgeNotificationCount != null && count != null) {
+                    if (count > 0) {
+                        badgeNotificationCount.setVisibility(View.VISIBLE);
+                        // Hiển thị số, tối đa 99+
+                        if (count > 99) {
+                            badgeNotificationCount.setText("99+");
+                        } else {
+                            badgeNotificationCount.setText(String.valueOf(count));
+                        }
+                    } else {
+                        badgeNotificationCount.setVisibility(View.GONE);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading unread notification count", e);
+            if (badgeNotificationCount != null) {
+                badgeNotificationCount.setVisibility(View.GONE);
+            }
         }
     }
 

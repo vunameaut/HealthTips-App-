@@ -7,12 +7,18 @@ import android.os.Build;
 import android.os.PowerManager;
 
 import com.vhn.doan.R;
+import com.vhn.doan.data.NotificationHistory;
+import com.vhn.doan.data.NotificationPriority;
+import com.vhn.doan.data.NotificationType;
 import com.vhn.doan.data.Reminder;
+import com.vhn.doan.data.repository.NotificationHistoryRepositoryImpl;
 import com.vhn.doan.data.repository.ReminderRepository;
 import com.vhn.doan.data.repository.ReminderRepositoryImpl;
+import com.vhn.doan.data.repository.RepositoryCallback;
 import com.vhn.doan.presentation.reminder.AlarmActivity;
 import com.vhn.doan.services.NotificationService;
 import com.vhn.doan.services.ReminderService;
+import com.vhn.doan.utils.SessionManager;
 
 import android.util.Log;
 
@@ -104,6 +110,9 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
                         Log.d(TAG, "🔔 Hiển thị NOTIFICATION THƯỜNG với âm thanh và rung");
                         showNotificationWithSound(context, reminder);
                     }
+
+                    // Lưu reminder vào notification history
+                    saveReminderToHistory(context, reminder);
 
                     // Lên lịch lặp lại nếu cần
                     if (reminder.getRepeatType() != Reminder.RepeatType.NO_REPEAT) {
@@ -329,5 +338,62 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
         ReminderRepository repository = new ReminderRepositoryImpl();
         // Tạm thời bỏ qua việc lấy userId - cần cải thiện trong tương lai
         // Có thể lưu userId vào SharedPreferences hoặc cơ chế khác
+    }
+
+    /**
+     * Lưu reminder vào NotificationHistory
+     */
+    private void saveReminderToHistory(Context context, Reminder reminder) {
+        try {
+            // Lấy user ID
+            String userId = reminder.getUserId();
+            if (userId == null || userId.isEmpty()) {
+                // Fallback: lấy từ SessionManager
+                SessionManager sessionManager = new SessionManager(context);
+                userId = sessionManager.getCurrentUserId();
+            }
+
+            if (userId == null || userId.isEmpty()) {
+                Log.w(TAG, "Cannot save reminder to history: User ID is null");
+                return;
+            }
+
+            // Tạo NotificationHistory object
+            NotificationHistory notification = new NotificationHistory();
+            notification.setUserId(userId);
+            notification.setTitle(reminder.getTitle());
+            notification.setBody(reminder.getDescription() != null ? reminder.getDescription() : "");
+
+            // Set notification type based on alarm style
+            if (reminder.isAlarmStyle()) {
+                notification.setType(NotificationType.REMINDER_ALARM);
+                notification.setPriority(NotificationPriority.MAX);
+            } else {
+                notification.setType(NotificationType.REMINDER_ALERT);
+                notification.setPriority(NotificationPriority.HIGH);
+            }
+
+            // Set deep link
+            notification.setDeepLink("healthtips://reminder/" + reminder.getId());
+            notification.setTargetId(reminder.getId());
+            notification.setTargetType("reminder");
+
+            // Lưu vào database
+            NotificationHistoryRepositoryImpl repository = NotificationHistoryRepositoryImpl.getInstance(context);
+            repository.saveNotification(notification, new RepositoryCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    Log.d(TAG, "Reminder saved to history successfully");
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Failed to save reminder to history: " + error);
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving reminder to history", e);
+        }
     }
 }

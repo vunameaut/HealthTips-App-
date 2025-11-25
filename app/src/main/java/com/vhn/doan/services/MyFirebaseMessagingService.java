@@ -15,6 +15,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.vhn.doan.R;
+import com.vhn.doan.data.NotificationHistory;
+import com.vhn.doan.data.NotificationPriority;
+import com.vhn.doan.data.NotificationType;
+import com.vhn.doan.data.repository.NotificationHistoryRepositoryImpl;
+import com.vhn.doan.data.repository.RepositoryCallback;
+import com.vhn.doan.utils.SessionManager;
 
 import java.util.Map;
 
@@ -80,6 +86,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         Intent intent = createDeepLinkIntent(type, data);
         showNotification(title, body, intent);
+
+        // Lưu notification vào history
+        saveNotificationToHistory(data);
     }
 
     /**
@@ -204,6 +213,197 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     Log.e(TAG, "Failed to save FCM token", e));
         } else {
             Log.w(TAG, "User not logged in, cannot save FCM token");
+        }
+    }
+
+    /**
+     * Lưu notification vào NotificationHistory
+     */
+    private void saveNotificationToHistory(Map<String, String> data) {
+        try {
+            // Lấy user ID từ SessionManager hoặc Firebase Auth
+            SessionManager sessionManager = new SessionManager(this);
+            String userId = sessionManager.getCurrentUserId();
+
+            if (userId == null || userId.isEmpty()) {
+                // Thử lấy từ Firebase Auth nếu SessionManager không có
+                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                }
+            }
+
+            if (userId == null || userId.isEmpty()) {
+                Log.w(TAG, "Cannot save notification to history: User not logged in");
+                return;
+            }
+
+            // Tạo NotificationHistory object
+            NotificationHistory notification = new NotificationHistory();
+            notification.setUserId(userId);
+            notification.setTitle(data.get("title"));
+            notification.setBody(data.get("body"));
+            notification.setImageUrl(data.get("image"));
+
+            // Set notification type
+            String typeStr = data.get("type");
+            NotificationType type = NotificationType.fromValue(typeStr);
+            notification.setType(type);
+
+            // Set priority (mặc định là HIGH cho FCM)
+            notification.setPriority(NotificationPriority.HIGH);
+
+            // Create deep link
+            String deepLink = createDeepLink(typeStr, data);
+            notification.setDeepLink(deepLink);
+
+            // Set target ID và type
+            notification.setTargetId(getTargetId(typeStr, data));
+            notification.setTargetType(getTargetType(typeStr));
+
+            // Set extra data for comment-related notifications
+            String extraData = getExtraData(typeStr, data);
+            if (extraData != null) {
+                notification.setExtraData(extraData);
+            }
+
+            // Lưu vào database
+            NotificationHistoryRepositoryImpl repository = NotificationHistoryRepositoryImpl.getInstance(this);
+            repository.saveNotification(notification, new RepositoryCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    Log.d(TAG, "Notification saved to history successfully");
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e(TAG, "Failed to save notification to history: " + error);
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving notification to history", e);
+        }
+    }
+
+    /**
+     * Tạo deep link string từ notification data
+     */
+    private String createDeepLink(String type, Map<String, String> data) {
+        String baseUrl = "healthtips://";
+
+        switch (type) {
+            case TYPE_COMMENT_REPLY:
+                return baseUrl + "video/" + data.get("videoId") + "?comment=" + data.get("replyCommentId");
+
+            case TYPE_NEW_HEALTH_TIP:
+                return baseUrl + "tip/" + data.get("healthTipId");
+
+            case TYPE_NEW_VIDEO:
+                return baseUrl + "video/" + data.get("videoId");
+
+            case TYPE_COMMENT_LIKE:
+                return baseUrl + "video/" + data.get("videoId") + "?comment=" + data.get("commentId");
+
+            case TYPE_HEALTH_TIP_RECOMMENDATION:
+                return baseUrl + "recommendations";
+
+            default:
+                return baseUrl + "home";
+        }
+    }
+
+    /**
+     * Lấy target ID từ notification data
+     */
+    private String getTargetId(String type, Map<String, String> data) {
+        switch (type) {
+            case TYPE_COMMENT_REPLY:
+            case TYPE_COMMENT_LIKE:
+            case TYPE_NEW_VIDEO:
+                return data.get("videoId");
+
+            case TYPE_NEW_HEALTH_TIP:
+                return data.get("healthTipId");
+
+            case TYPE_HEALTH_TIP_RECOMMENDATION:
+                // Extract first tip ID from tips JSON
+                String tipsJson = data.get("tips");
+                if (tipsJson != null && !tipsJson.isEmpty()) {
+                    try {
+                        org.json.JSONArray tipsArray = new org.json.JSONArray(tipsJson);
+                        if (tipsArray.length() > 0) {
+                            org.json.JSONObject firstTip = tipsArray.getJSONObject(0);
+                            return firstTip.getString("healthTipId");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing tips JSON for targetId", e);
+                    }
+                }
+                return null;
+
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Lấy target type từ notification type
+     */
+    private String getTargetType(String type) {
+        switch (type) {
+            case TYPE_COMMENT_REPLY:
+            case TYPE_COMMENT_LIKE:
+                return "comment";
+
+            case TYPE_NEW_VIDEO:
+                return "video";
+
+            case TYPE_NEW_HEALTH_TIP:
+                return "health_tip";
+
+            case TYPE_HEALTH_TIP_RECOMMENDATION:
+                return "recommendation";
+
+            default:
+                return "unknown";
+        }
+    }
+
+    /**
+     * Lấy extra data JSON string từ notification data
+     * Dùng để lưu thêm thông tin như comment_id cho comment notifications
+     */
+    private String getExtraData(String type, Map<String, String> data) {
+        try {
+            org.json.JSONObject extraJson = new org.json.JSONObject();
+
+            switch (type) {
+                case TYPE_COMMENT_REPLY:
+                    String replyCommentId = data.get("replyCommentId");
+                    String parentCommentId = data.get("parentCommentId");
+                    if (replyCommentId != null) {
+                        extraJson.put("comment_id", replyCommentId);
+                    }
+                    if (parentCommentId != null) {
+                        extraJson.put("parent_comment_id", parentCommentId);
+                    }
+                    break;
+
+                case TYPE_COMMENT_LIKE:
+                    String commentId = data.get("commentId");
+                    if (commentId != null) {
+                        extraJson.put("comment_id", commentId);
+                    }
+                    break;
+
+                default:
+                    return null;
+            }
+
+            return extraJson.length() > 0 ? extraJson.toString() : null;
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating extra data JSON", e);
+            return null;
         }
     }
 }

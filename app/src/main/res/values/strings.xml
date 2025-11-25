@@ -869,4 +869,41 @@
     <string name="fcm_toast_no_token">Không có token để copy!</string>
     <string name="fcm_error_details">Chi tiết lỗi:\n%1$s</string>
 
+    <!-- Notification History -->
+    <string name="notification_history_title">Lịch sử thông báo</string>
+    <string name="notification_history_empty_title">Chưa có thông báo nào</string>
+    <string name="notification_history_empty_subtitle">Các thông báo của bạn sẽ xuất hiện ở đây</string>
+    <string name="notification_history_mark_all_read">Đánh dấu tất cả đã đọc</string>
+    <string name="notification_history_delete_read">Xóa đã đọc</string>
+    <string name="notification_history_delete_all">Xóa tất cả</string>
+    <string name="notification_history_settings">Cài đặt</string>
+    <string name="notification_history_delete_confirm_title">Xác nhận xóa</string>
+    <string name="notification_history_delete_confirm_message">Bạn có chắc chắn muốn xóa thông báo này?</string>
+    <string name="notification_history_delete_all_confirm">Bạn có chắc chắn muốn xóa tất cả thông báo?</string>
+    <string name="notification_history_delete_read_confirm">Bạn có chắc chắn muốn xóa các thông báo đã đọc?</string>
+    <string name="notification_history_marked_all_read">Đã đánh dấu tất cả là đã đọc</string>
+    <string name="notification_history_deleted">Đã xóa thông báo</string>
+    <string name="notification_history_deleted_all">Đã xóa tất cả thông báo</string>
+    <string name="notification_history_deleted_read">Đã xóa các thông báo đã đọc</string>
+    <string name="notification_history_undo">Hoàn tác</string>
+    <string name="notification_history_loading">Đang tải...</string>
+    <string name="notification_history_error">Đã xảy ra lỗi</string>
+    <string name="notification_history_retry">Thử lại</string>
+    <string name="notification_history_section_today">Hôm nay</string>
+    <string name="notification_history_section_yesterday">Hôm qua</string>
+    <string name="notification_history_section_this_week">Tuần này</string>
+    <string name="notification_history_section_this_month">Tháng này</string>
+    <string name="notification_history_section_older">Cũ hơn</string>
+    <string name="notification_type_comment_reply">Trả lời bình luận</string>
+    <string name="notification_type_new_health_tip">Mẹo sức khỏe mới</string>
+    <string name="notification_type_new_video">Video mới</string>
+    <string name="notification_type_comment_like">Lượt thích bình luận</string>
+    <string name="notification_type_recommendation">Đề xuất</string>
+    <string name="notification_type_reminder_alert">Nhắc nhở</string>
+    <string name="notification_type_reminder_alarm">Báo thức</string>
+    <string name="notification_type_system">Hệ thống</string>
+    <string name="notification_type_other">Khác</string>
+    <string name="notification_history_unread_count">%d chưa đọc</string>
+    <string name="notification_history_swipe_to_delete">Vuốt để xóa</string>
+
 </resources>

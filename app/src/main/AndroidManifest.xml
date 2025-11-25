@@ -156,6 +156,11 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Activity lịch sử thông báo -->
+        <activity
+            android:name=".presentation.notification.NotificationHistoryActivity"
+            android:exported="false" />
+
         <!-- Activity chọn âm thanh cho reminder -->
         <activity
             android:name=".presentation.reminder.SoundSelectionActivity"

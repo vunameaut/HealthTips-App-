@@ -29,44 +29,75 @@
             <!-- Logo HealthFlow -->
             <TextView
                 android:id="@+id/textViewAppLogo"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="HealthTips"
                 android:textColor="@color/primary_button_start"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium"
+                android:ellipsize="end"
+                android:maxLines="1"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toStartOf="@id/buttonSearch"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintHorizontal_chainStyle="spread_inside" />
 
             <!-- Icon Tìm kiếm -->
-            <ImageButton
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/buttonSearch"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/search"
-                android:src="@android:drawable/ic_menu_search"
+                android:src="@drawable/icon_search"
                 android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/buttonNotification"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/text_primary" />
+                app:layout_constraintEnd_toStartOf="@id/notificationContainer"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Icon Thông báo (Chuông) -->
-            <ImageButton
-                android:id="@+id/buttonNotification"
+            <!-- Icon Thông báo (Chuông) với Badge -->
+            <FrameLayout
+                android:id="@+id/notificationContainer"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Thông báo"
-                android:src="@android:drawable/ic_popup_reminder"
-                android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/text_primary" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/buttonNotification"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Thông báo"
+                    android:src="@drawable/notification"
+                    android:padding="6dp"
+                    app:tint="@color/text_primary"
+                    android:scaleType="fitCenter" />
+
+                <!-- Badge hiển thị số lượng thông báo chưa đọc -->
+                <TextView
+                    android:id="@+id/badgeNotificationCount"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_notification_badge"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textColor="@android:color/white"
+                    android:textSize="9sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    tools:text="9" />
+
+            </FrameLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
