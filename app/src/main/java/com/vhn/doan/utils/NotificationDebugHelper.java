@@ -16,13 +16,16 @@ import java.util.Random;
 /**
  * Helper class để debug và kiểm tra trạng thái thông báo
  * - Kiểm tra quyền thông báo
- * - Test thông báo ngay lập tức
+ * - DISABLED: Test notification features (người dùng không muốn thông báo test)
  * - Kiểm tra thiết lập các kênh thông báo
  */
 public class NotificationDebugHelper {
     private static final String TAG = "NotificationDebugHelper";
     private static final String DEBUG_CHANNEL_ID = "debug_channel";
     private static final String DEBUG_CHANNEL_NAME = "Debug Notifications";
+
+    // Flag để disable tất cả test notifications
+    private static final boolean ENABLE_TEST_NOTIFICATIONS = false;
 
     /**
      * Kiểm tra xem ứng dụng có quyền hiển thị thông báo không
@@ -92,11 +95,18 @@ public class NotificationDebugHelper {
 
     /**
      * Test thông báo ngay lập tức
+     * DISABLED: Chức năng test đã bị vô hiệu hóa theo yêu cầu người dùng
      *
      * @param context Context của ứng dụng
-     * @return true nếu thông báo được hiển thị thành công, false nếu không
+     * @return false - test notification disabled
      */
     public static boolean testNotification(Context context) {
+        if (!ENABLE_TEST_NOTIFICATIONS) {
+            Log.d(TAG, "Test notification đã bị vô hiệu hóa");
+            return false;
+        }
+
+        // Code cũ được giữ lại nhưng không chạy
         if (context == null) return false;
 
         if (!checkNotificationPermission(context)) {

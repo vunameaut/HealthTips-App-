@@ -55,6 +55,7 @@
                 android:contentDescription="@string/search"
                 android:src="@drawable/icon_search"
                 android:padding="8dp"
+                app:tint="@color/text_primary"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/notificationContainer"
                 app:layout_constraintTop_toTopOf="parent" />

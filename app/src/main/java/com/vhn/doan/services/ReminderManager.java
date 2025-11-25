@@ -33,6 +33,13 @@ public class ReminderManager {
     private static final String TAG = "ReminderManager";
     private final UserSessionManager userSessionManager;
 
+    // Flag để disable missed reminder notifications nếu người dùng không muốn
+    private static final boolean ENABLE_MISSED_REMINDER_NOTIFICATIONS = false;
+
+    // Flag để disable foreground service (tránh thông báo trống)
+    // Sử dụng AlarmManager trực tiếp thay vì foreground service
+    private static final boolean ENABLE_FOREGROUND_SERVICE = false;
+
     @Inject
     public ReminderManager(UserSessionManager userSessionManager) {
         this.userSessionManager = userSessionManager;
@@ -40,8 +47,14 @@ public class ReminderManager {
 
     /**
      * Khởi động ReminderForegroundService để đảm bảo reminders hoạt động
+     * DISABLED: Tắt foreground service để tránh thông báo trống
      */
     public void startReminderService(Context context) {
+        if (!ENABLE_FOREGROUND_SERVICE) {
+            Log.d(TAG, "ReminderForegroundService đã bị vô hiệu hóa để tránh thông báo trống");
+            return;
+        }
+
         try {
             Intent serviceIntent = new Intent(context, ReminderForegroundService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -99,8 +112,14 @@ public class ReminderManager {
     /**
      * Kiểm tra và hiển thị các reminders đã bị miss
      * Được gọi khi app mở để thông báo cho người dùng về các reminders đã bỏ lỡ
+     * DISABLED: Chức năng này đã bị tắt để tránh thông báo test
      */
     public void checkAndShowMissedReminders(Context context) {
+        if (!ENABLE_MISSED_REMINDER_NOTIFICATIONS) {
+            Log.d(TAG, "Missed reminder notifications đã bị vô hiệu hóa");
+            return;
+        }
+
         String userId = userSessionManager.getCurrentUserId();
         if (userId == null || userId.isEmpty()) {
             Log.e(TAG, "Không thể kiểm tra reminders bị miss: User không đăng nhập");

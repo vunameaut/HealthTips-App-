@@ -143,14 +143,21 @@ public class ReminderPermissionHelper {
 
     /**
      * Khởi động foreground service để duy trì hoạt động
+     * DISABLED: Tắt để tránh thông báo trống
      */
     public static void startReminderService(Context context) {
+        // DISABLED: Foreground service bị tắt để tránh notification trống
+        // AlarmManager sẽ xử lý reminders trực tiếp
+        Log.d(TAG, "Reminder foreground service đã bị vô hiệu hóa để tránh notification trống");
+
+        /* Code cũ - đã tắt
         try {
             com.vhn.doan.services.ReminderForegroundService.startService(context);
             Log.d(TAG, "Reminder foreground service started");
         } catch (Exception e) {
             Log.e(TAG, "Failed to start reminder service", e);
         }
+        */
     }
 
     /**
