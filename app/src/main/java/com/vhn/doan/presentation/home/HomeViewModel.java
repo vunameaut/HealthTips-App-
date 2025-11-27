@@ -39,17 +39,17 @@ public class HomeViewModel extends BaseViewModel {
     public HomeViewModel(@NonNull Application application) {
         super(application);
 
-        // Initialize LiveData từ database
+        // Initialize LiveData từ database với LIMIT để tối ưu performance
         categories = database.categoryDao().getAllCategories();
         recommendedHealthTips = database.healthTipDao().getRecommendedHealthTips(10);
-        latestHealthTips = database.healthTipDao().getAllHealthTips();
+        latestHealthTips = database.healthTipDao().getAllHealthTipsLimited(50); // ⚡ OPTIMIZED: Limit 50 items
         mostViewedHealthTips = database.healthTipDao().getMostViewedHealthTips(10);
         mostLikedHealthTips = database.healthTipDao().getMostLikedHealthTips(10);
 
         // Setup MediatorLiveData để check nếu có data
         setupHasDataObserver();
 
-        Log.d(TAG, "HomeViewModel initialized");
+        Log.d(TAG, "HomeViewModel initialized with optimized queries");
     }
 
     /**

@@ -22,6 +22,7 @@ import com.vhn.doan.data.local.CacheManager;
 import com.vhn.doan.data.repository.FavoriteRepository;
 import com.vhn.doan.data.repository.FavoriteRepositoryImpl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,13 +105,56 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
     }
 
     /**
-     * Cập nhật danh sách mẹo sức khỏe
+     * Cập nhật danh sách mẹo sức khỏe với DiffUtil (OPTIMIZED)
+     * Chỉ update items thay đổi thay vì rebind tất cả
      * @param newHealthTips Danh sách mẹo sức khỏe mới
      */
     public void updateHealthTips(List<HealthTip> newHealthTips) {
-        healthTips.clear();
-        healthTips.addAll(newHealthTips);
-        notifyDataSetChanged();
+        // ⚡ OPTIMIZED: Sử dụng DiffUtil thay vì notifyDataSetChanged()
+        final List<HealthTip> oldList = new ArrayList<>(this.healthTips);
+
+        androidx.recyclerview.widget.DiffUtil.DiffResult diffResult =
+            androidx.recyclerview.widget.DiffUtil.calculateDiff(new androidx.recyclerview.widget.DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return oldList.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return newHealthTips.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    // So sánh ID để xác định cùng một item
+                    HealthTip oldItem = oldList.get(oldItemPosition);
+                    HealthTip newItem = newHealthTips.get(newItemPosition);
+                    return oldItem.getId() != null && oldItem.getId().equals(newItem.getId());
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    // So sánh nội dung để xác định có thay đổi không
+                    HealthTip oldItem = oldList.get(oldItemPosition);
+                    HealthTip newItem = newHealthTips.get(newItemPosition);
+
+                    // So sánh các fields quan trọng
+                    boolean sameTitle = (oldItem.getTitle() == null && newItem.getTitle() == null) ||
+                            (oldItem.getTitle() != null && oldItem.getTitle().equals(newItem.getTitle()));
+
+                    boolean sameLikeCount = oldItem.getLikeCount() == newItem.getLikeCount();
+                    boolean sameViewCount = oldItem.getViewCount() == newItem.getViewCount();
+
+                    return sameTitle && sameLikeCount && sameViewCount;
+                }
+            });
+
+        // Update list và dispatch changes
+        this.healthTips.clear();
+        this.healthTips.addAll(newHealthTips);
+        diffResult.dispatchUpdatesTo(this);
+
         // Reload favorites sau khi cập nhật danh sách
         loadUserFavorites();
     }
@@ -140,6 +184,18 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
                 android.util.Log.e("HealthTipAdapter", "Lỗi khi tải danh sách yêu thích: " + error);
             }
         });
+    }
+
+    /**
+     * ⚡ OPTIMIZED: Update favorites từ shared data thay vì load riêng
+     * Dùng method này để share favorites giữa nhiều adapters
+     */
+    public void updateFavoritesFromShared(java.util.Set<String> sharedFavoriteIds) {
+        if (sharedFavoriteIds != null) {
+            favoriteHealthTipIds.clear();
+            favoriteHealthTipIds.addAll(sharedFavoriteIds);
+            notifyDataSetChanged();
+        }
     }
 
     /**
@@ -295,8 +351,12 @@ public class HealthTipAdapter extends RecyclerView.Adapter<HealthTipAdapter.Heal
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 android.util.Log.d("HealthTipAdapter", "Loading image: " + imageUrl);
 
+                // ⚡ OPTIMIZED: Glide with disk cache, priority, and thumbnail
                 Glide.with(itemView.getContext())
                         .load(imageUrl)
+                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.RESOURCE) // Cache decoded images
+                        .priority(com.bumptech.glide.Priority.HIGH) // High priority for visible items
+                        .thumbnail(0.1f) // Load 10% thumbnail first for faster display
                         .centerCrop()
                         .placeholder(R.drawable.placeholder_image)
                         .error(R.drawable.error_image)

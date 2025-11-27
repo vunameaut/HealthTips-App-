@@ -114,6 +114,7 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     /**
      * Helper method để load category names cho danh sách health tips
      * Sau khi load xong, lưu vào Room cache
+     * ⚡ OPTIMIZED: Load tất cả categories một lần thay vì N+1 queries
      */
     private void loadCategoryNamesForHealthTips(List<HealthTip> healthTips, final HealthTipCallback callback) {
         if (healthTips == null || healthTips.isEmpty()) {
@@ -121,23 +122,42 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
             return;
         }
 
-        final int[] completedCount = {0};
-        final int totalCount = healthTips.size();
+        // ⚡ OPTIMIZATION: Load tất cả categories một lần
+        categoriesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Tạo HashMap để O(1) lookup
+                HashMap<String, String> categoryMap = new HashMap<>();
 
-        for (HealthTip healthTip : healthTips) {
-            loadCategoryNameForHealthTip(healthTip, new Runnable() {
-                @Override
-                public void run() {
-                    completedCount[0]++;
-                    if (completedCount[0] >= totalCount) {
-                        // Tất cả category names đã load xong
-                        // Lưu vào Room cache trước khi trả về callback
-                        saveToCache(healthTips);
-                        callback.onSuccess(healthTips);
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Category category = snapshot.getValue(Category.class);
+                    if (category != null && category.getId() != null) {
+                        categoryMap.put(category.getId(), category.getName());
                     }
                 }
-            });
-        }
+
+                // Gán category names từ HashMap
+                for (HealthTip healthTip : healthTips) {
+                    if (healthTip.getCategoryId() != null) {
+                        String categoryName = categoryMap.get(healthTip.getCategoryId());
+                        healthTip.setCategoryName(categoryName != null ? categoryName : "Chưa phân loại");
+                    } else {
+                        healthTip.setCategoryName("Chưa phân loại");
+                    }
+                }
+
+                // Lưu vào cache và trả về
+                saveToCache(healthTips);
+                callback.onSuccess(healthTips);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Error loading categories: " + databaseError.getMessage());
+                // Vẫn trả về health tips nhưng không có category names
+                callback.onSuccess(healthTips);
+            }
+        });
     }
 
     /**
@@ -180,8 +200,9 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         if (healthTipDao != null) {
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 try {
-                    List<HealthTipEntity> cachedEntities = healthTipDao.getAllHealthTipsSync();
-                    Log.d(TAG, "Cache loaded: " + (cachedEntities != null ? cachedEntities.size() : 0) + " items");
+                    // ⚡ OPTIMIZED: Limit 100 items để giảm memory usage và tăng tốc độ
+                    List<HealthTipEntity> cachedEntities = healthTipDao.getAllHealthTipsSyncLimited(100);
+                    Log.d(TAG, "Cache loaded (limited): " + (cachedEntities != null ? cachedEntities.size() : 0) + " items");
 
                     if (cachedEntities != null && !cachedEntities.isEmpty()) {
                         // Chuyển đổi Entity sang Model
@@ -222,13 +243,16 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
             Log.w(TAG, "Offline support not available (healthTipDao is null)");
         }
 
-        // 2. Nếu online, fetch từ Firebase
+        // 2. Nếu online, fetch từ Firebase với LIMIT
         if (isOnline) {
-            Log.d(TAG, "Fetching from Firebase...");
-            healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            Log.d(TAG, "Fetching from Firebase with limit...");
+            // ⚡ OPTIMIZED: Limit to 100 latest items thay vì load tất cả
+            Query limitedQuery = healthTipsRef.orderByChild("createdAt").limitToLast(100);
+
+            limitedQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Log.d(TAG, "Firebase onDataChange: " + dataSnapshot.getChildrenCount() + " items");
+                    Log.d(TAG, "Firebase onDataChange (limited): " + dataSnapshot.getChildrenCount() + " items");
                     List<HealthTip> healthTips = new ArrayList<>();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         try {
@@ -776,12 +800,17 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
     public void getRecommendedHealthTips(int limit, final HealthTipCallback callback) {
         // Logic đề xuất: Lấy ngẫu nhiên các bài viết từ nhiều danh mục khác nhau
         // Kết hợp từ các bài viết mới, được xem nhiều và được thích nhiều
-        healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        // ⚡ OPTIMIZED: Limit to 200 latest items để tính recommendation score
+        // thay vì load tất cả (có thể hàng nghìn items)
+        Query recommendQuery = healthTipsRef.orderByChild("createdAt").limitToLast(200);
+
+        recommendQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<HealthTip> allHealthTips = new ArrayList<>();
 
-                // Lấy tất cả bài viết
+                // Lấy subset để tính recommendation
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     HealthTip healthTip = snapshot.getValue(HealthTip.class);
                     if (healthTip != null) {
@@ -1207,13 +1236,15 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         }
 
         Log.d(TAG, "Fetching recommended tips from Firebase...");
-        // Lấy tất cả bài viết trước, sau đó áp dụng thuật toán đề xuất dựa trên ngày
-        healthTipsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        // ⚡ OPTIMIZED: Lấy 200 bài viết mới nhất thay vì tất cả
+        Query recommendQuery = healthTipsRef.orderByChild("createdAt").limitToLast(200);
+
+        recommendQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<HealthTip> allHealthTips = new ArrayList<>();
 
-                // Lấy tất cả bài viết
+                // Lấy subset để tính recommendation
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     HealthTip healthTip = snapshot.getValue(HealthTip.class);
                     if (healthTip != null) {

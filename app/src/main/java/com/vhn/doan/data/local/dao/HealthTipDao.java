@@ -45,28 +45,62 @@ public interface HealthTipDao {
 
     /**
      * Lấy tất cả health tips (LiveData - tự động update UI)
+     * @deprecated Sử dụng getAllHealthTipsLimited() để tối ưu performance
      */
     @Query("SELECT * FROM health_tips ORDER BY created_at DESC")
     LiveData<List<HealthTipEntity>> getAllHealthTips();
 
     /**
+     * Lấy health tips với giới hạn số lượng (LiveData - OPTIMIZED)
+     * @param limit Số lượng items tối đa
+     */
+    @Query("SELECT * FROM health_tips ORDER BY created_at DESC LIMIT :limit")
+    LiveData<List<HealthTipEntity>> getAllHealthTipsLimited(int limit);
+
+    /**
      * Lấy tất cả health tips (synchronous - không phải LiveData)
      * Dùng cho offline-first strategy
+     * @deprecated Sử dụng getAllHealthTipsSyncLimited() để tối ưu performance
      */
     @Query("SELECT * FROM health_tips ORDER BY created_at DESC")
     List<HealthTipEntity> getAllHealthTipsSync();
 
     /**
+     * Lấy health tips với giới hạn số lượng (synchronous - OPTIMIZED)
+     * @param limit Số lượng items tối đa
+     */
+    @Query("SELECT * FROM health_tips ORDER BY created_at DESC LIMIT :limit")
+    List<HealthTipEntity> getAllHealthTipsSyncLimited(int limit);
+
+    /**
      * Lấy health tips theo category
+     * @deprecated Sử dụng getHealthTipsByCategoryLimited() để tối ưu performance
      */
     @Query("SELECT * FROM health_tips WHERE category_id = :categoryId ORDER BY created_at DESC")
     LiveData<List<HealthTipEntity>> getHealthTipsByCategory(String categoryId);
 
     /**
+     * Lấy health tips theo category với giới hạn (OPTIMIZED)
+     * @param categoryId ID của category
+     * @param limit Số lượng items tối đa
+     */
+    @Query("SELECT * FROM health_tips WHERE category_id = :categoryId ORDER BY created_at DESC LIMIT :limit")
+    LiveData<List<HealthTipEntity>> getHealthTipsByCategoryLimited(String categoryId, int limit);
+
+    /**
      * Lấy health tips theo category (synchronous)
+     * @deprecated Sử dụng getHealthTipsByCategorySyncLimited() để tối ưu performance
      */
     @Query("SELECT * FROM health_tips WHERE category_id = :categoryId ORDER BY created_at DESC")
     List<HealthTipEntity> getHealthTipsByCategorySync(String categoryId);
+
+    /**
+     * Lấy health tips theo category với giới hạn (synchronous - OPTIMIZED)
+     * @param categoryId ID của category
+     * @param limit Số lượng items tối đa
+     */
+    @Query("SELECT * FROM health_tips WHERE category_id = :categoryId ORDER BY created_at DESC LIMIT :limit")
+    List<HealthTipEntity> getHealthTipsByCategorySyncLimited(String categoryId, int limit);
 
     /**
      * Lấy health tips được recommend (sorted by score)
@@ -76,15 +110,31 @@ public interface HealthTipDao {
 
     /**
      * Lấy health tips được yêu thích
+     * @deprecated Sử dụng getFavoriteHealthTipsLimited() để tối ưu performance
      */
     @Query("SELECT * FROM health_tips WHERE is_favorite = 1 ORDER BY created_at DESC")
     LiveData<List<HealthTipEntity>> getFavoriteHealthTips();
 
     /**
+     * Lấy health tips được yêu thích với giới hạn (OPTIMIZED)
+     * @param limit Số lượng items tối đa
+     */
+    @Query("SELECT * FROM health_tips WHERE is_favorite = 1 ORDER BY created_at DESC LIMIT :limit")
+    LiveData<List<HealthTipEntity>> getFavoriteHealthTipsLimited(int limit);
+
+    /**
      * Lấy health tips được like
+     * @deprecated Sử dụng getLikedHealthTipsLimited() để tối ưu performance
      */
     @Query("SELECT * FROM health_tips WHERE is_liked = 1 ORDER BY created_at DESC")
     LiveData<List<HealthTipEntity>> getLikedHealthTips();
+
+    /**
+     * Lấy health tips được like với giới hạn (OPTIMIZED)
+     * @param limit Số lượng items tối đa
+     */
+    @Query("SELECT * FROM health_tips WHERE is_liked = 1 ORDER BY created_at DESC LIMIT :limit")
+    LiveData<List<HealthTipEntity>> getLikedHealthTipsLimited(int limit);
 
     /**
      * Lấy health tips xem nhiều nhất
@@ -124,9 +174,18 @@ public interface HealthTipDao {
 
     /**
      * Tìm kiếm health tips theo title
+     * @deprecated Sử dụng searchHealthTipsLimited() để tối ưu performance
      */
     @Query("SELECT * FROM health_tips WHERE title LIKE '%' || :query || '%' ORDER BY created_at DESC")
     LiveData<List<HealthTipEntity>> searchHealthTips(String query);
+
+    /**
+     * Tìm kiếm health tips theo title với giới hạn (OPTIMIZED)
+     * @param query Từ khóa tìm kiếm
+     * @param limit Số lượng kết quả tối đa
+     */
+    @Query("SELECT * FROM health_tips WHERE title LIKE '%' || :query || '%' ORDER BY created_at DESC LIMIT :limit")
+    LiveData<List<HealthTipEntity>> searchHealthTipsLimited(String query, int limit);
 
     /**
      * Đếm số lượng health tips
