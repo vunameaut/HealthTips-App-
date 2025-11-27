@@ -168,7 +168,107 @@
                     </LinearLayout>
 
                     <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchHealthTips"
+                        android:id="@+id/switchNewHealthTips"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/divider_color" />
+
+                <!-- Video mới -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="Icon"
+                        android:src="@drawable/ic_video"
+                        app:tint="@color/primary_green" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Video mới"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Thông báo khi có video mới"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switchNewVideos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/divider_color" />
+
+                <!-- Đề xuất -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="Icon"
+                        android:src="@drawable/ic_star"
+                        app:tint="@color/primary_green" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Đề xuất"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Nhận đề xuất cá nhân hóa"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switchRecommendations"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
@@ -252,43 +352,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Lượt thích -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:contentDescription="@string/icon"
-                        android:src="@drawable/ic_heart_outline"
-                        app:tint="@color/primary_green" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_weight="1"
-                        android:text="@string/likes"
-                        android:textColor="@color/text_primary"
-                        android:textSize="15sp" />
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchLikes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="12dp"
-                    android:background="@color/divider_color" />
-
-                <!-- Bình luận -->
+                <!-- Trả lời bình luận -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -302,17 +366,31 @@
                         android:src="@drawable/ic_comment"
                         app:tint="@color/primary_green" />
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="@string/comment"
-                        android:textColor="@color/text_primary"
-                        android:textSize="15sp" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Trả lời bình luận"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Khi ai đó trả lời bình luận của bạn"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
 
                     <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchComments"
+                        android:id="@+id/switchCommentReply"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
@@ -324,7 +402,7 @@
                     android:layout_marginVertical="12dp"
                     android:background="@color/divider_color" />
 
-                <!-- Theo dõi -->
+                <!-- Lượt thích bình luận -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -334,21 +412,35 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:contentDescription="Icon"
-                        android:src="@drawable/ic_person_add"
+                        android:contentDescription="@string/icon"
+                        android:src="@drawable/ic_heart_outline"
                         app:tint="@color/primary_green" />
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="@string/new_followers"
-                        android:textColor="@color/text_primary"
-                        android:textSize="15sp" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lượt thích bình luận"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Khi ai đó thích bình luận của bạn"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
 
                     <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchFollows"
+                        android:id="@+id/switchCommentLike"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
@@ -396,17 +488,31 @@
                         android:src="@drawable/ic_update"
                         app:tint="@color/primary_green" />
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="@string/app_updates"
-                        android:textColor="@color/text_primary"
-                        android:textSize="15sp" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/app_updates"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cập nhật và thông báo hệ thống"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
 
                     <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchUpdates"
+                        android:id="@+id/switchSystemUpdates"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 

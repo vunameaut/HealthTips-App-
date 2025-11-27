@@ -14,6 +14,7 @@ import androidx.core.app.NotificationManagerCompat;
 import com.vhn.doan.R;
 import com.vhn.doan.data.Reminder;
 import com.vhn.doan.presentation.reminder.AlarmActivity;
+import com.vhn.doan.presentation.settings.content.NotificationSettingsActivity;
 import com.vhn.doan.receivers.ReminderActionReceiver;
 
 /**
@@ -59,12 +60,20 @@ public class NotificationService {
 
     /**
      * Hiển thị thông báo nhắc nhở
+     * ✅ UPDATED: Check reminder settings và tôn trọng sound/vibration preferences
      */
     public void showReminderNotification(Reminder reminder) {
         if (reminder == null) {
             android.util.Log.w("NotificationService", "showReminderNotification: Reminder is null");
             return;
         }
+
+        // ✅ CHECK: Kiểm tra xem reminder notifications có được bật không
+        if (!NotificationSettingsActivity.isNotificationEnabled(context, "reminders")) {
+            android.util.Log.d("NotificationService", "Reminder notifications are disabled in settings. Skipping notification.");
+            return;
+        }
+
         android.util.Log.d("NotificationService", "showReminderNotification: Showing notification for reminder: " + reminder.getTitle());
 
         // Tạo intent để mở app khi click notification
@@ -81,13 +90,12 @@ public class NotificationService {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Tạo notification với âm thanh và rung
+        // Tạo notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_reminder)
             .setContentTitle("🔔 Nhắc nhở: " + reminder.getTitle())
             .setContentText(reminder.getDescription())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(true)
             .setOngoing(false)
             .setContentIntent(pendingIntent)
@@ -101,6 +109,21 @@ public class NotificationService {
             )
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);
+
+        // ✅ CHECK: Tôn trọng sound và vibration settings
+        boolean soundEnabled = NotificationSettingsActivity.isSoundEnabled(context);
+        boolean vibrationEnabled = NotificationSettingsActivity.isVibrationEnabled(context);
+
+        int defaults = NotificationCompat.DEFAULT_LIGHTS; // Always show lights
+        if (soundEnabled) {
+            defaults |= NotificationCompat.DEFAULT_SOUND;
+        }
+        if (vibrationEnabled) {
+            defaults |= NotificationCompat.DEFAULT_VIBRATE;
+        }
+        builder.setDefaults(defaults);
+
+        android.util.Log.d("NotificationService", "Reminder notification settings - Sound: " + soundEnabled + ", Vibration: " + vibrationEnabled);
 
         // Hiển thị notification
         try {
@@ -162,8 +185,15 @@ public class NotificationService {
     /**
      * Overload method để hỗ trợ ReminderWorker
      * Hiển thị thông báo nhắc nhở với các tham số truyền vào
+     * ✅ UPDATED: Check reminder settings và sound/vibration
      */
     public void showReminderNotification(int notificationId, String title, String message, Intent intent) {
+        // ✅ CHECK: Kiểm tra xem reminder notifications có được bật không
+        if (!NotificationSettingsActivity.isNotificationEnabled(context, "reminders")) {
+            android.util.Log.d("NotificationService", "Reminder notifications are disabled in settings. Skipping notification.");
+            return;
+        }
+
         try {
             // Tạo PendingIntent từ Intent đã truyền vào
             PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -179,7 +209,6 @@ public class NotificationService {
                 .setContentTitle("🔔 " + title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setAutoCancel(true)
                 .setOngoing(false)
                 .setContentIntent(pendingIntent)
@@ -189,6 +218,19 @@ public class NotificationService {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setFullScreenIntent(pendingIntent, true); // Hiển thị full screen ngay cả khi khóa màn hình
+
+            // ✅ CHECK: Tôn trọng sound và vibration settings
+            boolean soundEnabled = NotificationSettingsActivity.isSoundEnabled(context);
+            boolean vibrationEnabled = NotificationSettingsActivity.isVibrationEnabled(context);
+
+            int defaults = NotificationCompat.DEFAULT_LIGHTS;
+            if (soundEnabled) {
+                defaults |= NotificationCompat.DEFAULT_SOUND;
+            }
+            if (vibrationEnabled) {
+                defaults |= NotificationCompat.DEFAULT_VIBRATE;
+            }
+            builder.setDefaults(defaults);
 
             // Hiển thị notification
             NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
@@ -205,9 +247,16 @@ public class NotificationService {
 
     /**
      * Hiển thị thông báo với âm thanh tùy chỉnh
+     * ✅ UPDATED: Check reminder settings và tôn trọng user sound/vibration preferences
      */
     public void showReminderNotificationWithSound(Reminder reminder, String soundUri) {
         if (reminder == null) return;
+
+        // ✅ CHECK: Kiểm tra xem reminder notifications có được bật không
+        if (!NotificationSettingsActivity.isNotificationEnabled(context, "reminders")) {
+            android.util.Log.d("NotificationService", "Reminder notifications are disabled in settings. Skipping notification.");
+            return;
+        }
 
         // Tạo intent để mở app khi click notification
         Intent intent = new Intent(context, AlarmActivity.class);
@@ -233,23 +282,31 @@ public class NotificationService {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);
 
-        // Thêm âm thanh tùy chỉnh nếu có
-        if (soundUri != null && !soundUri.isEmpty()) {
-            try {
-                android.net.Uri uri = android.net.Uri.parse(soundUri);
-                builder.setSound(uri);
-            } catch (Exception e) {
-                // Fallback về âm thanh mặc định
+        // ✅ CHECK: Tôn trọng sound settings
+        boolean soundEnabled = NotificationSettingsActivity.isSoundEnabled(context);
+        if (soundEnabled) {
+            // Thêm âm thanh tùy chỉnh nếu có
+            if (soundUri != null && !soundUri.isEmpty()) {
+                try {
+                    android.net.Uri uri = android.net.Uri.parse(soundUri);
+                    builder.setSound(uri);
+                } catch (Exception e) {
+                    // Fallback về âm thanh mặc định
+                    builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
+                }
+            } else {
                 builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
             }
-        } else {
-            builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
         }
 
-        // Thêm rung nếu được bật
-        if (reminder.isVibrate()) {
+        // ✅ CHECK: Tôn trọng vibration settings
+        boolean vibrationEnabled = NotificationSettingsActivity.isVibrationEnabled(context);
+        if (vibrationEnabled && reminder.isVibrate()) {
             builder.setDefaults(builder.build().defaults | NotificationCompat.DEFAULT_VIBRATE);
         }
+
+        // Always show lights
+        builder.setDefaults(builder.build().defaults | NotificationCompat.DEFAULT_LIGHTS);
 
         // Hiển thị notification
         try {
@@ -257,6 +314,7 @@ public class NotificationService {
             if (notificationManagerCompat.areNotificationsEnabled()) {
                 int notificationId = REMINDER_NOTIFICATION_ID + reminder.getId().hashCode();
                 notificationManagerCompat.notify(notificationId, builder.build());
+                android.util.Log.d("NotificationService", "Showed reminder with custom sound - Sound: " + soundEnabled + ", Vibration: " + vibrationEnabled);
             }
         } catch (Exception e) {
             android.util.Log.e("NotificationService", "Lỗi hiển thị thông báo với âm thanh", e);

@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.settings.account;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.LinearLayout;
@@ -136,8 +137,8 @@ public class PrivacySettingsActivity extends AppCompatActivity {
             loadFromLocalPreferences();
         }
 
-        // Load blocked users count (mock data for now)
-        updateBlockedUsersCount(0);
+        // ✅ IMPLEMENTED: Load blocked users count from Firebase
+        loadBlockedUsersCount();
     }
 
     private void loadFromLocalPreferences() {
@@ -187,8 +188,9 @@ public class PrivacySettingsActivity extends AppCompatActivity {
         });
 
         btnBlockedUsers.setOnClickListener(v -> {
-            // TODO: Navigate to blocked users list
-            Toast.makeText(this, "Chức năng đang phát triển", Toast.LENGTH_SHORT).show();
+            // ✅ IMPLEMENTED: Navigate to blocked users list
+            Intent intent = new Intent(this, BlockedUsersActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -240,24 +242,230 @@ public class PrivacySettingsActivity extends AppCompatActivity {
     }
 
     private void clearSearchHistory() {
-        // TODO: Clear search history from local database and Firebase
+        // ✅ IMPLEMENTED: Clear search history from local database and Firebase
+
+        // 1. Clear local SharedPreferences
         SharedPreferences searchPrefs = getSharedPreferences("SearchHistory", MODE_PRIVATE);
         searchPrefs.edit().clear().apply();
 
-        Toast.makeText(this, "Đã xóa lịch sử tìm kiếm", Toast.LENGTH_SHORT).show();
+        // 2. Clear from Firebase if user is logged in
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            DatabaseReference searchHistoryRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(currentUser.getUid())
+                .child("search_history");
+
+            searchHistoryRef.removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "✅ Đã xóa lịch sử tìm kiếm (local và cloud)", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Đã xóa local. Lỗi xóa cloud: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+        } else {
+            Toast.makeText(this, "Đã xóa lịch sử tìm kiếm (local)", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void clearViewHistory() {
-        // TODO: Clear view history from local database and Firebase
+        // ✅ IMPLEMENTED: Clear view history from local database and Firebase
+
+        // 1. Clear local SharedPreferences
         SharedPreferences viewPrefs = getSharedPreferences("ViewHistory", MODE_PRIVATE);
         viewPrefs.edit().clear().apply();
 
-        Toast.makeText(this, "Đã xóa lịch sử xem", Toast.LENGTH_SHORT).show();
+        // 2. Clear from Firebase if user is logged in
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            DatabaseReference viewHistoryRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(currentUser.getUid())
+                .child("view_history");
+
+            viewHistoryRef.removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "✅ Đã xóa lịch sử xem (local và cloud)", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Đã xóa local. Lỗi xóa cloud: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+        } else {
+            Toast.makeText(this, "Đã xóa lịch sử xem (local)", Toast.LENGTH_SHORT).show();
+        }
     }
 
+    /**
+     * ✅ IMPLEMENTED: Export user data to JSON file
+     */
     private void requestDataDownload() {
-        // TODO: Request data download from server
-        Toast.makeText(this, "Yêu cầu đã được gửi. Bạn sẽ nhận được email trong vòng 24-48 giờ.", Toast.LENGTH_LONG).show();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "Bạn cần đăng nhập để tải dữ liệu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Show progress dialog
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Đang chuẩn bị dữ liệu...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        // Collect all user data from Firebase
+        DatabaseReference userDataRef = FirebaseDatabase.getInstance()
+            .getReference("users")
+            .child(currentUser.getUid());
+
+        userDataRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                try {
+                    // Build JSON data
+                    org.json.JSONObject jsonData = new org.json.JSONObject();
+
+                    // User profile
+                    org.json.JSONObject profile = new org.json.JSONObject();
+                    profile.put("email", currentUser.getEmail());
+                    profile.put("displayName", currentUser.getDisplayName());
+                    profile.put("uid", currentUser.getUid());
+                    profile.put("createdAt", currentUser.getMetadata() != null
+                            ? currentUser.getMetadata().getCreationTimestamp() : 0);
+                    jsonData.put("profile", profile);
+
+                    // Privacy settings
+                    if (dataSnapshot.child("privacy_settings").exists()) {
+                        org.json.JSONObject privacySettings = new org.json.JSONObject();
+                        DataSnapshot privacySnap = dataSnapshot.child("privacy_settings");
+                        for (DataSnapshot child : privacySnap.getChildren()) {
+                            privacySettings.put(child.getKey(), child.getValue());
+                        }
+                        jsonData.put("privacy_settings", privacySettings);
+                    }
+
+                    // Notification settings
+                    if (dataSnapshot.child("notification_settings").exists()) {
+                        org.json.JSONObject notifSettings = new org.json.JSONObject();
+                        DataSnapshot notifSnap = dataSnapshot.child("notification_settings");
+                        for (DataSnapshot child : notifSnap.getChildren()) {
+                            notifSettings.put(child.getKey(), child.getValue());
+                        }
+                        jsonData.put("notification_settings", notifSettings);
+                    }
+
+                    // Blocked users
+                    if (dataSnapshot.child("blocked_users").exists()) {
+                        org.json.JSONArray blockedUsers = new org.json.JSONArray();
+                        DataSnapshot blockedSnap = dataSnapshot.child("blocked_users");
+                        for (DataSnapshot child : blockedSnap.getChildren()) {
+                            org.json.JSONObject user = new org.json.JSONObject();
+                            user.put("userId", child.getKey());
+                            if (child.child("displayName").exists()) {
+                                user.put("displayName", child.child("displayName").getValue());
+                            }
+                            if (child.child("blockedAt").exists()) {
+                                user.put("blockedAt", child.child("blockedAt").getValue());
+                            }
+                            blockedUsers.put(user);
+                        }
+                        jsonData.put("blocked_users", blockedUsers);
+                    }
+
+                    // Export timestamp
+                    jsonData.put("exported_at", System.currentTimeMillis());
+                    jsonData.put("exported_date", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                            java.util.Locale.getDefault()).format(new java.util.Date()));
+
+                    // Save to file
+                    saveDataToFile(jsonData.toString(2), progressDialog);
+
+                } catch (org.json.JSONException e) {
+                    progressDialog.dismiss();
+                    Toast.makeText(PrivacySettingsActivity.this,
+                            "Lỗi xử lý dữ liệu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                progressDialog.dismiss();
+                Toast.makeText(PrivacySettingsActivity.this,
+                        "Lỗi tải dữ liệu: " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void saveDataToFile(String jsonData, android.app.ProgressDialog progressDialog) {
+        try {
+            // Create file in Downloads directory
+            java.io.File downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(
+                    android.os.Environment.DIRECTORY_DOWNLOADS);
+
+            String fileName = "HealthTips_MyData_" +
+                    new java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault())
+                            .format(new java.util.Date()) + ".json";
+
+            java.io.File file = new java.io.File(downloadsDir, fileName);
+
+            java.io.FileWriter writer = new java.io.FileWriter(file);
+            writer.write(jsonData);
+            writer.close();
+
+            progressDialog.dismiss();
+
+            // Show success message with file path
+            new MaterialAlertDialogBuilder(this)
+                .setTitle("✅ Tải xuống thành công")
+                .setMessage("Dữ liệu của bạn đã được lưu tại:\n\n" +
+                        file.getAbsolutePath() + "\n\n" +
+                        "Bạn có thể tìm file trong thư mục Downloads.")
+                .setPositiveButton("Mở thư mục", (dialog, which) -> {
+                    // Open Downloads folder
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(android.net.Uri.fromFile(downloadsDir), "resource/folder");
+                    if (intent.resolveActivityInfo(getPackageManager(), 0) != null) {
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(this, "Không thể mở thư mục Downloads", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Đóng", null)
+                .show();
+
+        } catch (java.io.IOException e) {
+            progressDialog.dismiss();
+            Toast.makeText(this, "Lỗi lưu file: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * ✅ IMPLEMENTED: Load blocked users count from Firebase
+     */
+    private void loadBlockedUsersCount() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            DatabaseReference blockedUsersRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(currentUser.getUid())
+                .child("blocked_users");
+
+            blockedUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    int count = (int) dataSnapshot.getChildrenCount();
+                    updateBlockedUsersCount(count);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // On error, default to 0
+                    updateBlockedUsersCount(0);
+                    android.util.Log.e("PrivacySettings", "Error loading blocked users: " + databaseError.getMessage());
+                }
+            });
+        } else {
+            // No user logged in
+            updateBlockedUsersCount(0);
+        }
     }
 
     private void updateBlockedUsersCount(int count) {

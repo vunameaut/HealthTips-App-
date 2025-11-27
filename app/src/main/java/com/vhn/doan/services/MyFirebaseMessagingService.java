@@ -20,6 +20,7 @@ import com.vhn.doan.data.NotificationPriority;
 import com.vhn.doan.data.NotificationType;
 import com.vhn.doan.data.repository.NotificationHistoryRepositoryImpl;
 import com.vhn.doan.data.repository.RepositoryCallback;
+import com.vhn.doan.presentation.settings.content.NotificationSettingsActivity;
 import com.vhn.doan.utils.SessionManager;
 
 import java.util.Map;
@@ -84,11 +85,54 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             return;
         }
 
+        // ✅ CHECK: Kiểm tra notification settings trước khi hiển thị
+        if (!shouldShowNotification(type)) {
+            Log.d(TAG, "Notification type '" + type + "' is disabled in settings. Skipping notification.");
+            // Vẫn lưu vào history nhưng không hiển thị notification
+            saveNotificationToHistory(data);
+            return;
+        }
+
         Intent intent = createDeepLinkIntent(type, data);
         showNotification(title, body, intent);
 
         // Lưu notification vào history
         saveNotificationToHistory(data);
+    }
+
+    /**
+     * ✅ NEW: Kiểm tra xem notification type này có được bật trong settings không
+     */
+    private boolean shouldShowNotification(String type) {
+        // Map FCM notification types to NotificationSettings keys
+        String settingsKey = mapTypeToSettingsKey(type);
+        if (settingsKey == null) {
+            // Unknown type, show by default
+            return true;
+        }
+
+        // Check if this notification type is enabled
+        return NotificationSettingsActivity.isNotificationEnabled(this, settingsKey);
+    }
+
+    /**
+     * ✅ NEW: Map FCM notification type sang NotificationSettings key
+     */
+    private String mapTypeToSettingsKey(String fcmType) {
+        switch (fcmType) {
+            case TYPE_COMMENT_REPLY:
+                return "comment_reply";
+            case TYPE_NEW_HEALTH_TIP:
+                return "new_health_tip";
+            case TYPE_NEW_VIDEO:
+                return "new_video";
+            case TYPE_COMMENT_LIKE:
+                return "comment_like";
+            case TYPE_HEALTH_TIP_RECOMMENDATION:
+                return "recommendations";
+            default:
+                return null;
+        }
     }
 
     /**
@@ -142,6 +186,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     /**
      * Hiển thị notification với PendingIntent
+     * ✅ UPDATED: Tôn trọng sound và vibration settings
      */
     private void showNotification(String title, String body, Intent intent) {
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -159,6 +204,24 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(body));
+
+        // ✅ CHECK: Tôn trọng sound và vibration settings
+        boolean soundEnabled = NotificationSettingsActivity.isSoundEnabled(this);
+        boolean vibrationEnabled = NotificationSettingsActivity.isVibrationEnabled(this);
+
+        int defaults = 0;
+        if (soundEnabled) {
+            defaults |= NotificationCompat.DEFAULT_SOUND;
+        }
+        if (vibrationEnabled) {
+            defaults |= NotificationCompat.DEFAULT_VIBRATE;
+        }
+        // Always show lights
+        defaults |= NotificationCompat.DEFAULT_LIGHTS;
+
+        builder.setDefaults(defaults);
+
+        Log.d(TAG, "Notification settings - Sound: " + soundEnabled + ", Vibration: " + vibrationEnabled);
 
         NotificationManager notificationManager =
             (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

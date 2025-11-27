@@ -555,6 +555,9 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     public void onResume() {
         super.onResume();
 
+        // ✅ Reload greeting để cập nhật tên user nếu đã đổi
+        setupGreeting();
+
         // Force reload nếu categories chưa được load (xảy ra khi recreate do theme change)
         if (!isCategoriesLoaded) {
             // KHÔNG gọi setupSkeletonLoading() ở đây vì đã được gọi trong onCreateView()
@@ -578,6 +581,9 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         super.onHiddenChanged(hidden);
 
         if (!hidden) {
+            // ✅ Reload greeting khi fragment được show lại
+            setupGreeting();
+
             // Fragment được hiển thị lại (khi back từ CategoryFragment)
             // Refresh dữ liệu để đảm bảo cập nhật mới nhất
             if (presenter != null) {

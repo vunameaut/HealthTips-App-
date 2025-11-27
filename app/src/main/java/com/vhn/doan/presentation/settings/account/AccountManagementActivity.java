@@ -60,6 +60,15 @@ public class AccountManagementActivity extends BaseActivity {
         setupListeners();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // ✅ Reload user data khi quay lại activity (sau khi edit profile)
+        currentUser = mAuth.getCurrentUser(); // Refresh user object
+        loadUserData();
+        checkPendingDeletion();
+    }
+
     private void setupViews() {
         toolbar = findViewById(R.id.toolbar);
         tvEmail = findViewById(R.id.tvEmail);
@@ -110,7 +119,51 @@ public class AccountManagementActivity extends BaseActivity {
         }
     }
 
+    /**
+     * ✅ UPDATED: Reload user data từ Firebase để có dữ liệu mới nhất
+     */
     private void loadUserData() {
+        if (currentUser != null) {
+            // ✅ Reload user từ Firebase server để lấy dữ liệu mới nhất
+            currentUser.reload().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    // Refresh currentUser reference
+                    currentUser = mAuth.getCurrentUser();
+
+                    if (currentUser != null) {
+                        // Load email
+                        String email = currentUser.getEmail();
+                        if (email != null && !email.isEmpty()) {
+                            tvEmail.setText(email);
+                        }
+
+                        // Load display name
+                        String displayName = currentUser.getDisplayName();
+                        if (displayName != null && !displayName.isEmpty()) {
+                            tvDisplayName.setText(displayName);
+                        } else {
+                            tvDisplayName.setText(getString(R.string.account_display_name_placeholder));
+                        }
+
+                        // Load creation date
+                        long creationTimestamp = currentUser.getMetadata() != null
+                            ? currentUser.getMetadata().getCreationTimestamp()
+                            : System.currentTimeMillis();
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                        tvCreatedDate.setText(sdf.format(new Date(creationTimestamp)));
+                    }
+                } else {
+                    // Nếu reload thất bại, vẫn hiển thị dữ liệu cached
+                    displayCachedUserData();
+                }
+            });
+        }
+    }
+
+    /**
+     * ✅ NEW: Hiển thị dữ liệu user từ cache (fallback khi reload thất bại)
+     */
+    private void displayCachedUserData() {
         if (currentUser != null) {
             // Load email
             String email = currentUser.getEmail();

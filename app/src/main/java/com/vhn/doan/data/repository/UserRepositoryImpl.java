@@ -1,5 +1,8 @@
 package com.vhn.doan.data.repository;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -180,6 +183,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     /**
      * Cập nhật thông tin cá nhân của người dùng
+     * ✅ UPDATED: Cũng cập nhật Firebase Authentication displayName
      * @param uid UID của người dùng
      * @param displayName Tên hiển thị mới
      * @param bio Giới thiệu bản thân mới
@@ -212,8 +216,40 @@ public class UserRepositoryImpl implements UserRepository {
             return;
         }
 
+        // ✅ Step 1: Update Firebase Database
         usersRef.child(uid).updateChildren(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess())
+                .addOnSuccessListener(aVoid -> {
+                    // ✅ Step 2: Update Firebase Authentication displayName nếu có
+                    if (displayName != null && !displayName.isEmpty()) {
+                        updateFirebaseAuthDisplayName(displayName, callback);
+                    } else {
+                        callback.onSuccess();
+                    }
+                })
                 .addOnFailureListener(e -> callback.onError("Lỗi khi cập nhật thông tin cá nhân: " + e.getMessage()));
+    }
+
+    /**
+     * ✅ NEW: Update Firebase Authentication displayName
+     */
+    private void updateFirebaseAuthDisplayName(String displayName, UserOperationCallback callback) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(displayName)
+                    .build();
+
+            currentUser.updateProfile(profileUpdates)
+                    .addOnSuccessListener(aVoid -> callback.onSuccess())
+                    .addOnFailureListener(e -> {
+                        // Database đã update thành công, chỉ Auth update thất bại
+                        // Vẫn coi là thành công nhưng log error
+                        android.util.Log.e("UserRepositoryImpl", "Failed to update Firebase Auth displayName: " + e.getMessage());
+                        callback.onSuccess(); // Still return success vì Database đã update
+                    });
+        } else {
+            // Không có current user, nhưng database đã update thành công
+            callback.onSuccess();
+        }
     }
 }
