@@ -495,6 +495,7 @@
     <string name="faq_how_to_report">콘텐츠를 신고하는 방법은?</string>
 
     <!-- Report Content -->
+    <string name="report">신고</string>
     <string name="report_content">콘텐츠 신고</string>
     <string name="report_content_reason">신고 사유</string>
     <string name="report_spam">스팸</string>

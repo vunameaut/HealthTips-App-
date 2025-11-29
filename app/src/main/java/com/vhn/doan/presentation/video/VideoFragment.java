@@ -656,4 +656,5 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
+
 }

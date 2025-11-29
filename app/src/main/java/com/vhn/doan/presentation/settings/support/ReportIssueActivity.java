@@ -1,24 +1,33 @@
 package com.vhn.doan.presentation.settings.support;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.vhn.doan.R;
+import com.vhn.doan.utils.AdminNotificationSender;
+import com.vhn.doan.utils.CloudinaryHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,20 +39,50 @@ public class ReportIssueActivity extends AppCompatActivity {
 
     private Spinner spinnerIssueType;
     private EditText etSubject, etDescription;
-    private Button btnSubmit;
+    private Button btnSubmit, btnAttachImage, btnRemoveImage;
     private ProgressBar progressBar;
     private TextView tvDeviceInfo;
+    private ImageView imagePreview;
 
     private DatabaseReference issuesRef;
     private FirebaseAuth firebaseAuth;
+    private AdminNotificationSender adminNotificationSender;
+
+    private Uri selectedImageUri = null;
+    private String uploadedImageUrl = null;
+    private boolean isUploadingImage = false;
+
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_issue);
 
+        // Handle edge-to-edge display and notch
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+        }
+
         firebaseAuth = FirebaseAuth.getInstance();
         issuesRef = FirebaseDatabase.getInstance().getReference("issues");
+        adminNotificationSender = new AdminNotificationSender(this);
+
+        // Initialize Cloudinary
+        CloudinaryHelper.initCloudinary(this);
+
+        // Setup image picker launcher
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        if (imageUri != null) {
+                            onImageSelected(imageUri);
+                        }
+                    }
+                }
+        );
 
         setupViews();
         setupIssueTypeSpinner();
@@ -61,7 +100,14 @@ public class ReportIssueActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         tvDeviceInfo = findViewById(R.id.tvDeviceInfo);
 
+        // Image attachment views
+        btnAttachImage = findViewById(R.id.btnAttachImage);
+        btnRemoveImage = findViewById(R.id.btnRemoveImage);
+        imagePreview = findViewById(R.id.imagePreview);
+
         btnSubmit.setOnClickListener(v -> submitReport());
+        btnAttachImage.setOnClickListener(v -> openImagePicker());
+        btnRemoveImage.setOnClickListener(v -> removeImage());
     }
 
     private void setupIssueTypeSpinner() {
@@ -115,6 +161,18 @@ public class ReportIssueActivity extends AppCompatActivity {
             return;
         }
 
+        // Check if image is being uploaded
+        if (isUploadingImage) {
+            Toast.makeText(this, R.string.uploading_image, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // If image is selected but not uploaded, upload it first
+        if (selectedImageUri != null && uploadedImageUrl == null) {
+            uploadImageAndSubmit(issueType, subject, description);
+            return;
+        }
+
         // Show progress
         progressBar.setVisibility(View.VISIBLE);
         btnSubmit.setEnabled(false);
@@ -131,6 +189,11 @@ public class ReportIssueActivity extends AppCompatActivity {
         reportData.put("timestamp", System.currentTimeMillis());
         reportData.put("status", "pending");
 
+        // Add image URL if available
+        if (uploadedImageUrl != null) {
+            reportData.put("imageUrl", uploadedImageUrl);
+        }
+
         if (firebaseAuth.getCurrentUser() != null) {
             reportData.put("userId", firebaseAuth.getCurrentUser().getUid());
             reportData.put("userEmail", firebaseAuth.getCurrentUser().getEmail());
@@ -141,10 +204,8 @@ public class ReportIssueActivity extends AppCompatActivity {
         if (reportId != null) {
             issuesRef.child(reportId).setValue(reportData)
                 .addOnSuccessListener(aVoid -> {
-                    progressBar.setVisibility(View.GONE);
-                    btnSubmit.setEnabled(true);
-                    Toast.makeText(this, R.string.report_success, Toast.LENGTH_LONG).show();
-                    finish();
+                    // Also send to web admin
+                    sendToAdminPanel(issueType, subject, description);
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
@@ -152,5 +213,140 @@ public class ReportIssueActivity extends AppCompatActivity {
                     Toast.makeText(this, R.string.error_network, Toast.LENGTH_SHORT).show();
                 });
         }
+    }
+
+    /**
+     * Send report to web admin panel
+     */
+    private void sendToAdminPanel(String issueType, String subject, String description) {
+        // Map issue type to report type
+        String reportType = mapIssueTypeToReportType(issueType);
+
+        adminNotificationSender.sendUserReport(
+                reportType,
+                subject,
+                description,
+                null,  // No content ID for general reports
+                null,  // No content type
+                new AdminNotificationSender.NotificationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(() -> {
+                            progressBar.setVisibility(View.GONE);
+                            btnSubmit.setEnabled(true);
+                            Toast.makeText(ReportIssueActivity.this,
+                                    R.string.report_success, Toast.LENGTH_LONG).show();
+                            finish();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        // Even if admin notification fails, report was saved to Firebase
+                        runOnUiThread(() -> {
+                            progressBar.setVisibility(View.GONE);
+                            btnSubmit.setEnabled(true);
+                            Toast.makeText(ReportIssueActivity.this,
+                                    R.string.report_success, Toast.LENGTH_LONG).show();
+                            finish();
+                        });
+                    }
+                }
+        );
+    }
+
+    /**
+     * Map issue type string to report type
+     */
+    private String mapIssueTypeToReportType(String issueType) {
+        if (issueType.contains("spam") || issueType.contains("Spam")) {
+            return "spam";
+        } else if (issueType.contains("inappropriate") || issueType.contains("Inappropriate")) {
+            return "inappropriate";
+        } else if (issueType.contains("harassment") || issueType.contains("Harassment")) {
+            return "abuse";
+        } else if (issueType.contains("violence") || issueType.contains("Violence")) {
+            return "abuse";
+        } else {
+            return "other";
+        }
+    }
+
+    /**
+     * Open image picker
+     */
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imagePickerLauncher.launch(intent);
+    }
+
+    /**
+     * Handle image selection
+     */
+    private void onImageSelected(Uri imageUri) {
+        selectedImageUri = imageUri;
+
+        // Show preview
+        imagePreview.setVisibility(View.VISIBLE);
+        btnRemoveImage.setVisibility(View.VISIBLE);
+
+        Glide.with(this)
+                .load(imageUri)
+                .centerCrop()
+                .into(imagePreview);
+    }
+
+    /**
+     * Remove selected image
+     */
+    private void removeImage() {
+        selectedImageUri = null;
+        uploadedImageUrl = null;
+        imagePreview.setVisibility(View.GONE);
+        btnRemoveImage.setVisibility(View.GONE);
+        imagePreview.setImageDrawable(null);
+    }
+
+    /**
+     * Upload image and then submit report
+     */
+    private void uploadImageAndSubmit(String issueType, String subject, String description) {
+        isUploadingImage = true;
+        progressBar.setVisibility(View.VISIBLE);
+        btnSubmit.setEnabled(false);
+
+        Toast.makeText(this, R.string.uploading_image, Toast.LENGTH_SHORT).show();
+
+        CloudinaryHelper.uploadSupportImage(this, selectedImageUri, new CloudinaryHelper.CloudinaryUploadCallback() {
+            @Override
+            public void onUploadStart() {
+                // Already showing progress
+            }
+
+            @Override
+            public void onUploadProgress(int progress) {
+                // Could update progress bar here if needed
+            }
+
+            @Override
+            public void onUploadSuccess(String imageUrl) {
+                isUploadingImage = false;
+                uploadedImageUrl = imageUrl;
+                Toast.makeText(ReportIssueActivity.this, R.string.image_upload_success, Toast.LENGTH_SHORT).show();
+
+                // Now submit the report
+                submitReport();
+            }
+
+            @Override
+            public void onUploadError(String errorMessage) {
+                isUploadingImage = false;
+                progressBar.setVisibility(View.GONE);
+                btnSubmit.setEnabled(true);
+                Toast.makeText(ReportIssueActivity.this,
+                        R.string.image_upload_failed + ": " + errorMessage,
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

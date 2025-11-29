@@ -10,7 +10,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.vhn.doan.R;
-import com.vhn.doan.presentation.support.SupportTicketsActivity;
 
 /**
  * Activity hỗ trợ
@@ -35,7 +34,7 @@ public class SupportHelpActivity extends AppCompatActivity {
         // Mở màn hình Support Tickets
         LinearLayout layoutSupportTickets = findViewById(R.id.layoutSupportTickets);
         layoutSupportTickets.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SupportTicketsActivity.class);
+            Intent intent = new Intent(this, MySupportTicketsActivity.class);
             startActivity(intent);
         });
 

@@ -835,4 +835,5 @@ public class SingleVideoPlayerFragment extends Fragment {
         displayVideoInfo();
         playVideo();
     }
+
 }

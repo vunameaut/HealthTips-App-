@@ -96,6 +96,54 @@ public class CloudinaryHelper {
     }
 
     /**
+     * Upload support image to Cloudinary
+     * @param context Context của ứng dụng
+     * @param imageUri Uri của ảnh cần upload
+     * @param callback callback để nhận kết quả
+     */
+    public static void uploadSupportImage(Context context, Uri imageUri,
+                                         CloudinaryUploadCallback callback) {
+        if (!isInitialized) {
+            initCloudinary(context);
+        }
+
+        String requestId = MediaManager.get().upload(imageUri)
+                .option("folder", "support")
+                .option("public_id", "support_" + System.currentTimeMillis())
+                .option("overwrite", true)
+                .option("resource_type", "image")
+                .callback(new UploadCallback() {
+                    @Override
+                    public void onStart(String requestId) {
+                        callback.onUploadStart();
+                    }
+
+                    @Override
+                    public void onProgress(String requestId, long bytes, long totalBytes) {
+                        double progress = (double) bytes / totalBytes;
+                        callback.onUploadProgress((int) (progress * 100));
+                    }
+
+                    @Override
+                    public void onSuccess(String requestId, Map resultData) {
+                        String secureUrl = (String) resultData.get("secure_url");
+                        callback.onUploadSuccess(secureUrl);
+                    }
+
+                    @Override
+                    public void onError(String requestId, ErrorInfo error) {
+                        callback.onUploadError("Lỗi khi tải ảnh lên: " + error.getDescription());
+                    }
+
+                    @Override
+                    public void onReschedule(String requestId, ErrorInfo error) {
+                        callback.onUploadError("Upload bị trì hoãn: " + error.getDescription());
+                    }
+                })
+                .dispatch();
+    }
+
+    /**
      * Interface callback cho việc upload ảnh lên Cloudinary
      */
     public interface CloudinaryUploadCallback {

@@ -239,6 +239,15 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".presentation.settings.support.MySupportTicketsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.settings.support.TicketChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".presentation.settings.support.SupportHelpActivity"
             android:exported="false" />
 

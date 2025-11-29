@@ -506,6 +506,7 @@
     <string name="faq_how_to_report">Làm thế nào để báo cáo nội dung?</string>
 
     <!-- Report Content -->
+    <string name="report">Báo cáo</string>
     <string name="report_content">Báo cáo nội dung</string>
     <string name="report_content_reason">Lý do báo cáo</string>
     <string name="report_spam">Spam</string>
@@ -905,5 +906,36 @@
     <string name="notification_type_other">Khác</string>
     <string name="notification_history_unread_count">%d chưa đọc</string>
     <string name="notification_history_swipe_to_delete">Vuốt để xóa</string>
+
+    <!-- Support Tickets (only new strings not already in file) -->
+    <string name="my_support_tickets">Yêu cầu hỗ trợ của tôi</string>
+    <string name="no_tickets_found">Không có yêu cầu hỗ trợ nào</string>
+    <string name="error_loading_tickets">Lỗi khi tải danh sách yêu cầu</string>
+    <string name="status_pending">Đang chờ</string>
+    <string name="status_in_progress">Đang xử lý</string>
+    <string name="status_resolved">Đã giải quyết</string>
+    <string name="ticket_details">Chi tiết yêu cầu</string>
+    <string name="admin_response">Phản hồi từ Admin</string>
+    <string name="responded_at">Phản hồi lúc</string>
+    <string name="submitted_at">Gửi lúc</string>
+    <string name="please_login">Vui lòng đăng nhập</string>
+
+    <!-- Image Attachment Strings -->
+    <string name="attach_image">Đính kèm ảnh</string>
+    <string name="attach_image_optional">(Tùy chọn) Đính kèm ảnh minh họa cho vấn đề</string>
+    <string name="select_image">Chọn ảnh từ thiết bị</string>
+    <string name="image_preview">Xem trước ảnh</string>
+    <string name="remove_image">Xóa ảnh</string>
+    <string name="uploading_image">Đang tải ảnh lên...</string>
+    <string name="image_upload_success">Ảnh đã được tải lên</string>
+    <string name="image_upload_failed">Không thể tải ảnh lên</string>
+
+    <!-- Chat/Conversation Strings -->
+    <string name="conversation">Cuộc trò chuyện</string>
+    <string name="send_message">Gửi tin nhắn</string>
+    <string name="type_message">Nhập tin nhắn...</string>
+    <string name="no_messages_yet">Chưa có tin nhắn nào</string>
+    <string name="admin">Admin</string>
+    <string name="you">Bạn</string>
 
 </resources>
