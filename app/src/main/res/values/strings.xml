@@ -937,5 +937,6 @@
     <string name="no_messages_yet">Chưa có tin nhắn nào</string>
     <string name="admin">Admin</string>
     <string name="you">Bạn</string>
+    <string name="auto_acknowledgment_message">Cảm ơn bạn đã gửi báo cáo. Chúng tôi đã nhận được thông tin và sẽ xử lý trong thời gian sớm nhất. Đội ngũ hỗ trợ sẽ phản hồi lại bạn qua cuộc trò chuyện này.</string>
 
 </resources>

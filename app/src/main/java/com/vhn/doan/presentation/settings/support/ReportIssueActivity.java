@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -36,6 +37,8 @@ import java.util.Map;
  * Activity báo cáo vấn đề
  */
 public class ReportIssueActivity extends AppCompatActivity {
+
+    private static final String TAG = "ReportIssueActivity";
 
     private Spinner spinnerIssueType;
     private EditText etSubject, etDescription;
@@ -202,8 +205,12 @@ public class ReportIssueActivity extends AppCompatActivity {
         // Submit to Firebase
         String reportId = issuesRef.push().getKey();
         if (reportId != null) {
+            final String finalReportId = reportId;
             issuesRef.child(reportId).setValue(reportData)
                 .addOnSuccessListener(aVoid -> {
+                    // Send automatic acknowledgment message
+                    sendAutoAcknowledgment(finalReportId);
+
                     // Also send to web admin
                     sendToAdminPanel(issueType, subject, description);
                 })
@@ -212,6 +219,32 @@ public class ReportIssueActivity extends AppCompatActivity {
                     btnSubmit.setEnabled(true);
                     Toast.makeText(this, R.string.error_network, Toast.LENGTH_SHORT).show();
                 });
+        }
+    }
+
+    /**
+     * Send automatic acknowledgment message
+     */
+    private void sendAutoAcknowledgment(String ticketId) {
+        DatabaseReference messagesRef = FirebaseDatabase.getInstance()
+                .getReference("issues")
+                .child(ticketId)
+                .child("messages");
+
+        String messageId = messagesRef.push().getKey();
+        if (messageId != null) {
+            Map<String, Object> autoMessage = new HashMap<>();
+            autoMessage.put("text", getString(R.string.auto_acknowledgment_message));
+            autoMessage.put("senderId", "system");
+            autoMessage.put("senderType", "admin");
+            autoMessage.put("senderName", "HealthTips Support");
+            autoMessage.put("timestamp", System.currentTimeMillis());
+
+            messagesRef.child(messageId).setValue(autoMessage)
+                    .addOnFailureListener(e -> {
+                        // Silent fail - not critical
+                        Log.e(TAG, "Failed to send auto acknowledgment", e);
+                    });
         }
     }
 
