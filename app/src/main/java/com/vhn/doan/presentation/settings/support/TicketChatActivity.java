@@ -34,11 +34,18 @@ import com.vhn.doan.model.SupportTicket;
 import com.vhn.doan.presentation.settings.support.adapter.MessageAdapter;
 import com.vhn.doan.utils.CloudinaryHelper;
 
+import org.json.JSONObject;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TicketChatActivity extends AppCompatActivity {
 
@@ -68,6 +75,7 @@ public class TicketChatActivity extends AppCompatActivity {
     private boolean isUploadingImage = false;
 
     private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private ExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +104,9 @@ public class TicketChatActivity extends AppCompatActivity {
 
         ticketRef = FirebaseDatabase.getInstance().getReference("issues").child(ticketId);
         messagesRef = ticketRef.child("messages");
+
+        // Initialize ExecutorService for background tasks
+        executorService = Executors.newSingleThreadExecutor();
 
         // Initialize Cloudinary
         CloudinaryHelper.initCloudinary(this);
@@ -256,6 +267,9 @@ public class TicketChatActivity extends AppCompatActivity {
                     selectedImageUri = null;
                     // Scroll to bottom
                     messagesRecyclerView.smoothScrollToPosition(messagesList.size() - 1);
+
+                    // Send notification to admin (in background)
+                    sendNotificationToAdmin(messageText);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show();
@@ -307,11 +321,64 @@ public class TicketChatActivity extends AppCompatActivity {
         });
     }
 
+    private void sendNotificationToAdmin(String messageText) {
+        if (firebaseAuth.getCurrentUser() == null || currentTicket == null) {
+            return;
+        }
+
+        executorService.execute(() -> {
+            try {
+                // API endpoint
+                URL url = new URL("https://healthtips-admin-5bs6s22wr-vunams-projects-d3582d4f.vercel.app/api/support/send-message-notification");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+                conn.setConnectTimeout(10000); // 10 seconds timeout
+                conn.setReadTimeout(10000);
+
+                // Create JSON payload
+                JSONObject payload = new JSONObject();
+                payload.put("ticketId", ticketId);
+                payload.put("userId", firebaseAuth.getCurrentUser().getUid());
+                payload.put("senderType", "user");
+                payload.put("message", messageText);
+                payload.put("senderName", firebaseAuth.getCurrentUser().getEmail() != null ?
+                        firebaseAuth.getCurrentUser().getEmail() : "User");
+
+                // Send request
+                OutputStream os = conn.getOutputStream();
+                os.write(payload.toString().getBytes("UTF-8"));
+                os.flush();
+                os.close();
+
+                // Get response
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // Success - notification sent
+                    android.util.Log.d("TicketChat", "Admin notification sent successfully");
+                } else {
+                    // Failed but don't show error to user
+                    android.util.Log.e("TicketChat", "Failed to send admin notification: " + responseCode);
+                }
+
+                conn.disconnect();
+
+            } catch (Exception e) {
+                // Don't show error to user, just log it
+                android.util.Log.e("TicketChat", "Error sending admin notification", e);
+            }
+        });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (messagesListener != null && messagesRef != null) {
             messagesRef.removeEventListener(messagesListener);
+        }
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
         }
     }
 }
