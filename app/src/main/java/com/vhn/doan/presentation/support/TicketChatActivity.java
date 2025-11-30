@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,7 +79,7 @@ public class TicketChatActivity extends AppCompatActivity {
     private EditText etMessage;
     private FloatingActionButton btnSend;
     private ImageButton btnAttachImage;
-    private LinearLayout layoutImagePreview;
+    private RelativeLayout layoutImagePreview;
     private ImageView ivImagePreview;
     private ImageButton btnRemoveImage;
 
@@ -138,9 +139,17 @@ public class TicketChatActivity extends AppCompatActivity {
     }
 
     private void getTicketIdFromIntent() {
-        ticketId = getIntent().getStringExtra(EXTRA_TICKET_ID);
-        if (TextUtils.isEmpty(ticketId)) {
-            Toast.makeText(this, "Ticket not found", Toast.LENGTH_SHORT).show();
+        try {
+            ticketId = getIntent().getStringExtra(EXTRA_TICKET_ID);
+            Log.d(TAG, "Received ticket ID: " + ticketId);
+            if (TextUtils.isEmpty(ticketId)) {
+                Toast.makeText(this, "Ticket ID is empty", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting ticket ID: " + e.getMessage(), e);
+            Toast.makeText(this, "Error loading ticket: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -195,9 +204,32 @@ public class TicketChatActivity extends AppCompatActivity {
     }
 
     private void displayTicketInfo() {
-        tvTicketSubject.setText(ticket.getSubject());
-        tvTicketId.setText("Ticket #" + ticket.getId().substring(0, Math.min(8, ticket.getId().length())).toUpperCase());
-        setupStatusChip(ticket.getStatus());
+        try {
+            if (ticket == null) {
+                Log.e(TAG, "Ticket is null");
+                Toast.makeText(this, "Ticket data is empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String subject = ticket.getSubject();
+            if (subject != null && !subject.isEmpty()) {
+                tvTicketSubject.setText(subject);
+            } else {
+                tvTicketSubject.setText("No subject");
+            }
+
+            String ticketIdStr = ticket.getId();
+            if (ticketIdStr != null && !ticketIdStr.isEmpty()) {
+                tvTicketId.setText("Ticket #" + ticketIdStr.substring(0, Math.min(8, ticketIdStr.length())).toUpperCase());
+            } else {
+                tvTicketId.setText("Ticket #UNKNOWN");
+            }
+
+            setupStatusChip(ticket.getStatus());
+        } catch (Exception e) {
+            Log.e(TAG, "Error displaying ticket info: " + e.getMessage(), e);
+            Toast.makeText(this, "Error displaying ticket: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupStatusChip(String status) {
