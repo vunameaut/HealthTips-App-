@@ -71,6 +71,10 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
                 handleHealthTipRecommendation(intent);
                 break;
 
+            case MyFirebaseMessagingService.TYPE_SUPPORT_REPLY:
+                handleSupportReplyNotification(intent);
+                break;
+
             default:
                 Log.w(TAG, "Unknown notification type: " + notificationType);
                 finish();
@@ -213,6 +217,30 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
         videoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         startActivity(videoIntent);
+        finish();
+    }
+
+    /**
+     * Xử lý thông báo support reply từ admin
+     * Mở TicketChatActivity với ticket ID
+     */
+    private void handleSupportReplyNotification(Intent sourceIntent) {
+        String ticketId = sourceIntent.getStringExtra("ticket_id");
+
+        if (ticketId == null) {
+            Log.w(TAG, "Missing ticket_id for support reply notification");
+            finish();
+            return;
+        }
+
+        Log.d(TAG, "Opening support chat for ticket: " + ticketId);
+
+        // Tạo Intent để mở TicketChatActivity
+        Intent chatIntent = new Intent(this, com.vhn.doan.presentation.support.TicketChatActivity.class);
+        chatIntent.putExtra(com.vhn.doan.presentation.support.TicketChatActivity.EXTRA_TICKET_ID, ticketId);
+        chatIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(chatIntent);
         finish();
     }
 }

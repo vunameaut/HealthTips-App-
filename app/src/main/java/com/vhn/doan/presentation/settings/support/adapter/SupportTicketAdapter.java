@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.vhn.doan.R;
 import com.vhn.doan.model.SupportTicket;
-import com.vhn.doan.presentation.settings.support.TicketChatActivity;
+import com.vhn.doan.presentation.support.TicketChatActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

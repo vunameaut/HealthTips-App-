@@ -275,6 +275,12 @@
             android:label="@string/ticket_detail_title"
             android:windowSoftInputMode="adjustResize" />
 
+        <activity
+            android:name=".presentation.support.TicketChatActivity"
+            android:exported="false"
+            android:label="Hỗ trợ"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- About Activities -->
         <activity
             android:name=".presentation.about.AboutActivity"

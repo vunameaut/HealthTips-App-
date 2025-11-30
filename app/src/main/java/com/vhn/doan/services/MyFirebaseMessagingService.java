@@ -42,6 +42,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final String TYPE_NEW_VIDEO = "new_video";
     public static final String TYPE_COMMENT_LIKE = "comment_like";
     public static final String TYPE_HEALTH_TIP_RECOMMENDATION = "health_tip_recommendation";
+    public static final String TYPE_SUPPORT_REPLY = "SUPPORT_REPLY";
 
     @Override
     public void onCreate() {
@@ -130,6 +131,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 return "comment_like";
             case TYPE_HEALTH_TIP_RECOMMENDATION:
                 return "recommendations";
+            case TYPE_SUPPORT_REPLY:
+                return "support_reply";
             default:
                 return null;
         }
@@ -178,6 +181,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 intent.putExtra("tips", tipsJson); // Backward compatibility
                 intent.putExtra("tips_count", data.get("tipsCount"));
                 Log.d(TAG, "Recommendation notification data: tips=" + tipsJson);
+                break;
+
+            case TYPE_SUPPORT_REPLY:
+                intent.putExtra("ticket_id", data.get("ticketId"));
+                Log.d(TAG, "Support reply notification data: ticketId=" + data.get("ticketId"));
                 break;
         }
 
@@ -370,6 +378,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             case TYPE_HEALTH_TIP_RECOMMENDATION:
                 return baseUrl + "recommendations";
 
+            case TYPE_SUPPORT_REPLY:
+                return baseUrl + "support/" + data.get("ticketId");
+
             default:
                 return baseUrl + "home";
         }
@@ -387,6 +398,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             case TYPE_NEW_HEALTH_TIP:
                 return data.get("healthTipId");
+
+            case TYPE_SUPPORT_REPLY:
+                return data.get("ticketId");
 
             case TYPE_HEALTH_TIP_RECOMMENDATION:
                 // Extract first tip ID from tips JSON
@@ -426,6 +440,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             case TYPE_HEALTH_TIP_RECOMMENDATION:
                 return "recommendation";
+
+            case TYPE_SUPPORT_REPLY:
+                return "support_ticket";
 
             default:
                 return "unknown";

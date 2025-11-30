@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="8dp"
+    android:paddingEnd="48dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <ImageView
+        android:id="@+id/iv_admin_avatar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignBottom="@+id/message_container"
+        android:background="@drawable/circle_background_secondary"
+        android:src="@drawable/ic_support"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="Admin"
+        app:tint="@android:color/white"
+        android:elevation="2dp" />
+
+    <LinearLayout
+        android:id="@+id/message_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_toEndOf="@id/iv_admin_avatar"
+        android:layout_marginStart="10dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_admin_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="4dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorSecondary"
+            android:text="Admin Support" />
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/grey_200"
+            app:cardPreventCornerOverlap="false"
+            app:contentPadding="0dp">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tv_admin_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="15sp"
+                    android:lineSpacingExtra="4dp"
+                    android:minWidth="80dp"
+                    android:maxWidth="260dp"
+                    android:text="Admin reply message" />
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <ImageView
+            android:id="@+id/iv_admin_image"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="6dp"
+            android:layout_gravity="start"
+            android:scaleType="centerCrop"
+            android:background="@drawable/rounded_background"
+            android:visibility="gone"
+            android:contentDescription="Image attachment" />
+
+        <TextView
+            android:id="@+id/tv_admin_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorSecondary"
+            android:alpha="0.6"
+            android:text="14:31" />
+
+    </LinearLayout>
+
+</RelativeLayout>

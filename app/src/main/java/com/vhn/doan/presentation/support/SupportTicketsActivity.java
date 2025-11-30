@@ -188,8 +188,8 @@ public class SupportTicketsActivity extends AppCompatActivity implements Support
 
     @Override
     public void navigateToTicketDetail(String ticketId) {
-        Intent intent = new Intent(this, TicketDetailActivity.class);
-        intent.putExtra(TicketDetailActivity.EXTRA_TICKET_ID, ticketId);
+        Intent intent = new Intent(this, TicketChatActivity.class);
+        intent.putExtra(TicketChatActivity.EXTRA_TICKET_ID, ticketId);
         startActivity(intent);
     }
 
