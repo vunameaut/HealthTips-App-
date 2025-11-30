@@ -425,7 +425,16 @@ public class TicketChatActivity extends AppCompatActivity {
 
                 @Override
                 public void onResponse(@NonNull Call call, @NonNull Response response) {
-                    Log.d(TAG, "Admin notification sent successfully");
+                    try {
+                        String responseBody = response.body() != null ? response.body().string() : "";
+                        if (response.isSuccessful()) {
+                            Log.d(TAG, "Admin notification sent successfully: " + responseBody);
+                        } else {
+                            Log.e(TAG, "Admin notification failed with code " + response.code() + ": " + responseBody);
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading response: " + e.getMessage());
+                    }
                 }
             });
 
