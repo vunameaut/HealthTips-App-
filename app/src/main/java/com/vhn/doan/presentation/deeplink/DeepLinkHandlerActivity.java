@@ -3,6 +3,7 @@ package com.vhn.doan.presentation.deeplink;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -44,11 +45,13 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
 
         if (notificationType == null) {
             Log.w(TAG, "No notification type found");
+            Log.d(TAG, "Intent extras: " + intent.getExtras());
             finish();
             return;
         }
 
         Log.d(TAG, "Handling deep link for type: " + notificationType);
+        Log.d(TAG, "All intent extras: " + intent.getExtras());
 
         switch (notificationType) {
             case MyFirebaseMessagingService.TYPE_COMMENT_REPLY:
@@ -227,8 +230,10 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
     private void handleSupportReplyNotification(Intent sourceIntent) {
         String ticketId = sourceIntent.getStringExtra("ticket_id");
 
-        if (ticketId == null) {
-            Log.w(TAG, "Missing ticket_id for support reply notification");
+        if (ticketId == null || ticketId.isEmpty()) {
+            Log.e(TAG, "Missing or empty ticket_id for support reply notification");
+            Log.e(TAG, "All extras: " + sourceIntent.getExtras());
+            Toast.makeText(this, "Lỗi: Không tìm thấy ticket ID", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }

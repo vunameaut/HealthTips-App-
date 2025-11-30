@@ -328,8 +328,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notification.setDeepLink(deepLink);
 
             // Set target ID và type
-            notification.setTargetId(getTargetId(typeStr, data));
+            String targetId = getTargetId(typeStr, data);
+            notification.setTargetId(targetId);
             notification.setTargetType(getTargetType(typeStr));
+
+            Log.d(TAG, "Saving notification to history - Type: " + typeStr + ", TargetId: " + targetId);
 
             // Set extra data for comment-related notifications
             String extraData = getExtraData(typeStr, data);
