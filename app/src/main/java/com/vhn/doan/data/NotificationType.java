@@ -10,6 +10,7 @@ public enum NotificationType {
     NEW_VIDEO("new_video", "Video mới"),
     COMMENT_LIKE("comment_like", "Lượt thích bình luận"),
     HEALTH_TIP_RECOMMENDATION("health_tip_recommendation", "Đề xuất"),
+    SUPPORT_REPLY("support_reply", "Trả lời hỗ trợ"),
 
     // Reminder Types
     REMINDER_ALERT("reminder_alert", "Nhắc nhở"),

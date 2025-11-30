@@ -423,6 +423,13 @@ public class NotificationHistoryActivity extends BaseActivity implements Notific
                 }
                 break;
 
+            case SUPPORT_REPLY:
+                if (targetId != null && !targetId.isEmpty()) {
+                    intent = new Intent(this, com.vhn.doan.presentation.support.TicketChatActivity.class);
+                    intent.putExtra(com.vhn.doan.presentation.support.TicketChatActivity.EXTRA_TICKET_ID, targetId);
+                }
+                break;
+
             default:
                 Toast.makeText(this, "Không thể mở nội dung này", Toast.LENGTH_SHORT).show();
                 return;
