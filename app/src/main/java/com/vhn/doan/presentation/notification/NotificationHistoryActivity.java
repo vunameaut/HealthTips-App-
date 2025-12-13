@@ -430,6 +430,33 @@ public class NotificationHistoryActivity extends BaseActivity implements Notific
                 }
                 break;
 
+            case ADMIN_REPLY:
+                // New Report System
+                if (targetId != null && !targetId.isEmpty()) {
+                    intent = new Intent(this, com.vhn.doan.presentation.report.ReportChatActivity.class);
+                    intent.putExtra(com.vhn.doan.presentation.report.ReportChatActivity.EXTRA_REPORT_ID, targetId);
+                } else {
+                    // Try to get reportId from extraData or deepLink
+                    String extraData = notification.getExtraData();
+                    if (extraData != null && !extraData.isEmpty()) {
+                        try {
+                            org.json.JSONObject json = new org.json.JSONObject(extraData);
+                            if (json.has("reportId")) {
+                                String reportId = json.getString("reportId");
+                                intent = new Intent(this, com.vhn.doan.presentation.report.ReportChatActivity.class);
+                                intent.putExtra(com.vhn.doan.presentation.report.ReportChatActivity.EXTRA_REPORT_ID, reportId);
+                            }
+                        } catch (Exception e) {
+                            Log.e("NotificationHistory", "Error parsing extra data for ADMIN_REPLY", e);
+                        }
+                    }
+                    if (intent == null) {
+                        Toast.makeText(this, "Không tìm thấy ID báo cáo", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+                break;
+
             default:
                 Toast.makeText(this, "Không thể mở nội dung này", Toast.LENGTH_SHORT).show();
                 return;

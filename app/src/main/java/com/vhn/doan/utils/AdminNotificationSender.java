@@ -213,4 +213,150 @@ public class AdminNotificationSender {
         void onSuccess();
         void onFailure(Exception e);
     }
+
+    // ==================== NEW REPORT SYSTEM METHODS ====================
+
+    /**
+     * Gửi thông báo khi có report mới (static method)
+     */
+    public static void sendNewReportNotification(
+            Context context,
+            String reportId,
+            String userId,
+            String userName,
+            String reportType,
+            String content
+    ) {
+        Log.d(TAG, "sendNewReportNotification - reportId: " + reportId);
+        
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Log.e(TAG, "User not authenticated");
+            return;
+        }
+
+        currentUser.getIdToken(true).addOnCompleteListener(task -> {
+            if (!task.isSuccessful() || task.getResult() == null) {
+                Log.e(TAG, "Failed to get ID token", task.getException());
+                return;
+            }
+
+            String idToken = task.getResult().getToken();
+
+            try {
+                JSONObject json = new JSONObject();
+                json.put("type", "NEW_REPORT");
+                json.put("reportId", reportId);
+                json.put("userId", userId);
+                json.put("userName", userName);
+                json.put("reportType", reportType);
+                json.put("content", content.length() > 100 ? 
+                        content.substring(0, 100) + "..." : content);
+
+                OkHttpClient client = new OkHttpClient();
+                RequestBody body = RequestBody.create(json.toString(), JSON);
+
+                String url = ADMIN_API_BASE_URL + "/admin-notifications/new-report";
+                Log.d(TAG, "Sending new report notification to: " + url);
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .addHeader("Authorization", "Bearer " + idToken)
+                        .addHeader("Content-Type", "application/json")
+                        .post(body)
+                        .build();
+
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.e(TAG, "Failed to send new report notification", e);
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) {
+                        if (response.isSuccessful()) {
+                            Log.d(TAG, "New report notification sent successfully");
+                        } else {
+                            Log.e(TAG, "New report notification failed: " + response.code());
+                        }
+                        response.close();
+                    }
+                });
+
+            } catch (JSONException e) {
+                Log.e(TAG, "JSON error", e);
+            }
+        });
+    }
+
+    /**
+     * Gửi thông báo khi user reply trong report chat (static method)
+     */
+    public static void sendUserReplyNotification(
+            Context context,
+            String reportId,
+            String userId,
+            String userName,
+            String message
+    ) {
+        Log.d(TAG, "sendUserReplyNotification - reportId: " + reportId);
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Log.e(TAG, "User not authenticated");
+            return;
+        }
+
+        currentUser.getIdToken(true).addOnCompleteListener(task -> {
+            if (!task.isSuccessful() || task.getResult() == null) {
+                Log.e(TAG, "Failed to get ID token", task.getException());
+                return;
+            }
+
+            String idToken = task.getResult().getToken();
+
+            try {
+                JSONObject json = new JSONObject();
+                json.put("type", "USER_REPLY");
+                json.put("reportId", reportId);
+                json.put("userId", userId);
+                json.put("userName", userName);
+                json.put("message", message.length() > 100 ? 
+                        message.substring(0, 100) + "..." : message);
+
+                OkHttpClient client = new OkHttpClient();
+                RequestBody body = RequestBody.create(json.toString(), JSON);
+
+                String url = ADMIN_API_BASE_URL + "/admin-notifications/user-reply";
+                Log.d(TAG, "Sending user reply notification to: " + url);
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .addHeader("Authorization", "Bearer " + idToken)
+                        .addHeader("Content-Type", "application/json")
+                        .post(body)
+                        .build();
+
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Log.e(TAG, "Failed to send user reply notification", e);
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) {
+                        if (response.isSuccessful()) {
+                            Log.d(TAG, "User reply notification sent successfully");
+                        } else {
+                            Log.e(TAG, "User reply notification failed: " + response.code());
+                        }
+                        response.close();
+                    }
+                });
+
+            } catch (JSONException e) {
+                Log.e(TAG, "JSON error", e);
+            }
+        });
+    }
 }

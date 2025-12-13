@@ -37,7 +37,16 @@
       "Bash(find:*)",
       "Bash(adb devices:*)",
       "Bash(git push:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(.gradlew.bat assembleDebug:*)",
+      "Bash(timeout:*)",
+      "Bash(adb logcat:*)",
+      "WebFetch(domain:healthtips-admin-fxbnt4896-projects.vercel.app)",
+      "Bash(copy \"app\\build\\intermediates\\apk\\debug\\app-debug.apk\" \"HealthTips-DEBUG.apk\")",
+      "Bash(.gradlew.bat clean assembleDebug)",
+      "Bash(copy \"app\\build\\outputs\\apk\\debug\\app-debug.apk\" \"HealthTips-SupportTickets-Fixed.apk\")",
+      "Bash(node -e:*)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []

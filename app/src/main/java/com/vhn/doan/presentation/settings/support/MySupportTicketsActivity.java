@@ -53,7 +53,7 @@ public class MySupportTicketsActivity extends AppCompatActivity {
         }
 
         firebaseAuth = FirebaseAuth.getInstance();
-        issuesRef = FirebaseDatabase.getInstance().getReference("issues");
+        issuesRef = FirebaseDatabase.getInstance().getReference("support_tickets");
         userNotificationsRef = FirebaseDatabase.getInstance().getReference("user_notifications");
 
         setupViews();

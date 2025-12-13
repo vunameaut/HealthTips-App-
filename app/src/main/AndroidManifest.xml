@@ -287,6 +287,34 @@
             android:exported="false"
             android:label="@string/about_app" />
 
+        <!-- New Report System Activities -->
+        <activity
+            android:name=".presentation.report.CreateReportActivity"
+            android:exported="false"
+            android:label="@string/create_report"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".presentation.report.MyReportsActivity"
+            android:exported="false"
+            android:label="@string/my_reports" />
+
+        <activity
+            android:name=".presentation.report.ReportChatActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Deep Link Support: Cho phép mở chat từ notification -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="healthtips"
+                    android:host="report"
+                    android:pathPattern="/.*" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".presentation.about.LegalDocumentActivity"
             android:exported="false" />

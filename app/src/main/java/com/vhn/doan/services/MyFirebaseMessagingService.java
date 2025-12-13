@@ -23,6 +23,7 @@ import com.vhn.doan.data.repository.RepositoryCallback;
 import com.vhn.doan.presentation.settings.content.NotificationSettingsActivity;
 import com.vhn.doan.utils.SessionManager;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,6 +36,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FCMService";
     private static final String CHANNEL_ID = "health_tips_notifications";
+    
+    // Deduplication: Track recent notifications to prevent spam
+    private static final Map<String, Long> recentNotifications = new HashMap<>();
+    private static final long DEDUP_WINDOW_MS = 5000; // 5 seconds
 
     // Notification types
     public static final String TYPE_COMMENT_REPLY = "comment_reply";
@@ -43,6 +48,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final String TYPE_COMMENT_LIKE = "comment_like";
     public static final String TYPE_HEALTH_TIP_RECOMMENDATION = "health_tip_recommendation";
     public static final String TYPE_SUPPORT_REPLY = "SUPPORT_REPLY";
+    public static final String TYPE_ADMIN_REPLY = "ADMIN_REPLY"; // New Report System
 
     @Override
     public void onCreate() {
@@ -86,6 +92,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             return;
         }
 
+        // ✅ DEDUPLICATION: Check if this notification was recently shown
+        String notificationKey = createNotificationKey(type, data);
+        long currentTime = System.currentTimeMillis();
+        Long lastShownTime = recentNotifications.get(notificationKey);
+        
+        if (lastShownTime != null && (currentTime - lastShownTime) < DEDUP_WINDOW_MS) {
+            Log.d(TAG, "Duplicate notification detected, skipping: " + notificationKey);
+            return; // Skip duplicate notification
+        }
+        
+        // Mark as shown
+        recentNotifications.put(notificationKey, currentTime);
+        
+        // Clean old entries (older than 1 minute)
+        recentNotifications.entrySet().removeIf(entry -> (currentTime - entry.getValue()) > 60000);
+
         // ✅ CHECK: Kiểm tra notification settings trước khi hiển thị
         if (!shouldShowNotification(type)) {
             Log.d(TAG, "Notification type '" + type + "' is disabled in settings. Skipping notification.");
@@ -99,6 +121,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         // Lưu notification vào history
         saveNotificationToHistory(data);
+    }
+    
+    /**
+     * Tạo unique key cho notification để deduplication
+     */
+    private String createNotificationKey(String type, Map<String, String> data) {
+        StringBuilder key = new StringBuilder(type);
+        if (TYPE_ADMIN_REPLY.equals(type)) {
+            key.append("_").append(data.get("reportId"));
+        } else if (TYPE_SUPPORT_REPLY.equals(type)) {
+            key.append("_").append(data.get("ticketId"));
+        } else if (TYPE_COMMENT_REPLY.equals(type)) {
+            key.append("_").append(data.get("replyCommentId"));
+        } else {
+            key.append("_").append(data.get("title")).append("_").append(data.get("body"));
+        }
+        return key.toString();
     }
 
     /**
@@ -133,6 +172,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 return "recommendations";
             case TYPE_SUPPORT_REPLY:
                 return "support_reply";
+            case TYPE_ADMIN_REPLY:
+                return "support_reply"; // Uses same setting
             default:
                 return null;
         }
@@ -186,6 +227,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             case TYPE_SUPPORT_REPLY:
                 intent.putExtra("ticket_id", data.get("ticketId"));
                 Log.d(TAG, "Support reply notification data: ticketId=" + data.get("ticketId"));
+                break;
+
+            case TYPE_ADMIN_REPLY:
+                // New Report System - Mở ReportChatActivity
+                intent.putExtra("report_id", data.get("reportId"));
+                Log.d(TAG, "Admin reply notification data: reportId=" + data.get("reportId"));
                 break;
         }
 
@@ -384,6 +431,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             case TYPE_SUPPORT_REPLY:
                 return baseUrl + "support/" + data.get("ticketId");
 
+            case TYPE_ADMIN_REPLY:
+                return baseUrl + "report/" + data.get("reportId");
+
             default:
                 return baseUrl + "home";
         }
@@ -404,6 +454,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             case TYPE_SUPPORT_REPLY:
                 return data.get("ticketId");
+
+            case TYPE_ADMIN_REPLY:
+                return data.get("reportId");
 
             case TYPE_HEALTH_TIP_RECOMMENDATION:
                 // Extract first tip ID from tips JSON
@@ -446,6 +499,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             case TYPE_SUPPORT_REPLY:
                 return "support_ticket";
+
+            case TYPE_ADMIN_REPLY:
+                return "report";
 
             default:
                 return "unknown";

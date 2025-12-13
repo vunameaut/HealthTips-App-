@@ -152,4 +152,117 @@ public class CloudinaryHelper {
         void onUploadSuccess(String imageUrl);
         void onUploadError(String errorMessage);
     }
+
+    // ==================== NEW REPORT SYSTEM METHODS ====================
+
+    /**
+     * Interface callback đơn giản cho Report system
+     */
+    public interface ReportUploadCallback {
+        void onSuccess(String imageUrl);
+        void onError(String error);
+        void onProgress(int progress);
+    }
+
+    /**
+     * Upload ảnh đính kèm cho Report
+     * @param context Context
+     * @param imageUri Uri của ảnh
+     * @param callback Callback
+     */
+    public static void uploadReportImage(Context context, Uri imageUri, ReportUploadCallback callback) {
+        if (!isInitialized) {
+            initCloudinary(context);
+        }
+
+        MediaManager.get().upload(imageUri)
+                .option("folder", "reports")
+                .option("public_id", "report_" + System.currentTimeMillis())
+                .option("overwrite", true)
+                .option("resource_type", "image")
+                .option("transformation", "c_limit,w_1920,h_1920,q_auto:good")
+                .callback(new UploadCallback() {
+                    @Override
+                    public void onStart(String requestId) {
+                        Log.d(TAG, "Report image upload started: " + requestId);
+                    }
+
+                    @Override
+                    public void onProgress(String requestId, long bytes, long totalBytes) {
+                        int progress = (int) ((bytes * 100) / totalBytes);
+                        callback.onProgress(progress);
+                    }
+
+                    @Override
+                    public void onSuccess(String requestId, Map resultData) {
+                        String secureUrl = (String) resultData.get("secure_url");
+                        Log.d(TAG, "Report image uploaded: " + secureUrl);
+                        callback.onSuccess(secureUrl);
+                    }
+
+                    @Override
+                    public void onError(String requestId, ErrorInfo error) {
+                        Log.e(TAG, "Report image upload error: " + error.getDescription());
+                        callback.onError(error.getDescription());
+                    }
+
+                    @Override
+                    public void onReschedule(String requestId, ErrorInfo error) {
+                        Log.e(TAG, "Report image upload rescheduled: " + error.getDescription());
+                        callback.onError("Upload bị trì hoãn: " + error.getDescription());
+                    }
+                })
+                .dispatch();
+    }
+
+    /**
+     * Upload ảnh trong chat Report
+     * @param context Context
+     * @param imageUri Uri của ảnh
+     * @param callback Callback
+     */
+    public static void uploadChatImage(Context context, Uri imageUri, ReportUploadCallback callback) {
+        if (!isInitialized) {
+            initCloudinary(context);
+        }
+
+        MediaManager.get().upload(imageUri)
+                .option("folder", "reports/chat")
+                .option("public_id", "chat_" + System.currentTimeMillis())
+                .option("overwrite", true)
+                .option("resource_type", "image")
+                .option("transformation", "c_limit,w_1280,h_1280,q_auto:good")
+                .callback(new UploadCallback() {
+                    @Override
+                    public void onStart(String requestId) {
+                        Log.d(TAG, "Chat image upload started: " + requestId);
+                    }
+
+                    @Override
+                    public void onProgress(String requestId, long bytes, long totalBytes) {
+                        int progress = (int) ((bytes * 100) / totalBytes);
+                        callback.onProgress(progress);
+                    }
+
+                    @Override
+                    public void onSuccess(String requestId, Map resultData) {
+                        String secureUrl = (String) resultData.get("secure_url");
+                        Log.d(TAG, "Chat image uploaded: " + secureUrl);
+                        callback.onSuccess(secureUrl);
+                    }
+
+                    @Override
+                    public void onError(String requestId, ErrorInfo error) {
+                        Log.e(TAG, "Chat image upload error: " + error.getDescription());
+                        callback.onError(error.getDescription());
+                    }
+
+                    @Override
+                    public void onReschedule(String requestId, ErrorInfo error) {
+                        Log.e(TAG, "Chat image upload rescheduled: " + error.getDescription());
+                        callback.onError("Upload bị trì hoãn: " + error.getDescription());
+                    }
+                })
+                .dispatch();
+    }
 }

@@ -68,7 +68,7 @@ public class ReportIssueActivity extends AppCompatActivity {
         }
 
         firebaseAuth = FirebaseAuth.getInstance();
-        issuesRef = FirebaseDatabase.getInstance().getReference("issues");
+        issuesRef = FirebaseDatabase.getInstance().getReference("support_tickets");
         adminNotificationSender = new AdminNotificationSender(this);
 
         // Initialize Cloudinary
@@ -227,7 +227,7 @@ public class ReportIssueActivity extends AppCompatActivity {
      */
     private void sendAutoAcknowledgment(String ticketId) {
         DatabaseReference messagesRef = FirebaseDatabase.getInstance()
-                .getReference("issues")
+                .getReference("support_tickets")
                 .child(ticketId)
                 .child("messages");
 

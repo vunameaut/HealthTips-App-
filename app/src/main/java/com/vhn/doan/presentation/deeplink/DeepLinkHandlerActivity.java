@@ -78,6 +78,10 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
                 handleSupportReplyNotification(intent);
                 break;
 
+            case MyFirebaseMessagingService.TYPE_ADMIN_REPLY:
+                handleAdminReplyNotification(intent);
+                break;
+
             default:
                 Log.w(TAG, "Unknown notification type: " + notificationType);
                 finish();
@@ -243,6 +247,32 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
         // Tạo Intent để mở TicketChatActivity
         Intent chatIntent = new Intent(this, com.vhn.doan.presentation.support.TicketChatActivity.class);
         chatIntent.putExtra(com.vhn.doan.presentation.support.TicketChatActivity.EXTRA_TICKET_ID, ticketId);
+        chatIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(chatIntent);
+        finish();
+    }
+
+    /**
+     * Xử lý thông báo admin reply trong hệ thống Report mới
+     * Mở ReportChatActivity với report ID
+     */
+    private void handleAdminReplyNotification(Intent sourceIntent) {
+        String reportId = sourceIntent.getStringExtra("report_id");
+
+        if (reportId == null || reportId.isEmpty()) {
+            Log.e(TAG, "Missing or empty report_id for admin reply notification");
+            Log.e(TAG, "All extras: " + sourceIntent.getExtras());
+            Toast.makeText(this, "Lỗi: Không tìm thấy report ID", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        Log.d(TAG, "Opening report chat for report: " + reportId);
+
+        // Tạo Intent để mở ReportChatActivity
+        Intent chatIntent = new Intent(this, com.vhn.doan.presentation.report.ReportChatActivity.class);
+        chatIntent.putExtra(com.vhn.doan.presentation.report.ReportChatActivity.EXTRA_REPORT_ID, reportId);
         chatIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         startActivity(chatIntent);

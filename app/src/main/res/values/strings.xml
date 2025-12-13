@@ -507,7 +507,7 @@
 
     <!-- Report Content -->
     <string name="report">Báo cáo</string>
-    <string name="report_content">Báo cáo nội dung</string>
+    <string name="report_content_title">Báo cáo nội dung</string>
     <string name="report_content_reason">Lý do báo cáo</string>
     <string name="report_spam">Spam</string>
     <string name="report_inappropriate">Nội dung không phù hợp</string>
@@ -939,4 +939,53 @@
     <string name="you">Bạn</string>
     <string name="auto_acknowledgment_message">Cảm ơn bạn đã gửi báo cáo. Chúng tôi đã nhận được thông tin và sẽ xử lý trong thời gian sớm nhất. Đội ngũ hỗ trợ sẽ phản hồi lại bạn qua cuộc trò chuyện này.</string>
 
+    <!-- ========== New Report System Strings ========== -->
+    <string name="create_report">Tạo báo cáo</string>
+    <string name="my_reports">Báo cáo của tôi</string>
+    <string name="report_type">Loại báo cáo</string>
+    <string name="report_content">Nội dung chi tiết</string>
+    <string name="attach_screenshot">Đính kèm ảnh chụp màn hình</string>
+    <string name="optional">(Tùy chọn)</string>
+    <string name="choose_image">Chọn ảnh</string>
+    <string name="image_size_limit">Tối đa 5MB, hỗ trợ JPG, PNG</string>
+    <string name="device_info_note">Thông tin thiết bị sẽ được gửi kèm để hỗ trợ tốt hơn</string>
+    <string name="submit_report">Gửi báo cáo</string>
+    <string name="sending_report">Đang gửi báo cáo...</string>
+    <string name="uploading_progress">Đang tải ảnh... %d%%</string>
+    <string name="image_too_large">Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn %dMB</string>
+    <string name="error_reading_image">Không thể đọc file ảnh</string>
+    <string name="please_login_first">Vui lòng đăng nhập trước</string>
+    <string name="please_select_report_type">Vui lòng chọn loại báo cáo</string>
+    <string name="please_enter_content">Vui lòng nhập nội dung</string>
+    <string name="content_too_short">Nội dung quá ngắn (tối thiểu 10 ký tự)</string>
+    <string name="upload_image_failed">Không thể tải ảnh: %s</string>
+    <string name="report_sent_success">Đã gửi báo cáo thành công!</string>
+    <string name="report_send_failed">Không thể gửi báo cáo: %s</string>
+    <string name="confirm_exit">Xác nhận thoát</string>
+    <string name="discard_report_message">Bạn có muốn hủy bỏ báo cáo này không?</string>
+    <string name="discard">Hủy bỏ</string>
+    
+    <!-- Report List Strings -->
+    <string name="filter_all">Tất cả</string>
+    <string name="filter_pending">Chưa xử lý</string>
+    <string name="filter_in_progress">Đang trao đổi</string>
+    <string name="filter_resolved">Đã xử lý</string>
+    <string name="no_reports">Chưa có báo cáo nào</string>
+    <string name="no_reports_hint">Khi bạn gửi báo cáo, chúng sẽ xuất hiện ở đây</string>
+    <string name="create_first_report">Tạo báo cáo đầu tiên</string>
+    <string name="new_report">Báo cáo mới</string>
+    <string name="error_loading_reports">Không thể tải danh sách: %s</string>
+    <string name="has_attachment">Có ảnh đính kèm</string>
+    
+    <!-- Report Chat Strings -->
+    <string name="report_not_found">Không tìm thấy báo cáo</string>
+    <string name="error_loading_report">Không thể tải báo cáo: %s</string>
+    <string name="created_at_format">Gửi lúc: %s</string>
+    <string name="report_closed_notice">Báo cáo này đã được đóng. Bạn chỉ có thể xem lại lịch sử trao đổi.</string>
+    <string name="report_closed_cannot_chat">Báo cáo đã đóng, không thể gửi tin nhắn mới</string>
+    <string name="image_attached">Đã đính kèm ảnh</string>
+    <string name="remove">Xóa</string>
+    <string name="permission_denied">Quyền truy cập bị từ chối</string>
+    <string name="send_message_failed">Không thể gửi tin nhắn: %s</string>
+    
 </resources>

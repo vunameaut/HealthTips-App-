@@ -128,9 +128,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         UserMessageViewHolder(View itemView) {
             super(itemView);
-            messageText = itemView.findViewById(R.id.messageText);
-            messageImage = itemView.findViewById(R.id.messageImage);
-            messageTime = itemView.findViewById(R.id.messageTime);
+            messageText = itemView.findViewById(R.id.tvMessageText);
+            messageImage = itemView.findViewById(R.id.ivMessageImage);
+            messageTime = itemView.findViewById(R.id.tvTime);
         }
     }
 
@@ -142,9 +142,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         AdminMessageViewHolder(View itemView) {
             super(itemView);
-            messageText = itemView.findViewById(R.id.messageText);
-            messageImage = itemView.findViewById(R.id.messageImage);
-            messageTime = itemView.findViewById(R.id.messageTime);
+            messageText = itemView.findViewById(R.id.tvMessageText);
+            messageImage = itemView.findViewById(R.id.ivMessageImage);
+            messageTime = itemView.findViewById(R.id.tvTime);
         }
     }
 
