@@ -39,7 +39,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     
     // Deduplication: Track recent notifications to prevent spam
     private static final Map<String, Long> recentNotifications = new HashMap<>();
-    private static final long DEDUP_WINDOW_MS = 5000; // 5 seconds
+    private static final long DEDUP_WINDOW_MS = 30000; // 30 seconds - Tăng từ 5s để chống spam tốt hơn
 
     // Notification types
     public static final String TYPE_COMMENT_REPLY = "comment_reply";
@@ -69,14 +69,24 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage message) {
         super.onMessageReceived(message);
 
-        Log.d(TAG, "Message received from: " + message.getFrom());
+        Log.d(TAG, "========== FCM MESSAGE RECEIVED ==========");
+        Log.d(TAG, "Message ID: " + message.getMessageId());
+        Log.d(TAG, "Message from: " + message.getFrom());
+        Log.d(TAG, "Message sent time: " + message.getSentTime());
 
         // Xử lý data payload
         if (!message.getData().isEmpty()) {
             Map<String, String> data = message.getData();
-            Log.d(TAG, "Message data payload: " + data);
+            Log.d(TAG, "===== Full FCM Data Payload =====");
+            for (Map.Entry<String, String> entry : data.entrySet()) {
+                Log.d(TAG, entry.getKey() + " = " + entry.getValue());
+            }
+            Log.d(TAG, "================================");
             handleNotificationData(data);
+        } else {
+            Log.w(TAG, "No data payload in FCM message");
         }
+        Log.d(TAG, "==========================================");
     }
 
     /**
@@ -108,19 +118,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Clean old entries (older than 1 minute)
         recentNotifications.entrySet().removeIf(entry -> (currentTime - entry.getValue()) > 60000);
 
+        // ✅ CRITICAL FIX: Luôn lưu vào notification history TRƯỚC KHI kiểm tra settings
+        // Điều này đảm bảo rằng lịch sử được lưu dù app đang foreground hay background
+        saveNotificationToHistory(data);
+
         // ✅ CHECK: Kiểm tra notification settings trước khi hiển thị
         if (!shouldShowNotification(type)) {
-            Log.d(TAG, "Notification type '" + type + "' is disabled in settings. Skipping notification.");
-            // Vẫn lưu vào history nhưng không hiển thị notification
-            saveNotificationToHistory(data);
+            Log.d(TAG, "Notification type '" + type + "' is disabled in settings. History saved but not showing notification.");
             return;
         }
 
         Intent intent = createDeepLinkIntent(type, data);
         showNotification(title, body, intent);
-
-        // Lưu notification vào history
-        saveNotificationToHistory(data);
     }
     
     /**
@@ -231,8 +240,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             case TYPE_ADMIN_REPLY:
                 // New Report System - Mở ReportChatActivity
-                intent.putExtra("report_id", data.get("reportId"));
-                Log.d(TAG, "Admin reply notification data: reportId=" + data.get("reportId"));
+                String reportId = data.get("reportId");
+                if (reportId == null || reportId.isEmpty()) {
+                    // Fallback: Thử lấy từ report_id
+                    reportId = data.get("report_id");
+                }
+                intent.putExtra("report_id", reportId);
+                Log.d(TAG, "Admin reply notification - reportId from FCM: " + reportId);
+                Log.d(TAG, "Admin reply notification - All data keys: " + data.keySet());
                 break;
         }
 

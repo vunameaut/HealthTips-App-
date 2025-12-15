@@ -260,10 +260,18 @@ public class DeepLinkHandlerActivity extends AppCompatActivity {
     private void handleAdminReplyNotification(Intent sourceIntent) {
         String reportId = sourceIntent.getStringExtra("report_id");
 
+        // Log toàn bộ extras để debug
+        Log.d(TAG, "handleAdminReplyNotification - All extras:");
+        if (sourceIntent.getExtras() != null) {
+            for (String key : sourceIntent.getExtras().keySet()) {
+                Object value = sourceIntent.getExtras().get(key);
+                Log.d(TAG, "  " + key + " = " + value);
+            }
+        }
+
         if (reportId == null || reportId.isEmpty()) {
             Log.e(TAG, "Missing or empty report_id for admin reply notification");
-            Log.e(TAG, "All extras: " + sourceIntent.getExtras());
-            Toast.makeText(this, "Lỗi: Không tìm thấy report ID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Lỗi: Không tìm thấy report ID trong thông báo", Toast.LENGTH_LONG).show();
             finish();
             return;
         }

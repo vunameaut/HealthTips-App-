@@ -317,17 +317,16 @@ public class AdminNotificationSender {
 
             try {
                 JSONObject json = new JSONObject();
-                json.put("type", "USER_REPLY");
                 json.put("reportId", reportId);
                 json.put("userId", userId);
                 json.put("userName", userName);
-                json.put("message", message.length() > 100 ? 
-                        message.substring(0, 100) + "..." : message);
+                json.put("messageText", message);
 
                 OkHttpClient client = new OkHttpClient();
                 RequestBody body = RequestBody.create(json.toString(), JSON);
 
-                String url = ADMIN_API_BASE_URL + "/admin-notifications/user-reply";
+                // ✅ Updated endpoint để match với API mới
+                String url = ADMIN_API_BASE_URL + "/notifications/notify-admin-user-reply";
                 Log.d(TAG, "Sending user reply notification to: " + url);
 
                 Request request = new Request.Builder()
