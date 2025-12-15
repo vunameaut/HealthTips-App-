@@ -408,7 +408,7 @@ public class TicketChatActivity extends AppCompatActivity {
             );
 
             // Use your web admin API URL
-            String apiUrl = "https://healthtips-admin-fxbnt4896-projects.vercel.app/api/admin-notifications/user-message";
+            String apiUrl = "https://healthtips-admin.vercel.app/api/support/send-message-notification";
 
             Request request = new Request.Builder()
                     .url(apiUrl)
