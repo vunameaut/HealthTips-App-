@@ -73,6 +73,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "Message ID: " + message.getMessageId());
         Log.d(TAG, "Message from: " + message.getFrom());
         Log.d(TAG, "Message sent time: " + message.getSentTime());
+        
+        // Check if message contains a notification payload
+        if (message.getNotification() != null) {
+            Log.d(TAG, "Notification payload:");
+            Log.d(TAG, "  Title: " + message.getNotification().getTitle());
+            Log.d(TAG, "  Body: " + message.getNotification().getBody());
+        }
 
         // Xử lý data payload
         if (!message.getData().isEmpty()) {
@@ -82,9 +89,32 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 Log.d(TAG, entry.getKey() + " = " + entry.getValue());
             }
             Log.d(TAG, "================================");
-            handleNotificationData(data);
+            
+            // ✅ CRITICAL: Nếu có notification payload, lấy title/body từ đó
+            // Nếu không, lấy từ data payload
+            String title = message.getNotification() != null ? 
+                    message.getNotification().getTitle() : data.get("title");
+            String body = message.getNotification() != null ? 
+                    message.getNotification().getBody() : data.get("body");
+            
+            // Đảm bảo data có title và body
+            Map<String, String> enrichedData = new HashMap<>(data);
+            if (title != null) enrichedData.put("title", title);
+            if (body != null) enrichedData.put("body", body);
+            
+            handleNotificationData(enrichedData);
         } else {
             Log.w(TAG, "No data payload in FCM message");
+            
+            // ✅ FALLBACK: Nếu chỉ có notification payload mà không có data
+            if (message.getNotification() != null) {
+                Log.d(TAG, "Handling notification-only message");
+                Map<String, String> data = new HashMap<>();
+                data.put("title", message.getNotification().getTitle());
+                data.put("body", message.getNotification().getBody());
+                data.put("type", "ADMIN_REPLY"); // Default type
+                handleNotificationData(data);
+            }
         }
         Log.d(TAG, "==========================================");
     }
