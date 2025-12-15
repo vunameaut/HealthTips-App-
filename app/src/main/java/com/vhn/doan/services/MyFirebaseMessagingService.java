@@ -501,7 +501,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 return data.get("ticketId");
 
             case TYPE_ADMIN_REPLY:
-                return data.get("reportId");
+                // Try both reportId and report_id keys
+                String reportId = data.get("reportId");
+                if (reportId == null || reportId.isEmpty()) {
+                    reportId = data.get("report_id");
+                }
+                Log.d(TAG, "getTargetId for ADMIN_REPLY: " + reportId + " (from data keys: " + data.keySet() + ")");
+                return reportId;
 
             case TYPE_HEALTH_TIP_RECOMMENDATION:
                 // Extract first tip ID from tips JSON
@@ -577,6 +583,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     String commentId = data.get("commentId");
                     if (commentId != null) {
                         extraJson.put("comment_id", commentId);
+                    }
+                    break;
+
+                case TYPE_ADMIN_REPLY:
+                    // Save reportId to extraData as backup
+                    String reportId = data.get("reportId");
+                    if (reportId == null || reportId.isEmpty()) {
+                        reportId = data.get("report_id");
+                    }
+                    if (reportId != null && !reportId.isEmpty()) {
+                        extraJson.put("reportId", reportId);
                     }
                     break;
 
