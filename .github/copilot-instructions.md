@@ -7,9 +7,11 @@ Dự án này là ứng dụng mẹo sức khỏe trên Android, được phát 
     * **Luôn viết phản hồi / mô tả bằng tiếng Việt.**
 
 **QUAN TRỌNG - QUY TẮC NGHIÊM NGẶT:**
-0.1. **KHÔNG TỰ Ý TẠO FILE HƯỚNG DẪN:**
-    * **NGHIÊM CẤM tự động tạo bất kỳ file hướng dẫn, tài liệu (README, GUIDE, INSTRUCTION, etc.) nào mà không có yêu cầu rõ ràng từ người dùng.**
+0.1. **KHÔNG TỰ Ý TẠO FILE HƯỚNG DẪN, BÁO CÁO, TÀI LIỆU:**
+    * **NGHIÊM CẤM tự động tạo bất kỳ file hướng dẫn, tài liệu, báo cáo (README, GUIDE, INSTRUCTION, DOCUMENTATION, REPORT, SUMMARY, CHANGELOG, etc.) nào mà không có yêu cầu rõ ràng và cụ thể từ người dùng.**
+    * **KHÔNG tạo file markdown (.md), text (.txt), hoặc bất kỳ file tài liệu nào để "tóm tắt thay đổi", "hướng dẫn sử dụng", "báo cáo công việc" trừ khi người dùng YÊU CẦU RÕ RÀNG.**
     * **Chỉ tập trung vào việc viết code, sửa lỗi và triển khai chức năng theo yêu cầu.**
+    * **Nếu hoàn thành công việc, chỉ cần BÁO CÁO NGẮN GỌN bằng lời trong phản hồi, KHÔNG tạo file.**
 
 0.2. **KHÔNG TỰ Ý CHẠY BUILD TERMINAL:**
     * **NGHIÊM CẤM tự động chạy các lệnh build, gradle, compile hoặc bất kỳ lệnh terminal nào mà không có yêu cầu cụ thể từ người dùng.**

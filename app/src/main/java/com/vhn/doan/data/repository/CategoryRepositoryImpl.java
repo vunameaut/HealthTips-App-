@@ -1,5 +1,8 @@
 package com.vhn.doan.data.repository;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -7,6 +10,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.vhn.doan.data.Category;
+import com.vhn.doan.utils.AuthTokenManager;
 import com.vhn.doan.utils.Constants;
 
 import java.util.ArrayList;
@@ -19,15 +23,54 @@ import java.util.Map;
  */
 public class CategoryRepositoryImpl implements CategoryRepository {
 
+    private static final String TAG = "CategoryRepoImpl";
     private final FirebaseDatabase database;
     private final DatabaseReference categoryRef;
+    private final Context context;
 
     /**
-     * Constructor mặc định
+     * Constructor với Context
      */
-    public CategoryRepositoryImpl() {
+    public CategoryRepositoryImpl(Context context) {
+        this.context = context != null ? context.getApplicationContext() : null;
         database = FirebaseDatabase.getInstance();
         categoryRef = database.getReference(Constants.CATEGORIES_REF);
+    }
+
+    /**
+     * Constructor mặc định (để tương thích ngược)
+     * @deprecated Sử dụng constructor với Context thay thế
+     */
+    @Deprecated
+    public CategoryRepositoryImpl() {
+        this.context = null;
+        database = FirebaseDatabase.getInstance();
+        categoryRef = database.getReference(Constants.CATEGORIES_REF);
+    }
+
+    /**
+     * Helper method để xử lý DatabaseError và kiểm tra PERMISSION_DENIED
+     */
+    private String handleDatabaseError(DatabaseError databaseError, String errorMessage) {
+        if (databaseError == null) {
+            return errorMessage;
+        }
+
+        Log.e(TAG, "DatabaseError: " + databaseError.getMessage() + " (Code: " + databaseError.getCode() + ")");
+
+        // Kiểm tra nếu là lỗi PERMISSION_DENIED
+        if (AuthTokenManager.isPermissionDeniedError(databaseError)) {
+            Log.w(TAG, "Phát hiện lỗi PERMISSION_DENIED - Token có thể đã bị invalidate");
+
+            // Xử lý lỗi PERMISSION_DENIED
+            if (context != null) {
+                AuthTokenManager.handlePermissionDeniedError(context, databaseError);
+            }
+
+            return "Phiên đăng nhập đã hết hạn. Đang làm mới...";
+        }
+
+        return errorMessage + ": " + databaseError.getMessage();
     }
 
     @Override
@@ -62,7 +105,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Lỗi khi tải danh mục");
+                callback.onError(errorMsg);
             }
         });
     }
@@ -98,7 +142,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Lỗi khi tải danh mục");
+                callback.onError(errorMsg);
             }
         });
     }
@@ -122,7 +167,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Lỗi khi tải danh mục theo trạng thái");
+                callback.onError(errorMsg);
             }
         });
     }
@@ -197,7 +243,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Lỗi khi lắng nghe danh mục");
+                callback.onError(errorMsg);
             }
         };
 

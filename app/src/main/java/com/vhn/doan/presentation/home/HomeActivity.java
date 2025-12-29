@@ -20,8 +20,10 @@ import com.vhn.doan.presentation.chat.NewChatFragment;
 import com.vhn.doan.presentation.profile.ProfileFragment;
 import com.vhn.doan.presentation.reminder.ReminderFragment;
 import com.vhn.doan.presentation.video.VideoFragment;
+import com.google.firebase.auth.FirebaseAuth;
 import com.vhn.doan.services.AuthManager;
 import com.vhn.doan.services.ReminderManager;
+import com.vhn.doan.utils.AuthTokenManager;
 import com.vhn.doan.utils.SyncScheduler;
 import com.vhn.doan.utils.UserSessionManager;
 
@@ -37,6 +39,7 @@ public class HomeActivity extends BaseActivity {
     private BottomNavigationView bottomNavigationView;
     private AuthManager authManager;
     private ReminderManager reminderManager;
+    private FirebaseAuth.AuthStateListener authStateListener;
 
     // Cache Fragments để sử dụng show/hide thay vì replace
     private HomeFragment homeFragment;
@@ -70,6 +73,25 @@ public class HomeActivity extends BaseActivity {
             finish();
             return;
         }
+
+        // Thêm AuthStateListener để theo dõi thay đổi trạng thái đăng nhập
+        authStateListener = AuthTokenManager.addAuthStateListener(this);
+        Log.d(TAG, "AuthStateListener đã được thêm để theo dõi trạng thái đăng nhập");
+
+        // Verify token hiện tại để đảm bảo nó vẫn hợp lệ
+        AuthTokenManager.verifyCurrentToken(new AuthTokenManager.TokenRefreshCallback() {
+            @Override
+            public void onTokenRefreshed() {
+                Log.d(TAG, "Token hiện tại hợp lệ, tiếp tục khởi động ứng dụng");
+            }
+
+            @Override
+            public void onTokenRefreshFailed() {
+                Log.w(TAG, "Token không hợp lệ, đăng xuất và chuyển về màn hình đăng nhập");
+                AuthTokenManager.forceLogoutAndRedirectToLogin(HomeActivity.this,
+                    "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+            }
+        });
 
         // Khởi tạo ReminderManager
         reminderManager = new ReminderManager(new UserSessionManager(this));
@@ -486,6 +508,16 @@ public class HomeActivity extends BaseActivity {
             fragment instanceof VideoFragment ||
             fragment instanceof ProfileFragment) {
             showBottomNavigation();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Remove AuthStateListener để tránh memory leak
+        if (authStateListener != null) {
+            AuthTokenManager.removeAuthStateListener(authStateListener);
+            Log.d(TAG, "AuthStateListener đã được remove");
         }
     }
 }

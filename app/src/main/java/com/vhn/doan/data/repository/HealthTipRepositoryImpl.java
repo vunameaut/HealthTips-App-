@@ -18,6 +18,7 @@ import com.vhn.doan.data.Category;
 import com.vhn.doan.data.local.AppDatabase;
 import com.vhn.doan.data.local.dao.HealthTipDao;
 import com.vhn.doan.data.local.entity.HealthTipEntity;
+import com.vhn.doan.utils.AuthTokenManager;
 import com.vhn.doan.utils.Constants;
 import com.vhn.doan.utils.NetworkUtils;
 import com.vhn.doan.utils.VercelApiHelper;
@@ -79,6 +80,34 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
         healthTipDao = null;
 
         Log.w(TAG, "HealthTipRepositoryImpl initialized WITHOUT offline support (deprecated constructor)");
+    }
+
+    /**
+     * Helper method để xử lý DatabaseError và kiểm tra PERMISSION_DENIED
+     * @param databaseError Lỗi từ Firebase
+     * @param errorMessage Thông báo lỗi mặc định
+     * @return Thông báo lỗi đã được xử lý
+     */
+    private String handleDatabaseError(DatabaseError databaseError, String errorMessage) {
+        if (databaseError == null) {
+            return errorMessage;
+        }
+
+        Log.e(TAG, "DatabaseError: " + databaseError.getMessage() + " (Code: " + databaseError.getCode() + ")");
+
+        // Kiểm tra nếu là lỗi PERMISSION_DENIED
+        if (AuthTokenManager.isPermissionDeniedError(databaseError)) {
+            Log.w(TAG, "Phát hiện lỗi PERMISSION_DENIED - Token có thể đã bị invalidate");
+
+            // Xử lý lỗi PERMISSION_DENIED
+            if (context != null) {
+                AuthTokenManager.handlePermissionDeniedError(context, databaseError);
+            }
+
+            return "Phiên đăng nhập đã hết hạn. Đang làm mới...";
+        }
+
+        return errorMessage + ": " + databaseError.getMessage();
     }
 
     /**
@@ -153,7 +182,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "Error loading categories: " + databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Error loading categories");
+                Log.e(TAG, errorMsg);
                 // Vẫn trả về health tips nhưng không có category names
                 callback.onSuccess(healthTips);
             }
@@ -364,11 +394,12 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "Firebase error: " + databaseError.getMessage());
+                    String errorMsg = handleDatabaseError(databaseError, "Firebase error");
+                    Log.e(TAG, errorMsg);
                     // Nếu có cache thì không báo lỗi (vì đã trả về cache rồi)
                     // Chỉ báo lỗi nếu không có cache
                     if (healthTipDao == null) {
-                        callback.onError(databaseError.getMessage());
+                        callback.onError(errorMsg);
                     }
                 }
             });
@@ -492,14 +523,15 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "Firebase error in getHealthTipDetail: " + databaseError.getMessage());
+                    String errorMsg = handleDatabaseError(databaseError, "Firebase error in getHealthTipDetail");
+                    Log.e(TAG, errorMsg);
 
                     // 🎯 FIX CRITICAL: KHÔNG callback error nếu đã có cache
                     // Đây là bug chính - Firebase error ghi đè cache result!
                     if (!callbackCalled[0]) {
                         // Chỉ báo lỗi nếu thực sự không có offline support
                         if (healthTipDao == null) {
-                            callback.onError(databaseError.getMessage());
+                            callback.onError(errorMsg);
                             callbackCalled[0] = true;
                         }
                         // Ngược lại: im lặng, vì cache đã hoặc sẽ được load
@@ -600,9 +632,10 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "Firebase error in getHealthTipsByCategory: " + databaseError.getMessage());
+                    String errorMsg = handleDatabaseError(databaseError, "Firebase error in getHealthTipsByCategory");
+                    Log.e(TAG, errorMsg);
                     if (healthTipDao == null) {
-                        callback.onError(databaseError.getMessage());
+                        callback.onError(errorMsg);
                     }
                 }
             });
@@ -684,9 +717,10 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "Firebase error in getLatestHealthTips: " + databaseError.getMessage());
+                    String errorMsg = handleDatabaseError(databaseError, "Firebase error in getLatestHealthTips");
+                    Log.e(TAG, errorMsg);
                     if (healthTipDao == null) {
-                        callback.onError(databaseError.getMessage());
+                        callback.onError(errorMsg);
                     }
                 }
             });
@@ -757,9 +791,10 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "Firebase error in getMostViewedHealthTips: " + databaseError.getMessage());
+                    String errorMsg = handleDatabaseError(databaseError, "Firebase error in getMostViewedHealthTips");
+                    Log.e(TAG, errorMsg);
                     if (healthTipDao == null) {
-                        callback.onError(databaseError.getMessage());
+                        callback.onError(errorMsg);
                     }
                 }
             });
@@ -791,7 +826,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Firebase error in getMostLikedHealthTips");
+                callback.onError(errorMsg);
             }
         });
     }
@@ -884,7 +920,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Firebase error in getRecommendedHealthTips");
+                callback.onError(errorMsg);
             }
         });
     }
@@ -1014,7 +1051,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError("Lỗi khi tìm kiếm: " + databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Lỗi khi tìm kiếm");
+                callback.onError(errorMsg);
             }
         });
     }
@@ -1069,7 +1107,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError("Lỗi khi lắng nghe dữ liệu: " + databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Lỗi khi lắng nghe dữ liệu");
+                callback.onError(errorMsg);
             }
         };
 
@@ -1139,7 +1178,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "View count update cancelled: " + databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "View count update cancelled");
+                Log.e(TAG, errorMsg);
                 callback.onSuccess(); // 🎯 FIX: Callback success thay vì error
             }
         });
@@ -1172,7 +1212,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError("Lỗi khi tải danh sách yêu thích: " + databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Lỗi khi tải danh sách yêu thích");
+                callback.onError(errorMsg);
             }
         });
     }
@@ -1272,7 +1313,8 @@ public class HealthTipRepositoryImpl implements HealthTipRepository {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onError("Lỗi khi tải dữ liệu: " + databaseError.getMessage());
+                String errorMsg = handleDatabaseError(databaseError, "Lỗi khi tải dữ liệu");
+                callback.onError(errorMsg);
             }
         });
     }
