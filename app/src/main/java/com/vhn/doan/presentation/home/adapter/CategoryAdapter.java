@@ -10,11 +10,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.card.MaterialCardView;
 import com.vhn.doan.R;
 import com.vhn.doan.data.Category;
 
@@ -110,12 +110,15 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         }
 
         // Xử lý sự kiện click vào card
-        holder.cardViewCategory.setOnClickListener(v -> {
+        View.OnClickListener clickHandler = v -> {
             if (clickListener != null) {
                 Log.d(TAG, "Category clicked: " + category.getName());
                 clickListener.onCategoryClick(category);
             }
-        });
+        };
+
+        holder.cardViewCategory.setOnClickListener(clickHandler);
+        holder.itemView.setOnClickListener(clickHandler);
     }
 
     @Override
@@ -136,7 +139,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
      * ViewHolder cho item của RecyclerView
      */
     static class CategoryViewHolder extends RecyclerView.ViewHolder {
-        CardView cardViewCategory;
+        MaterialCardView cardViewCategory;
         ImageView imageViewCategoryIcon;
         TextView textViewCategoryName;
         TextView textViewArticleCount;

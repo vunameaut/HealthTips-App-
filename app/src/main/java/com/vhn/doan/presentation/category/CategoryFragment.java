@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ public class CategoryFragment extends Fragment implements CategoryView, Category
     private ProgressBar progressBar;
     private LinearLayout layoutEmpty;
     private TextView textViewError;
+    private ImageButton buttonBack;
 
     // Adapter và Presenter
     private CategoryAdapter adapter;
@@ -81,6 +83,16 @@ public class CategoryFragment extends Fragment implements CategoryView, Category
         progressBar = view.findViewById(R.id.progressBar);
         layoutEmpty = view.findViewById(R.id.layoutEmpty);
         textViewError = view.findViewById(R.id.textViewError);
+        buttonBack = view.findViewById(R.id.buttonBack);
+
+        // Xử lý nút back
+        if (buttonBack != null) {
+            buttonBack.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    getActivity().getSupportFragmentManager().popBackStack();
+                }
+            });
+        }
     }
 
     /**

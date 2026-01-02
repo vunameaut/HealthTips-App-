@@ -72,27 +72,72 @@ public class ContentBlock {
         if (item instanceof java.util.Map) {
             java.util.Map<String, Object> map = (java.util.Map<String, Object>) item;
 
-            String id = (String) map.get("id");
-            String type = (String) map.get("type");
-            String value = (String) map.get("value");
+            // Xử lý an toàn cho id
+            String id = null;
+            Object idObj = map.get("id");
+            if (idObj instanceof String) {
+                id = (String) idObj;
+            } else if (idObj != null) {
+                id = idObj.toString();
+            }
+
+            // Xử lý an toàn cho type
+            String type = null;
+            Object typeObj = map.get("type");
+            if (typeObj instanceof String) {
+                type = (String) typeObj;
+            } else if (typeObj != null) {
+                type = typeObj.toString();
+            }
+
+            // Xử lý an toàn cho value - có thể là String hoặc ArrayList
+            String value = null;
+            Object valueObj = map.get("value");
+            if (valueObj instanceof String) {
+                value = (String) valueObj;
+            } else if (valueObj instanceof java.util.ArrayList) {
+                // Nếu là ArrayList, chuyển thành chuỗi hoặc bỏ qua
+                value = "";
+            } else if (valueObj != null) {
+                // Nếu là kiểu khác, chuyển thành String
+                value = valueObj.toString();
+            }
 
             ContentMetadata metadata = null;
             if (map.containsKey("metadata") && map.get("metadata") != null) {
-                java.util.Map<String, Object> metaMap = (java.util.Map<String, Object>) map.get("metadata");
+                Object metadataObj = map.get("metadata");
+                if (metadataObj instanceof java.util.Map) {
+                    java.util.Map<String, Object> metaMap = (java.util.Map<String, Object>) metadataObj;
 
-                Integer level = null;
-                if (metaMap.containsKey("level") && metaMap.get("level") != null) {
-                    if (metaMap.get("level") instanceof Long) {
-                        level = ((Long) metaMap.get("level")).intValue();
-                    } else if (metaMap.get("level") instanceof Integer) {
-                        level = (Integer) metaMap.get("level");
+                    Integer level = null;
+                    if (metaMap.containsKey("level") && metaMap.get("level") != null) {
+                        if (metaMap.get("level") instanceof Long) {
+                            level = ((Long) metaMap.get("level")).intValue();
+                        } else if (metaMap.get("level") instanceof Integer) {
+                            level = (Integer) metaMap.get("level");
+                        }
                     }
+
+                    // Xử lý an toàn cho alt
+                    String alt = null;
+                    Object altObj = metaMap.get("alt");
+                    if (altObj instanceof String) {
+                        alt = (String) altObj;
+                    } else if (altObj != null) {
+                        alt = altObj.toString();
+                    }
+
+                    // Xử lý an toàn cho caption
+                    String caption = null;
+                    Object captionObj = metaMap.get("caption");
+                    if (captionObj instanceof String) {
+                        caption = (String) captionObj;
+                    } else if (captionObj != null) {
+                        caption = captionObj.toString();
+                    }
+
+                    metadata = new ContentMetadata(level, alt, caption);
                 }
-
-                String alt = (String) metaMap.get("alt");
-                String caption = (String) metaMap.get("caption");
-
-                metadata = new ContentMetadata(level, alt, caption);
             }
 
             return new ContentBlock(id, type, value, metadata);

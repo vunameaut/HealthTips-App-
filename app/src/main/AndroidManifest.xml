@@ -70,6 +70,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".presentation.category.AllCategoriesActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".presentation.home.AllHealthTipsActivity"
             android:exported="false" />
 

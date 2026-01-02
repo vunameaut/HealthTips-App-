@@ -8,11 +8,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.card.MaterialCardView;
 import com.vhn.doan.R;
 import com.vhn.doan.data.Category;
 
@@ -75,7 +75,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
      * ViewHolder chứa references đến các view trong item_category
      */
     class CategoryViewHolder extends RecyclerView.ViewHolder {
-        private final CardView cardViewCategory;
+        private final MaterialCardView cardViewCategory;
         private final ImageView imageViewCategoryIcon;
         private final TextView textViewCategoryName;
         private final TextView textViewArticleCount;
@@ -89,12 +89,18 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             textViewArticleCount = itemView.findViewById(R.id.textViewArticleCount);
             badgeTrending = itemView.findViewById(R.id.badgeTrending);
 
-            cardViewCategory.setOnClickListener(v -> {
+            // Đặt click listener trên cả itemView và cardView để đảm bảo click hoạt động
+            View.OnClickListener clickListener = v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && listener != null) {
                     listener.onCategoryClick(categories.get(position));
                 }
-            });
+            };
+
+            itemView.setOnClickListener(clickListener);
+            if (cardViewCategory != null) {
+                cardViewCategory.setOnClickListener(clickListener);
+            }
         }
 
         /**

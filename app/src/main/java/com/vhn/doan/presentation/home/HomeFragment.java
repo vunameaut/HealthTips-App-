@@ -40,7 +40,6 @@ import com.vhn.doan.presentation.home.adapter.InfiniteHealthTipAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipAdapter;
 import com.vhn.doan.presentation.home.adapter.CategorySkeletonAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipSkeletonAdapter;
-import com.vhn.doan.presentation.category.CategoryFragment;
 import com.vhn.doan.utils.NetworkMonitor;
 import com.vhn.doan.data.repository.NotificationHistoryRepositoryImpl;
 import com.vhn.doan.utils.SessionManager;
@@ -505,17 +504,11 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
         // Featured Tips carousel - touch listener để pause/resume auto-scroll
         setupFeaturedTouchListener();
 
-        // Xem tất cả danh mục
+        // Xem tất cả danh mục - mở Activity mới thay vì Fragment
         if (textViewSeeAllCategories != null) {
             textViewSeeAllCategories.setOnClickListener(v -> {
                 if (getActivity() == null || !isAdded()) return;
-                CategoryFragment categoryFragment = CategoryFragment.newInstance();
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .hide(this)
-                        .add(R.id.fragment_container, categoryFragment)
-                        .addToBackStack(null)
-                        .commit();
+                startActivity(com.vhn.doan.presentation.category.AllCategoriesActivity.createIntent(requireContext()));
             });
         }
 
@@ -585,6 +578,15 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
             setupGreeting();
 
             // Fragment được hiển thị lại (khi back từ CategoryFragment)
+            // Đảm bảo RecyclerView categories visible
+            if (recyclerViewCategories != null) {
+                recyclerViewCategories.setVisibility(View.VISIBLE);
+                // Force refresh adapter để hiển thị lại items
+                if (categoryAdapter != null) {
+                    categoryAdapter.notifyDataSetChanged();
+                }
+            }
+
             // Refresh dữ liệu để đảm bảo cập nhật mới nhất
             if (presenter != null) {
                 presenter.start();
