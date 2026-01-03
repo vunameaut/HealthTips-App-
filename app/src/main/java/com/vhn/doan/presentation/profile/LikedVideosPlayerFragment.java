@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +25,9 @@ import com.vhn.doan.presentation.video.CommentBottomSheetFragment;
 import com.vhn.doan.presentation.video.VideoPresenter;
 import com.vhn.doan.presentation.video.VideoView;
 import com.vhn.doan.presentation.video.adapter.VideoAdapter;
+import com.vhn.doan.presentation.video.dialog.VideoOptionsDialog;
 import com.vhn.doan.utils.EventBus;
+import com.vhn.doan.utils.SharedPreferencesHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -224,6 +227,22 @@ public class LikedVideosPlayerFragment extends BaseFragment implements VideoView
             @Override
             public void onVideoInvisible(int position) {
                 // Video không còn visible
+            }
+
+            @Override
+            public void onVideoEnded(int position) {
+                // Video đã kết thúc - có thể auto scroll nếu cần
+            }
+
+            @Override
+            public void onLoadMore() {
+                // Load more videos - không cần thiết cho liked videos vì đã load hết
+            }
+
+            @Override
+            public void onMenuClick(ShortVideo video, int position) {
+                // Show video options menu
+                showVideoOptionsDialog(video, position);
             }
         });
     }
@@ -559,5 +578,216 @@ public class LikedVideosPlayerFragment extends BaseFragment implements VideoView
     public void onError(String message) {
         // Xử lý lỗi chung
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Hiển thị dialog tùy chọn video
+     */
+    private void showVideoOptionsDialog(ShortVideo video, int position) {
+        if (getContext() == null || video == null) return;
+
+        final VideoOptionsDialog[] dialogHolder = new VideoOptionsDialog[1];
+
+        // Lấy playback speed hiện tại từ SharedPreferences
+        float currentPlaybackSpeed = SharedPreferencesHelper.getPlaybackSpeed(getContext());
+
+        VideoOptionsDialog dialog = new VideoOptionsDialog(
+                getContext(),
+                videoAdapter.isAutoScrollEnabled(),
+                false, // Không cần truyền hideUIEnabled vì đã đổi thành button
+                currentPlaybackSpeed,
+                new VideoOptionsDialog.OnVideoOptionsListener() {
+                    @Override
+                    public void onAutoScrollChanged(boolean enabled) {
+                        // Cập nhật trạng thái auto-scroll trong adapter
+                        videoAdapter.setAutoScrollEnabled(enabled);
+
+                        // Lưu preference
+                        if (getContext() != null) {
+                            SharedPreferencesHelper.saveAutoScrollEnabled(getContext(), enabled);
+                        }
+
+                        // Hiển thị thông báo
+                        String message = enabled ?
+                                getString(R.string.auto_scroll_enabled) :
+                                getString(R.string.auto_scroll_disabled);
+                        showMessage(message);
+                    }
+
+                    @Override
+                    public void onReportVideoClicked() {
+                        // Chuyển qua màn hình báo cáo với thông tin video
+                        navigateToReportScreen(video);
+                    }
+
+                    @Override
+                    public void onPlaybackSpeedClicked() {
+                        // Hiển thị dialog chọn tốc độ phát
+                        showPlaybackSpeedDialog(dialogHolder[0]);
+                    }
+
+                    @Override
+                    public void onHideUIClicked() {
+                        // Ẩn UI ngay lập tức (TikTok style)
+                        videoAdapter.setUIVisibility(false);
+
+                        // Hiển thị thông báo
+                        showMessage(getString(R.string.hide_ui_enabled));
+                    }
+                }
+        );
+
+        dialogHolder[0] = dialog;
+        dialog.show();
+    }
+
+    /**
+     * Hiển thị dialog chọn tốc độ phát video
+     */
+    private void showPlaybackSpeedDialog(VideoOptionsDialog parentDialog) {
+        if (getContext() == null) return;
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_speed_selector, null);
+        builder.setView(dialogView);
+
+        android.app.AlertDialog speedDialog = builder.create();
+        if (speedDialog.getWindow() != null) {
+            speedDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        // Tìm các view trong dialog
+        android.widget.RadioGroup radioGroup = dialogView.findViewById(R.id.radio_group_speed);
+        android.widget.Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        android.widget.Button btnApply = dialogView.findViewById(R.id.btn_apply);
+
+        // Lấy tốc độ hiện tại
+        float currentSpeed = SharedPreferencesHelper.getPlaybackSpeed(getContext());
+
+        // Chọn tốc độ hiện tại
+        int selectedId;
+        if (currentSpeed == 0.25f) {
+            selectedId = R.id.speed_0_25;
+        } else if (currentSpeed == 0.5f) {
+            selectedId = R.id.speed_0_5;
+        } else if (currentSpeed == 0.75f) {
+            selectedId = R.id.speed_0_75;
+        } else if (currentSpeed == 1.0f) {
+            selectedId = R.id.speed_normal;
+        } else if (currentSpeed == 1.25f) {
+            selectedId = R.id.speed_1_25;
+        } else if (currentSpeed == 1.5f) {
+            selectedId = R.id.speed_1_5;
+        } else if (currentSpeed == 2.0f) {
+            selectedId = R.id.speed_2_0;
+        } else {
+            selectedId = R.id.speed_normal;
+        }
+        radioGroup.check(selectedId);
+
+        // Xử lý button cancel
+        btnCancel.setOnClickListener(v -> speedDialog.dismiss());
+
+        // Xử lý button apply
+        btnApply.setOnClickListener(v -> {
+            int checkedId = radioGroup.getCheckedRadioButtonId();
+            float newSpeed;
+
+            if (checkedId == R.id.speed_0_25) {
+                newSpeed = 0.25f;
+            } else if (checkedId == R.id.speed_0_5) {
+                newSpeed = 0.5f;
+            } else if (checkedId == R.id.speed_0_75) {
+                newSpeed = 0.75f;
+            } else if (checkedId == R.id.speed_normal) {
+                newSpeed = 1.0f;
+            } else if (checkedId == R.id.speed_1_25) {
+                newSpeed = 1.25f;
+            } else if (checkedId == R.id.speed_1_5) {
+                newSpeed = 1.5f;
+            } else if (checkedId == R.id.speed_2_0) {
+                newSpeed = 2.0f;
+            } else {
+                newSpeed = 1.0f;
+            }
+
+            // Áp dụng tốc độ phát
+            applyPlaybackSpeed(newSpeed);
+
+            // Cập nhật text trong parent dialog
+            if (parentDialog != null) {
+                parentDialog.updatePlaybackSpeed(newSpeed);
+            }
+
+            speedDialog.dismiss();
+        });
+
+        speedDialog.show();
+    }
+
+    /**
+     * Áp dụng tốc độ phát mới cho video player
+     */
+    private void applyPlaybackSpeed(float speed) {
+        // Áp dụng tốc độ cho video adapter
+        if (videoAdapter != null) {
+            videoAdapter.setPlaybackSpeed(speed);
+        }
+
+        // Lưu preference
+        if (getContext() != null) {
+            SharedPreferencesHelper.savePlaybackSpeed(getContext(), speed);
+        }
+
+        // Hiển thị thông báo
+        String speedText;
+        if (speed == 0.25f) {
+            speedText = getString(R.string.speed_0_25);
+        } else if (speed == 0.5f) {
+            speedText = getString(R.string.speed_0_5);
+        } else if (speed == 0.75f) {
+            speedText = getString(R.string.speed_0_75);
+        } else if (speed == 1.0f) {
+            speedText = getString(R.string.speed_normal);
+        } else if (speed == 1.25f) {
+            speedText = getString(R.string.speed_1_25);
+        } else if (speed == 1.5f) {
+            speedText = getString(R.string.speed_1_5);
+        } else if (speed == 2.0f) {
+            speedText = getString(R.string.speed_2_0);
+        } else {
+            speedText = speed + "x";
+        }
+
+        showMessage("Đã thay đổi tốc độ phát: " + speedText);
+    }
+
+    /**
+     * Chuyển đến màn hình báo cáo video
+     */
+    private void navigateToReportScreen(ShortVideo video) {
+        if (getActivity() == null || video == null) return;
+
+        try {
+            // Tạo intent để mở CreateReportActivity
+            Intent intent = new Intent(getActivity(), com.vhn.doan.presentation.report.CreateReportActivity.class);
+
+            // Thêm thông tin video vào intent
+            intent.putExtra("report_type", "video");
+            intent.putExtra("video_id", video.getId());
+            intent.putExtra("video_title", video.getTitle());
+            intent.putExtra("video_url", video.getVideoUrl());
+
+            // Pre-fill content với thông tin video
+            String prefillContent = "Báo cáo video: " + video.getTitle() + "\n" +
+                    "Video ID: " + video.getId() + "\n\n" +
+                    "Lý do báo cáo: ";
+            intent.putExtra("prefill_content", prefillContent);
+
+            startActivity(intent);
+        } catch (Exception e) {
+            android.util.Log.e("LikedVideosPlayer", "Error navigating to report screen", e);
+            showMessage("Không thể mở màn hình báo cáo");
+        }
     }
 }

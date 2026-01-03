@@ -285,6 +285,10 @@
 
     <!-- Strings for Video -->
     <string name="video_poster_description">视频海报</string>
+    <string name="video_menu_description">视频菜单选项</string>
+    <string name="comment_count_placeholder">0</string>
+    <string name="fast_forward_indicator">⏩ x2</string>
+    <string name="rewind_indicator">⏪ x2</string>
 
     <!-- Strings for Settings and Privacy -->
     <string name="settings_and_privacy">设置和隐私</string>
@@ -845,5 +849,19 @@
     <string name="favorite_articles">收藏的文章</string>
     <string name="favorite_articles_tab">收藏的文章</string>
     <string name="video_liked_tab">点赞的视频</string>
+
+    <!-- Video Options Dialog -->
+    <string name="video_options_title">视频选项</string>
+    <string name="auto_scroll_label">自动滚动</string>
+    <string name="auto_scroll_description">视频结束时自动移至下一个视频</string>
+    <string name="auto_scroll_enabled">已启用自动滚动</string>
+    <string name="auto_scroll_disabled">已禁用自动滚动</string>
+    <string name="hide_ui_label">隐藏界面</string>
+    <string name="hide_ui_description">隐藏视频信息和控制按钮</string>
+    <string name="hide_ui_enabled">已隐藏视频界面</string>
+    <string name="hide_ui_disabled">已显示视频界面</string>
+    <string name="show_ui_button">显示界面</string>
+    <string name="report_video_label">举报视频</string>
+    <string name="report_video_description">举报不当内容或违规行为</string>
 
 </resources>

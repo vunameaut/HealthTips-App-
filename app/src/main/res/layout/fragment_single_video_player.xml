@@ -68,7 +68,7 @@
         android:layout_height="80dp"
         android:layout_gravity="center"
         android:src="@drawable/ic_favorite"
-        android:tint="@color/like_color_active"
+        app:tint="@color/like_color_active"
         android:visibility="gone"
         android:contentDescription="@string/double_tap_heart_animation" />
 
@@ -81,6 +81,7 @@
 
     <!-- Video Info Overlay - Bottom Left Corner -->
     <LinearLayout
+        android:id="@+id/layout_video_info"
         android:layout_width="319dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
@@ -188,6 +189,7 @@
 
     <!-- Action Buttons - Right Side -->
     <LinearLayout
+        android:id="@+id/layout_action_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
@@ -297,5 +299,41 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <!-- Fast Forward Indicator - Thu nhỏ và đặt ở dưới cạnh phải -->
+    <TextView
+        android:id="@+id/tv_fast_forward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="120dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/fast_forward_indicator"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:padding="6dp"
+        android:paddingHorizontal="10dp"
+        android:background="#99000000"
+        android:visibility="gone"
+        android:elevation="8dp" />
+
+    <!-- Rewind Indicator - Thu nhỏ và đặt ở dưới cạnh trái -->
+    <TextView
+        android:id="@+id/tv_rewind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="120dp"
+        android:layout_marginStart="24dp"
+        android:text="@string/rewind_indicator"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:padding="6dp"
+        android:paddingHorizontal="10dp"
+        android:background="#99000000"
+        android:visibility="gone"
+        android:elevation="8dp" />
 
 </FrameLayout>

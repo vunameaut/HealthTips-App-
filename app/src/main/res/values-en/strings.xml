@@ -285,6 +285,10 @@
 
     <!-- Strings for Video -->
     <string name="video_poster_description">Video Poster</string>
+    <string name="video_menu_description">Video menu options</string>
+    <string name="comment_count_placeholder">0</string>
+    <string name="fast_forward_indicator">⏩ x2</string>
+    <string name="rewind_indicator">⏪ x2</string>
 
     <!-- Strings for Settings and Privacy -->
     <string name="settings_and_privacy">Settings and Privacy</string>
@@ -845,5 +849,19 @@
     <string name="favorite_articles">Favorite Articles</string>
     <string name="favorite_articles_tab">Favorite Articles</string>
     <string name="video_liked_tab">Liked Videos</string>
+
+    <!-- Video Options Dialog -->
+    <string name="video_options_title">Video Options</string>
+    <string name="auto_scroll_label">Auto-scroll</string>
+    <string name="auto_scroll_description">Automatically move to the next video when finished</string>
+    <string name="auto_scroll_enabled">Auto-scroll enabled</string>
+    <string name="auto_scroll_disabled">Auto-scroll disabled</string>
+    <string name="hide_ui_label">Hide Interface</string>
+    <string name="hide_ui_description">Hide video information and control buttons</string>
+    <string name="hide_ui_enabled">Video interface hidden</string>
+    <string name="hide_ui_disabled">Video interface shown</string>
+    <string name="show_ui_button">Show interface</string>
+    <string name="report_video_label">Report Video</string>
+    <string name="report_video_description">Report inappropriate content or violations</string>
 
 </resources>

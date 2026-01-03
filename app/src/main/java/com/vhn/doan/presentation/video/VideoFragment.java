@@ -25,6 +25,7 @@ import com.vhn.doan.data.repository.OfflineVideoRepositoryImpl;
 import com.vhn.doan.presentation.base.BaseFragment;
 import com.vhn.doan.presentation.base.FragmentVisibilityListener;
 import com.vhn.doan.presentation.video.adapter.VideoAdapter;
+import com.vhn.doan.presentation.video.dialog.VideoOptionsDialog;
 import com.vhn.doan.utils.AnalyticsManager;
 import com.vhn.doan.utils.EventBus;
 import com.vhn.doan.utils.SharedPreferencesHelper;
@@ -66,6 +67,8 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
     private NetworkMonitor networkMonitor;
     private boolean wasOffline = false;
 
+    // Playback speed
+    private float currentPlaybackSpeed = 1.0f;
 
     // Flag để kiểm soát video playback
     private boolean isFragmentVisible = false;
@@ -236,16 +239,37 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
             public void onVideoInvisible(int position) {
                 // Có thể thêm logic khi video invisible
             }
+
+            @Override
+            public void onVideoEnded(int position) {
+                // Auto-scroll: chuyển sang video tiếp theo
+                if (position < videoAdapter.getVideos().size() - 1) {
+                    recyclerView.smoothScrollToPosition(position + 1);
+                }
+            }
+
+            @Override
+            public void onLoadMore() {
+                // Load thêm video khi scroll gần hết
+                // TODO: Implement load more videos feature in presenter
+                android.util.Log.d(TAG, "Load more videos requested");
+            }
+
+            @Override
+            public void onMenuClick(ShortVideo video, int position) {
+                // Hiển thị dialog tùy chọn video
+                showVideoOptionsDialog(video, position);
+            }
         });
     }
 
     private void setupRetryButton() {
-        retryButton.setOnClickListener(v -> {
-            loadVideoFeed();
-        });
+        retryButton.setOnClickListener(v -> loadVideoFeed());
     }
 
     private void loadVideoFeed() {
+        if (getContext() == null) return;
+
         // Lấy user ID từ Firebase Auth trước, sau đó từ SharedPreferences
         String userId = getCurrentUserId();
         String country = SharedPreferencesHelper.getUserCountry(getContext());
@@ -262,6 +286,8 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
      * Lấy User ID hiện tại từ Firebase Auth hoặc SharedPreferences
      */
     private String getCurrentUserId() {
+        if (getContext() == null) return null;
+
         // Ưu tiên lấy từ Firebase Auth
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
@@ -299,8 +325,7 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
                 ShortVideo video = videos.get(i);
                 Boolean isLiked = likeStatusMap.get(video.getId());
                 if (isLiked != null) {
-                    int position = i;
-                    updateVideoLikeStatus(position, isLiked);
+                    updateVideoLikeStatus(i, isLiked);
                 }
             }
         };
@@ -512,10 +537,6 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
         }
     }
 
-    private void showComingSoon() {
-        Toast.makeText(getContext(), "Tính năng đang phát triển", Toast.LENGTH_SHORT).show();
-    }
-
     // Lifecycle Methods
 
     @Override
@@ -523,12 +544,14 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
         super.onResume();
 
         // Set user ID cho presenter
-        String userId = SharedPreferencesHelper.getUserId(getContext());
-        if (presenter != null && userId != null) {
-            presenter.setCurrentUserId(userId);
+        if (getContext() != null) {
+            String userId = SharedPreferencesHelper.getUserId(getContext());
+            if (presenter != null && userId != null) {
+                presenter.setCurrentUserId(userId);
 
-            // Kiểm tra trạng thái like cho tất cả video hiện tại
-            presenter.checkLikeStatusForVisibleVideos();
+                // Kiểm tra trạng thái like cho tất cả video hiện tại
+                presenter.checkLikeStatusForVisibleVideos();
+            }
         }
 
         // QUAN TRỌNG: CHỈ resume video nếu fragment đang visible
@@ -655,6 +678,215 @@ public class VideoFragment extends BaseFragment implements VideoView, FragmentVi
         if (getActivity() != null) {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+    }
+
+    /**
+     * Hiển thị dialog tùy chọn video
+     */
+    private void showVideoOptionsDialog(ShortVideo video, int position) {
+        if (getContext() == null || video == null) return;
+
+        final VideoOptionsDialog[] dialogHolder = new VideoOptionsDialog[1];
+
+        VideoOptionsDialog dialog = new VideoOptionsDialog(
+                getContext(),
+                videoAdapter.isAutoScrollEnabled(),
+                false, // Không cần truyền hideUIEnabled vì đã đổi thành button
+                currentPlaybackSpeed,
+                new VideoOptionsDialog.OnVideoOptionsListener() {
+                    @Override
+                    public void onAutoScrollChanged(boolean enabled) {
+                        // Cập nhật trạng thái auto-scroll trong adapter
+                        videoAdapter.setAutoScrollEnabled(enabled);
+
+                        // Lưu preference (tùy chọn)
+                        if (getContext() != null) {
+                            SharedPreferencesHelper.saveAutoScrollEnabled(getContext(), enabled);
+                        }
+
+                        // Hiển thị thông báo
+                        String message = enabled ?
+                                getString(R.string.auto_scroll_enabled) :
+                                getString(R.string.auto_scroll_disabled);
+                        showMessage(message);
+                    }
+
+                    @Override
+                    public void onReportVideoClicked() {
+                        // Chuyển qua màn hình báo cáo với thông tin video
+                        navigateToReportScreen(video);
+                    }
+
+                    @Override
+                    public void onPlaybackSpeedClicked() {
+                        // Hiển thị dialog chọn tốc độ phát
+                        showPlaybackSpeedDialog(dialogHolder[0]);
+                    }
+
+                    @Override
+                    public void onHideUIClicked() {
+                        // Ẩn UI ngay lập tức (TikTok style)
+                        videoAdapter.setUIVisibility(false);
+
+                        // Hiển thị thông báo
+                        showMessage(getString(R.string.hide_ui_enabled));
+                    }
+                }
+        );
+
+        dialogHolder[0] = dialog;
+        dialog.show();
+    }
+
+    private void navigateToReportScreen(ShortVideo video) {
+        if (getActivity() == null || video == null) return;
+
+        try {
+            // Tạo intent để mở CreateReportActivity
+            Intent intent = new Intent(getActivity(), com.vhn.doan.presentation.report.CreateReportActivity.class);
+
+            // Thêm thông tin video vào intent để báo cáo
+            intent.putExtra("report_type", "video");
+            intent.putExtra("video_id", video.getId());
+            intent.putExtra("video_title", video.getTitle());
+            intent.putExtra("video_url", video.getVideoUrl());
+
+            // Pre-fill content với thông tin video
+            String prefillContent = "Báo cáo video: " + video.getTitle() + "\n" +
+                    "Video ID: " + video.getId() + "\n\n" +
+                    "Lý do báo cáo: ";
+            intent.putExtra("prefill_content", prefillContent);
+
+            startActivity(intent);
+
+            // Log analytics event
+            if (analyticsManager != null) {
+                analyticsManager.logCustomEvent("video_report_initiated", null);
+            }
+        } catch (Exception e) {
+            android.util.Log.e(TAG, "Error navigating to report screen", e);
+            showMessage("Không thể mở màn hình báo cáo");
+        }
+    }
+
+    /**
+     * Hiển thị dialog chọn tốc độ phát video
+     */
+    private void showPlaybackSpeedDialog(VideoOptionsDialog parentDialog) {
+        if (getContext() == null) return;
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_speed_selector, null);
+        builder.setView(dialogView);
+
+        android.app.AlertDialog speedDialog = builder.create();
+        if (speedDialog.getWindow() != null) {
+            speedDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        // Tìm các view trong dialog
+        android.widget.RadioGroup radioGroup = dialogView.findViewById(R.id.radio_group_speed);
+        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        Button btnApply = dialogView.findViewById(R.id.btn_apply);
+
+        // Chọn tốc độ hiện tại
+        int selectedId;
+        if (currentPlaybackSpeed == 0.25f) {
+            selectedId = R.id.speed_0_25;
+        } else if (currentPlaybackSpeed == 0.5f) {
+            selectedId = R.id.speed_0_5;
+        } else if (currentPlaybackSpeed == 0.75f) {
+            selectedId = R.id.speed_0_75;
+        } else if (currentPlaybackSpeed == 1.0f) {
+            selectedId = R.id.speed_normal;
+        } else if (currentPlaybackSpeed == 1.25f) {
+            selectedId = R.id.speed_1_25;
+        } else if (currentPlaybackSpeed == 1.5f) {
+            selectedId = R.id.speed_1_5;
+        } else if (currentPlaybackSpeed == 2.0f) {
+            selectedId = R.id.speed_2_0;
+        } else {
+            selectedId = R.id.speed_normal;
+        }
+        radioGroup.check(selectedId);
+
+        // Xử lý button cancel
+        btnCancel.setOnClickListener(v -> speedDialog.dismiss());
+
+        // Xử lý button apply
+        btnApply.setOnClickListener(v -> {
+            int checkedId = radioGroup.getCheckedRadioButtonId();
+            float newSpeed;
+
+            if (checkedId == R.id.speed_0_25) {
+                newSpeed = 0.25f;
+            } else if (checkedId == R.id.speed_0_5) {
+                newSpeed = 0.5f;
+            } else if (checkedId == R.id.speed_0_75) {
+                newSpeed = 0.75f;
+            } else if (checkedId == R.id.speed_normal) {
+                newSpeed = 1.0f;
+            } else if (checkedId == R.id.speed_1_25) {
+                newSpeed = 1.25f;
+            } else if (checkedId == R.id.speed_1_5) {
+                newSpeed = 1.5f;
+            } else if (checkedId == R.id.speed_2_0) {
+                newSpeed = 2.0f;
+            } else {
+                newSpeed = 1.0f;
+            }
+
+            // Cập nhật tốc độ phát
+            applyPlaybackSpeed(newSpeed);
+
+            // Cập nhật text trong parent dialog
+            if (parentDialog != null) {
+                parentDialog.updatePlaybackSpeed(newSpeed);
+            }
+
+            speedDialog.dismiss();
+        });
+
+        speedDialog.show();
+    }
+
+    /**
+     * Áp dụng tốc độ phát mới cho video player
+     */
+    private void applyPlaybackSpeed(float speed) {
+        currentPlaybackSpeed = speed;
+
+        // Áp dụng tốc độ cho video adapter
+        if (videoAdapter != null) {
+            videoAdapter.setPlaybackSpeed(speed);
+        }
+
+        // Lưu preference
+        if (getContext() != null) {
+            SharedPreferencesHelper.savePlaybackSpeed(getContext(), speed);
+        }
+
+        // Hiển thị thông báo
+        String speedText;
+        if (speed == 0.25f) {
+            speedText = getString(R.string.speed_0_25);
+        } else if (speed == 0.5f) {
+            speedText = getString(R.string.speed_0_5);
+        } else if (speed == 0.75f) {
+            speedText = getString(R.string.speed_0_75);
+        } else if (speed == 1.0f) {
+            speedText = getString(R.string.speed_normal);
+        } else if (speed == 1.25f) {
+            speedText = getString(R.string.speed_1_25);
+        } else if (speed == 1.5f) {
+            speedText = getString(R.string.speed_1_5);
+        } else if (speed == 2.0f) {
+            speedText = getString(R.string.speed_2_0);
+        } else {
+            speedText = speed + "x";
+        }
+
+        showMessage("Đã thay đổi tốc độ phát: " + speedText);
     }
 
 }

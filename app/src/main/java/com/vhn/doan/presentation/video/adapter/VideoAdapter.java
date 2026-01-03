@@ -2,7 +2,10 @@ package com.vhn.doan.presentation.video.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.media.audiofx.LoudnessEnhancer;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -52,6 +55,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     private static final boolean REPLAY_ON_REVISIT = true; // lướt quay lại -> phát từ đầu
     private static final int PRELOAD_AHEAD = 2;            // số item preload trước/sau
     private static final int MAX_CAPTION_LENGTH = 100;     // Độ dài tối đa caption trước khi cắt
+    private static final float DEFAULT_VOLUME = 0.5f;      // Volume mặc định 50%
+    private static final int LOUDNESS_GAIN = 800;          // +8dB loudness boost (800 = 8.0dB)
+    private static final float FAST_FORWARD_SPEED = 2.0f;  // Tốc độ phát nhanh x2 khi nhấn giữ
+    private static final float REWIND_SPEED = 0.5f;        // Tốc độ phát chậm x0.5 khi nhấn giữ lùi
+    private static final int LOAD_MORE_THRESHOLD = 3;      // Số video còn lại để trigger load more
 
     // ================== Dữ liệu / listener ==================
     private final List<ShortVideo> videos = new ArrayList<>();
@@ -60,6 +68,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     // Map để theo dõi trạng thái like của từng video
     private final Map<Integer, Boolean> likeStatusMap = new HashMap<>();
 
+    // Auto-scroll state
+    private boolean autoScrollEnabled = false;
+
+    // Audio enhancement
+    private LoudnessEnhancer loudnessEnhancer;
+
     public interface OnVideoInteractionListener {
         void onVideoClick(ShortVideo video, int position);
         void onLikeClick(ShortVideo video, int position);
@@ -67,13 +81,78 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         void onCommentClick(ShortVideo video, int position);
         void onVideoVisible(int position);
         void onVideoInvisible(int position);
+        void onVideoEnded(int position); // Callback khi video kết thúc
+        void onLoadMore(); // Callback để load thêm video
+        void onMenuClick(ShortVideo video, int position); // Callback khi click menu
     }
 
     public void setOnVideoInteractionListener(OnVideoInteractionListener listener) {
         this.listener = listener;
     }
 
+    /**
+     * Bật/tắt chế độ auto-scroll
+     */
+    public void setAutoScrollEnabled(boolean enabled) {
+        this.autoScrollEnabled = enabled;
+        // Cập nhật repeat mode của player hiện tại
+        if (currentPlayer != null) {
+            currentPlayer.setRepeatMode(enabled ? Player.REPEAT_MODE_OFF : Player.REPEAT_MODE_ONE);
+        }
+    }
+
+    /**
+     * Lấy trạng thái auto-scroll hiện tại
+     */
+    public boolean isAutoScrollEnabled() {
+        return autoScrollEnabled;
+    }
+
+    /**
+     * Lấy trạng thái hiển thị UI hiện tại
+     * Trả về true nếu UI đang hiển thị, false nếu đang ẩn
+     */
+    public boolean isUIVisible() {
+        // Kiểm tra trạng thái UI từ ViewHolder hiện tại nếu có
+        if (currentPlayingPosition != RecyclerView.NO_POSITION && currentRecyclerView != null) {
+            RecyclerView.ViewHolder holder = currentRecyclerView.findViewHolderForAdapterPosition(currentPlayingPosition);
+            if (holder instanceof VideoViewHolder) {
+                return ((VideoViewHolder) holder).isUIVisible;
+            }
+        }
+        // Mặc định là hiển thị UI
+        return true;
+    }
+
+    /**
+     * Thiết lập hiển thị/ẩn UI cho tất cả video
+     * @param visible true để hiển thị UI, false để ẩn UI
+     */
+    public void setUIVisibility(boolean visible) {
+        // Cập nhật UI cho ViewHolder hiện tại
+        if (currentPlayingPosition != RecyclerView.NO_POSITION && currentRecyclerView != null) {
+            RecyclerView.ViewHolder holder = currentRecyclerView.findViewHolderForAdapterPosition(currentPlayingPosition);
+            if (holder instanceof VideoViewHolder) {
+                VideoViewHolder viewHolder = (VideoViewHolder) holder;
+                viewHolder.setUIVisibility(visible);
+            }
+        }
+    }
+
     public void updateVideos(List<ShortVideo> newVideos) {
+        // 🎯 QUAN TRỌNG: Clear tất cả PlayerView trước khi release players
+        // Điều này đảm bảo không có frame cache nào được giữ lại
+        if (currentRecyclerView != null) {
+            for (int i = 0; i < currentRecyclerView.getChildCount(); i++) {
+                android.view.View child = currentRecyclerView.getChildAt(i);
+                RecyclerView.ViewHolder holder = currentRecyclerView.getChildViewHolder(child);
+                if (holder instanceof VideoViewHolder) {
+                    VideoViewHolder vh = (VideoViewHolder) holder;
+                    vh.playerView.setPlayer(null);
+                }
+            }
+        }
+
         releaseAllPlayers();
         videos.clear();
         // Không xóa likeStatusMap nữa để giữ lại trạng thái like
@@ -183,11 +262,29 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             .setMediaSourceFactory(new DefaultMediaSourceFactory(cacheDataSourceFactory))
             .build();
 
-        currentPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+        // Set repeat mode dựa trên auto-scroll
+        currentPlayer.setRepeatMode(autoScrollEnabled ? Player.REPEAT_MODE_OFF : Player.REPEAT_MODE_ONE);
         currentPlayer.setPlayWhenReady(true);
+
+        // Thiết lập volume mặc định 50%
+        currentPlayer.setVolume(DEFAULT_VOLUME);
+
+        // Khởi tạo LoudnessEnhancer để tăng âm lượng
+        try {
+            if (loudnessEnhancer != null) {
+                loudnessEnhancer.release();
+            }
+            loudnessEnhancer = new LoudnessEnhancer(currentPlayer.getAudioSessionId());
+            loudnessEnhancer.setTargetGain(LOUDNESS_GAIN); // +8dB
+            loudnessEnhancer.setEnabled(true);
+            Log.d("VideoAdapter", "✅ LoudnessEnhancer initialized with +8dB gain");
+        } catch (Exception e) {
+            Log.e("VideoAdapter", "❌ Failed to initialize LoudnessEnhancer", e);
+        }
+
         attachMainPlayerListener();
 
-        Log.d("VideoAdapter", "✅ Current player created with cache support");
+        Log.d("VideoAdapter", "✅ Current player created with cache support and audio enhancement");
     }
 
     private void attachMainPlayerListener() {
@@ -205,9 +302,22 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                         activeHolder.showPoster(false);
                         break;
                     case Player.STATE_ENDED:
-                        // Loop êm
-                        currentPlayer.seekTo(0);
-                        currentPlayer.play();
+                        // Xử lý khi video kết thúc
+                        if (autoScrollEnabled && listener != null) {
+                            // Auto-scroll: chuyển sang video tiếp theo
+                            listener.onVideoEnded(currentPlayingPosition);
+                        } else {
+                            // Manual mode: phát lại video hiện tại
+                            currentPlayer.seekTo(0);
+                            currentPlayer.play();
+                        }
+
+                        // Kiểm tra xem có cần load thêm video không
+                        if (currentPlayingPosition >= getItemCount() - LOAD_MORE_THRESHOLD) {
+                            if (listener != null) {
+                                listener.onLoadMore();
+                            }
+                        }
                         break;
                     case Player.STATE_IDLE:
                     default:
@@ -298,15 +408,24 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
         holder.bindMetadata(video);
 
+        // 🎯 Reset UI về trạng thái hiển thị mặc định khi bind video mới
+        // Đảm bảo mỗi video mới đều hiển thị UI, không bị ảnh hưởng bởi trạng thái ẩn UI của video trước
+        holder.setUIVisibility(true);
+
+        // 🎯 QUAN TRỌNG: Clear player trước để tránh hiển thị frame cũ
+        holder.playerView.setPlayer(null);
+
         // Cấu hình PlayerView anti-flicker
         holder.playerView.setUseController(false);
         holder.playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING);
-        holder.playerView.setKeepContentOnPlayerReset(true);
+        // 🎯 TẮT keepContentOnPlayerReset để tránh giữ lại video cache cũ
+        holder.playerView.setKeepContentOnPlayerReset(false);
         holder.playerView.setShutterBackgroundColor(Color.TRANSPARENT);
 
         // Nếu là item đang phát -> gắn player chính
         if (position == currentPlayingPosition && currentPlayer != null) {
             activeHolder = holder;
+            // 🎯 Đặt player SAU KHI đã clear để tránh flash
             holder.playerView.setPlayer(currentPlayer);
             // đồng bộ UI theo state hiện tại
             int state = currentPlayer.getPlaybackState();
@@ -318,7 +437,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                 listener.onVideoVisible(position);
             }
         } else {
-            holder.playerView.setPlayer(null);
+            // PlayerView đã được clear ở trên rồi
             holder.showLoading(false);
             // Khi không phải item đang phát thì để poster hiển thị sẵn
             holder.showPoster(true);
@@ -368,17 +487,32 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                 listener.onVideoVisible(position);
             }
 
+
             // 1) Nếu đã có player preload cho vị trí này -> handover sang player chính
+            // (Note: Giờ không còn preload cho video đang phát, nhưng giữ logic để xử lý edge cases)
             ExoPlayer pre = preloadedPlayers.remove(position);
             if (pre != null) {
+                android.util.Log.d("VideoAdapter", "🔄 Handover preload player to current for position " + position);
+
+                // Dừng hẳn preload player
+                pre.pause();
+                pre.setPlayWhenReady(false);
+
                 // Giải phóng player chính cũ
                 if (currentPlayer != null) {
                     try { currentPlayer.release(); } catch (Exception ignore) {}
                 }
+
+                // Handover sang player chính
                 currentPlayer = pre;
-                attachMainPlayerListener(); // gắn listener cho player chính mới
+                attachMainPlayerListener();
+
+                // Seek về 0 và play
+                currentPlayer.seekTo(0);
+                currentPlayer.setVolume(1f);
                 currentPlayer.setPlayWhenReady(true);
-                currentPlayer.setVolume(1f); // phát bình thường
+
+                android.util.Log.d("VideoAdapter", "✅ Handover complete - playing from start");
 
             } else {
                 // 2) Dùng player chính hiện tại:
@@ -395,11 +529,19 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                     if (REPLAY_ON_REVISIT) currentPlayer.seekTo(0);
                     currentPlayer.setPlayWhenReady(true);
                 } else {
+                    // 🎯 QUAN TRỌNG: Clear surface trước khi load video mới
+                    // Detach player từ tất cả views để xóa frame cache
+                    if (activeHolder != null) {
+                        activeHolder.playerView.setPlayer(null);
+                    }
+
                     currentPlayer.stop();
                     currentPlayer.clearMediaItems();
                     currentPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(url)), /*resetPosition=*/true);
                     currentPlayer.prepare();
                     currentPlayer.setPlayWhenReady(true);
+
+                    android.util.Log.d("VideoAdapter", "🔄 Loading new video: " + url);
                 }
             }
 
@@ -434,8 +576,17 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
      */
     public void releaseAllPlayers() {
         if (currentPlayer != null) {
-            try { currentPlayer.release(); } catch (Exception ignore) {}
+            try {
+                // 🎯 QUAN TRỌNG: Stop và clear media items trước khi release
+                currentPlayer.stop();
+                currentPlayer.clearMediaItems();
+                currentPlayer.release();
+            } catch (Exception ignore) {}
             currentPlayer = null;
+        }
+        if (loudnessEnhancer != null) {
+            try { loudnessEnhancer.release(); } catch (Exception ignore) {}
+            loudnessEnhancer = null;
         }
         for (ExoPlayer p : preloadedPlayers.values()) {
             try { p.release(); } catch (Exception ignore) {}
@@ -450,20 +601,22 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         if (appContext == null) appContext = lastKnownContext;
         if (appContext == null) return;
 
-        // dọn những player preload quá xa
+        // dọn những player preload quá xa hoặc chính là video đang phát
         preloadedPlayers.entrySet().removeIf(e -> {
             int pos = e.getKey();
-            if (Math.abs(pos - anchorPosition) > PRELOAD_AHEAD) {
+            // 🎯 Xóa player preload nếu quá xa HOẶC là video đang phát
+            if (Math.abs(pos - anchorPosition) > PRELOAD_AHEAD || pos == anchorPosition) {
                 try { e.getValue().release(); } catch (Exception ignore) {}
                 return true;
             }
             return false;
         });
 
-        // preload phía trước
+        // preload phía trước và phía sau - NHƯNG KHÔNG preload cho chính anchorPosition
         for (int i = 1; i <= PRELOAD_AHEAD; i++) {
             int next = anchorPosition + i;
-            if (next < getItemCount() && !preloadedPlayers.containsKey(next)) {
+            // 🎯 Chỉ preload nếu KHÔNG phải video đang phát
+            if (next < getItemCount() && next != anchorPosition && !preloadedPlayers.containsKey(next)) {
                 try {
                     String url = getVideoUrl(videos.get(next));
                     if (url != null && !url.isEmpty()) {
@@ -474,7 +627,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                 }
             }
             int prev = anchorPosition - i;
-            if (prev >= 0 && !preloadedPlayers.containsKey(prev)) {
+            // 🎯 Chỉ preload nếu KHÔNG phải video đang phát
+            if (prev >= 0 && prev != anchorPosition && !preloadedPlayers.containsKey(prev)) {
                 try {
                     String url = getVideoUrl(videos.get(prev));
                     if (url != null && !url.isEmpty()) {
@@ -506,10 +660,22 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         // Actions
         private final LinearLayout likeButton, shareButton, commentButton;
         private final ImageView likeIcon;
+        private final ImageView menuButton;
 
         // Double-tap animation
         private final ImageView doubleTapHeart;
         private GestureDetector gestureDetector;
+
+        // Seek indicators
+        private final TextView fastForwardIndicator;
+        private final TextView rewindIndicator;
+        private boolean isSeeking = false;
+
+        // UI visibility toggle (TikTok style)
+        private final LinearLayout layoutVideoInfo;
+        private final LinearLayout layoutActionButtons;
+        private final ImageView btnShowUI;
+        private boolean isUIVisible = true;
 
         // State tracking cho optimistic UI
         private boolean isLikedLocally = false;
@@ -537,16 +703,20 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             commentButton = itemView.findViewById(R.id.btn_comment);
             likeIcon = itemView.findViewById(R.id.iv_like_icon);
             doubleTapHeart = itemView.findViewById(R.id.iv_double_tap_heart);
+            menuButton = itemView.findViewById(R.id.btn_menu);
+
+            // Seek indicators
+            fastForwardIndicator = itemView.findViewById(R.id.tv_fast_forward);
+            rewindIndicator = itemView.findViewById(R.id.tv_rewind);
+
+            // UI containers for visibility toggle
+            layoutVideoInfo = itemView.findViewById(R.id.layout_video_info);
+            layoutActionButtons = itemView.findViewById(R.id.layout_action_buttons);
+            btnShowUI = itemView.findViewById(R.id.btn_show_ui);
 
             setupDoubleTapGesture();
-
-            // Tap để pause/play hoặc double-tap để like
-            View videoTapArea = itemView.findViewById(R.id.video_tap_area);
-            if (videoTapArea != null) {
-                videoTapArea.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
-            } else {
-                playerView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
-            }
+            setupSeekGestures();
+            setupShowUIButton();
 
             // Buttons
             likeButton.setOnClickListener(v -> {
@@ -569,20 +739,31 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                     listener.onCommentClick(videos.get(p), p);
                 }
             });
+
+            // Menu button
+            if (menuButton != null) {
+                menuButton.setOnClickListener(v -> {
+                    int p = getBindingAdapterPosition();
+                    if (p != RecyclerView.NO_POSITION && listener != null) {
+                        listener.onMenuClick(videos.get(p), p);
+                    }
+                });
+            }
         }
 
         private void setupDoubleTapGesture() {
             gestureDetector = new GestureDetector(itemView.getContext(), new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onSingleTapConfirmed(MotionEvent e) {
-                    // Single tap = pause/play
+                    // Single tap = toggle play/pause (thay vì toggle UI để tránh conflict)
+                    // UI visibility giờ được điều khiển qua dialog options
                     togglePlayPause();
                     return true;
                 }
 
                 @Override
                 public boolean onDoubleTap(MotionEvent e) {
-                    // Double tap = like v���i animation
+                    // Double tap = like với animation
                     int p = getBindingAdapterPosition();
                     if (p != RecyclerView.NO_POSITION && !isLikeOperationPending) {
                         handleDoubleTapLike(videos.get(p), p, e.getX(), e.getY());
@@ -595,6 +776,247 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                     return true;
                 }
             });
+        }
+
+        /**
+         * Toggle visibility của UI elements (caption, icons) như TikTok
+         */
+        private void toggleUIVisibility() {
+            isUIVisible = !isUIVisible;
+
+            // Animate fade in/out
+            if (layoutVideoInfo != null) {
+                if (isUIVisible) {
+                    layoutVideoInfo.setAlpha(0f);
+                    layoutVideoInfo.setVisibility(View.VISIBLE);
+                    layoutVideoInfo.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .start();
+                } else {
+                    layoutVideoInfo.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction(() -> layoutVideoInfo.setVisibility(View.GONE))
+                        .start();
+                }
+            }
+
+            if (layoutActionButtons != null) {
+                if (isUIVisible) {
+                    layoutActionButtons.setAlpha(0f);
+                    layoutActionButtons.setVisibility(View.VISIBLE);
+                    layoutActionButtons.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .start();
+                } else {
+                    layoutActionButtons.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction(() -> layoutActionButtons.setVisibility(View.GONE))
+                        .start();
+                }
+            }
+        }
+
+        /**
+         * Thiết lập hiển thị/ẩn UI từ bên ngoài (từ dialog options)
+         * @param visible true để hiển thị UI, false để ẩn UI
+         */
+        void setUIVisibility(boolean visible) {
+            isUIVisible = visible;
+
+            // Animate fade in/out cho layoutVideoInfo
+            if (layoutVideoInfo != null) {
+                if (isUIVisible) {
+                    layoutVideoInfo.setAlpha(0f);
+                    layoutVideoInfo.setVisibility(View.VISIBLE);
+                    layoutVideoInfo.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .start();
+                } else {
+                    layoutVideoInfo.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction(() -> layoutVideoInfo.setVisibility(View.GONE))
+                        .start();
+                }
+            }
+
+            // Animate fade in/out cho layoutActionButtons
+            if (layoutActionButtons != null) {
+                if (isUIVisible) {
+                    layoutActionButtons.setAlpha(0f);
+                    layoutActionButtons.setVisibility(View.VISIBLE);
+                    layoutActionButtons.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .start();
+                } else {
+                    layoutActionButtons.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction(() -> layoutActionButtons.setVisibility(View.GONE))
+                        .start();
+                }
+            }
+
+            // Hiển thị/ẩn nút Show UI (ngược lại với UI visibility)
+            if (btnShowUI != null) {
+                if (isUIVisible) {
+                    // UI đang hiển thị -> ẩn nút Show UI
+                    btnShowUI.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction(() -> btnShowUI.setVisibility(View.GONE))
+                        .start();
+                } else {
+                    // UI đang ẩn -> hiển thị nút Show UI
+                    btnShowUI.setAlpha(0f);
+                    btnShowUI.setVisibility(View.VISIBLE);
+                    btnShowUI.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .start();
+                }
+            }
+        }
+
+        /**
+         * Setup nút Show UI - hiển thị khi UI bị ẩn (TikTok style)
+         */
+        private void setupShowUIButton() {
+            if (btnShowUI != null) {
+                btnShowUI.setOnClickListener(v -> {
+                    // Khi click nút Show UI -> hiển thị lại UI
+                    setUIVisibility(true);
+                });
+            }
+        }
+
+        /**
+         * Setup seek gestures for fast forward and rewind
+         * Nhấn giữ cạnh phải: tua nhanh x2
+         * Nhấn giữ cạnh trái: tua lùi x2
+         */
+        private void setupSeekGestures() {
+            View videoTapArea = itemView.findViewById(R.id.video_tap_area);
+            View touchView = videoTapArea != null ? videoTapArea : playerView;
+
+            touchView.setOnTouchListener(new View.OnTouchListener() {
+                private float initialX = 0;
+                private boolean isLongPressHandled = false;
+                private final Handler handler = new Handler(Looper.getMainLooper());
+                private Runnable longPressRunnable;
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    // Cho gesture detector xử lý trước (single tap, double tap)
+                    boolean gestureHandled = gestureDetector.onTouchEvent(event);
+
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            initialX = event.getX();
+                            isLongPressHandled = false;
+
+                            // Setup long press cho dialog (nhấn giữ vào giữa màn hình)
+                            float screenWidth = v.getWidth();
+                            float centerZoneStart = screenWidth * 0.3f;
+                            float centerZoneEnd = screenWidth * 0.7f;
+
+                            if (initialX >= centerZoneStart && initialX <= centerZoneEnd) {
+                                // Nhấn giữ vào giữa -> hiển thị menu dialog
+                                longPressRunnable = () -> {
+                                    isLongPressHandled = true;
+                                    int p = getBindingAdapterPosition();
+                                    if (p != RecyclerView.NO_POSITION && listener != null) {
+                                        listener.onMenuClick(videos.get(p), p);
+                                    }
+                                };
+                                handler.postDelayed(longPressRunnable, 500); // 500ms để kích hoạt long press
+                            } else {
+                                // Nhấn giữ hai cạnh -> tua video
+                                longPressRunnable = () -> {
+                                    if (currentPlayer != null && getBindingAdapterPosition() == currentPlayingPosition) {
+                                        isLongPressHandled = true;
+                                        boolean isRightSide = initialX > screenWidth / 2;
+                                        startSeeking(isRightSide);
+                                    }
+                                };
+                                handler.postDelayed(longPressRunnable, 200); // 200ms để bắt đầu tua
+                            }
+                            break;
+
+                        case MotionEvent.ACTION_MOVE:
+                            // Nếu di chuyển quá xa khỏi vị trí ban đầu, hủy long press
+                            if (Math.abs(event.getX() - initialX) > 50) {
+                                if (longPressRunnable != null) {
+                                    handler.removeCallbacks(longPressRunnable);
+                                }
+                            }
+                            break;
+
+                        case MotionEvent.ACTION_UP:
+                        case MotionEvent.ACTION_CANCEL:
+                            if (longPressRunnable != null) {
+                                handler.removeCallbacks(longPressRunnable);
+                            }
+                            if (isSeeking) {
+                                stopSeeking();
+                            }
+                            // Nếu long press đã xử lý, không cho gesture detector xử lý nữa
+                            return isLongPressHandled || gestureHandled;
+                    }
+
+                    return gestureHandled || isLongPressHandled;
+                }
+            });
+        }
+
+        /**
+         * Bắt đầu tăng tốc độ phát video x2
+         */
+        private void startSeeking(boolean forward) {
+            if (currentPlayer == null || isSeeking) return;
+
+            isSeeking = true;
+
+            // Hiển thị indicator
+            if (forward) {
+                if (fastForwardIndicator != null) {
+                    fastForwardIndicator.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (rewindIndicator != null) {
+                    rewindIndicator.setVisibility(View.VISIBLE);
+                }
+            }
+
+            // Tăng tốc độ phát lên x2 cho fast forward, giảm xuống x0.5 cho rewind
+            float playbackSpeed = forward ? FAST_FORWARD_SPEED : REWIND_SPEED;
+            currentPlayer.setPlaybackSpeed(playbackSpeed);
+        }
+
+        /**
+         * Dừng tua video - đặt lại tốc độ phát về bình thường
+         */
+        private void stopSeeking() {
+            isSeeking = false;
+
+            // Đặt lại tốc độ phát về bình thường (1.0x)
+            if (currentPlayer != null) {
+                currentPlayer.setPlaybackSpeed(1.0f);
+            }
+
+            // Ẩn indicators
+            if (fastForwardIndicator != null) {
+                fastForwardIndicator.setVisibility(View.GONE);
+            }
+            if (rewindIndicator != null) {
+                rewindIndicator.setVisibility(View.GONE);
+            }
         }
 
         private void handleLikeClick(ShortVideo video, int position) {
@@ -851,5 +1273,15 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
      */
     public List<ShortVideo> getVideos() {
         return videos;
+    }
+
+    /**
+     * Cập nhật tốc độ phát video
+     * @param speed Tốc độ phát (0.25f - 2.0f)
+     */
+    public void setPlaybackSpeed(float speed) {
+        if (currentPlayer != null) {
+            currentPlayer.setPlaybackSpeed(speed);
+        }
     }
 }

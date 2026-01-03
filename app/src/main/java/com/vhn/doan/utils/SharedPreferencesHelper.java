@@ -14,6 +14,7 @@ public class SharedPreferencesHelper {
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_USER_COUNTRY = "user_country";
+    private static final String KEY_AUTO_SCROLL_ENABLED = "auto_scroll_enabled";
 
     private final SharedPreferences sharedPreferences;
 
@@ -136,5 +137,41 @@ public class SharedPreferencesHelper {
      */
     public String getUserCountry() {
         return sharedPreferences.getString(KEY_USER_COUNTRY, "VN");
+    }
+
+    /**
+     * Static method để lưu trạng thái auto-scroll
+     */
+    public static void saveAutoScrollEnabled(Context context, boolean enabled) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_AUTO_SCROLL_ENABLED, enabled);
+        editor.apply();
+    }
+
+    /**
+     * Static method để lấy trạng thái auto-scroll
+     */
+    public static boolean getAutoScrollEnabled(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(KEY_AUTO_SCROLL_ENABLED, false); // Default: tắt
+    }
+
+    /**
+     * Static method để lưu tốc độ phát video
+     */
+    public static void savePlaybackSpeed(Context context, float speed) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putFloat("playback_speed", speed);
+        editor.apply();
+    }
+
+    /**
+     * Static method để lấy tốc độ phát video
+     */
+    public static float getPlaybackSpeed(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getFloat("playback_speed", 1.0f); // Default: 1.0x (bình thường)
     }
 }

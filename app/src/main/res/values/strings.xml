@@ -122,6 +122,7 @@
     <string name="like_count_placeholder">0</string>
     <string name="comment_button_description">Nút b��nh luận video</string>
     <string name="comment_action">Bình luận</string>
+    <string name="comment_count_placeholder">0</string>
     <string name="share_button_description">Nút chia sẻ video</string>
     <string name="share_action">Chia sẻ</string>
     <string name="double_tap_heart_animation">Animation trái tim khi double-tap</string>
@@ -150,6 +151,7 @@
     <string name="conversation_name">Tên cuộc trò chuyện</string>
     <string name="rename">Đổi tên</string>
     <string name="cancel">Hủy</string>
+    <string name="apply">Áp dụng</string>
     <string name="delete_conversation_confirm">Bạn có chắc chắn muốn xóa cuộc trò chuyện này?</string>
     <string name="delete_conversation_confirm_message">Tất cả tin nhắn trong cuộc trò chuyện sẽ bị xóa vĩnh viễn.</string>
     <string name="conversation_deleted">Đã xóa cuộc trò chuyện</string>
@@ -294,6 +296,19 @@
 
     <!-- Strings cho Video -->
     <string name="video_poster_description">Poster video</string>
+    <string name="fast_forward_indicator">▶▶ x2</string>
+    <string name="rewind_indicator">◀◀ x0.5</string>
+
+    <!-- Playback Speed -->
+    <string name="playback_speed_title">Tốc độ phát</string>
+    <string name="playback_speed_label">Tốc độ phát</string>
+    <string name="speed_0_25">0.25x (Rất chậm)</string>
+    <string name="speed_0_5">0.5x (Chậm)</string>
+    <string name="speed_0_75">0.75x (Hơi chậm)</string>
+    <string name="speed_normal">1.0x (Bình thường)</string>
+    <string name="speed_1_25">1.25x (Hơi nhanh)</string>
+    <string name="speed_1_5">1.5x (Nhanh)</string>
+    <string name="speed_2_0">2.0x (Rất nhanh)</string>
 
     <!-- Strings cho Settings và Privacy -->
     <string name="settings_and_privacy">Cài đặt và quyền riêng tư</string>
@@ -987,5 +1002,21 @@
     <string name="remove">Xóa</string>
     <string name="permission_denied">Quyền truy cập bị từ chối</string>
     <string name="send_message_failed">Không thể gửi tin nhắn: %s</string>
-    
+
+    <!-- Video Options Dialog -->
+    <string name="video_options_title">Tùy chọn Video</string>
+    <string name="auto_scroll_label">Tự động cuộn</string>
+    <string name="auto_scroll_description">Tự động chuyển sang video tiếp theo khi kết thúc</string>
+    <string name="auto_scroll_enabled">Đã bật tự động cuộn video</string>
+    <string name="auto_scroll_disabled">Đã tắt tự động cuộn video</string>
+    <string name="hide_ui_label">Ẩn giao diện</string>
+    <string name="hide_ui_description">Ẩn thông tin và nút điều khiển video</string>
+    <string name="hide_ui_enabled">Đã ẩn giao diện video</string>
+    <string name="hide_ui_disabled">Đã hiện giao diện video</string>
+    <string name="show_ui_button">Hiển thị lại giao diện</string>
+    <string name="report_video_label">Báo cáo video</string>
+    <string name="report_video_description">Báo cáo nội dung không phù hợp hoặc vi phạm</string>
+    <string name="close">Đóng</string>
+    <string name="video_menu_description">Menu tùy chọn video</string>
+
 </resources>

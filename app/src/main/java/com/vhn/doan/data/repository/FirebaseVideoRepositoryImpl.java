@@ -407,6 +407,12 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
         Collections.sort(trendingVideos, engagementComparator);
         Collections.sort(diverseVideos, engagementComparator);
 
+        // 🎯 SHUFFLE NHẸ: Shuffle trong mỗi nhóm để tránh video đầu luôn giống nhau
+        // Nhưng vẫn ưu tiên video có engagement cao bằng cách shuffle theo "tiers"
+        shuffleWithinTiers(favoriteVideos, userPreferences, favoriteCategories, trendingVideoIds);
+        shuffleWithinTiers(trendingVideos, userPreferences, favoriteCategories, trendingVideoIds);
+        shuffleWithinTiers(diverseVideos, userPreferences, favoriteCategories, trendingVideoIds);
+
         // Step 4: 🎯 SMART MIXING to prevent boredom (like TikTok)
         // Pattern: 2 favorites → 1 trending → 1 diverse → repeat
         List<ShortVideo> finalFeed = new ArrayList<>();
@@ -449,6 +455,11 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
             ", Trending: " + trendingVideos.size() +
             ", Diverse: " + diverseVideos.size() +
             ", Final: " + finalFeed.size());
+
+        // 🎯 Log video đầu tiên để debug
+        if (!finalFeed.isEmpty()) {
+            android.util.Log.d("VideoRepository", "🎬 First video in feed: " + finalFeed.get(0).getTitle() + " (ID: " + finalFeed.get(0).getId() + ")");
+        }
 
         return finalFeed;
     }
@@ -547,6 +558,64 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
         }
 
         return false;
+    }
+
+    /**
+     * 🎯 Shuffle video trong cùng tier để tạo đa dạng nhưng vẫn ưu tiên video có engagement cao
+     *
+     * Chiến lược:
+     * - Chia danh sách thành các tier dựa trên điểm engagement (mỗi tier ~20% danh sách)
+     * - Shuffle trong mỗi tier
+     * - Kết quả: Video top vẫn ưu tiên nhưng thứ tự thay đổi mỗi lần
+     */
+    private void shuffleWithinTiers(List<ShortVideo> videos,
+                                   Map<String, Boolean> userPreferences,
+                                   List<String> favoriteCategories,
+                                   List<String> trendingVideoIds) {
+        if (videos == null || videos.size() <= 1) return;
+
+        // Tính điểm cho từng video
+        List<VideoWithScore> videosWithScores = new ArrayList<>();
+        for (ShortVideo video : videos) {
+            double score = calculateEngagementScore(video, userPreferences, favoriteCategories, trendingVideoIds);
+            videosWithScores.add(new VideoWithScore(video, score));
+        }
+
+        // Chia thành tiers (mỗi tier 20% hoặc tối thiểu 3 videos)
+        int tierSize = Math.max(3, videos.size() / 5);
+        List<ShortVideo> shuffledVideos = new ArrayList<>();
+
+        for (int i = 0; i < videos.size(); i += tierSize) {
+            int end = Math.min(i + tierSize, videos.size());
+            List<VideoWithScore> tier = videosWithScores.subList(i, end);
+
+            // Shuffle trong tier
+            Collections.shuffle(tier);
+
+            // Add vào kết quả
+            for (VideoWithScore vws : tier) {
+                shuffledVideos.add(vws.video);
+            }
+        }
+
+        // Cập nhật lại list gốc
+        videos.clear();
+        videos.addAll(shuffledVideos);
+
+        android.util.Log.d("VideoRepository", "🔀 Shuffled " + videos.size() + " videos within tiers (tier size: " + tierSize + ")");
+    }
+
+    /**
+     * Helper class để lưu video cùng điểm số
+     */
+    private static class VideoWithScore {
+        ShortVideo video;
+        double score;
+
+        VideoWithScore(ShortVideo video, double score) {
+            this.video = video;
+            this.score = score;
+        }
     }
 
     @Override

@@ -80,6 +80,7 @@
 
     <!-- Video Info Overlay - Bottom Left Corner -->
     <LinearLayout
+        android:id="@+id/layout_video_info"
         android:layout_width="319dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
@@ -187,6 +188,7 @@
 
     <!-- Action Buttons - Right Side -->
     <LinearLayout
+        android:id="@+id/layout_action_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
@@ -250,9 +252,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="@string/comment_action"
+                android:text="@string/comment_count_placeholder"
                 android:textColor="#FFFFFF"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:gravity="center"
                 android:shadowColor="#80000000"
                 android:shadowDx="1"
@@ -260,6 +262,18 @@
                 android:shadowRadius="2" />
 
         </LinearLayout>
+
+        <!-- Menu Button (3 dots) -->
+        <ImageView
+            android:id="@+id/btn_menu"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_more_vert"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/video_menu_description"
+            app:tint="#FFFFFF" />
 
         <!-- Share Button -->
         <LinearLayout
@@ -294,5 +308,60 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <!-- Fast Forward Indicator - Thu nhỏ và đặt ở dưới cạnh phải -->
+    <TextView
+        android:id="@+id/tv_fast_forward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="120dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/fast_forward_indicator"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:padding="6dp"
+        android:paddingHorizontal="10dp"
+        android:background="#99000000"
+        android:visibility="gone"
+        android:elevation="8dp" />
+
+    <!-- Rewind Indicator - Thu nhỏ và đặt ở dưới cạnh trái -->
+    <TextView
+        android:id="@+id/tv_rewind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="120dp"
+        android:layout_marginStart="24dp"
+        android:text="@string/rewind_indicator"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:padding="6dp"
+        android:paddingHorizontal="10dp"
+        android:background="#99000000"
+        android:visibility="gone"
+        android:elevation="8dp" />
+
+    <!-- Show UI Button - Nút hiển thị lại UI khi đang ẩn (TikTok style) -->
+    <!-- Đặt ở góc dưới bên phải, cùng vị trí với action buttons -->
+    <ImageView
+        android:id="@+id/btn_show_ui"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="90dp"
+        android:layout_marginEnd="12dp"
+        android:src="@drawable/ic_visibility"
+        android:background="@drawable/bg_circle_button"
+        android:padding="10dp"
+        android:contentDescription="@string/show_ui_button"
+        android:visibility="gone"
+        android:elevation="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:tint="#FFFFFF" />
 
 </FrameLayout>

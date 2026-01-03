@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/surface">
+
+    <!-- Tiêu đề -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/playback_speed_title"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="?attr/colorOnSurface"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/outline"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Speed Options -->
+    <RadioGroup
+        android:id="@+id/radio_group_speed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/speed_0_25"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/speed_0_25"
+            android:textSize="16sp"
+            android:padding="12dp"/>
+
+        <RadioButton
+            android:id="@+id/speed_0_5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/speed_0_5"
+            android:textSize="16sp"
+            android:padding="12dp"/>
+
+        <RadioButton
+            android:id="@+id/speed_0_75"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/speed_0_75"
+            android:textSize="16sp"
+            android:padding="12dp"/>
+
+        <RadioButton
+            android:id="@+id/speed_normal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/speed_normal"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/speed_1_25"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/speed_1_25"
+            android:textSize="16sp"
+            android:padding="12dp"/>
+
+        <RadioButton
+            android:id="@+id/speed_1_5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/speed_1_5"
+            android:textSize="16sp"
+            android:padding="12dp"/>
+
+        <RadioButton
+            android:id="@+id/speed_2_0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/speed_2_0"
+            android:textSize="16sp"
+            android:padding="12dp"/>
+
+    </RadioGroup>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/outline"
+        android:layout_marginVertical="8dp"/>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:textAllCaps="false"
+            android:layout_marginEnd="8dp"
+            style="@style/Widget.Material3.Button.TextButton"/>
+
+        <Button
+            android:id="@+id/btn_apply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/apply"
+            android:textAllCaps="false"
+            style="@style/Widget.Material3.Button"/>
+
+    </LinearLayout>
+
+</LinearLayout>
+

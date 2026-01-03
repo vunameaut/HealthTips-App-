@@ -285,6 +285,10 @@
 
     <!-- Strings for Video -->
     <string name="video_poster_description">動画ポスター</string>
+    <string name="video_menu_description">動画メニューオプション</string>
+    <string name="comment_count_placeholder">0</string>
+    <string name="fast_forward_indicator">⏩ x2</string>
+    <string name="rewind_indicator">⏪ x2</string>
 
     <!-- Strings for Settings and Privacy -->
     <string name="settings_and_privacy">設定とプライバシー</string>
@@ -845,5 +849,19 @@
     <string name="favorite_articles">お気に入りの記事</string>
     <string name="favorite_articles_tab">お気に入りの記事</string>
     <string name="video_liked_tab">いいねした動画</string>
+
+    <!-- Video Options Dialog -->
+    <string name="video_options_title">動画オプション</string>
+    <string name="auto_scroll_label">自動スクロール</string>
+    <string name="auto_scroll_description">動画終了時に自動的に次の動画に移動</string>
+    <string name="auto_scroll_enabled">自動スクロールが有効になりました</string>
+    <string name="auto_scroll_disabled">自動スクロールが無効になりました</string>
+    <string name="hide_ui_label">インターフェースを非表示</string>
+    <string name="hide_ui_description">動画情報とコントロールボタンを非表示</string>
+    <string name="hide_ui_enabled">動画インターフェースを非表示にしました</string>
+    <string name="hide_ui_disabled">動画インターフェースを表示しました</string>
+    <string name="show_ui_button">インターフェースを表示</string>
+    <string name="report_video_label">動画を報告</string>
+    <string name="report_video_description">不適切なコンテンツや違反を報告</string>
 
 </resources>

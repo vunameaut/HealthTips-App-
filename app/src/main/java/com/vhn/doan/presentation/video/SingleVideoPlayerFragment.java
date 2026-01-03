@@ -74,6 +74,16 @@ public class SingleVideoPlayerFragment extends Fragment {
     private LinearLayout btnComment;
     private LinearLayout btnShare;
 
+    // Fast forward/rewind indicators
+    private TextView tvFastForward;
+    private TextView tvRewind;
+    private boolean isSeeking = false;
+
+    // UI containers for visibility toggle
+    private LinearLayout layoutVideoInfo;
+    private LinearLayout layoutActionButtons;
+    private boolean isUIVisible = true;
+
     // Dependencies
     private VideoRepository videoRepository;
     private FirebaseAuthHelper authHelper;
@@ -189,6 +199,14 @@ public class SingleVideoPlayerFragment extends Fragment {
         tvLikeCount = view.findViewById(R.id.tv_like_count);
         btnComment = view.findViewById(R.id.btn_comment);
         btnShare = view.findViewById(R.id.btn_share);
+
+        // Fast forward/rewind indicators
+        tvFastForward = view.findViewById(R.id.tv_fast_forward);
+        tvRewind = view.findViewById(R.id.tv_rewind);
+
+        // UI containers for visibility toggle
+        layoutVideoInfo = view.findViewById(R.id.layout_video_info);
+        layoutActionButtons = view.findViewById(R.id.layout_action_buttons);
 
         setupClickListeners();
     }
@@ -569,8 +587,8 @@ public class SingleVideoPlayerFragment extends Fragment {
     private class DoubleTapGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            // Xử lý single tap - toggle play/pause
-            togglePlayPause();
+            // Xử lý single tap - toggle UI visibility (như TikTok)
+            toggleUIVisibility();
             return true;
         }
 
@@ -582,6 +600,48 @@ public class SingleVideoPlayerFragment extends Fragment {
                 performDoubleTapAnimation();
             }
             return true;
+        }
+    }
+
+    /**
+     * Toggle visibility của UI elements (caption, icons) như TikTok
+     */
+    private void toggleUIVisibility() {
+        isUIVisible = !isUIVisible;
+
+        // Animate fade in/out
+        if (layoutVideoInfo != null) {
+            if (isUIVisible) {
+                layoutVideoInfo.setAlpha(0f);
+                layoutVideoInfo.setVisibility(View.VISIBLE);
+                layoutVideoInfo.animate()
+                    .alpha(1f)
+                    .setDuration(200)
+                    .start();
+            } else {
+                layoutVideoInfo.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> layoutVideoInfo.setVisibility(View.GONE))
+                    .start();
+            }
+        }
+
+        if (layoutActionButtons != null) {
+            if (isUIVisible) {
+                layoutActionButtons.setAlpha(0f);
+                layoutActionButtons.setVisibility(View.VISIBLE);
+                layoutActionButtons.animate()
+                    .alpha(1f)
+                    .setDuration(200)
+                    .start();
+            } else {
+                layoutActionButtons.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> layoutActionButtons.setVisibility(View.GONE))
+                    .start();
+            }
         }
     }
 

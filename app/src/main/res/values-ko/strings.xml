@@ -285,6 +285,10 @@
 
     <!-- Strings for Video -->
     <string name="video_poster_description">동영상 포스터</string>
+    <string name="video_menu_description">동영상 메뉴 옵션</string>
+    <string name="comment_count_placeholder">0</string>
+    <string name="fast_forward_indicator">⏩ x2</string>
+    <string name="rewind_indicator">⏪ x2</string>
 
     <!-- Strings for Settings and Privacy -->
     <string name="settings_and_privacy">설정 및 개인정보</string>
@@ -845,5 +849,19 @@
     <string name="favorite_articles">즐겨찾기 기사</string>
     <string name="favorite_articles_tab">즐겨찾기 기사</string>
     <string name="video_liked_tab">좋아요한 동영상</string>
+
+    <!-- Video Options Dialog -->
+    <string name="video_options_title">동영상 옵션</string>
+    <string name="auto_scroll_label">자동 스크롤</string>
+    <string name="auto_scroll_description">동영상 종료 시 자동으로 다음 동영상으로 이동</string>
+    <string name="auto_scroll_enabled">자동 스크롤이 활성화되었습니다</string>
+    <string name="auto_scroll_disabled">자동 스크롤이 비활성화되었습니다</string>
+    <string name="hide_ui_label">인터페이스 숨기기</string>
+    <string name="hide_ui_description">동영상 정보 및 컨트롤 버튼 숨기기</string>
+    <string name="hide_ui_enabled">동영상 인터페이스를 숨겼습니다</string>
+    <string name="hide_ui_disabled">동영상 인터페이스를 표시했습니다</string>
+    <string name="show_ui_button">인터페이스 표시</string>
+    <string name="report_video_label">동영상 신고</string>
+    <string name="report_video_description">부적절한 콘텐츠 또는 위반 사항 신고</string>
 
 </resources>
