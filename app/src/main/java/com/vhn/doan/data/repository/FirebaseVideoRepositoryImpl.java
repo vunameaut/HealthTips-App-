@@ -63,26 +63,49 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
         final java.util.Set<String> likedVideoIds = new java.util.HashSet<>(); // 🎯 Liked videos
         final CountDownLatch latch = new CountDownLatch(6); // Tăng lên 6
 
-        // 1. Lấy tất cả videos có status == "ready"
-        videosRef.orderByChild("status").equalTo("ready")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        // 1. Lấy tất cả videos (không filter theo status, sẽ filter trong code)
+        // Chấp nhận status: "ready", "published" (bỏ qua: "draft", "processing", "failed")
+        videosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         try {
+                            android.util.Log.d("VideoRepository", "🎬 Tổng số video trong Firebase: " + dataSnapshot.getChildrenCount());
+
+                            int readyCount = 0;
+                            int publishedCount = 0;
+                            int otherCount = 0;
+
                             for (DataSnapshot videoSnapshot : dataSnapshot.getChildren()) {
                                 try {
-                                    // Sử dụng custom deserializer thay vì getValue(ShortVideo.class)
-                                    ShortVideo video = ShortVideoDeserializer.fromDataSnapshot(videoSnapshot);
-                                    if (video != null) {
-                                        allVideos.add(video);
+                                    // Kiểm tra status trước khi deserialize
+                                    String status = videoSnapshot.child("status").getValue(String.class);
+
+                                    // Chỉ load video có status = "ready" hoặc "published"
+                                    if ("ready".equals(status) || "published".equals(status)) {
+                                        // Sử dụng custom deserializer thay vì getValue(ShortVideo.class)
+                                        ShortVideo video = ShortVideoDeserializer.fromDataSnapshot(videoSnapshot);
+                                        if (video != null) {
+                                            allVideos.add(video);
+                                            android.util.Log.d("VideoRepository", "✅ Loaded video [" + status + "]: " + video.getId() + " - " + video.getTitle());
+
+                                            if ("ready".equals(status)) readyCount++;
+                                            else publishedCount++;
+                                        } else {
+                                            android.util.Log.w("VideoRepository", "⚠️ Video null sau deserialize: " + videoSnapshot.getKey());
+                                        }
+                                    } else {
+                                        android.util.Log.d("VideoRepository", "⏭️ Bỏ qua video với status='" + status + "': " + videoSnapshot.getKey());
+                                        otherCount++;
                                     }
                                 } catch (Exception e) {
                                     // Log lỗi conversion cho video cụ thể và skip video đó
                                     android.util.Log.w("VideoRepository",
-                                        "Không thể convert video với ID: " + videoSnapshot.getKey() +
+                                        "❌ Không thể convert video với ID: " + videoSnapshot.getKey() +
                                         ", Lỗi: " + e.getMessage());
                                 }
                             }
+                            android.util.Log.d("VideoRepository", "📦 Đã load thành công " + allVideos.size() + " videos " +
+                                "(ready: " + readyCount + ", published: " + publishedCount + ", bỏ qua: " + otherCount + ")");
                         } catch (Exception e) {
                             android.util.Log.e("VideoRepository", "Lỗi khi đọc videos từ Firebase", e);
                         }
@@ -251,6 +274,11 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
             try {
                 // Timeout sau 10 giây
                 if (latch.await(10, TimeUnit.SECONDS)) {
+                    android.util.Log.d("VideoRepository", "📊 Trước khi filter - Total videos: " + allVideos.size() +
+                        ", Preferences: " + userPreferences.size() +
+                        ", Favorite categories: " + favoriteCategories.size() +
+                        ", Trending: " + trendingVideoIds.size());
+
                     // 🎯 Filter and sort videos with TikTok-style algorithm
                     List<ShortVideo> sortedVideos = filterAndSortVideosSmartly(
                         allVideos,
@@ -261,10 +289,14 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                         likedVideoIds
                     );
 
-                    android.util.Log.d("VideoRepository", "Total videos: " + allVideos.size() +
+                    android.util.Log.d("VideoRepository", "📊 Sau khi filter - Total videos: " + allVideos.size() +
                         ", Watched: " + watchedVideoIds.size() +
                         ", Liked: " + likedVideoIds.size() +
                         ", Final feed: " + sortedVideos.size());
+
+                    if (sortedVideos.isEmpty()) {
+                        android.util.Log.w("VideoRepository", "⚠️ CẢNH BÁO: Danh sách video cuối cùng trống!");
+                    }
 
                     // Đảm bảo callback được gọi trên Main UI Thread
                     android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
@@ -1161,11 +1193,10 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
             return;
         }
 
-        android.util.Log.d("FirebaseVideoRepo", "Bắt đầu query Firebase cho videos có status=ready");
+        android.util.Log.d("FirebaseVideoRepo", "Bắt đầu query Firebase cho videos có status=ready hoặc published");
 
-        // Lấy danh sách video ID mà user đã like từ /videos/{videoId}/likes/{userId}
-        videosRef.orderByChild("status").equalTo("ready")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        // Lấy tất cả videos, filter theo status trong code (vì Firebase không hỗ trợ OR query)
+        videosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         android.util.Log.d("FirebaseVideoRepo", "Firebase query trả về " + dataSnapshot.getChildrenCount() + " videos");
@@ -1176,17 +1207,19 @@ public class FirebaseVideoRepositoryImpl implements VideoRepository {
                         Map<String, DataSnapshot> videoDataMap = new HashMap<>();
                         List<String> videoIds = new ArrayList<>();
 
-                        // Collect all video data and IDs
+                        // Collect all video data and IDs (chỉ lấy video có status = "ready" hoặc "published")
                         for (DataSnapshot videoSnapshot : dataSnapshot.getChildren()) {
                             String videoId = videoSnapshot.getKey();
-                            if (videoId != null) {
+                            String status = videoSnapshot.child("status").getValue(String.class);
+
+                            if (videoId != null && ("ready".equals(status) || "published".equals(status))) {
                                 videoIds.add(videoId);
                                 videoDataMap.put(videoId, videoSnapshot);
-                                android.util.Log.d("FirebaseVideoRepo", "Tìm thấy video: " + videoId);
+                                android.util.Log.d("FirebaseVideoRepo", "Tìm thấy video [" + status + "]: " + videoId);
                             }
                         }
 
-                        android.util.Log.d("FirebaseVideoRepo", "Tổng cộng " + videoIds.size() + " videos để kiểm tra like status");
+                        android.util.Log.d("FirebaseVideoRepo", "Tổng cộng " + videoIds.size() + " videos (ready/published) để kiểm tra like status");
 
                         if (videoIds.isEmpty()) {
                             android.util.Log.d("FirebaseVideoRepo", "Không có video nào trong database");

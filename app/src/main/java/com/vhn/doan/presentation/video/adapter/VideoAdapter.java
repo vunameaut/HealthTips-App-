@@ -700,17 +700,29 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
                 if (caption.length() > MAX_CAPTION_LENGTH) {
                     String shortCaption = caption.substring(0, MAX_CAPTION_LENGTH) + "...";
+
+                    // Đặt về trạng thái thu gọn ban đầu
+                    captionTextView.setMaxLines(2);
                     captionTextView.setText(shortCaption);
+
                     if (seeMore != null) {
                         seeMore.setVisibility(View.VISIBLE);
                         seeMore.setText("Xem thêm");
                         seeMore.setOnClickListener(v -> {
+                            // Mở rộng caption - hiển thị toàn bộ
+                            captionTextView.setMaxLines(Integer.MAX_VALUE);
                             captionTextView.setText(caption);
                             seeMore.setText("Thu gọn");
+
                             seeMore.setOnClickListener(v2 -> {
+                                // Thu gọn caption
+                                captionTextView.setMaxLines(2);
                                 captionTextView.setText(shortCaption);
                                 seeMore.setText("Xem thêm");
+
                                 seeMore.setOnClickListener(v3 -> {
+                                    // Mở rộng lại
+                                    captionTextView.setMaxLines(Integer.MAX_VALUE);
                                     captionTextView.setText(caption);
                                     seeMore.setText("Thu gọn");
                                 });
@@ -718,6 +730,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                         });
                     }
                 } else {
+                    captionTextView.setMaxLines(Integer.MAX_VALUE);
                     captionTextView.setText(caption);
                     if (seeMore != null) seeMore.setVisibility(View.GONE);
                 }
