@@ -779,6 +779,14 @@
 
     <!-- ========== Login/Register Strings ========== -->
     <string name="no_account_register">Chưa có tài khoản? Đăng ký ngay</string>
+    <string name="sign_in_with_google">Đăng nhập với Google</string>
+    <string name="or_divider">HOẶC</string>
+    <string name="google_sign_in_failed">Đăng nhập Google thất bại</string>
+    <string name="account_exists_error">Tài khoản không tồn tại trong hệ thống</string>
+
+    <!-- Google Sign-In Web Client ID - Cần thay thế bằng Web Client ID từ Firebase Console -->
+    <!-- Hướng dẫn: Firebase Console > Project Settings > General > Your apps > Web app > Web Client ID -->
+    <string name="default_web_client_id">842128210652-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com</string>
 
     <!-- ========== Chat Strings ========== -->
     <string name="no_conversations">Chưa có cuộc trò chuyện nào</string>

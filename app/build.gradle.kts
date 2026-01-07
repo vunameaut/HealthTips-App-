@@ -118,6 +118,9 @@ dependencies {
     implementation("com.google.firebase:firebase-storage") // Giữ lại cho avatar người dùng
     implementation("com.google.firebase:firebase-database")
 
+    // Google Sign-In cho Firebase Authentication - Updated to latest version
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

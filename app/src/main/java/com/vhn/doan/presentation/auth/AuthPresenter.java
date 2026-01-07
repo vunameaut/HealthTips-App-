@@ -1,5 +1,6 @@
 package com.vhn.doan.presentation.auth;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.vhn.doan.services.AuthManager;
 
 /**
@@ -34,6 +35,24 @@ public class AuthPresenter {
         view.showLoading(true);
 
         authManager.loginWithEmailPassword(email, password, (isSuccess, userId, errorMessage) -> {
+            view.showLoading(false);
+
+            if (isSuccess) {
+                view.onLoginSuccess(userId);
+            } else {
+                view.showError(errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Thực hiện đăng nhập bằng Google
+     * @param account Google account từ Google Sign-In
+     */
+    public void loginWithGoogle(GoogleSignInAccount account) {
+        view.showLoading(true);
+
+        authManager.signInWithGoogle(account, (isSuccess, userId, errorMessage) -> {
             view.showLoading(false);
 
             if (isSuccess) {

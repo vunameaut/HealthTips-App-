@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Đăng nhập"
+        android:text="@string/login"
         android:textColor="@color/text_primary"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -64,6 +64,7 @@
                 android:textColorHint="@color/text_secondary"
                 android:textColor="@color/text_primary"
                 android:inputType="textEmailAddress"
+                android:autofillHints="emailAddress"
                 android:padding="12dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -88,6 +89,7 @@
                 android:textColorHint="@color/text_secondary"
                 android:textColor="@color/text_primary"
                 android:inputType="textPassword"
+                android:autofillHints="password"
                 android:padding="12dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -97,9 +99,59 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Đăng nhập"
+            android:text="@string/login"
             android:textStyle="bold"
             style="@style/PrimaryButton" />
+
+        <!-- Divider HOẶC -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/text_secondary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:text="@string/or_divider"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/text_secondary" />
+
+        </LinearLayout>
+
+        <!-- Nút đăng nhập bằng Google - Chuẩn Google Material Design -->
+        <Button
+            android:id="@+id/buttonGoogleSignIn"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/sign_in_with_google"
+            android:textColor="#3C4043"
+            android:textSize="14sp"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-medium"
+            android:background="@drawable/bg_google_sign_in_button"
+            android:drawableStart="@drawable/ic_google"
+            android:drawablePadding="24dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical"
+            android:elevation="2dp"
+            android:stateListAnimator="@null" />
 
         <!-- Nút quên mật khẩu -->
         <TextView
@@ -108,7 +160,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:text="Quên mật khẩu?"
+            android:text="@string/forgot_password"
             android:textColor="@color/text_secondary"
             android:padding="8dp" />
 
