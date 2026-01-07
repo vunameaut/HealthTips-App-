@@ -135,23 +135,13 @@
         </LinearLayout>
 
         <!-- Nút đăng nhập bằng Google - Chuẩn Google Material Design -->
-        <Button
+        <com.google.android.gms.common.SignInButton
             android:id="@+id/buttonGoogleSignIn"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="@string/sign_in_with_google"
-            android:textColor="#3C4043"
-            android:textSize="14sp"
-            android:textAllCaps="false"
-            android:fontFamily="sans-serif-medium"
-            android:background="@drawable/bg_google_sign_in_button"
-            android:drawableStart="@drawable/ic_google"
-            android:drawablePadding="24dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:gravity="center_vertical"
-            android:elevation="2dp"
-            android:stateListAnimator="@null" />
+            android:layout_height="wrap_content"
+            app:buttonSize="wide"
+            app:colorScheme="dark"
+            android:layout_gravity="center_horizontal" />
 
         <!-- Nút quên mật khẩu -->
         <TextView
