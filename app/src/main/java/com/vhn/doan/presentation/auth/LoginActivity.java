@@ -37,7 +37,7 @@ public class LoginActivity extends BaseActivity implements AuthView {
     private EditText editTextEmail;
     private EditText editTextPassword;
     private Button buttonLogin;
-    private Button buttonGoogleSignIn;
+    private com.google.android.gms.common.SignInButton buttonGoogleSignIn;
     private TextView textViewForgotPassword;
     private TextView textViewRegister;
     private ProgressDialog progressDialog;

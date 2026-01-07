@@ -170,9 +170,6 @@ public class AuthTokenManager {
 
         Log.w(TAG, "Buộc đăng xuất user và chuyển về màn hình đăng nhập");
 
-        // Đăng xuất khỏi Firebase
-        getFirebaseAuth().signOut();
-
         // Xóa session local
         SessionManager sessionManager = new SessionManager(context);
         sessionManager.clearSession();
