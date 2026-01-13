@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.Task;
 import com.vhn.doan.R;
 import com.vhn.doan.presentation.base.BaseActivity;
 import com.vhn.doan.presentation.home.HomeActivity;
+import com.vhn.doan.services.CustomAnalyticsService;
 import com.vhn.doan.utils.SessionManager;
 
 /**
@@ -301,6 +302,9 @@ public class LoginActivity extends BaseActivity implements AuthView {
 
         // Create new session
         sessionManager.createSession();
+
+        // Track user login to Admin Panel
+        CustomAnalyticsService.getInstance(this).trackUserLogin();
 
         showMessage("Đăng nhập thành công");
         navigateToHomeActivity();

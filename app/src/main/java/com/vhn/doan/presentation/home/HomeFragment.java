@@ -42,6 +42,7 @@ import com.vhn.doan.presentation.home.adapter.CategorySkeletonAdapter;
 import com.vhn.doan.presentation.home.adapter.HealthTipSkeletonAdapter;
 import com.vhn.doan.utils.NetworkMonitor;
 import com.vhn.doan.data.repository.NotificationHistoryRepositoryImpl;
+import com.vhn.doan.services.CustomAnalyticsService;
 import com.vhn.doan.utils.SessionManager;
 
 import java.util.ArrayList;
@@ -547,6 +548,11 @@ public class HomeFragment extends Fragment implements HomeView, FragmentVisibili
     @Override
     public void onResume() {
         super.onResume();
+
+        // Track page view
+        if (getContext() != null) {
+            CustomAnalyticsService.getInstance(getContext()).trackPageView("home");
+        }
 
         // ✅ Reload greeting để cập nhật tên user nếu đã đổi
         setupGreeting();

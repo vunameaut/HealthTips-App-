@@ -8,16 +8,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.vhn.doan.services.CustomAnalyticsService;
 
 /**
- * Singleton class để quản lý Firebase Analytics
- * Theo hướng dẫn trong update.md - Analytics Tracking
+ * Singleton class để quản lý Firebase Analytics & Custom Analytics
+ * - Firebase Analytics: Cho Firebase Console insights
+ * - Custom Analytics: Cho Admin Panel (Realtime Database)
  */
 public class AnalyticsManager {
 
     private static final String TAG = "AnalyticsManager";
     private static AnalyticsManager instance;
     private FirebaseAnalytics firebaseAnalytics;
+    private CustomAnalyticsService customAnalytics;
 
     // Analytics Event Names
     public static final String EVENT_VIEW_HEALTH_TIP = "view_health_tip";
@@ -48,7 +51,8 @@ public class AnalyticsManager {
 
     private AnalyticsManager(Context context) {
         firebaseAnalytics = FirebaseAnalytics.getInstance(context.getApplicationContext());
-        Log.d(TAG, "AnalyticsManager initialized");
+        customAnalytics = CustomAnalyticsService.getInstance(context.getApplicationContext());
+        Log.d(TAG, "AnalyticsManager initialized with Firebase & Custom Analytics");
     }
 
     /**
@@ -66,14 +70,18 @@ public class AnalyticsManager {
      * Được gọi trong HealthTipDetailActivity
      */
     public void logViewHealthTip(@NonNull String tipId, @NonNull String tipTitle, @Nullable String category) {
+        // Firebase Analytics
         Bundle bundle = new Bundle();
         bundle.putString(PARAM_TIP_ID, tipId);
         bundle.putString(PARAM_TIP_TITLE, tipTitle);
         if (category != null && !category.isEmpty()) {
             bundle.putString(PARAM_TIP_CATEGORY, category);
         }
-
         firebaseAnalytics.logEvent(EVENT_VIEW_HEALTH_TIP, bundle);
+        
+        // Custom Analytics cho Admin Panel
+        customAnalytics.trackContentView(tipId, tipTitle, category);
+        
         Log.d(TAG, "Logged: view_health_tip - " + tipTitle);
     }
 
@@ -82,13 +90,17 @@ public class AnalyticsManager {
      * Được gọi trong SearchActivity
      */
     public void logSearch(@NonNull String searchTerm, @Nullable String searchType) {
+        // Firebase Analytics
         Bundle bundle = new Bundle();
         bundle.putString(PARAM_SEARCH_TERM, searchTerm);
         if (searchType != null) {
             bundle.putString(PARAM_SEARCH_TYPE, searchType);
         }
-
         firebaseAnalytics.logEvent(EVENT_SEARCH, bundle);
+        
+        // Custom Analytics cho Admin Panel
+        customAnalytics.trackSearch(searchTerm, searchType);
+        
         Log.d(TAG, "Logged: search - " + searchTerm);
     }
 
@@ -110,12 +122,16 @@ public class AnalyticsManager {
      * Được gọi trong ReminderEditorActivity
      */
     public void logReminderCreated(@Nullable String reminderType) {
+        // Firebase Analytics
         Bundle bundle = new Bundle();
         if (reminderType != null) {
             bundle.putString(PARAM_REMINDER_TYPE, reminderType);
         }
-
         firebaseAnalytics.logEvent(EVENT_REMINDER_CREATED, bundle);
+        
+        // Custom Analytics cho Admin Panel
+        customAnalytics.trackReminderSet("reminder_" + System.currentTimeMillis(), reminderType);
+        
         Log.d(TAG, "Logged: reminder_created");
     }
 
@@ -124,12 +140,16 @@ public class AnalyticsManager {
      * Được gọi trong VideoFragment khi video được phát
      */
     public void logVideoView(@NonNull String videoId, @NonNull String videoTitle, int position) {
+        // Firebase Analytics
         Bundle bundle = new Bundle();
         bundle.putString(PARAM_VIDEO_ID, videoId);
         bundle.putString(PARAM_VIDEO_TITLE, videoTitle);
         bundle.putInt(PARAM_VIDEO_POSITION, position);
-
         firebaseAnalytics.logEvent(EVENT_VIDEO_VIEW, bundle);
+        
+        // Custom Analytics cho Admin Panel
+        customAnalytics.trackVideoView(videoId, videoTitle);
+        
         Log.d(TAG, "Logged: video_view - " + videoTitle);
     }
 
@@ -161,11 +181,15 @@ public class AnalyticsManager {
      * Log sự kiện thêm tip vào yêu thích
      */
     public void logTipFavorite(@NonNull String tipId, @NonNull String tipTitle) {
+        // Firebase Analytics
         Bundle bundle = new Bundle();
         bundle.putString(PARAM_TIP_ID, tipId);
         bundle.putString(PARAM_TIP_TITLE, tipTitle);
-
         firebaseAnalytics.logEvent(EVENT_TIP_FAVORITE, bundle);
+        
+        // Custom Analytics cho Admin Panel
+        customAnalytics.trackFavoriteAdd(tipId, tipTitle);
+        
         Log.d(TAG, "Logged: tip_favorite - " + tipTitle);
     }
 
@@ -173,11 +197,15 @@ public class AnalyticsManager {
      * Log sự kiện bỏ tip khỏi yêu thích
      */
     public void logTipUnfavorite(@NonNull String tipId, @NonNull String tipTitle) {
+        // Firebase Analytics
         Bundle bundle = new Bundle();
         bundle.putString(PARAM_TIP_ID, tipId);
         bundle.putString(PARAM_TIP_TITLE, tipTitle);
-
         firebaseAnalytics.logEvent(EVENT_TIP_UNFAVORITE, bundle);
+        
+        // Custom Analytics cho Admin Panel
+        customAnalytics.trackFavoriteRemove(tipId, tipTitle);
+        
         Log.d(TAG, "Logged: tip_unfavorite - " + tipTitle);
     }
 
