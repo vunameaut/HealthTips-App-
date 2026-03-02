@@ -36,7 +36,15 @@ for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
 @rem Find java.exe
-if defined JAVA_HOME goto findJavaFromJavaHome
+@rem Check if JAVA_HOME is valid first
+if defined JAVA_HOME (
+    if not exist "%JAVA_HOME%\bin\java.exe" (
+        @rem JAVA_HOME is invalid, unset it to let Gradle find JDK
+        set JAVA_HOME=
+    ) else (
+        goto findJavaFromJavaHome
+    )
+)
 
 set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1

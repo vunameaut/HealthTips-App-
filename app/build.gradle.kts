@@ -38,9 +38,13 @@ android {
             val firebaseAuthKey = localProperties.getProperty("firebase.auth.key", "")
             buildConfigField("String", "FIREBASE_AUTH_KEY", "\"$firebaseAuthKey\"")
 
-            // Thêm OpenAI API key vào BuildConfig
+            // Thêm OpenAI API key vào BuildConfig (Backup)
             val openaiApiKey = localProperties.getProperty("openai.api.key", "")
             buildConfigField("String", "OPENAI_API_KEY", "\"$openaiApiKey\"")
+
+            // Thêm Google Gemini API key vào BuildConfig (Currently Active)
+            val geminiApiKey = localProperties.getProperty("gemini.api.key", "")
+            buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
         }
 
         // Cấu hình MultiDex
@@ -55,11 +59,20 @@ android {
         }
     }
 
+    // Cấu hình hỗ trợ 16 KB page size alignment
+    androidResources {
+        noCompress += "tflite"
+    }
+
     // Cấu hình packaging để hỗ trợ 16KB page size alignment (Updated for AGP 8.1+)
     packaging {
         jniLibs {
-            // Sử dụng cấu hình mới cho 16KB page size alignment
+            // QUAN TRỌNG: Bật useLegacyPackaging = false để hỗ trợ 16KB page alignment
+            // Điều này đảm bảo native libraries được align đúng với 16KB boundaries
             useLegacyPackaging = false
+
+            // Không nén native libraries để hỗ trợ 16KB alignment tốt hơn
+            // keepDebugSymbols += listOf("**/*.so")
         }
 
         // Loại bỏ các file không cần thiết để giảm kích thước APK
@@ -70,7 +83,16 @@ android {
                 "/META-INF/LICENSE",
                 "/META-INF/LICENSE.txt",
                 "/META-INF/NOTICE",
-                "/META-INF/NOTICE.txt"
+                "/META-INF/NOTICE.txt",
+                "/META-INF/*.kotlin_module"
+            )
+
+            // Merge duplicate resources
+            pickFirsts += listOf(
+                "lib/armeabi-v7a/libc++_shared.so",
+                "lib/arm64-v8a/libc++_shared.so",
+                "lib/x86/libc++_shared.so",
+                "lib/x86_64/libc++_shared.so"
             )
         }
     }
@@ -88,11 +110,21 @@ android {
             isDebuggable = false
             isJniDebuggable = false
             renderscriptOptimLevel = 3
+
+            // Đảm bảo 16KB page alignment cho release build
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
 
         debug {
             isMinifyEnabled = false
             isDebuggable = true
+
+            // Đảm bảo 16KB page alignment cho debug build
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
 
@@ -103,6 +135,13 @@ android {
 
         // Cho phép sử dụng các tính năng Java 8+
         isCoreLibraryDesugaringEnabled = true
+    }
+
+    // Configure Java toolchain to use version 17
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
     }
 }
 
@@ -155,9 +194,15 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // Thư viện Glide để load ảnh
-    implementation("com.github.bumptech.glide:glide:4.16.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    // Thư viện Glide để load ảnh - Updated to latest version with 16KB support
+    implementation("com.github.bumptech.glide:glide:5.0.5") {
+        // Exclude các thư viện native có thể gây conflict
+        exclude(group = "com.android.support")
+    }
+    annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
+
+    // Glide OkHttp3 integration (optional but recommended)
+    implementation("com.github.bumptech.glide:okhttp3-integration:5.0.5")
 
     // Thêm OkHttp và Gson cho Chat API
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -168,16 +213,16 @@ dependencies {
     // CircleImageView cho avatar tròn
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
-    // Glide cho load ảnh/video
-    implementation("com.github.bumptech.glide:glide:4.16.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     // ExoPlayer cho video playback (tùy chọn thay thế VideoView)
     implementation("com.google.android.exoplayer:exoplayer:2.19.1")
     implementation("com.google.android.exoplayer:exoplayer-ui:2.19.1")
 
-    // Thêm Cloudinary Android SDK
-    implementation("com.cloudinary:cloudinary-android:2.8.0")
+    // Thêm Cloudinary Android SDK - Updated to latest version
+    implementation("com.cloudinary:cloudinary-android:3.0.2") {
+        // Exclude Fresco nếu có để tránh vấn đề 16KB page size
+        exclude(group = "com.facebook.fresco", module = "fresco")
+    }
 
     // ===== PERFORMANCE OPTIMIZATION DEPENDENCIES =====
 

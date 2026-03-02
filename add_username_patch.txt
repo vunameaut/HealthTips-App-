@@ -1,9 +1,0 @@
-        if (firebaseAuth.getCurrentUser() != null) {
-            reportData.put("userId", firebaseAuth.getCurrentUser().getUid());
-            reportData.put("userEmail", firebaseAuth.getCurrentUser().getEmail());
-            String userName = firebaseAuth.getCurrentUser().getDisplayName();
-            if (userName == null || userName.isEmpty()) {
-                userName = firebaseAuth.getCurrentUser().getEmail();
-            }
-            reportData.put("userName", userName);
-        }

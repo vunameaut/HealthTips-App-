@@ -15,7 +15,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.vhn.doan.BuildConfig;
 import com.vhn.doan.data.ChatMessage;
-import com.vhn.doan.data.ChatApiResponse;
 import com.vhn.doan.data.Conversation;
 
 import java.io.IOException;
@@ -38,9 +37,33 @@ import okhttp3.Response;
 public class ChatRepositoryImpl implements ChatRepository {
 
     private static final String TAG = "ChatRepositoryImpl";
-    // Thay đổi sang OpenAI API chính thức
-    private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String OPENAI_KEY = BuildConfig.OPENAI_API_KEY;
+    // Google Gemini API Configuration - API key được load từ BuildConfig (local.properties)
+    private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+
+    /**
+     * Lấy Gemini API key từ BuildConfig
+     * API key được load từ local.properties để bảo mật và tránh bị push lên GitHub
+     *
+     * @return API key hoặc empty string nếu chưa được cấu hình
+     */
+    private static String getGeminiApiKey() {
+        try {
+            // Sử dụng reflection để lấy API key từ BuildConfig
+            // Điều này tránh lỗi compile khi field chưa được tạo
+            java.lang.reflect.Field field = BuildConfig.class.getDeclaredField("GEMINI_API_KEY");
+            Object value = field.get(null);
+            return value != null ? value.toString() : "";
+        } catch (NoSuchFieldException e) {
+            Log.e(TAG, "GEMINI_API_KEY chưa được cấu hình trong BuildConfig. " +
+                      "Vui lòng:\n" +
+                      "1. Thêm 'gemini.api.key=YOUR_API_KEY' vào file local.properties\n" +
+                      "2. Rebuild project (Build > Rebuild Project)");
+            return "";
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi đọc GEMINI_API_KEY từ BuildConfig", e);
+            return "";
+        }
+    }
 
     // Firebase paths
     private static final String CONVERSATIONS_PATH = "conversations";
@@ -300,41 +323,36 @@ public class ChatRepositoryImpl implements ChatRepository {
             // Nếu conversationId là null, tạo một cuộc trò chuyện mới với tin nhắn đơn lẻ
             if (conversationId == null) {
                 Log.d(TAG, "sendMessageToAI: conversationId is null, creating standalone request without history");
-                // Tạo JSON request body cho API với một tin nhắn duy nhất
+                // Tạo JSON request body cho Gemini API
                 JsonObject requestBody = new JsonObject();
-                JsonArray messagesArray = new JsonArray();
+                JsonArray contentsArray = new JsonArray();
 
-                // Thêm system message để định nghĩa trợ lý sức khỏe
-                JsonObject systemMessage = new JsonObject();
-                systemMessage.addProperty("role", "system");
-                systemMessage.addProperty("content", getSystemPrompt());
-                messagesArray.add(systemMessage);
+                // Tạo content object với system instruction và user message
+                JsonObject contentObject = new JsonObject();
+                JsonArray partsArray = new JsonArray();
 
-                // Thêm tin nhắn hiện tại
-                JsonObject userMessage = new JsonObject();
-                userMessage.addProperty("role", "user");
-                userMessage.addProperty("content", message);
-                messagesArray.add(userMessage);
+                // Thêm system prompt và user message vào parts
+                JsonObject textPart = new JsonObject();
+                textPart.addProperty("text", getSystemPrompt() + "\n\n" + message);
+                partsArray.add(textPart);
 
-                requestBody.add("messages", messagesArray);
+                contentObject.add("parts", partsArray);
+                contentsArray.add(contentObject);
 
-                // Sử dụng model mới và thêm các tham số khác
-                requestBody.addProperty("model", "gpt-4o-mini");
-                requestBody.addProperty("temperature", 0.7);
-                requestBody.addProperty("max_tokens", 2048);
+                requestBody.add("contents", contentsArray);
 
-                // Gửi request đến API
+                // Gửi request đến Gemini API
                 MediaType JSON = MediaType.parse("application/json; charset=utf-8");
                 RequestBody body = RequestBody.create(requestBody.toString(), JSON);
 
                 Request request = new Request.Builder()
-                    .url(OPENAI_URL)
+                    .url(GEMINI_URL)
                     .post(body)
-                    .addHeader("content-type", "application/json")
-                    .addHeader("Authorization", "Bearer " + OPENAI_KEY)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("X-goog-api-key", getGeminiApiKey())
                     .build();
 
-                sendOpenAIRequest(request, callback);
+                sendGeminiRequest(request, callback);
                 return;
             }
 
@@ -358,84 +376,50 @@ public class ChatRepositoryImpl implements ChatRepository {
                             contextMessages = new ArrayList<>(chatHistory);
                         }
 
-                        // Tạo JSON request body cho API
+                        // Tạo JSON request body cho Gemini API
                         JsonObject requestBody = new JsonObject();
+                        JsonArray contentsArray = new JsonArray();
 
-                        // Tạo system message để định nghĩa trợ lý sức khỏe
-                        JsonArray messagesArray = new JsonArray();
-
-                        JsonObject systemMessage = new JsonObject();
-                        systemMessage.addProperty("role", "system");
-                        systemMessage.addProperty("content", getSystemPrompt());
-                        messagesArray.add(systemMessage);
+                        // Tạo content chứa system prompt và lịch sử chat
+                        StringBuilder contextBuilder = new StringBuilder();
+                        contextBuilder.append(getSystemPrompt()).append("\n\n");
+                        contextBuilder.append("=== Lịch sử cuộc trò chuyện ===\n");
 
                         // Thêm ngữ cảnh từ các tin nhắn trước đó
                         for (ChatMessage chatMessage : contextMessages) {
-                            JsonObject messageObj = new JsonObject();
-                            messageObj.addProperty("role", chatMessage.isFromUser() ? "user" : "assistant");
-                            messageObj.addProperty("content", chatMessage.getContent());
-                            messagesArray.add(messageObj);
+                            if (chatMessage.isFromUser()) {
+                                contextBuilder.append("Người dùng: ").append(chatMessage.getContent()).append("\n");
+                            } else {
+                                contextBuilder.append("Trợ lý: ").append(chatMessage.getContent()).append("\n");
+                            }
                         }
 
-                        // Thêm tin nhắn hiện tại
-                        JsonObject userMessage = new JsonObject();
-                        userMessage.addProperty("role", "user");
-                        userMessage.addProperty("content", message);
-                        messagesArray.add(userMessage);
+                        contextBuilder.append("\n=== Tin nhắn mới ===\n");
+                        contextBuilder.append("Người dùng: ").append(message);
 
-                        requestBody.add("messages", messagesArray);
+                        // Tạo content object
+                        JsonObject contentObject = new JsonObject();
+                        JsonArray partsArray = new JsonArray();
+                        JsonObject textPart = new JsonObject();
+                        textPart.addProperty("text", contextBuilder.toString());
+                        partsArray.add(textPart);
+                        contentObject.add("parts", partsArray);
+                        contentsArray.add(contentObject);
 
-                        // Sử dụng model mới và thêm các tham số khác
-                        requestBody.addProperty("model", "gpt-4o-mini");
-                        requestBody.addProperty("temperature", 0.7);
-                        requestBody.addProperty("max_tokens", 2048);
+                        requestBody.add("contents", contentsArray);
 
-                        // Gửi request đến API
+                        // Gửi request đến Gemini API
                         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
                         RequestBody body = RequestBody.create(requestBody.toString(), JSON);
 
                         Request request = new Request.Builder()
-                            .url(OPENAI_URL)
+                            .url(GEMINI_URL)
                             .post(body)
-                            .addHeader("content-type", "application/json")
-                            .addHeader("Authorization", "Bearer " + OPENAI_KEY)
+                            .addHeader("Content-Type", "application/json")
+                            .addHeader("X-goog-api-key", getGeminiApiKey())
                             .build();
 
-                        httpClient.newCall(request).enqueue(new Callback() {
-                            @Override
-                            public void onFailure(Call call, IOException e) {
-                                Log.e(TAG, "API call failed", e);
-                                mainHandler.post(() -> callback.onError("Không thể kết nối tới trợ lý AI: " + e.getMessage()));
-                            }
-
-                            @Override
-                            public void onResponse(Call call, Response response) throws IOException {
-                                if (response.isSuccessful() && response.body() != null) {
-                                    try {
-                                        String responseData = response.body().string();
-                                        Log.d(TAG, "API response: " + responseData);
-
-                                        ChatApiResponse chatResponse = gson.fromJson(responseData, ChatApiResponse.class);
-
-                                        if (chatResponse != null && chatResponse.getChoices() != null &&
-                                            !chatResponse.getChoices().isEmpty() &&
-                                            chatResponse.getChoices().get(0).getMessage() != null) {
-
-                                            String aiResponse = chatResponse.getChoices().get(0).getMessage().getContent();
-                                            mainHandler.post(() -> callback.onSuccess(aiResponse));
-                                        } else {
-                                            mainHandler.post(() -> callback.onError("Không thể xử lý câu trả lời từ AI"));
-                                        }
-                                    } catch (Exception e) {
-                                        Log.e(TAG, "Error parsing response", e);
-                                        mainHandler.post(() -> callback.onError("Lỗi xử lý dữ liệu: " + e.getMessage()));
-                                    }
-                                } else {
-                                    Log.e(TAG, "API error: " + response.code() + " " + response.message());
-                                    mainHandler.post(() -> callback.onError("Lỗi từ AI API: " + response.code()));
-                                }
-                            }
-                        });
+                        sendGeminiRequest(request, callback);
                     } catch (Exception e) {
                         Log.e(TAG, "Error preparing request", e);
                         callback.onError("Có lỗi xảy ra: " + e.getMessage());
@@ -476,53 +460,6 @@ public class ChatRepositoryImpl implements ChatRepository {
         // Phương thức cũ vẫn được giữ lại để tương thích ngược
         // Nhưng gọi đến phương thức mới với số lượng tin nhắn lịch sử mặc định là 5
         sendMessageToAI(message, null, 5, callback);
-    }
-
-    /**
-     * Phân tích thông báo lỗi từ RapidAPI response
-     */
-    private String parseRapidAPIErrorMessage(int responseCode, String responseBody) {
-        try {
-            // Thử parse JSON error response từ RapidAPI
-            JsonObject errorResponse = gson.fromJson(responseBody, JsonObject.class);
-            if (errorResponse.has("error")) {
-                String apiErrorMessage = errorResponse.get("error").getAsString();
-                Log.d(TAG, "RapidAPI Error Message: " + apiErrorMessage);
-
-                // Dịch một số lỗi phổ biến của RapidAPI
-                if (apiErrorMessage.contains("invalid key")) {
-                    return "Lỗi xác thực RapidAPI. API key không hợp lệ.";
-                } else if (apiErrorMessage.contains("quota exceeded")) {
-                    return "Đã vượt quá hạn mức sử dụng API. Vui lòng thử lại sau.";
-                } else if (apiErrorMessage.contains("rate limit")) {
-                    return "Đã vượt quá giới hạn yêu cầu. Vui lòng thử lại sau ít phút.";
-                }
-                return "Lỗi từ RapidAPI: " + apiErrorMessage;
-            } else if (errorResponse.has("message")) {
-                String message = errorResponse.get("message").getAsString();
-                return "Lỗi từ AI: " + message;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error parsing RapidAPI error response", e);
-        }
-
-        // Fallback cho các HTTP status codes của RapidAPI
-        switch (responseCode) {
-            case 401:
-                return "Lỗi xác thực RapidAPI. API key có thể đã hết hạn hoặc không hợp lệ.";
-            case 403:
-                return "Không có quyền truy cập RapidAPI. Vui lòng kiểm tra subscription.";
-            case 429:
-                return "Quá nhiều yêu cầu tới RapidAPI. Vui lòng chờ một chút rồi thử lại.";
-            case 500:
-                return "Lỗi máy chủ RapidAPI. Vui lòng thử lại sau.";
-            case 502:
-            case 503:
-            case 504:
-                return "RapidAPI tạm thời không khả dụng. Vui lòng thử lại sau.";
-            default:
-                return "Lỗi không xác định từ RapidAPI (Mã: " + responseCode + "). Vui lòng thử lại.";
-        }
     }
 
     @Override
@@ -851,16 +788,16 @@ public class ChatRepositoryImpl implements ChatRepository {
     }
 
     /**
-     * Gửi request đến OpenAI API và xử lý phản hồi
+     * Gửi request đến Google Gemini API và xử lý phản hồi
      *
      * @param request Request để gửi đến API
      * @param callback Callback để xử lý phản hồi
      */
-    private void sendOpenAIRequest(Request request, RepositoryCallback<String> callback) {
+    private void sendGeminiRequest(Request request, RepositoryCallback<String> callback) {
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e(TAG, "API call failed", e);
+                Log.e(TAG, "Gemini API call failed", e);
                 mainHandler.post(() -> callback.onError("Không thể kết nối tới trợ lý AI: " + e.getMessage()));
             }
 
@@ -869,25 +806,55 @@ public class ChatRepositoryImpl implements ChatRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String responseData = response.body().string();
-                        Log.d(TAG, "API response: " + responseData);
+                        Log.d(TAG, "Gemini API response: " + responseData);
 
-                        ChatApiResponse chatResponse = gson.fromJson(responseData, ChatApiResponse.class);
+                        // Parse Gemini response format
+                        JsonObject jsonResponse = gson.fromJson(responseData, JsonObject.class);
 
-                        if (chatResponse != null && chatResponse.getChoices() != null &&
-                            !chatResponse.getChoices().isEmpty() &&
-                            chatResponse.getChoices().get(0).getMessage() != null) {
+                        if (jsonResponse.has("candidates") &&
+                            jsonResponse.getAsJsonArray("candidates").size() > 0) {
 
-                            String aiResponse = chatResponse.getChoices().get(0).getMessage().getContent();
-                            mainHandler.post(() -> callback.onSuccess(aiResponse));
-                        } else {
-                            mainHandler.post(() -> callback.onError("Không thể xử lý câu trả lời từ AI"));
+                            JsonObject firstCandidate = jsonResponse.getAsJsonArray("candidates")
+                                                                    .get(0)
+                                                                    .getAsJsonObject();
+
+                            if (firstCandidate.has("content")) {
+                                JsonObject content = firstCandidate.getAsJsonObject("content");
+
+                                if (content.has("parts") &&
+                                    content.getAsJsonArray("parts").size() > 0) {
+
+                                    JsonObject firstPart = content.getAsJsonArray("parts")
+                                                                 .get(0)
+                                                                 .getAsJsonObject();
+
+                                    if (firstPart.has("text")) {
+                                        String aiResponse = firstPart.get("text").getAsString();
+                                        mainHandler.post(() -> callback.onSuccess(aiResponse));
+                                        return;
+                                    }
+                                }
+                            }
                         }
+
+                        mainHandler.post(() -> callback.onError("Không thể xử lý câu trả lời từ AI"));
+
                     } catch (Exception e) {
-                        Log.e(TAG, "Error parsing response", e);
+                        Log.e(TAG, "Error parsing Gemini response", e);
                         mainHandler.post(() -> callback.onError("Lỗi xử lý dữ liệu: " + e.getMessage()));
                     }
                 } else {
-                    Log.e(TAG, "API error: " + response.code() + " " + response.message());
+                    String errorBody = "";
+                    try {
+                        if (response.body() != null) {
+                            errorBody = response.body().string();
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error reading error body", e);
+                    }
+
+                    Log.e(TAG, "Gemini API error: " + response.code() + " " + response.message() +
+                          "\nError body: " + errorBody);
                     mainHandler.post(() -> callback.onError("Lỗi từ AI API: " + response.code()));
                 }
             }
