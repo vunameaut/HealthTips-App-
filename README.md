@@ -143,9 +143,7 @@ Dự án tuân thủ các nguyên tắc bảo mật:
 3. **ProGuard**: Minify và obfuscate code cho bản release
 4. **Firebase Security Rules**: Kiểm soát truy cập dữ liệu
 
-## 📄 License
 
-[Thêm thông tin license của bạn ở đây]
 
 ## 👥 Đóng góp
 
@@ -164,7 +162,7 @@ Mọi đóng góp đều được chào đón! Vui lòng:
 
 ## 📞 Liên hệ
 
-[Thêm thông tin liên hệ của bạn]
+Gmail: vuhoainam.dev@gmail.com
 
 ---
 
