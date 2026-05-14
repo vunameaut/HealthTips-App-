@@ -91,6 +91,25 @@ Sau khi thêm API key vào `local.properties`:
 - ✅ Hỗ trợ đa ngôn ngữ
 - ✅ Dark mode / Light mode
 
+## 🖼️ Giao diện hệ thống (Ảnh chụp màn hình)
+
+Thay các đường dẫn ảnh bên dưới bằng ảnh chụp màn hình thực tế của bạn.
+
+### Home
+![Home](screenshots/home.png)
+
+### Chat AI
+![Chat AI](screenshots/chat_ai.png)
+
+### Nhắc nhở
+![Nhắc nhở](screenshots/reminder.png)
+
+### Video ngắn
+![Video ngắn](screenshots/short_video.png)
+
+### Profile
+![Profile](screenshots/profile.png)
+
 ## 🛠️ Công nghệ sử dụng
 
 - **Ngôn ngữ**: Java
